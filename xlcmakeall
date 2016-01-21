@@ -1,0 +1,4 @@
+#!/bin/sh
+rm libdb400.a
+gmake -f xlcmakefile
+gmake -f xlcmakefile TGT64=64

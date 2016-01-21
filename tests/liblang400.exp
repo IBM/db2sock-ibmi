@@ -1,0 +1,4 @@
+#!liblang400.a(shr.o)
+
+lang_check_sqlrc
+
