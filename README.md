@@ -7,9 +7,6 @@ This project originated because of a need to create async DB2 requests for Node.
 - build   -- languages may compile using new PASE asynchronous API header (PaseCliAsync.h) 
 - runtime -- place helper libdb400.a before PASE libdb400.a driver (use LIBPATH) 
 
-#Follow Along
-We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
-
 #Contributors
 - Tony Cairns, IBM
 - Aaron Bartell, Krengel Technology, Inc.
