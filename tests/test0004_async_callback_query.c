@@ -114,7 +114,7 @@ void main_connect(SQLHANDLE henv) {
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   printf("main_connect (thread %d): starting\n",ptid);
   /* async connection */
-  tid = SQL400ConnectAsync(henv, (char *)&db, (char *)&uid, (char *)&pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
+  tid = SQL400ConnectAsync(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("main_connect (thread %d): leaving\n",ptid);
 }
 

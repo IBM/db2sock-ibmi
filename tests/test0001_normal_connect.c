@@ -32,7 +32,7 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400Environment( &henv, (SQLPOINTER)&pophenv );
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* normal db2 connect (no async) */
-  sqlrc = SQL400Connect(henv, (char *)&db, (char *)&uid, (char *)&pwd, &hdbc, (SQLPOINTER)&pophdbc);
+  sqlrc = SQL400Connect(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc);
   lang_check_sqlrc(SQL_HANDLE_DBC, hdbc, sqlrc, 1, &sqlcode);
   printf("SQL400Connect: complete\n");
   sqlrc = SQLDisconnect(hdbc);

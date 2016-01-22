@@ -45,7 +45,7 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400Environment( &henv, (SQLPOINTER)&pophenv );
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* async connection */
-  tid = SQL400ConnectAsync(henv, (char *)&db, (char *)&uid, (char *)&pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
+  tid = SQL400ConnectAsync(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   printf("SQL400ConnectAsync (thread %d): hi there from main thread\n",ptid);
   sleep(5);
