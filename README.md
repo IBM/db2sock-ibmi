@@ -42,9 +42,9 @@ build
 > ./xlcmakeall
 
 optional set user profile
-export SQL_DB400 "*LOCAL"
-export SQL_UID400 "UID"
-export SQL_PWD400 "PWD"
+> export SQL_DB400="*LOCAL"
+> export SQL_UID400="UID"
+> export SQL_PWD400="PWD"
 
 run 32-bit or 64-bit
 > testnnnn_32
