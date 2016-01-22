@@ -42,7 +42,7 @@ void init_unlock() {
  * set all symbols for CLI APIs,
  * via load_dlsym (PaseCliAsync_gen.c).
  * Note: dlhandle is checked twice,
- * second under global locl,
+ * second under global lock,
  * to avoid race conditions
  * multiple threads starting.
  */
@@ -97,7 +97,7 @@ void * init_table_addr(int hstmt) {
  * flag = 1 -- lock hdbc of hstmt (lock parent of statment)
  * 
  * Locking scope hdbc, obvious, aka, lock the connection
- * to one thread at a time usage. Mode typical most dadtbase driver 
+ * to one thread at a time usage. Mode typical most database driver 
  * scripting connection pools, aka, one thread<2>one connection (at a time).
  * (... pool says do not share 'resource' across threads)
  *  
