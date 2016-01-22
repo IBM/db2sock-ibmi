@@ -10,7 +10,7 @@
  * Ok, big trick, IBM i db2 resources
  * are unique across all types 
  * henv, hdbc, hstmt, hdesc.
- * Yep-R-Doodle, db2, one big old
+ * Yep-R-Doodle, db2 resources, one big old
  * process resource table with slots (IBMiTable).  
  */
 PaseCliResource IBMiTable[PASECLIMAXRESOURCE]; 
@@ -69,6 +69,7 @@ void init_dlsym() {
  * That is, PTHREAD_MUTEX_RECURSIVE, therefore, same thread, 
  * may lock more than once. Other thread will block.
  * Remember to unlock same number times locked to avoid hangs.
+ * (see init_table_lock to understand hstmt to hdbc map locks)
  */
 void init_table_ctor(int hstmt, int hdbc) {
   if (!IBMiTable[hstmt].hstmt) {
@@ -93,12 +94,21 @@ void * init_table_addr(int hstmt) {
 }
 /* hdbc and/or hstmt scope locks
  * flag = 0 -- lock hdbc (or hstmt, if we ever dare)
- * flag = 1 -- lock hdbc of hstmt
- * When locking hdbc, essentially allowing only
- * one thread access to any given "connection".
- * Nobody (i know), has ever tried multiple
- * statement threads requesting on a single
- * connection, but could try with these lock APIs (gulp).
+ * flag = 1 -- lock hdbc of hstmt (lock parent of statment)
+ * 
+ * Locking scope hdbc, obvious, aka, lock the connection
+ * to one thread at a time usage. Mode typical most dadtbase driver 
+ * scripting connection pools, aka, one thread<2>one connection (at a time).
+ * (... pool says do not share 'resource' across threads)
+ *  
+ * Locking scope hstmt, currently, flag=1, is recommended
+ * for safe hstmt-map2-hdbc connection locks (one statement at time).
+ *
+ * Future wild, reckless behaviour (Good morning Hal):
+ *
+ * Nobody (i know), ever tried multiple statement threads 
+ * requesting on a single connection at the same time. 
+ * However, flag=0, at hstmt level is possible with lock (gulp).
  */
 void init_table_lock(int hstmt, int flag) {
   if (flag) {
