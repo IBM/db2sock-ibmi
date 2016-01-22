@@ -34,6 +34,13 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 - PaseCliInit.c        -- internal use asynchronous resource table manager (build helper libdb400.a)
 - PaseCliInit.h        -- internal use asynchronous resource table header  (build helper libdb400.a)
 
+##examples
+```
+> cd tests
+> ./xlcmakeall
+```
+Note: APIs are changing daily, therefore, tests may change significantly.
+
 
 #License
 BSD
