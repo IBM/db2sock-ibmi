@@ -8,7 +8,7 @@
 #include "liblang400.h"
 
 /*
- * hType - SQL_HANDLE_ENV|DBC|SRTMT|DESC
+ * hType - SQL_HANDLE_ENV|DBC|STMT|DESC
  */
 void lang_check_sqlrc(SQLSMALLINT hType, SQLHANDLE handle, SQLINTEGER sqlrc, SQLSMALLINT recno, SQLINTEGER * sqlcode) {
   SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];

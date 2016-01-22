@@ -6,42 +6,29 @@
 #include <dlfcn.h>
 #include "PaseCliInit.h"
 
-extern void load_dlsym();
+/* static global resource table
+ * Ok, big trick, IBM i db2 resources
+ * are unique across all types 
+ * henv, hdbc, hstmt, hdesc.
+ * Yep-R-Doodle, db2, one big old
+ * process resource table with slots (IBMiTable).  
+ */
+PaseCliResource IBMiTable[PASECLIMAXRESOURCE]; 
 
-void *dlhandle = NULL;
-
-/* Thread specific data key */
-pthread_key_t threadDataKey = NULL;
+/* global data lock (IBM i resources) */
 pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
 static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
 
-/* static global resource table */
-PaseCliResource IBMiTable[PASECLIMAXRESOURCE]; 
+/* 
+ * dlopen handle of PASE libdb400.a (real driver) 
+ */
+void *dlhandle = NULL;
 
-
-void init_dtor(void *threadKeyData)
-{
-  void *dataPtr = (void *)threadKeyData;
-  free(dataPtr);
-}
-
-void init_ctor(void)
-{
-  (void)pthread_key_create(&threadDataKey,(void (*)(void *))init_dtor);
-  sync();
-}
-
-void * init_buff() {
-  void *dataPtr;
-  if ((dataPtr=(void *)pthread_getspecific(threadDataKey))==NULL)
-  {
-    dataPtr = malloc(64);
-    memset(dataPtr,0,64);
-    (void)pthread_setspecific(threadDataKey, (const void *)dataPtr);
-  }
-  return dataPtr;
-}
-
+/* global table lock
+ * This lock is 'lock once'.
+ * That is, not PTHREAD_MUTEX_RECURSIVE,
+ * therefore do not call twice, will hang.
+ */
 void init_lock() {
   pthread_mutex_lock(&threadMutexLock);
 }
@@ -50,6 +37,15 @@ void init_unlock() {
   pthread_mutex_unlock(&threadMutexLock);
 }
 
+/* 
+ * dlopen handle of PASE libdb400.a,
+ * set all symbols for CLI APIs,
+ * via load_dlsym (PaseCliAsync_gen.c).
+ * Note: dlhandle is checked twice,
+ * second under global locl,
+ * to avoid race conditions
+ * multiple threads starting.
+ */
 void init_dlsym() {
   char *dlservice = PASECLIDRIVER;
   if (dlhandle  == NULL) {
@@ -61,12 +57,19 @@ void init_dlsym() {
         exit(-1);
       }
       load_dlsym();
-      (void)pthread_once(&threadInitObject, (void (*)(void))init_ctor);
     }
     init_unlock();
   }
 }
 
+/* caller hold resource level lock
+ * init_table_ctor(hdbc,0)     -- opening a hdbc (connection)
+ * init_table_ctor(hstmt,hdbc) -- map a stmt to a hdbc (connection)
+ * These lock are resource level 'lock multiple', any thread.
+ * That is, PTHREAD_MUTEX_RECURSIVE, therefore, same thread, 
+ * may lock more than once. Other thread will block.
+ * Remember to unlock same number times locked to avoid hangs.
+ */
 void init_table_ctor(int hstmt, int hdbc) {
   if (!IBMiTable[hstmt].hstmt) {
     pthread_mutexattr_init(&IBMiTable[hstmt].threadMutexAttr);
@@ -85,10 +88,18 @@ void init_table_dtor(int hstmt) {
    * either statment or connection
    */
 }
-
 void * init_table_addr(int hstmt) {
   return (void *) &IBMiTable[hstmt];
 }
+/* hdbc and/or hstmt scope locks
+ * flag = 0 -- lock hdbc (or hstmt, if we ever dare)
+ * flag = 1 -- lock hdbc of hstmt
+ * When locking hdbc, essentially allowing only
+ * one thread access to any given "connection".
+ * Nobody (i know), has ever tried multiple
+ * statement threads requesting on a single
+ * connection, but could try with these lock APIs (gulp).
+ */
 void init_table_lock(int hstmt, int flag) {
   if (flag) {
     pthread_mutex_lock(&IBMiTable[IBMiTable[hstmt].hdbc].threadMutexLock);
@@ -111,7 +122,12 @@ void init_table_unlock(int hstmt,int flag) {
     }
   }
 }
-
+/* No lock.
+ * Used other thread, see if time to join
+ * work requested in child thread.
+ * This is dicey, but false yes/no is
+ * likely ok, when used as 'join'.
+ */
 int init_table_in_progress(int hstmt,int flag) {
   if (flag) {
     if (IBMiTable[IBMiTable[hstmt].hdbc].in_progress > 0) {
@@ -124,8 +140,11 @@ int init_table_in_progress(int hstmt,int flag) {
   }
   return 0;
 }
-
-
+/* No lock.
+ * Used free resources.
+ * This is dicey, but false yes/no is
+ * likely ok, when used as 'free'.
+ */
 int init_table_stmt_2_conn(int hstmt) {
   return IBMiTable[hstmt].hdbc;
 }
