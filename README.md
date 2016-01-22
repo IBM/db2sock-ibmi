@@ -1,3 +1,8 @@
+#IMPORTANT WARNING -------------------------
+This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. When this warning disappears, APIs will be considered stable.
+#IMPORTANT WARNING -------------------------
+
+
 #db2sock
 Welcome to the db2sock project.  Goal is PASE DB2 CLI asynchronous API helper driver (libdb400.a). Follow on project maybe socket based driver (tbd).
 
