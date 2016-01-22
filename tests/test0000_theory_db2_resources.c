@@ -40,6 +40,8 @@ int main(int argc, char * argv[]) {
       lang_check_sqlrc(SQL_HANDLE_STMT, hstmt[i][j], sqlrc, 1, &sqlcode);
     }
   }
+  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
+  sleep(10);
   for (i=0;i<10; i++) {
     for (j=0;j<10; j++) {
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt[i][j]);
