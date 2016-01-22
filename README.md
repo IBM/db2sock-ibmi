@@ -25,7 +25,7 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 ```
 
 ##gen.py creates: 
-- PaseCliAsync.h      -- header for asynchronous language extensions (php, ruby, node, etc.)
+- PaseCliAsync.h      -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c  -- asynchronous driver APIs
 - libdb400.exp        -- all CLI export APIs
 
