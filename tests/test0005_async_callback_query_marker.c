@@ -8,9 +8,9 @@
 #include "PaseCliAsync.h"
 #include "liblang400.h"
 
-char db[]  = { SQL_DB400 };
-char uid[] = { SQL_UID400 };
-char pwd[] = { SQL_PWD400 };
+char *db  = NULL;
+char *uid = NULL;
+char *pwd = NULL;
 SQL400SetAttrStruct options[100];
 SQLHANDLE henv;
 SQLHANDLE hdbc;
@@ -193,6 +193,11 @@ int main(int argc, char * argv[]) {
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
+  /* profile db2 */
+  db  = getenv(SQL_DB400);
+  uid = getenv(SQL_UID400);
+  pwd = getenv(SQL_PWD400);
+  /* async environment db2 */
   main_environ();
   sleep(20);
   sqlrc = SQLDisconnect(hdbc);

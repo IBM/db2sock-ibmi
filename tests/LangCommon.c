@@ -7,6 +7,7 @@
 #include "PaseCliAsync.h"
 #include "liblang400.h"
 
+
 /*
  * hType - SQL_HANDLE_ENV|DBC|STMT|DESC
  */

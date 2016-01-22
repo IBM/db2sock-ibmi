@@ -8,9 +8,9 @@
 #include "PaseCliAsync.h"
 #include "liblang400.h"
 
-char db[]  = { SQL_DB400 };
-char uid[] = { SQL_UID400 };
-char pwd[] = { SQL_PWD400 };
+char *db  = NULL;
+char *uid = NULL;
+char *pwd = NULL;
 SQL400SetAttrStruct options[100];
 SQLHANDLE henv; /* always 1, only one env on IBM i db2 */
 SQLHANDLE hdbc[10];
@@ -24,6 +24,10 @@ SQLINTEGER sqlcode;
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0, j = 0;
+  /* profile db2 */
+  db  = getenv(SQL_DB400);
+  uid = getenv(SQL_UID400);
+  pwd = getenv(SQL_PWD400);
   /* environment db2 */
   sqlrc = SQL400AddAttr(SQL_HANDLE_ENV, SQL400_ATTR_CCSID, &ccsid, 0, SQL400_ONERR_CONT, SQL400_FLAG_IMMED, (SQLPOINTER)&pophenv);
   sqlrc = SQL400AddAttr(SQL_HANDLE_ENV, SQL_ATTR_SERVER_MODE, &yes, 0, SQL400_ONERR_CONT, SQL400_FLAG_IMMED, (SQLPOINTER)&pophenv);
@@ -31,7 +35,7 @@ int main(int argc, char * argv[]) {
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* normal db2 connect (no async) */
   for (i=0;i<10; i++) {
-    sqlrc = SQL400Connect(henv, (char *)&db, (char *)&uid, (char *)&pwd, &hdbc[i], (SQLPOINTER)&pophdbc);
+    sqlrc = SQL400Connect(henv, db, uid, pwd, &hdbc[i], (SQLPOINTER)&pophdbc);
     printf("SQL400Connect: hdbc[%d]=%d\n",i,hdbc[i]);
     lang_check_sqlrc(SQL_HANDLE_DBC, hdbc[i], sqlrc, 1, &sqlcode);
     for (j=0;j<10; j++) {

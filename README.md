@@ -36,9 +36,19 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 
 ##examples
 ```
+build
 > cd tests
 > python genmake.py
 > ./xlcmakeall
+
+optional set user profile
+export SQL_DB400 "*LOCAL"
+export SQL_UID400 "UID"
+export SQL_PWD400 "PWD"
+
+run 32-bit or 64-bit
+> testnnnn_32
+> testnnnn_64
 ```
 Note: APIs are changing daily, therefore, tests may change significantly.
 

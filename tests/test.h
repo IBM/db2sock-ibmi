@@ -9,9 +9,9 @@
 #include <sqlcli1.h>
 
 
-#define SQL_DB400 "*LOCAL"
-#define SQL_UID400 "DB2"
-#define SQL_PWD400 "NICE2DB2"
+#define SQL_DB400 "SQL_DB400"
+#define SQL_UID400 "SQL_UID400"
+#define SQL_PWD400 "SQL_PWD400"
 
 #define SQL_IS_INTEGER 0
 
