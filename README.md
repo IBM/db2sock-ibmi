@@ -37,6 +37,7 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 ##examples
 ```
 > cd tests
+> python genmake.py
 > ./xlcmakeall
 ```
 Note: APIs are changing daily, therefore, tests may change significantly.
