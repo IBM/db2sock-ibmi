@@ -26,13 +26,13 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 
 ##gen.py creates: 
 - PaseCliAsync.h      -- header for building asynchronous language extensions (php, ruby, node, etc.)
-- PaseCliAsync_gen.c  -- internal use asynchronous driver      (build helper libdb400.a)
-- libdb400.exp        -- internal use asynchronous export APIs (build helper libdb400.a)
+- PaseCliAsync_gen.c  -- helper libdb400.a - asynchronous driver (read)
+- libdb400.exp        -- helper libdb400.a - all CLI export APIs
 
 ##human coding:
-- PaseCliCustom.c      -- internal use asynchronous custom APIs            (build helper libdb400.a)
-- PaseCliInit.c        -- internal use asynchronous resource table manager (build helper libdb400.a)
-- PaseCliInit.h        -- internal use asynchronous resource table header  (build helper libdb400.a)
+- PaseCliCustom.c      -- helper libdb400.a - custom 'big function' APIs (experimental)
+- PaseCliInit.c        -- helper libdb400.a - resource table manager (read)
+- PaseCliInit.h        -- helper libdb400.a - resource table header
 
 ##examples
 ```
