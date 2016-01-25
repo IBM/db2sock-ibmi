@@ -49,7 +49,7 @@ void main_fetch(SQLHANDLE hstmt) {
     lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
     data_cols[i] = (SQLPOINTER) malloc(1024);
     indPtr = 1024;
-    sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[i], &indPtr, (SQLPOINTER) &call_cols);
+    sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[i], &indPtr, (SQLPOINTER) &call_cols);
   }
   sqlrc = SQL400Fetch(hstmt, start_row, (SQLPOINTER)&call_cols, (SQLPOINTER)&desc_cols);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);

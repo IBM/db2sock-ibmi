@@ -51,7 +51,7 @@ void main_fetch(SQLHANDLE hstmt) {
     lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
     data_cols[i] = (SQLPOINTER) malloc(1024);
     indPtr = 1024;
-    sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[i], &indPtr, (SQLPOINTER) &call_cols);
+    sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[i], &indPtr, (SQLPOINTER) &call_cols);
   }
   sqlrc = SQL400Fetch(hstmt, start_row, (SQLPOINTER)&call_cols, (SQLPOINTER)&desc_cols);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
@@ -90,7 +90,7 @@ void main_execute(SQLHANDLE hstmt) {
   sqlrc = SQL400AddDesc(hstmt, 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
   indPtr = strlen(prm1);
-  sqlrc = SQL400AddCParam(1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER)prm1, &indPtr, (SQLPOINTER) &call_parms ); 
+  sqlrc = SQL400AddCVar(1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER)prm1, &indPtr, (SQLPOINTER) &call_parms ); 
   tid = SQL400ExecuteAsync(hstmt, (SQLPOINTER)&call_parms, (SQLPOINTER)&desc_parms, (void *)SQL400ExecuteCallback);
   printf("main_execute (thread %d): leaving\n",ptid);
 }

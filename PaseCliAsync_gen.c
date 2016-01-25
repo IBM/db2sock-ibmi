@@ -14,7 +14,7 @@ SQLRETURN custom_SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTE
 SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
 SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400AddCParam( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms );
+SQLRETURN custom_SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms );
 SQLRETURN custom_SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
 SQLRETURN custom_SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
 SQLRETURN custom_SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
@@ -1008,11 +1008,11 @@ SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * p
   sqlrc = custom_SQL400Connect( henv, db, uid, pwd, ohnd, options );
   return sqlrc;
 }
-SQLRETURN SQL400AddCParam( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
+SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   init_dlsym();
-  sqlrc = custom_SQL400AddCParam( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
+  sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
   return sqlrc;
 }
 SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
@@ -4318,22 +4318,22 @@ SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-void * SQL400AddCParamThread (void *ptr)
+void * SQL400AddCVarThread (void *ptr)
 {
-  SQL400AddCParamStruct * myptr = (SQL400AddCParamStruct *) ptr;
-  myptr->sqlrc = custom_SQL400AddCParam( myptr->icol, myptr->inOutType, myptr->pfSqlCType, myptr->pfSqlCValue, myptr->indPtr, myptr->parms );
-  /* void SQL400AddCParamCallback(SQL400AddCParamStruct* ); */
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVar( myptr->icol, myptr->inOutType, myptr->pfSqlCType, myptr->pfSqlCValue, myptr->indPtr, myptr->parms );
+  /* void SQL400AddCVarCallback(SQL400AddCVarStruct* ); */
   if (myptr->callback) {
-    void (*ptrFunc)(SQL400AddCParamStruct* ) = myptr->callback;
+    void (*ptrFunc)(SQL400AddCVarStruct* ) = myptr->callback;
     ptrFunc( myptr );
   }
   pthread_exit((void *)myptr);
 }
-pthread_t SQL400AddCParamAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms, void * callback )
+pthread_t SQL400AddCVarAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms, void * callback )
 {
   int rc = 0;
   pthread_t tid = 0;
-  SQL400AddCParamStruct * myptr = (SQL400AddCParamStruct *) malloc(sizeof(SQL400AddCParamStruct));
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) malloc(sizeof(SQL400AddCVarStruct));
   init_dlsym();
   myptr->sqlrc = SQL_SUCCESS;
   myptr->icol = icol;
@@ -4343,18 +4343,18 @@ pthread_t SQL400AddCParamAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLS
   myptr->indPtr = indPtr;
   myptr->parms = parms;
   myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQL400AddCParamThread, (void *)myptr);
+  rc = pthread_create(&tid, NULL, SQL400AddCVarThread, (void *)myptr);
   return tid;
 }
-SQL400AddCParamStruct * SQL400AddCParamJoin (pthread_t tid, SQLINTEGER flag)
+SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
 {
-  SQL400AddCParamStruct * myptr = (SQL400AddCParamStruct *) NULL;
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) NULL;
   int active = 0;
   init_dlsym();
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
-    return (SQL400AddCParamStruct *) NULL;
+    return (SQL400AddCVarStruct *) NULL;
   }
   return myptr;
 }

@@ -513,7 +513,7 @@ SQLRETURN SQL400Connect(SQLHENV henv,
 
 # custom interfaces, execute fetch
 
-SQLRETURN SQL400AddCParam(SQLSMALLINT icol, 
+SQLRETURN SQL400AddCVar(SQLSMALLINT icol, 
  SQLSMALLINT inOutType, 
  SQLSMALLINT pfSqlCType, 
  SQLPOINTER pfSqlCValue, 

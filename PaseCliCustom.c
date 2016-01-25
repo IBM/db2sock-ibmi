@@ -176,7 +176,7 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
  * excute fetch
  */
 
-SQLRETURN custom_SQL400AddCParam(SQLSMALLINT icol, SQLSMALLINT inOutType, SQLSMALLINT pfSqlCType, SQLPOINTER pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER parms )  { 
+SQLRETURN custom_SQL400AddCVar(SQLSMALLINT icol, SQLSMALLINT inOutType, SQLSMALLINT pfSqlCType, SQLPOINTER pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER parms )  { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   SQL400ParamStruct * opts = (SQL400ParamStruct *) parms;
@@ -416,7 +416,7 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = opt->pcbColDef * expCol + 1;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_GRAPHIC:
       case SQL_VARGRAPHIC:
@@ -424,7 +424,7 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = (opt->pcbColDef * expCol + 1) * 2;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_BINARY:
       case SQL_VARBINARY:
@@ -432,7 +432,7 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = opt->pcbColDef + 1;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_BINARY, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_BINARY, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_TYPE_DATE:
       case SQL_TYPE_TIME:
@@ -442,69 +442,69 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = opt->pcbColDef + 2;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_SMALLINT:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = sizeof(iAmFloat);
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_INTEGER:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = sizeof(iAmInt);
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_BIGINT:
         /* 9,223,372,036,854,775,807 */
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = 20;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_FLOAT:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = sizeof(iAmFloat);
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_DOUBLE:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = sizeof(iAmDouble);
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_DECIMAL:
       case SQL_NUMERIC:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = opt->pcbColDef + opt->pibScale + 3;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_CLOB:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = SQL_DATA_AT_EXEC;
         pfSqlCValue = (SQLPOINTER) malloc(sizeof(iAmInt));
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_CLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_CLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_DBCLOB:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = SQL_DATA_AT_EXEC;
         pfSqlCValue = (SQLPOINTER) malloc(sizeof(iAmInt));
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_DBCLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_DBCLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       case SQL_BLOB:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = SQL_DATA_AT_EXEC;
         pfSqlCValue = (SQLPOINTER) malloc(sizeof(iAmInt));
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_BLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_BLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
         indPtr = (SQLINTEGER *)malloc(sizeof(SQLINTEGER));
         *indPtr = opt->pcbColDef * expCol + 1;
         pfSqlCValue = (SQLPOINTER) malloc(*indPtr);
-        sqlrc = SQL400AddCParam(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        sqlrc = SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
     }

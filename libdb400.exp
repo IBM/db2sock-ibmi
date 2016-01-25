@@ -243,9 +243,9 @@ SQL400EnvironmentJoin
 SQL400Connect
 SQL400ConnectAsync
 SQL400ConnectJoin
-SQL400AddCParam
-SQL400AddCParamAsync
-SQL400AddCParamJoin
+SQL400AddCVar
+SQL400AddCVarAsync
+SQL400AddCVarJoin
 SQL400AddDesc
 SQL400AddDescAsync
 SQL400AddDescJoin
