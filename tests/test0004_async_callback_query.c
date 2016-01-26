@@ -28,6 +28,13 @@ SQL400DescStruct desc_cols[100];
 SQLPOINTER data_cols[100];
 char * qry0 = "select * from qiws.qcustcdt where lstnam like 'Hen%'";
 
+SQLINTEGER myccsid = 819;
+char db_utf8[11];
+char uid_utf8[11];
+char pwd_utf8[11];
+
+char qry0_utf8[1024];
+
 
 /* ====================
  * fetch
@@ -86,7 +93,8 @@ void main_query(SQLHANDLE hdbc) {
   printf("main_query (thread %d): starting\n",ptid);
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
-  tid = SQLExecDirectAsync (hstmt, (SQLCHAR *)qry0, strlen(qry0), (void *)SQLExecDirectCallback );
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) qry0, (SQLINTEGER) strlen(qry0), (SQLPOINTER) &qry0_utf8, (SQLINTEGER) sizeof(qry0_utf8), myccsid);
+  tid = SQLExecDirectAsync (hstmt, (SQLCHAR *)&qry0_utf8, strlen((SQLCHAR *)&qry0_utf8), (void *)SQLExecDirectCallback );
   printf("main_query (thread %d): leaving\n",ptid);
 }
 
@@ -109,12 +117,16 @@ void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
   printf("SQL400ConnectCallback (thread %d): leaving\n",ptid);
 }
 void main_connect(SQLHANDLE henv) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   printf("main_connect (thread %d): starting\n",ptid);
   /* async connection */
-  tid = SQL400ConnectAsync(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
+  sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
+  tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("main_connect (thread %d): leaving\n",ptid);
 }
 

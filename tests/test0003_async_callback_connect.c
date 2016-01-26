@@ -20,6 +20,11 @@ SQL400AttrStruct pophenv[3];
 SQL400AttrStruct pophdbc[3];
 SQLINTEGER sqlcode;
 
+SQLINTEGER myccsid = 819;
+char db_utf8[11];
+char uid_utf8[11];
+char pwd_utf8[11];
+
 /* callback sends SQL400ConnectStruct (PaseCliAsync.h) */
 void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
   pthread_t ptid = pthread_self();
@@ -48,7 +53,10 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400Environment( &henv, (SQLPOINTER)&pophenv );
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* async connection */
-  tid = SQL400ConnectAsync(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
+  sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
+  tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   printf("SQL400ConnectAsync (thread %d): hi there from main thread\n",ptid);
   sleep(5);

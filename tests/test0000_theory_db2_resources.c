@@ -21,6 +21,11 @@ SQL400AttrStruct pophenv[3];
 SQL400AttrStruct pophdbc[3];
 SQLINTEGER sqlcode;
 
+SQLINTEGER myccsid = 819;
+char db_utf8[11];
+char uid_utf8[11];
+char pwd_utf8[11];
+
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0, j = 0;
@@ -37,8 +42,11 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400Environment( &henv, (SQLPOINTER)&pophenv );
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* normal db2 connect (no async) */
+  sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
   for (i=0;i<10; i++) {
-    sqlrc = SQL400Connect(henv, db, uid, pwd, &hdbc[i], (SQLPOINTER)&pophdbc);
+    sqlrc = SQL400Connect(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc[i], (SQLPOINTER)&pophdbc);
     printf("SQL400Connect: hdbc[%d]=%d\n",i,hdbc[i]);
     lang_check_sqlrc(SQL_HANDLE_DBC, hdbc[i], sqlrc, 1, &sqlcode);
     for (j=0;j<10; j++) {

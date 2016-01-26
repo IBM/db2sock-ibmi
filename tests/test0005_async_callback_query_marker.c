@@ -29,6 +29,14 @@ SQLPOINTER data_cols[100];
 char * qry1 = "select * from qiws.qcustcdt where lstnam like ?";
 char * prm1 = "Hen%";
 
+SQLINTEGER myccsid = 819;
+char db_utf8[11];
+char uid_utf8[11];
+char pwd_utf8[11];
+
+char qry1_utf8[1024];
+char prm1_utf8[10];
+
 
 /* ====================
  * fetch
@@ -89,8 +97,9 @@ void main_execute(SQLHANDLE hstmt) {
   printf("main_execute (thread %d): starting\n",ptid);
   sqlrc = SQL400AddDesc(hstmt, 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
-  indPtr = strlen(prm1);
-  sqlrc = SQL400AddCVar(1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER)prm1, &indPtr, (SQLPOINTER) &call_parms ); 
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) prm1, (SQLINTEGER) strlen(prm1), (SQLPOINTER) &prm1_utf8, (SQLINTEGER) sizeof(prm1_utf8), myccsid);
+  indPtr = strlen((SQLCHAR *)&prm1_utf8);
+  sqlrc = SQL400AddCVar(1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER) &prm1_utf8, &indPtr, (SQLPOINTER) &call_parms ); 
   tid = SQL400ExecuteAsync(hstmt, (SQLPOINTER)&call_parms, (SQLPOINTER)&desc_parms, (void *)SQL400ExecuteCallback);
   printf("main_execute (thread %d): leaving\n",ptid);
 }
@@ -123,7 +132,8 @@ void main_prepare(SQLHANDLE hdbc) {
   printf("main_prepare (thread %d): starting\n",ptid);
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
-  tid = SQLPrepareAsync (hstmt, (SQLCHAR *)qry1, strlen(qry1), (void *)SQLPrepareCallback );
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) qry1, (SQLINTEGER) strlen(qry1), (SQLPOINTER) &qry1_utf8, (SQLINTEGER) sizeof(qry1_utf8), myccsid);
+  tid = SQLPrepareAsync (hstmt, (SQLCHAR *)&qry1_utf8, strlen((SQLCHAR *)&qry1_utf8), (void *)SQLPrepareCallback );
   printf("main_prepare (thread %d): leaving\n",ptid);
 }
 
@@ -148,10 +158,14 @@ void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
 void main_connect(SQLHANDLE henv) {
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   printf("main_connect (thread %d): starting\n",ptid);
   /* async connection */
-  tid = SQL400ConnectAsync(henv, db, uid, pwd, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
+  sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
+  tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("main_connect (thread %d): leaving\n",ptid);
 }
 
