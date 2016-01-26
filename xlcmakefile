@@ -1,7 +1,7 @@
 ### make
 ### make TGT64=64
 CC          = cc
-CCFLAGS32   = -g
+CCFLAGS32   = -g -qldbl128 -qalign=natural
 CCFLAGS64   = $(CCFLAGS32) -q64
 AR          = ar
 AROPT       = -X32_64
