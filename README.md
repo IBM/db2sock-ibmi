@@ -5,11 +5,12 @@ When this warning disappears, APIs will be considered stable.
 
 #db2sock
 Welcome to the db2sock project.  
+
 Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
-This new libdb400.a default switch is replacement for PASE libdb400.a.
-This was done to add the missing wide APIs to the driver.
-In addition, old driver was less than optimal.
-However, a chicken switch exists in generated code (not recommended)
+This new libdb400.a is replacement for PASE libdb400.a (default).
+Replacement was done to add missing wide APIs to PASE driver.
+Also, old driver was less than optimal dealing with CCSID.
+However, compile chicken switch exists in generated code to use old libdb400.a (not recommended).
 Follow on project maybe socket based driver (tbd).
 
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
@@ -21,14 +22,13 @@ This project originated because of a need to create async DB2 requests for Node.
 ##Important
 Only compiled with xlc using -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
-if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues
-(i have no idea if gcc can be made to provide proper alignment -- tbd).
+if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
+BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
 
 This is a unicode driver lib, UTF-8 or UTF16. 
-New functions have been added to assist in UTF-8/UT-16 conversion.
-Look at the include file PaseCliAsync.h to understand.
-Also see the test files.
+New functions have added to assist in UTF-8/UTF-16 conversion (see PaseCliAsync.h).
+Test files will provide idea of how it all works (changing daily).
 
 #Contributors
 - Tony Cairns, IBM
