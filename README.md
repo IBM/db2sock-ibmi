@@ -54,15 +54,16 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 ```
 
 ##gen.py creates: 
-- PaseCliAsync.h      -- header asynchronous extensions (php, node, ...)
-- PaseCliAsync_gen.c  -- asynchronous driver APIs
-- PaseCliILE_gen.c    -- direct ILE call APIs (exported)
-- libdb400.exp        -- all CLI export APIs
+- PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
+- PaseCliAsync_gen.c     -- asynchronous driver APIs
+- PaseCliILE_gen.c       -- direct ILE call APIs (exported)
+- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
+- libdb400.exp           -- all CLI export APIs
 
 ##human coding:
-- PaseCliCustom.c      -- 'big function' APIs (experimental)
-- PaseCliInit.c        -- db2 resource table manager (read)
-- PaseCliInit.h        -- db2 resource table header
+- PaseCliCustom.c        -- 'big function' APIs (experimental)
+- PaseCliInit.c          -- db2 resource table manager (read)
+- PaseCliInit.h          -- db2 resource table header
 
 ##examples
 ```
