@@ -27,9 +27,8 @@ Missing these options will result in ILE DB2 call failures.
 if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
 BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
-Direct PASE _ILECALL calls to ILE DB2 are supported by new libdb400.a 
-In general, use normal APIs, which, enable correct locking for async and non-async db2 operations.
-However, feel free to use new direct call ILE DB2 APIs. 
+In general, use CLI APIs, which, enable correct locking for async and non-async db2 operations.
+However, feel free to use new direct call ILE DB2 APIs (ILE_SQLxxx). 
 ```
 example:
 === CLI APIs UTF-8 or APIWs UTF-16  ===
