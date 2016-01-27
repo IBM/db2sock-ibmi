@@ -45,6 +45,7 @@ void SQLExecDirectWCallback(SQLExecDirectWStruct* );
 SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
 === bypass all, call ILE directly (not recommended) ===
 SQLRETURN ILE_SQLExecDirect(..);
+SQLRETURN ILE_SQLExecDirectW(..);
 ```
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
