@@ -780,12 +780,6 @@ file_PaseCliAsync_c += file_local_incl
 file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += 'int i_am_big_chicken_flag;' + "\n"
 file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += "/* special SQL400 aggregate functions */" + "\n"
-file_PaseCliAsync_c += "/* do common work for language driver */" + "\n"
-file_PaseCliAsync_c += "/* composite calls to CLI also async  */" + "\n"
-file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += PaseCliCustom_h_proto
-file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliLibDB400_c_main
 file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliAsync_c_main
@@ -929,9 +923,15 @@ file_PaseCliAsync_h += "/* ILE call                          */" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliILE_h_proto
 file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += "/* === internal use ======            */" + "\n"
+file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliLibDB400_h_symbol
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += "void libdb400_load_dlsym();" + "\n"
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += PaseCliCustom_h_proto
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += "/* === internal use ======            */" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '#endif /* _PASECLIASYNC_H */' + "\n"
 with open("PaseCliAsync.h", "w") as text_file:
