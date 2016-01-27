@@ -28,18 +28,27 @@ if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align co
 BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
 Direct PASE _ILECALL calls to ILE DB2 are supported by new libdb400.a 
-In general, use PASE APIs, which, enable correct locking for async and non-async db2 operations.
+In general, use normal APIs, which, enable correct locking for async and non-async db2 operations.
 However, feel free to use new direct call ILE DB2 APIs. 
 ```
 example:
-sqlrc = SQLExecDirect(..); -- normal PASE CLI API, including locking, etc.
-sqlrc = SQLExecDirectW(..); -- normal PASE CLI API, wide APIs for UTF-16
-sqlrc = SQLExecDirectAsync(..); -- async PASE CLI API, including locking, etc.
-sqlrc = SQLExecDirectWAsync(..); -- async PASE CLI API, wide APIs for UTF-16
-void SQLExecDirectCallback(SQLExecDirectStruct* ){}; -- async callback (option 1)
-SQLExecDirectStruct * data = SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag); -- async reap/join (option 2)
-sqlrc = ILE_SQLExecDirect(..); -- by pass all PASE locking, etc., call ILE DB2 directly
-(see libdb400.exp for all exported APIs)
+=== CLI APIs UTF-8 or W for UTF-16  ===
+=== choose async and/or normal wait === 
+sqlrc = SQLExecDirect(..);
+sqlrc = SQLExecDirectW(..);
+sqlrc = SQLExecDirectAsync(..);
+sqlrc = SQLExecDirectWAsync(..);
+== callback or reap/join with async ===
+void SQLExecDirectCallback(SQLExecDirectStruct* );
+SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag);
+void SQLExecDirectWCallback(SQLExecDirectWStruct* );
+SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
+=== bypass all, call ILE directly   ===
+=== (not recommended)               ===
+sqlrc = ILE_SQLExecDirect(..);
+
+SQLExecDirect is only an example,
+see libdb400.exp for all exported APIs.
 ```
 
 
