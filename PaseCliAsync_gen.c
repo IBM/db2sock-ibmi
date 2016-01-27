@@ -8,7 +8,10 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
+/* chicken switch use PASE libdb400.a */
+/* (maybe runtime env var someday)    */
 int i_am_big_chicken_flag;
+
 
 SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
 {
@@ -137,6 +140,57 @@ SQLRETURN SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQ
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLBindColThread (void *ptr)
+{
+  SQLBindColStruct * myptr = (SQLBindColStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  } else {
+    myptr->sqlrc = ILE_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLBindColCallback(SQLBindColStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLBindColStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLBindColStruct * myptr = (SQLBindColStruct *) malloc(sizeof(SQLBindColStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->iType = iType;
+  myptr->rgbValue = rgbValue;
+  myptr->cbValueMax = cbValueMax;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLBindColThread, (void *)myptr);
+  return tid;
+}
+SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLBindColStruct * myptr = (SQLBindColStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLBindColStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -151,6 +205,59 @@ SQLRETURN SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName,
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLBindFileToColThread (void *ptr)
+{
+  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
+  } else {
+    myptr->sqlrc = ILE_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLBindFileToColCallback(SQLBindFileToColStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLBindFileToColStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLBindFileToColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) malloc(sizeof(SQLBindFileToColStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->fName = fName;
+  myptr->fNameLen = fNameLen;
+  myptr->fOptions = fOptions;
+  myptr->fValueMax = fValueMax;
+  myptr->sLen = sLen;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLBindFileToColThread, (void *)myptr);
+  return tid;
+}
+SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLBindFileToColStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue )
 {
@@ -167,6 +274,59 @@ SQLRETURN SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  i
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLBindFileToParamThread (void *ptr)
+{
+  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
+  } else {
+    myptr->sqlrc = ILE_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLBindFileToParamCallback(SQLBindFileToParamStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLBindFileToParamStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLBindFileToParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) malloc(sizeof(SQLBindFileToParamStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->ipar = ipar;
+  myptr->iType = iType;
+  myptr->fName = fName;
+  myptr->fNameLen = fNameLen;
+  myptr->fOptions = fOptions;
+  myptr->fValueMax = fValueMax;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLBindFileToParamThread, (void *)myptr);
+  return tid;
+}
+SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLBindFileToParamStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -181,6 +341,59 @@ SQLRETURN SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType,
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLBindParamThread (void *ptr)
+{
+  SQLBindParamStruct * myptr = (SQLBindParamStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
+  } else {
+    myptr->sqlrc = ILE_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLBindParamCallback(SQLBindParamStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLBindParamStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLBindParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLBindParamStruct * myptr = (SQLBindParamStruct *) malloc(sizeof(SQLBindParamStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->iparm = iparm;
+  myptr->iType = iType;
+  myptr->pType = pType;
+  myptr->pLen = pLen;
+  myptr->pScale = pScale;
+  myptr->pData = pData;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLBindParamThread, (void *)myptr);
+  return tid;
+}
+SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLBindParamStruct * myptr = (SQLBindParamStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLBindParamStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
@@ -197,6 +410,61 @@ SQLRETURN SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fPa
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLBindParameterThread (void *ptr)
+{
+  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
+  } else {
+    myptr->sqlrc = ILE_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLBindParameterCallback(SQLBindParameterStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLBindParameterStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLBindParameterAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) malloc(sizeof(SQLBindParameterStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->ipar = ipar;
+  myptr->fParamType = fParamType;
+  myptr->fCType = fCType;
+  myptr->fSQLType = fSQLType;
+  myptr->pLen = pLen;
+  myptr->pScale = pScale;
+  myptr->pData = pData;
+  myptr->cbValueMax = cbValueMax;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLBindParameterThread, (void *)myptr);
+  return tid;
+}
+SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLBindParameterStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLCancel( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -211,6 +479,52 @@ SQLRETURN SQLCancel( SQLHSTMT  hstmt )
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLCancelThread (void *ptr)
+{
+  SQLCancelStruct * myptr = (SQLCancelStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLCancel( myptr->hstmt );
+  } else {
+    myptr->sqlrc = ILE_SQLCancel( myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLCancelCallback(SQLCancelStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLCancelStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLCancelAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLCancelStruct * myptr = (SQLCancelStruct *) malloc(sizeof(SQLCancelStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLCancelThread, (void *)myptr);
+  return tid;
+}
+SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLCancelStruct * myptr = (SQLCancelStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLCancelStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLCloseCursor( SQLHSTMT  hstmt )
 {
@@ -227,6 +541,52 @@ SQLRETURN SQLCloseCursor( SQLHSTMT  hstmt )
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLCloseCursorThread (void *ptr)
+{
+  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLCloseCursor( myptr->hstmt );
+  } else {
+    myptr->sqlrc = ILE_SQLCloseCursor( myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLCloseCursorCallback(SQLCloseCursorStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLCloseCursorStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLCloseCursorAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) malloc(sizeof(SQLCloseCursorStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLCloseCursorThread, (void *)myptr);
+  return tid;
+}
+SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLCloseCursorStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -241,6 +601,58 @@ SQLRETURN SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDes
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLColAttributeThread (void *ptr)
+{
+  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  } else {
+    myptr->sqlrc = ILE_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColAttributeCallback(SQLColAttributeStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColAttributeStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColAttributeAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) malloc(sizeof(SQLColAttributeStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->fDescType = fDescType;
+  myptr->rgbDesc = rgbDesc;
+  myptr->cbDescMax = cbDescMax;
+  myptr->pcbDesc = pcbDesc;
+  myptr->pfDesc = pfDesc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColAttributeThread, (void *)myptr);
+  return tid;
+}
+SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColAttributeStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
@@ -257,6 +669,58 @@ SQLRETURN SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDe
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLColAttributeWThread (void *ptr)
+{
+  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  } else {
+    myptr->sqlrc = ILE_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColAttributeWCallback(SQLColAttributeWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColAttributeWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColAttributeWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) malloc(sizeof(SQLColAttributeWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->fDescType = fDescType;
+  myptr->rgbDesc = rgbDesc;
+  myptr->cbDescMax = cbDescMax;
+  myptr->pcbDesc = pcbDesc;
+  myptr->pfDesc = pfDesc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColAttributeWThread, (void *)myptr);
+  return tid;
+}
+SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColAttributeWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -271,6 +735,58 @@ SQLRETURN SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDe
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLColAttributesThread (void *ptr)
+{
+  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  } else {
+    myptr->sqlrc = ILE_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColAttributesCallback(SQLColAttributesStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColAttributesStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColAttributesAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) malloc(sizeof(SQLColAttributesStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->fDescType = fDescType;
+  myptr->rgbDesc = rgbDesc;
+  myptr->cbDescMax = cbDescMax;
+  myptr->pcbDesc = pcbDesc;
+  myptr->pfDesc = pfDesc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColAttributesThread, (void *)myptr);
+  return tid;
+}
+SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColAttributesStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
@@ -287,6 +803,58 @@ SQLRETURN SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fD
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLColAttributesWThread (void *ptr)
+{
+  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  } else {
+    myptr->sqlrc = ILE_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColAttributesWCallback(SQLColAttributesWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColAttributesWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColAttributesWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) malloc(sizeof(SQLColAttributesWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->fDescType = fDescType;
+  myptr->rgbDesc = rgbDesc;
+  myptr->cbDescMax = cbDescMax;
+  myptr->pcbDesc = pcbDesc;
+  myptr->pfDesc = pfDesc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColAttributesWThread, (void *)myptr);
+  return tid;
+}
+SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColAttributesWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -301,6 +869,60 @@ SQLRETURN SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLS
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLColumnPrivilegesThread (void *ptr)
+{
+  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  } else {
+    myptr->sqlrc = ILE_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColumnPrivilegesCallback(SQLColumnPrivilegesStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColumnPrivilegesStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColumnPrivilegesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) malloc(sizeof(SQLColumnPrivilegesStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szTableQualifier = szTableQualifier;
+  myptr->cbTableQualifier = cbTableQualifier;
+  myptr->szTableOwner = szTableOwner;
+  myptr->cbTableOwner = cbTableOwner;
+  myptr->szTableName = szTableName;
+  myptr->cbTableName = cbTableName;
+  myptr->szColumnName = szColumnName;
+  myptr->cbColumnName = cbColumnName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColumnPrivilegesThread, (void *)myptr);
+  return tid;
+}
+SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColumnPrivilegesStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
@@ -317,6 +939,60 @@ SQLRETURN SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQ
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLColumnPrivilegesWThread (void *ptr)
+{
+  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  } else {
+    myptr->sqlrc = ILE_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColumnPrivilegesWCallback(SQLColumnPrivilegesWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColumnPrivilegesWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColumnPrivilegesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) malloc(sizeof(SQLColumnPrivilegesWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szTableQualifier = szTableQualifier;
+  myptr->cbTableQualifier = cbTableQualifier;
+  myptr->szTableOwner = szTableOwner;
+  myptr->cbTableOwner = cbTableOwner;
+  myptr->szTableName = szTableName;
+  myptr->cbTableName = cbTableName;
+  myptr->szColumnName = szColumnName;
+  myptr->cbColumnName = cbColumnName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColumnPrivilegesWThread, (void *)myptr);
+  return tid;
+}
+SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColumnPrivilegesWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -331,6 +1007,60 @@ SQLRETURN SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLColumnsThread (void *ptr)
+{
+  SQLColumnsStruct * myptr = (SQLColumnsStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  } else {
+    myptr->sqlrc = ILE_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColumnsCallback(SQLColumnsStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColumnsStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColumnsAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColumnsStruct * myptr = (SQLColumnsStruct *) malloc(sizeof(SQLColumnsStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szTableQualifier = szTableQualifier;
+  myptr->cbTableQualifier = cbTableQualifier;
+  myptr->szTableOwner = szTableOwner;
+  myptr->cbTableOwner = cbTableOwner;
+  myptr->szTableName = szTableName;
+  myptr->cbTableName = cbTableName;
+  myptr->szColumnName = szColumnName;
+  myptr->cbColumnName = cbColumnName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColumnsThread, (void *)myptr);
+  return tid;
+}
+SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColumnsStruct * myptr = (SQLColumnsStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColumnsStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
@@ -347,6 +1077,60 @@ SQLRETURN SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLColumnsWThread (void *ptr)
+{
+  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  } else {
+    myptr->sqlrc = ILE_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLColumnsWCallback(SQLColumnsWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLColumnsWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLColumnsWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) malloc(sizeof(SQLColumnsWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szTableQualifier = szTableQualifier;
+  myptr->cbTableQualifier = cbTableQualifier;
+  myptr->szTableOwner = szTableOwner;
+  myptr->cbTableOwner = cbTableOwner;
+  myptr->szTableName = szTableName;
+  myptr->cbTableName = cbTableName;
+  myptr->szColumnName = szColumnName;
+  myptr->cbColumnName = cbColumnName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLColumnsWThread, (void *)myptr);
+  return tid;
+}
+SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLColumnsWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -361,6 +1145,58 @@ SQLRETURN SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHA
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
+}
+void * SQLConnectThread (void *ptr)
+{
+  SQLConnectStruct * myptr = (SQLConnectStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  } else {
+    myptr->sqlrc = ILE_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQLConnectCallback(SQLConnectStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLConnectStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLConnectAsync ( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLConnectStruct * myptr = (SQLConnectStruct *) malloc(sizeof(SQLConnectStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->szDSN = szDSN;
+  myptr->cbDSN = cbDSN;
+  myptr->szUID = szUID;
+  myptr->cbUID = cbUID;
+  myptr->szAuthStr = szAuthStr;
+  myptr->cbAuthStr = cbAuthStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLConnectThread, (void *)myptr);
+  return tid;
+}
+SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLConnectStruct * myptr = (SQLConnectStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLConnectStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
@@ -377,6 +1213,58 @@ SQLRETURN SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLW
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
+void * SQLConnectWThread (void *ptr)
+{
+  SQLConnectWStruct * myptr = (SQLConnectWStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  } else {
+    myptr->sqlrc = ILE_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQLConnectWCallback(SQLConnectWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLConnectWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLConnectWAsync ( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLConnectWStruct * myptr = (SQLConnectWStruct *) malloc(sizeof(SQLConnectWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->szDSN = szDSN;
+  myptr->cbDSN = cbDSN;
+  myptr->szUID = szUID;
+  myptr->cbUID = cbUID;
+  myptr->szAuthStr = szAuthStr;
+  myptr->cbAuthStr = cbAuthStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLConnectWThread, (void *)myptr);
+  return tid;
+}
+SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLConnectWStruct * myptr = (SQLConnectWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLConnectWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -392,6 +1280,53 @@ SQLRETURN SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
   init_table_unlock(sDesc, 1);
   return sqlrc;
 }
+void * SQLCopyDescThread (void *ptr)
+{
+  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) ptr;
+  init_table_lock(myptr->sDesc, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
+  } else {
+    myptr->sqlrc = ILE_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
+  }
+  init_table_unlock(myptr->sDesc, 1);
+  /* void SQLCopyDescCallback(SQLCopyDescStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLCopyDescStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLCopyDescAsync ( SQLHDESC  sDesc, SQLHDESC  tDesc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) malloc(sizeof(SQLCopyDescStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->sDesc = sDesc;
+  myptr->tDesc = tDesc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLCopyDescThread, (void *)myptr);
+  return tid;
+}
+SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->sDesc, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLCopyDescStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -405,6 +1340,59 @@ SQLRETURN SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDS
   }
   return sqlrc;
 }
+void * SQLDataSourcesThread (void *ptr)
+{
+  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) ptr;
+  /* not lock */
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  } else {
+    myptr->sqlrc = ILE_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  }
+  /* not lock */
+  /* void SQLDataSourcesCallback(SQLDataSourcesStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDataSourcesStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDataSourcesAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) malloc(sizeof(SQLDataSourcesStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->henv = henv;
+  myptr->fDirection = fDirection;
+  myptr->szDSN = szDSN;
+  myptr->cbDSNMax = cbDSNMax;
+  myptr->pcbDSN = pcbDSN;
+  myptr->szDescription = szDescription;
+  myptr->cbDescriptionMax = cbDescriptionMax;
+  myptr->pcbDescription = pcbDescription;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDataSourcesThread, (void *)myptr);
+  return tid;
+}
+SQLDataSourcesStruct * SQLDataSourcesJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  /* not lock */
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDataSourcesStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -417,6 +1405,59 @@ SQLRETURN SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * sz
     sqlrc = ILE_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
   }
   return sqlrc;
+}
+void * SQLDataSourcesWThread (void *ptr)
+{
+  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) ptr;
+  /* not lock */
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  } else {
+    myptr->sqlrc = ILE_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  }
+  /* not lock */
+  /* void SQLDataSourcesWCallback(SQLDataSourcesWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDataSourcesWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDataSourcesWAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) malloc(sizeof(SQLDataSourcesWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->henv = henv;
+  myptr->fDirection = fDirection;
+  myptr->szDSN = szDSN;
+  myptr->cbDSNMax = cbDSNMax;
+  myptr->pcbDSN = pcbDSN;
+  myptr->szDescription = szDescription;
+  myptr->cbDescriptionMax = cbDescriptionMax;
+  myptr->pcbDescription = pcbDescription;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDataSourcesWThread, (void *)myptr);
+  return tid;
+}
+SQLDataSourcesWStruct * SQLDataSourcesWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  /* not lock */
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDataSourcesWStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
@@ -433,6 +1474,60 @@ SQLRETURN SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColNam
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLDescribeColThread (void *ptr)
+{
+  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  } else {
+    myptr->sqlrc = ILE_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLDescribeColCallback(SQLDescribeColStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDescribeColStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) malloc(sizeof(SQLDescribeColStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->szColName = szColName;
+  myptr->cbColNameMax = cbColNameMax;
+  myptr->pcbColName = pcbColName;
+  myptr->pfSqlType = pfSqlType;
+  myptr->pcbColDef = pcbColDef;
+  myptr->pibScale = pibScale;
+  myptr->pfNullable = pfNullable;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDescribeColThread, (void *)myptr);
+  return tid;
+}
+SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDescribeColStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -447,6 +1542,60 @@ SQLRETURN SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColN
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLDescribeColWThread (void *ptr)
+{
+  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  } else {
+    myptr->sqlrc = ILE_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLDescribeColWCallback(SQLDescribeColWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDescribeColWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDescribeColWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) malloc(sizeof(SQLDescribeColWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->szColName = szColName;
+  myptr->cbColNameMax = cbColNameMax;
+  myptr->pcbColName = pcbColName;
+  myptr->pfSqlType = pfSqlType;
+  myptr->pcbColDef = pcbColDef;
+  myptr->pibScale = pibScale;
+  myptr->pfNullable = pfNullable;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDescribeColWThread, (void *)myptr);
+  return tid;
+}
+SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDescribeColWStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
@@ -463,6 +1612,57 @@ SQLRETURN SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pf
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLDescribeParamThread (void *ptr)
+{
+  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  } else {
+    myptr->sqlrc = ILE_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLDescribeParamCallback(SQLDescribeParamStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDescribeParamStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDescribeParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) malloc(sizeof(SQLDescribeParamStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->ipar = ipar;
+  myptr->pfSqlType = pfSqlType;
+  myptr->pcbColDef = pcbColDef;
+  myptr->pibScale = pibScale;
+  myptr->pfNullable = pfNullable;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDescribeParamThread, (void *)myptr);
+  return tid;
+}
+SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDescribeParamStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLDisconnect( SQLHDBC  hdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -477,6 +1677,52 @@ SQLRETURN SQLDisconnect( SQLHDBC  hdbc )
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
+}
+void * SQLDisconnectThread (void *ptr)
+{
+  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDisconnect( myptr->hdbc );
+  } else {
+    myptr->sqlrc = ILE_SQLDisconnect( myptr->hdbc );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQLDisconnectCallback(SQLDisconnectStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDisconnectStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDisconnectAsync ( SQLHDBC  hdbc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) malloc(sizeof(SQLDisconnectStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDisconnectThread, (void *)myptr);
+  return tid;
+}
+SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDisconnectStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
@@ -493,6 +1739,59 @@ SQLRETURN SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStr
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
+void * SQLDriverConnectThread (void *ptr)
+{
+  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  } else {
+    myptr->sqlrc = ILE_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQLDriverConnectCallback(SQLDriverConnectStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDriverConnectStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDriverConnectAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) malloc(sizeof(SQLDriverConnectStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->hwnd = hwnd;
+  myptr->szConnStrIn = szConnStrIn;
+  myptr->cbConnStrin = cbConnStrin;
+  myptr->szConnStrOut = szConnStrOut;
+  myptr->cbConnStrOutMax = cbConnStrOutMax;
+  myptr->pcbConnStrOut = pcbConnStrOut;
+  myptr->fDriverCompletion = fDriverCompletion;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDriverConnectThread, (void *)myptr);
+  return tid;
+}
+SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDriverConnectStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -508,6 +1807,59 @@ SQLRETURN SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnS
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
+void * SQLDriverConnectWThread (void *ptr)
+{
+  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  } else {
+    myptr->sqlrc = ILE_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQLDriverConnectWCallback(SQLDriverConnectWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLDriverConnectWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLDriverConnectWAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) malloc(sizeof(SQLDriverConnectWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->hwnd = hwnd;
+  myptr->szConnStrIn = szConnStrIn;
+  myptr->cbConnStrin = cbConnStrin;
+  myptr->szConnStrOut = szConnStrOut;
+  myptr->cbConnStrOutMax = cbConnStrOutMax;
+  myptr->pcbConnStrOut = pcbConnStrOut;
+  myptr->fDriverCompletion = fDriverCompletion;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLDriverConnectWThread, (void *)myptr);
+  return tid;
+}
+SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLDriverConnectWStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -520,6 +1872,51 @@ SQLRETURN SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype )
     sqlrc = ILE_SQLEndTran( htype, henv, ctype );
   }
   return sqlrc;
+}
+void * SQLEndTranThread (void *ptr)
+{
+  SQLEndTranStruct * myptr = (SQLEndTranStruct *) ptr;
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
+  } else {
+    myptr->sqlrc = ILE_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
+  }
+  /* void SQLEndTranCallback(SQLEndTranStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLEndTranStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLEndTranAsync ( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLEndTranStruct * myptr = (SQLEndTranStruct *) malloc(sizeof(SQLEndTranStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->htype = htype;
+  myptr->henv = henv;
+  myptr->ctype = ctype;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLEndTranThread, (void *)myptr);
+  return tid;
+}
+SQLEndTranStruct * SQLEndTranJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLEndTranStruct * myptr = (SQLEndTranStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLEndTranStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
@@ -534,6 +1931,59 @@ SQLRETURN SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szS
   }
   return sqlrc;
 }
+void * SQLErrorThread (void *ptr)
+{
+  SQLErrorStruct * myptr = (SQLErrorStruct *) ptr;
+  /* not lock */
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  } else {
+    myptr->sqlrc = ILE_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  }
+  /* not lock */
+  /* void SQLErrorCallback(SQLErrorStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLErrorStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLErrorAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLErrorStruct * myptr = (SQLErrorStruct *) malloc(sizeof(SQLErrorStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->henv = henv;
+  myptr->hdbc = hdbc;
+  myptr->hstmt = hstmt;
+  myptr->szSqlState = szSqlState;
+  myptr->pfNativeError = pfNativeError;
+  myptr->szErrorMsg = szErrorMsg;
+  myptr->cbErrorMsgMax = cbErrorMsgMax;
+  myptr->pcbErrorMsg = pcbErrorMsg;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLErrorThread, (void *)myptr);
+  return tid;
+}
+SQLErrorStruct * SQLErrorJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLErrorStruct * myptr = (SQLErrorStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  /* not lock */
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLErrorStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -546,6 +1996,59 @@ SQLRETURN SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * s
     sqlrc = ILE_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
   }
   return sqlrc;
+}
+void * SQLErrorWThread (void *ptr)
+{
+  SQLErrorWStruct * myptr = (SQLErrorWStruct *) ptr;
+  /* not lock */
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  } else {
+    myptr->sqlrc = ILE_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  }
+  /* not lock */
+  /* void SQLErrorWCallback(SQLErrorWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLErrorWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLErrorWAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLErrorWStruct * myptr = (SQLErrorWStruct *) malloc(sizeof(SQLErrorWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->henv = henv;
+  myptr->hdbc = hdbc;
+  myptr->hstmt = hstmt;
+  myptr->szSqlState = szSqlState;
+  myptr->pfNativeError = pfNativeError;
+  myptr->szErrorMsg = szErrorMsg;
+  myptr->cbErrorMsgMax = cbErrorMsgMax;
+  myptr->pcbErrorMsg = pcbErrorMsg;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLErrorWThread, (void *)myptr);
+  return tid;
+}
+SQLErrorWStruct * SQLErrorWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLErrorWStruct * myptr = (SQLErrorWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  /* not lock */
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLErrorWStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
@@ -562,6 +2065,54 @@ SQLRETURN SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlS
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLExecDirectThread (void *ptr)
+{
+  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  } else {
+    myptr->sqlrc = ILE_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLExecDirectCallback(SQLExecDirectStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLExecDirectStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLExecDirectAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) malloc(sizeof(SQLExecDirectStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szSqlStr = szSqlStr;
+  myptr->cbSqlStr = cbSqlStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLExecDirectThread, (void *)myptr);
+  return tid;
+}
+SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLExecDirectStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -576,6 +2127,54 @@ SQLRETURN SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSq
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLExecDirectWThread (void *ptr)
+{
+  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  } else {
+    myptr->sqlrc = ILE_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLExecDirectWCallback(SQLExecDirectWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLExecDirectWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLExecDirectWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) malloc(sizeof(SQLExecDirectWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szSqlStr = szSqlStr;
+  myptr->cbSqlStr = cbSqlStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLExecDirectWThread, (void *)myptr);
+  return tid;
+}
+SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLExecDirectWStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLExecute( SQLHSTMT  hstmt )
 {
@@ -592,6 +2191,52 @@ SQLRETURN SQLExecute( SQLHSTMT  hstmt )
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLExecuteThread (void *ptr)
+{
+  SQLExecuteStruct * myptr = (SQLExecuteStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLExecute( myptr->hstmt );
+  } else {
+    myptr->sqlrc = ILE_SQLExecute( myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLExecuteCallback(SQLExecuteStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLExecuteStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLExecuteAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLExecuteStruct * myptr = (SQLExecuteStruct *) malloc(sizeof(SQLExecuteStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLExecuteThread, (void *)myptr);
+  return tid;
+}
+SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLExecuteStruct * myptr = (SQLExecuteStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLExecuteStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -606,6 +2251,56 @@ SQLRETURN SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  f
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLExtendedFetchThread (void *ptr)
+{
+  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
+  } else {
+    myptr->sqlrc = ILE_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLExtendedFetchCallback(SQLExtendedFetchStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLExtendedFetchStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLExtendedFetchAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) malloc(sizeof(SQLExtendedFetchStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->fOrient = fOrient;
+  myptr->fOffset = fOffset;
+  myptr->pcrow = pcrow;
+  myptr->rgfRowStatus = rgfRowStatus;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLExtendedFetchThread, (void *)myptr);
+  return tid;
+}
+SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLExtendedFetchStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLFetch( SQLHSTMT  hstmt )
 {
@@ -622,6 +2317,52 @@ SQLRETURN SQLFetch( SQLHSTMT  hstmt )
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLFetchThread (void *ptr)
+{
+  SQLFetchStruct * myptr = (SQLFetchStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLFetch( myptr->hstmt );
+  } else {
+    myptr->sqlrc = ILE_SQLFetch( myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLFetchCallback(SQLFetchStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLFetchStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLFetchAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLFetchStruct * myptr = (SQLFetchStruct *) malloc(sizeof(SQLFetchStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLFetchThread, (void *)myptr);
+  return tid;
+}
+SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLFetchStruct * myptr = (SQLFetchStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLFetchStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -636,6 +2377,54 @@ SQLRETURN SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOf
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLFetchScrollThread (void *ptr)
+{
+  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
+  } else {
+    myptr->sqlrc = ILE_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLFetchScrollCallback(SQLFetchScrollStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLFetchScrollStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLFetchScrollAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) malloc(sizeof(SQLFetchScrollStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->fOrient = fOrient;
+  myptr->fOffset = fOffset;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLFetchScrollThread, (void *)myptr);
+  return tid;
+}
+SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLFetchScrollStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
@@ -652,6 +2441,64 @@ SQLRETURN SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMAL
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
+void * SQLForeignKeysThread (void *ptr)
+{
+  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  } else {
+    myptr->sqlrc = ILE_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLForeignKeysCallback(SQLForeignKeysStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLForeignKeysStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLForeignKeysAsync ( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) malloc(sizeof(SQLForeignKeysStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szPkTableQualifier = szPkTableQualifier;
+  myptr->cbPkTableQualifier = cbPkTableQualifier;
+  myptr->szPkTableOwner = szPkTableOwner;
+  myptr->cbPkTableOwner = cbPkTableOwner;
+  myptr->szPkTableName = szPkTableName;
+  myptr->cbPkTableName = cbPkTableName;
+  myptr->szFkTableQualifier = szFkTableQualifier;
+  myptr->cbFkTableQualifier = cbFkTableQualifier;
+  myptr->szFkTableOwner = szFkTableOwner;
+  myptr->cbFkTableOwner = cbFkTableOwner;
+  myptr->szFkTableName = szFkTableName;
+  myptr->cbFkTableName = cbFkTableName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLForeignKeysThread, (void *)myptr);
+  return tid;
+}
+SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLForeignKeysStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -666,6 +2513,64 @@ SQLRETURN SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSM
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
+}
+void * SQLForeignKeysWThread (void *ptr)
+{
+  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    myptr->sqlrc = libdb400_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  } else {
+    myptr->sqlrc = ILE_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQLForeignKeysWCallback(SQLForeignKeysWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQLForeignKeysWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQLForeignKeysWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) malloc(sizeof(SQLForeignKeysWStruct));
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szPkTableQualifier = szPkTableQualifier;
+  myptr->cbPkTableQualifier = cbPkTableQualifier;
+  myptr->szPkTableOwner = szPkTableOwner;
+  myptr->cbPkTableOwner = cbPkTableOwner;
+  myptr->szPkTableName = szPkTableName;
+  myptr->cbPkTableName = cbPkTableName;
+  myptr->szFkTableQualifier = szFkTableQualifier;
+  myptr->cbFkTableQualifier = cbFkTableQualifier;
+  myptr->szFkTableOwner = szFkTableOwner;
+  myptr->cbFkTableOwner = cbFkTableOwner;
+  myptr->szFkTableName = szFkTableName;
+  myptr->cbFkTableName = cbFkTableName;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQLForeignKeysWThread, (void *)myptr);
+  return tid;
+}
+SQLForeignKeysWStruct * SQLForeignKeysWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) NULL;
+  int active = 0;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQLForeignKeysWStruct *) NULL;
+  }
+  return myptr;
 }
 SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
 {
@@ -788,3173 +2693,6 @@ SQLRETURN SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQL
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
-SQLRETURN SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
-  } else {
-    sqlrc = ILE_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
-  } else {
-    sqlrc = ILE_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
-  } else {
-    sqlrc = ILE_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectOption( hdbc, iopt, oval );
-  } else {
-    sqlrc = ILE_SQLGetConnectOption( hdbc, iopt, oval );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectOptionW( hdbc, iopt, oval );
-  } else {
-    sqlrc = ILE_SQLGetConnectOptionW( hdbc, iopt, oval );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
-  } else {
-    sqlrc = ILE_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
-  } else {
-    sqlrc = ILE_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
-  } else {
-    sqlrc = ILE_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  } else {
-    sqlrc = ILE_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  } else {
-    sqlrc = ILE_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  } else {
-    sqlrc = ILE_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  } else {
-    sqlrc = ILE_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  } else {
-    sqlrc = ILE_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  } else {
-    sqlrc = ILE_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  } else {
-    sqlrc = ILE_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  } else {
-    sqlrc = ILE_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
-  } else {
-    sqlrc = ILE_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLINT * pfExists )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetFunctions( hdbc, fFunction, pfExists );
-  } else {
-    sqlrc = ILE_SQLGetFunctions( hdbc, fFunction, pfExists );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  } else {
-    sqlrc = ILE_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  } else {
-    sqlrc = ILE_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetLength( hstmt, locType, locator, sLength, ind );
-  } else {
-    sqlrc = ILE_SQLGetLength( hstmt, locType, locator, sLength, ind );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  } else {
-    sqlrc = ILE_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  } else {
-    sqlrc = ILE_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
-  } else {
-    sqlrc = ILE_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
-  } else {
-    sqlrc = ILE_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtOption( hstmt, fOption, pvParam );
-  } else {
-    sqlrc = ILE_SQLGetStmtOption( hstmt, fOption, pvParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtOptionW( hstmt, fOption, pvParam );
-  } else {
-    sqlrc = ILE_SQLGetStmtOptionW( hstmt, fOption, pvParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  } else {
-    sqlrc = ILE_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  } else {
-    sqlrc = ILE_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetTypeInfo( hstmt, fSqlType );
-  } else {
-    sqlrc = ILE_SQLGetTypeInfo( hstmt, fSqlType );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetTypeInfoW( hstmt, fSqlType );
-  } else {
-    sqlrc = ILE_SQLGetTypeInfoW( hstmt, fSqlType );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLLanguages( SQLHSTMT  hstmt )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLLanguages( hstmt );
-  } else {
-    sqlrc = ILE_SQLLanguages( hstmt );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLMoreResults( SQLHSTMT  hstmt )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLMoreResults( hstmt );
-  } else {
-    sqlrc = ILE_SQLMoreResults( hstmt );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  } else {
-    sqlrc = ILE_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  } else {
-    sqlrc = ILE_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNextResult( hstmt, hstmt2 );
-  } else {
-    sqlrc = ILE_SQLNextResult( hstmt, hstmt2 );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNumParams( hstmt, pcpar );
-  } else {
-    sqlrc = ILE_SQLNumParams( hstmt, pcpar );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNumResultCols( hstmt, pccol );
-  } else {
-    sqlrc = ILE_SQLNumResultCols( hstmt, pccol );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLParamData( hstmt, Value );
-  } else {
-    sqlrc = ILE_SQLParamData( hstmt, Value );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * pirow )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLParamOptions( hstmt, crow, pirow );
-  } else {
-    sqlrc = ILE_SQLParamOptions( hstmt, crow, pirow );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
-  } else {
-    sqlrc = ILE_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
-  } else {
-    sqlrc = ILE_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
-    sqlrc = ILE_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
-    sqlrc = ILE_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  } else {
-    sqlrc = ILE_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  } else {
-    sqlrc = ILE_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  } else {
-    sqlrc = ILE_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  } else {
-    sqlrc = ILE_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPutData( hstmt, Data, SLen );
-  } else {
-    sqlrc = ILE_SQLPutData( hstmt, Data, SLen );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLReleaseEnv( SQLHENV  henv )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLReleaseEnv( henv );
-  } else {
-    sqlrc = ILE_SQLReleaseEnv( henv );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLRowCount( hstmt, pcrow );
-  } else {
-    sqlrc = ILE_SQLRowCount( hstmt, pcrow );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
-  } else {
-    sqlrc = ILE_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
-  } else {
-    sqlrc = ILE_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectOption( hdbc, fOption, vParam );
-  } else {
-    sqlrc = ILE_SQLSetConnectOption( hdbc, fOption, vParam );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectOptionW( hdbc, fOption, vParam );
-  } else {
-    sqlrc = ILE_SQLSetConnectOptionW( hdbc, fOption, vParam );
-  }
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetCursorName( hstmt, szCursor, cbCursor );
-  } else {
-    sqlrc = ILE_SQLSetCursorName( hstmt, szCursor, cbCursor );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
-  } else {
-    sqlrc = ILE_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
-  } else {
-    sqlrc = ILE_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
-  } else {
-    sqlrc = ILE_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
-  } else {
-    sqlrc = ILE_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
-  }
-  init_table_unlock(hdesc, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
-  } else {
-    sqlrc = ILE_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCType, SQLSMALLINT  fSqlType, SQLINTEGER  cbColDef, SQLSMALLINT  ibScale, SQLPOINTER  rgbValue, SQLINTEGER * pcbValue )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
-  } else {
-    sqlrc = ILE_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
-  } else {
-    sqlrc = ILE_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
-  } else {
-    sqlrc = ILE_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtOption( hstmt, fOption, vParam );
-  } else {
-    sqlrc = ILE_SQLSetStmtOption( hstmt, fOption, vParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtOptionW( hstmt, fOption, vParam );
-  } else {
-    sqlrc = ILE_SQLSetStmtOptionW( hstmt, fOption, vParam );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  } else {
-    sqlrc = ILE_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  } else {
-    sqlrc = ILE_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStartTran( htype, henv, mode, clevel );
-  } else {
-    sqlrc = ILE_SQLStartTran( htype, henv, mode, clevel );
-  }
-  return sqlrc;
-}
-SQLRETURN SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  } else {
-    sqlrc = ILE_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  } else {
-    sqlrc = ILE_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
-    sqlrc = ILE_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
-    sqlrc = ILE_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  } else {
-    sqlrc = ILE_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  } else {
-    sqlrc = ILE_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  }
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTransact( henv, hdbc, fType );
-  } else {
-    sqlrc = ILE_SQLTransact( henv, hdbc, fType );
-  }
-  return sqlrc;
-}
-SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, inccsid );
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400FromUtf8( hdbc, inparm, inlen, outparm, outlen, outccsid );
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, inccsid );
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400FromUtf16( hdbc, inparm, inlen, outparm, outlen, outccsid );
-  init_table_unlock(hdbc, 0);
-  return sqlrc;
-}
-SQLRETURN SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400AddAttr( scope, attrib, vParam, inlen, onerr, flag, options );
-  return sqlrc;
-}
-SQLRETURN SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400SetAttr( scope, hndl, flag, options );
-  return sqlrc;
-}
-SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400Environment( ohnd, options );
-  return sqlrc;
-}
-SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400Connect( henv, db, uid, pwd, ohnd, options );
-  return sqlrc;
-}
-SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400ConnectW( henv, db, uid, pwd, ohnd, options );
-  return sqlrc;
-}
-SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
-  return sqlrc;
-}
-SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  sqlrc = custom_SQL400AddDesc( hstmt, icol, flag, descs );
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  sqlrc = custom_SQL400Execute( hstmt, parms, desc_parms );
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  sqlrc = custom_SQL400Fetch( hstmt, start_row, cols, desc_cols );
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_table_lock(hstmt, 1);
-  sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
-  init_table_unlock(hstmt, 1);
-  return sqlrc;
-}
-
-void * SQLBindColThread (void *ptr)
-{
-  SQLBindColStruct * myptr = (SQLBindColStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLBindColCallback(SQLBindColStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLBindColStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLBindColStruct * myptr = (SQLBindColStruct *) malloc(sizeof(SQLBindColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->iType = iType;
-  myptr->rgbValue = rgbValue;
-  myptr->cbValueMax = cbValueMax;
-  myptr->pcbValue = pcbValue;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLBindColThread, (void *)myptr);
-  return tid;
-}
-SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLBindColStruct * myptr = (SQLBindColStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLBindColStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLBindFileToColThread (void *ptr)
-{
-  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLBindFileToColCallback(SQLBindFileToColStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLBindFileToColStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLBindFileToColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) malloc(sizeof(SQLBindFileToColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->fName = fName;
-  myptr->fNameLen = fNameLen;
-  myptr->fOptions = fOptions;
-  myptr->fValueMax = fValueMax;
-  myptr->sLen = sLen;
-  myptr->pcbValue = pcbValue;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLBindFileToColThread, (void *)myptr);
-  return tid;
-}
-SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLBindFileToColStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLBindFileToParamThread (void *ptr)
-{
-  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLBindFileToParamCallback(SQLBindFileToParamStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLBindFileToParamStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLBindFileToParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) malloc(sizeof(SQLBindFileToParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->ipar = ipar;
-  myptr->iType = iType;
-  myptr->fName = fName;
-  myptr->fNameLen = fNameLen;
-  myptr->fOptions = fOptions;
-  myptr->fValueMax = fValueMax;
-  myptr->pcbValue = pcbValue;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLBindFileToParamThread, (void *)myptr);
-  return tid;
-}
-SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLBindFileToParamStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLBindParamThread (void *ptr)
-{
-  SQLBindParamStruct * myptr = (SQLBindParamStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLBindParamCallback(SQLBindParamStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLBindParamStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLBindParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLBindParamStruct * myptr = (SQLBindParamStruct *) malloc(sizeof(SQLBindParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->iparm = iparm;
-  myptr->iType = iType;
-  myptr->pType = pType;
-  myptr->pLen = pLen;
-  myptr->pScale = pScale;
-  myptr->pData = pData;
-  myptr->pcbValue = pcbValue;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLBindParamThread, (void *)myptr);
-  return tid;
-}
-SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLBindParamStruct * myptr = (SQLBindParamStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLBindParamStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLBindParameterThread (void *ptr)
-{
-  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLBindParameterCallback(SQLBindParameterStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLBindParameterStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLBindParameterAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) malloc(sizeof(SQLBindParameterStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->ipar = ipar;
-  myptr->fParamType = fParamType;
-  myptr->fCType = fCType;
-  myptr->fSQLType = fSQLType;
-  myptr->pLen = pLen;
-  myptr->pScale = pScale;
-  myptr->pData = pData;
-  myptr->cbValueMax = cbValueMax;
-  myptr->pcbValue = pcbValue;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLBindParameterThread, (void *)myptr);
-  return tid;
-}
-SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLBindParameterStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLCancelThread (void *ptr)
-{
-  SQLCancelStruct * myptr = (SQLCancelStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCancel( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLCancel( myptr->hstmt );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLCancelCallback(SQLCancelStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLCancelStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLCancelAsync ( SQLHSTMT  hstmt, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLCancelStruct * myptr = (SQLCancelStruct *) malloc(sizeof(SQLCancelStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLCancelThread, (void *)myptr);
-  return tid;
-}
-SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLCancelStruct * myptr = (SQLCancelStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLCancelStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLCloseCursorThread (void *ptr)
-{
-  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCloseCursor( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLCloseCursor( myptr->hstmt );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLCloseCursorCallback(SQLCloseCursorStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLCloseCursorStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLCloseCursorAsync ( SQLHSTMT  hstmt, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) malloc(sizeof(SQLCloseCursorStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLCloseCursorThread, (void *)myptr);
-  return tid;
-}
-SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLCloseCursorStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColAttributeThread (void *ptr)
-{
-  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColAttributeCallback(SQLColAttributeStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColAttributeStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColAttributeAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) malloc(sizeof(SQLColAttributeStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->fDescType = fDescType;
-  myptr->rgbDesc = rgbDesc;
-  myptr->cbDescMax = cbDescMax;
-  myptr->pcbDesc = pcbDesc;
-  myptr->pfDesc = pfDesc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColAttributeThread, (void *)myptr);
-  return tid;
-}
-SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColAttributeStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColAttributeWThread (void *ptr)
-{
-  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColAttributeWCallback(SQLColAttributeWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColAttributeWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColAttributeWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) malloc(sizeof(SQLColAttributeWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->fDescType = fDescType;
-  myptr->rgbDesc = rgbDesc;
-  myptr->cbDescMax = cbDescMax;
-  myptr->pcbDesc = pcbDesc;
-  myptr->pfDesc = pfDesc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColAttributeWThread, (void *)myptr);
-  return tid;
-}
-SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColAttributeWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColAttributesThread (void *ptr)
-{
-  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColAttributesCallback(SQLColAttributesStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColAttributesStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColAttributesAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) malloc(sizeof(SQLColAttributesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->fDescType = fDescType;
-  myptr->rgbDesc = rgbDesc;
-  myptr->cbDescMax = cbDescMax;
-  myptr->pcbDesc = pcbDesc;
-  myptr->pfDesc = pfDesc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColAttributesThread, (void *)myptr);
-  return tid;
-}
-SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColAttributesStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColAttributesWThread (void *ptr)
-{
-  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColAttributesWCallback(SQLColAttributesWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColAttributesWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColAttributesWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) malloc(sizeof(SQLColAttributesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->fDescType = fDescType;
-  myptr->rgbDesc = rgbDesc;
-  myptr->cbDescMax = cbDescMax;
-  myptr->pcbDesc = pcbDesc;
-  myptr->pfDesc = pfDesc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColAttributesWThread, (void *)myptr);
-  return tid;
-}
-SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColAttributesWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColumnPrivilegesThread (void *ptr)
-{
-  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColumnPrivilegesCallback(SQLColumnPrivilegesStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColumnPrivilegesStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColumnPrivilegesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) malloc(sizeof(SQLColumnPrivilegesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szTableQualifier = szTableQualifier;
-  myptr->cbTableQualifier = cbTableQualifier;
-  myptr->szTableOwner = szTableOwner;
-  myptr->cbTableOwner = cbTableOwner;
-  myptr->szTableName = szTableName;
-  myptr->cbTableName = cbTableName;
-  myptr->szColumnName = szColumnName;
-  myptr->cbColumnName = cbColumnName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColumnPrivilegesThread, (void *)myptr);
-  return tid;
-}
-SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColumnPrivilegesStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColumnPrivilegesWThread (void *ptr)
-{
-  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColumnPrivilegesWCallback(SQLColumnPrivilegesWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColumnPrivilegesWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColumnPrivilegesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) malloc(sizeof(SQLColumnPrivilegesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szTableQualifier = szTableQualifier;
-  myptr->cbTableQualifier = cbTableQualifier;
-  myptr->szTableOwner = szTableOwner;
-  myptr->cbTableOwner = cbTableOwner;
-  myptr->szTableName = szTableName;
-  myptr->cbTableName = cbTableName;
-  myptr->szColumnName = szColumnName;
-  myptr->cbColumnName = cbColumnName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColumnPrivilegesWThread, (void *)myptr);
-  return tid;
-}
-SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColumnPrivilegesWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColumnsThread (void *ptr)
-{
-  SQLColumnsStruct * myptr = (SQLColumnsStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColumnsCallback(SQLColumnsStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColumnsStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColumnsAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColumnsStruct * myptr = (SQLColumnsStruct *) malloc(sizeof(SQLColumnsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szTableQualifier = szTableQualifier;
-  myptr->cbTableQualifier = cbTableQualifier;
-  myptr->szTableOwner = szTableOwner;
-  myptr->cbTableOwner = cbTableOwner;
-  myptr->szTableName = szTableName;
-  myptr->cbTableName = cbTableName;
-  myptr->szColumnName = szColumnName;
-  myptr->cbColumnName = cbColumnName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColumnsThread, (void *)myptr);
-  return tid;
-}
-SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColumnsStruct * myptr = (SQLColumnsStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColumnsStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLColumnsWThread (void *ptr)
-{
-  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLColumnsWCallback(SQLColumnsWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLColumnsWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLColumnsWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) malloc(sizeof(SQLColumnsWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szTableQualifier = szTableQualifier;
-  myptr->cbTableQualifier = cbTableQualifier;
-  myptr->szTableOwner = szTableOwner;
-  myptr->cbTableOwner = cbTableOwner;
-  myptr->szTableName = szTableName;
-  myptr->cbTableName = cbTableName;
-  myptr->szColumnName = szColumnName;
-  myptr->cbColumnName = cbColumnName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLColumnsWThread, (void *)myptr);
-  return tid;
-}
-SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLColumnsWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLConnectThread (void *ptr)
-{
-  SQLConnectStruct * myptr = (SQLConnectStruct *) ptr;
-  init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  } else {
-    myptr->sqlrc = ILE_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  }
-  init_table_unlock(myptr->hdbc, 0);
-  /* void SQLConnectCallback(SQLConnectStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLConnectStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLConnectAsync ( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLConnectStruct * myptr = (SQLConnectStruct *) malloc(sizeof(SQLConnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hdbc = hdbc;
-  myptr->szDSN = szDSN;
-  myptr->cbDSN = cbDSN;
-  myptr->szUID = szUID;
-  myptr->cbUID = cbUID;
-  myptr->szAuthStr = szAuthStr;
-  myptr->cbAuthStr = cbAuthStr;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLConnectThread, (void *)myptr);
-  return tid;
-}
-SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLConnectStruct * myptr = (SQLConnectStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hdbc, 0);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLConnectStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLConnectWThread (void *ptr)
-{
-  SQLConnectWStruct * myptr = (SQLConnectWStruct *) ptr;
-  init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  } else {
-    myptr->sqlrc = ILE_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  }
-  init_table_unlock(myptr->hdbc, 0);
-  /* void SQLConnectWCallback(SQLConnectWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLConnectWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLConnectWAsync ( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLConnectWStruct * myptr = (SQLConnectWStruct *) malloc(sizeof(SQLConnectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hdbc = hdbc;
-  myptr->szDSN = szDSN;
-  myptr->cbDSN = cbDSN;
-  myptr->szUID = szUID;
-  myptr->cbUID = cbUID;
-  myptr->szAuthStr = szAuthStr;
-  myptr->cbAuthStr = cbAuthStr;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLConnectWThread, (void *)myptr);
-  return tid;
-}
-SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLConnectWStruct * myptr = (SQLConnectWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hdbc, 0);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLConnectWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLCopyDescThread (void *ptr)
-{
-  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) ptr;
-  init_table_lock(myptr->sDesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
-  }
-  init_table_unlock(myptr->sDesc, 1);
-  /* void SQLCopyDescCallback(SQLCopyDescStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLCopyDescStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLCopyDescAsync ( SQLHDESC  sDesc, SQLHDESC  tDesc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) malloc(sizeof(SQLCopyDescStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->sDesc = sDesc;
-  myptr->tDesc = tDesc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLCopyDescThread, (void *)myptr);
-  return tid;
-}
-SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->sDesc, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLCopyDescStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDataSourcesThread (void *ptr)
-{
-  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) ptr;
-  /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  } else {
-    myptr->sqlrc = ILE_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  }
-  /* not lock */
-  /* void SQLDataSourcesCallback(SQLDataSourcesStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDataSourcesStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDataSourcesAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) malloc(sizeof(SQLDataSourcesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->henv = henv;
-  myptr->fDirection = fDirection;
-  myptr->szDSN = szDSN;
-  myptr->cbDSNMax = cbDSNMax;
-  myptr->pcbDSN = pcbDSN;
-  myptr->szDescription = szDescription;
-  myptr->cbDescriptionMax = cbDescriptionMax;
-  myptr->pcbDescription = pcbDescription;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDataSourcesThread, (void *)myptr);
-  return tid;
-}
-SQLDataSourcesStruct * SQLDataSourcesJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  /* not lock */
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDataSourcesStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDataSourcesWThread (void *ptr)
-{
-  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) ptr;
-  /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  } else {
-    myptr->sqlrc = ILE_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  }
-  /* not lock */
-  /* void SQLDataSourcesWCallback(SQLDataSourcesWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDataSourcesWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDataSourcesWAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) malloc(sizeof(SQLDataSourcesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->henv = henv;
-  myptr->fDirection = fDirection;
-  myptr->szDSN = szDSN;
-  myptr->cbDSNMax = cbDSNMax;
-  myptr->pcbDSN = pcbDSN;
-  myptr->szDescription = szDescription;
-  myptr->cbDescriptionMax = cbDescriptionMax;
-  myptr->pcbDescription = pcbDescription;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDataSourcesWThread, (void *)myptr);
-  return tid;
-}
-SQLDataSourcesWStruct * SQLDataSourcesWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  /* not lock */
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDataSourcesWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDescribeColThread (void *ptr)
-{
-  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLDescribeColCallback(SQLDescribeColStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDescribeColStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) malloc(sizeof(SQLDescribeColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->szColName = szColName;
-  myptr->cbColNameMax = cbColNameMax;
-  myptr->pcbColName = pcbColName;
-  myptr->pfSqlType = pfSqlType;
-  myptr->pcbColDef = pcbColDef;
-  myptr->pibScale = pibScale;
-  myptr->pfNullable = pfNullable;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDescribeColThread, (void *)myptr);
-  return tid;
-}
-SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDescribeColStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDescribeColWThread (void *ptr)
-{
-  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLDescribeColWCallback(SQLDescribeColWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDescribeColWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDescribeColWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) malloc(sizeof(SQLDescribeColWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->icol = icol;
-  myptr->szColName = szColName;
-  myptr->cbColNameMax = cbColNameMax;
-  myptr->pcbColName = pcbColName;
-  myptr->pfSqlType = pfSqlType;
-  myptr->pcbColDef = pcbColDef;
-  myptr->pibScale = pibScale;
-  myptr->pfNullable = pfNullable;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDescribeColWThread, (void *)myptr);
-  return tid;
-}
-SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDescribeColWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDescribeParamThread (void *ptr)
-{
-  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLDescribeParamCallback(SQLDescribeParamStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDescribeParamStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDescribeParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) malloc(sizeof(SQLDescribeParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->ipar = ipar;
-  myptr->pfSqlType = pfSqlType;
-  myptr->pcbColDef = pcbColDef;
-  myptr->pibScale = pibScale;
-  myptr->pfNullable = pfNullable;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDescribeParamThread, (void *)myptr);
-  return tid;
-}
-SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDescribeParamStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDisconnectThread (void *ptr)
-{
-  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) ptr;
-  init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDisconnect( myptr->hdbc );
-  } else {
-    myptr->sqlrc = ILE_SQLDisconnect( myptr->hdbc );
-  }
-  init_table_unlock(myptr->hdbc, 0);
-  /* void SQLDisconnectCallback(SQLDisconnectStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDisconnectStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDisconnectAsync ( SQLHDBC  hdbc, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) malloc(sizeof(SQLDisconnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hdbc = hdbc;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDisconnectThread, (void *)myptr);
-  return tid;
-}
-SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hdbc, 0);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDisconnectStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDriverConnectThread (void *ptr)
-{
-  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) ptr;
-  init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  } else {
-    myptr->sqlrc = ILE_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  }
-  init_table_unlock(myptr->hdbc, 0);
-  /* void SQLDriverConnectCallback(SQLDriverConnectStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDriverConnectStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDriverConnectAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) malloc(sizeof(SQLDriverConnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hdbc = hdbc;
-  myptr->hwnd = hwnd;
-  myptr->szConnStrIn = szConnStrIn;
-  myptr->cbConnStrin = cbConnStrin;
-  myptr->szConnStrOut = szConnStrOut;
-  myptr->cbConnStrOutMax = cbConnStrOutMax;
-  myptr->pcbConnStrOut = pcbConnStrOut;
-  myptr->fDriverCompletion = fDriverCompletion;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDriverConnectThread, (void *)myptr);
-  return tid;
-}
-SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hdbc, 0);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDriverConnectStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLDriverConnectWThread (void *ptr)
-{
-  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) ptr;
-  init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  } else {
-    myptr->sqlrc = ILE_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  }
-  init_table_unlock(myptr->hdbc, 0);
-  /* void SQLDriverConnectWCallback(SQLDriverConnectWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLDriverConnectWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLDriverConnectWAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) malloc(sizeof(SQLDriverConnectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hdbc = hdbc;
-  myptr->hwnd = hwnd;
-  myptr->szConnStrIn = szConnStrIn;
-  myptr->cbConnStrin = cbConnStrin;
-  myptr->szConnStrOut = szConnStrOut;
-  myptr->cbConnStrOutMax = cbConnStrOutMax;
-  myptr->pcbConnStrOut = pcbConnStrOut;
-  myptr->fDriverCompletion = fDriverCompletion;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLDriverConnectWThread, (void *)myptr);
-  return tid;
-}
-SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hdbc, 0);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLDriverConnectWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLEndTranThread (void *ptr)
-{
-  SQLEndTranStruct * myptr = (SQLEndTranStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
-  } else {
-    myptr->sqlrc = ILE_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
-  }
-  /* void SQLEndTranCallback(SQLEndTranStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLEndTranStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLEndTranAsync ( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLEndTranStruct * myptr = (SQLEndTranStruct *) malloc(sizeof(SQLEndTranStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->htype = htype;
-  myptr->henv = henv;
-  myptr->ctype = ctype;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLEndTranThread, (void *)myptr);
-  return tid;
-}
-SQLEndTranStruct * SQLEndTranJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLEndTranStruct * myptr = (SQLEndTranStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLEndTranStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLErrorThread (void *ptr)
-{
-  SQLErrorStruct * myptr = (SQLErrorStruct *) ptr;
-  /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  } else {
-    myptr->sqlrc = ILE_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  }
-  /* not lock */
-  /* void SQLErrorCallback(SQLErrorStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLErrorStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLErrorAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLErrorStruct * myptr = (SQLErrorStruct *) malloc(sizeof(SQLErrorStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->henv = henv;
-  myptr->hdbc = hdbc;
-  myptr->hstmt = hstmt;
-  myptr->szSqlState = szSqlState;
-  myptr->pfNativeError = pfNativeError;
-  myptr->szErrorMsg = szErrorMsg;
-  myptr->cbErrorMsgMax = cbErrorMsgMax;
-  myptr->pcbErrorMsg = pcbErrorMsg;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLErrorThread, (void *)myptr);
-  return tid;
-}
-SQLErrorStruct * SQLErrorJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLErrorStruct * myptr = (SQLErrorStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  /* not lock */
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLErrorStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLErrorWThread (void *ptr)
-{
-  SQLErrorWStruct * myptr = (SQLErrorWStruct *) ptr;
-  /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  } else {
-    myptr->sqlrc = ILE_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  }
-  /* not lock */
-  /* void SQLErrorWCallback(SQLErrorWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLErrorWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLErrorWAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLErrorWStruct * myptr = (SQLErrorWStruct *) malloc(sizeof(SQLErrorWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->henv = henv;
-  myptr->hdbc = hdbc;
-  myptr->hstmt = hstmt;
-  myptr->szSqlState = szSqlState;
-  myptr->pfNativeError = pfNativeError;
-  myptr->szErrorMsg = szErrorMsg;
-  myptr->cbErrorMsgMax = cbErrorMsgMax;
-  myptr->pcbErrorMsg = pcbErrorMsg;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLErrorWThread, (void *)myptr);
-  return tid;
-}
-SQLErrorWStruct * SQLErrorWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLErrorWStruct * myptr = (SQLErrorWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  /* not lock */
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLErrorWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLExecDirectThread (void *ptr)
-{
-  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLExecDirectCallback(SQLExecDirectStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLExecDirectStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLExecDirectAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) malloc(sizeof(SQLExecDirectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szSqlStr = szSqlStr;
-  myptr->cbSqlStr = cbSqlStr;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLExecDirectThread, (void *)myptr);
-  return tid;
-}
-SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLExecDirectStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLExecDirectWThread (void *ptr)
-{
-  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLExecDirectWCallback(SQLExecDirectWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLExecDirectWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLExecDirectWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) malloc(sizeof(SQLExecDirectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szSqlStr = szSqlStr;
-  myptr->cbSqlStr = cbSqlStr;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLExecDirectWThread, (void *)myptr);
-  return tid;
-}
-SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLExecDirectWStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLExecuteThread (void *ptr)
-{
-  SQLExecuteStruct * myptr = (SQLExecuteStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecute( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLExecute( myptr->hstmt );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLExecuteCallback(SQLExecuteStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLExecuteStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLExecuteAsync ( SQLHSTMT  hstmt, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLExecuteStruct * myptr = (SQLExecuteStruct *) malloc(sizeof(SQLExecuteStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLExecuteThread, (void *)myptr);
-  return tid;
-}
-SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLExecuteStruct * myptr = (SQLExecuteStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLExecuteStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLExtendedFetchThread (void *ptr)
-{
-  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
-  } else {
-    myptr->sqlrc = ILE_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLExtendedFetchCallback(SQLExtendedFetchStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLExtendedFetchStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLExtendedFetchAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) malloc(sizeof(SQLExtendedFetchStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->fOrient = fOrient;
-  myptr->fOffset = fOffset;
-  myptr->pcrow = pcrow;
-  myptr->rgfRowStatus = rgfRowStatus;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLExtendedFetchThread, (void *)myptr);
-  return tid;
-}
-SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLExtendedFetchStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLFetchThread (void *ptr)
-{
-  SQLFetchStruct * myptr = (SQLFetchStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLFetch( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLFetch( myptr->hstmt );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLFetchCallback(SQLFetchStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLFetchStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLFetchAsync ( SQLHSTMT  hstmt, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLFetchStruct * myptr = (SQLFetchStruct *) malloc(sizeof(SQLFetchStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLFetchThread, (void *)myptr);
-  return tid;
-}
-SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLFetchStruct * myptr = (SQLFetchStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLFetchStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLFetchScrollThread (void *ptr)
-{
-  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
-  } else {
-    myptr->sqlrc = ILE_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLFetchScrollCallback(SQLFetchScrollStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLFetchScrollStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLFetchScrollAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) malloc(sizeof(SQLFetchScrollStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->fOrient = fOrient;
-  myptr->fOffset = fOffset;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLFetchScrollThread, (void *)myptr);
-  return tid;
-}
-SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLFetchScrollStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLForeignKeysThread (void *ptr)
-{
-  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLForeignKeysCallback(SQLForeignKeysStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLForeignKeysStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLForeignKeysAsync ( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) malloc(sizeof(SQLForeignKeysStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szPkTableQualifier = szPkTableQualifier;
-  myptr->cbPkTableQualifier = cbPkTableQualifier;
-  myptr->szPkTableOwner = szPkTableOwner;
-  myptr->cbPkTableOwner = cbPkTableOwner;
-  myptr->szPkTableName = szPkTableName;
-  myptr->cbPkTableName = cbPkTableName;
-  myptr->szFkTableQualifier = szFkTableQualifier;
-  myptr->cbFkTableQualifier = cbFkTableQualifier;
-  myptr->szFkTableOwner = szFkTableOwner;
-  myptr->cbFkTableOwner = cbFkTableOwner;
-  myptr->szFkTableName = szFkTableName;
-  myptr->cbFkTableName = cbFkTableName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLForeignKeysThread, (void *)myptr);
-  return tid;
-}
-SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLForeignKeysStruct *) NULL;
-  }
-  return myptr;
-}
-void * SQLForeignKeysWThread (void *ptr)
-{
-  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) ptr;
-  init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  }
-  init_table_unlock(myptr->hstmt, 1);
-  /* void SQLForeignKeysWCallback(SQLForeignKeysWStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQLForeignKeysWStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQLForeignKeysWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) malloc(sizeof(SQLForeignKeysWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->hstmt = hstmt;
-  myptr->szPkTableQualifier = szPkTableQualifier;
-  myptr->cbPkTableQualifier = cbPkTableQualifier;
-  myptr->szPkTableOwner = szPkTableOwner;
-  myptr->cbPkTableOwner = cbPkTableOwner;
-  myptr->szPkTableName = szPkTableName;
-  myptr->cbPkTableName = cbPkTableName;
-  myptr->szFkTableQualifier = szFkTableQualifier;
-  myptr->cbFkTableQualifier = cbFkTableQualifier;
-  myptr->szFkTableOwner = szFkTableOwner;
-  myptr->cbFkTableOwner = cbFkTableOwner;
-  myptr->szFkTableName = szFkTableName;
-  myptr->cbFkTableName = cbFkTableName;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQLForeignKeysWThread, (void *)myptr);
-  return tid;
-}
-SQLForeignKeysWStruct * SQLForeignKeysWJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) NULL;
-  int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  active = init_table_in_progress(myptr->hstmt, 1);
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQLForeignKeysWStruct *) NULL;
-  }
-  return myptr;
-}
 void * SQLGetColThread (void *ptr)
 {
   SQLGetColStruct * myptr = (SQLGetColStruct *) ptr;
@@ -4005,6 +2743,21 @@ SQLGetColStruct * SQLGetColJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetColStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
+  } else {
+    sqlrc = ILE_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetColWThread (void *ptr)
 {
@@ -4057,6 +2810,21 @@ SQLGetColWStruct * SQLGetColWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
+  } else {
+    sqlrc = ILE_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLGetConnectAttrThread (void *ptr)
 {
   SQLGetConnectAttrStruct * myptr = (SQLGetConnectAttrStruct *) ptr;
@@ -4106,6 +2874,21 @@ SQLGetConnectAttrStruct * SQLGetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetConnectAttrStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
+  } else {
+    sqlrc = ILE_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQLGetConnectAttrWThread (void *ptr)
 {
@@ -4157,6 +2940,21 @@ SQLGetConnectAttrWStruct * SQLGetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
   }
   return myptr;
 }
+SQLRETURN SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetConnectOption( hdbc, iopt, oval );
+  } else {
+    sqlrc = ILE_SQLGetConnectOption( hdbc, iopt, oval );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLGetConnectOptionThread (void *ptr)
 {
   SQLGetConnectOptionStruct * myptr = (SQLGetConnectOptionStruct *) ptr;
@@ -4205,6 +3003,21 @@ SQLGetConnectOptionStruct * SQLGetConnectOptionJoin (pthread_t tid, SQLINTEGER f
   }
   return myptr;
 }
+SQLRETURN SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetConnectOptionW( hdbc, iopt, oval );
+  } else {
+    sqlrc = ILE_SQLGetConnectOptionW( hdbc, iopt, oval );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLGetConnectOptionWThread (void *ptr)
 {
   SQLGetConnectOptionWStruct * myptr = (SQLGetConnectOptionWStruct *) ptr;
@@ -4252,6 +3065,21 @@ SQLGetConnectOptionWStruct * SQLGetConnectOptionWJoin (pthread_t tid, SQLINTEGER
     return (SQLGetConnectOptionWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
+  } else {
+    sqlrc = ILE_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetCursorNameThread (void *ptr)
 {
@@ -4302,6 +3130,21 @@ SQLGetCursorNameStruct * SQLGetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
+  } else {
+    sqlrc = ILE_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetCursorNameWThread (void *ptr)
 {
   SQLGetCursorNameWStruct * myptr = (SQLGetCursorNameWStruct *) ptr;
@@ -4350,6 +3193,21 @@ SQLGetCursorNameWStruct * SQLGetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetCursorNameWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
+  } else {
+    sqlrc = ILE_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetDataThread (void *ptr)
 {
@@ -4402,6 +3260,21 @@ SQLGetDataStruct * SQLGetDataJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+  } else {
+    sqlrc = ILE_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
+}
 void * SQLGetDescFieldThread (void *ptr)
 {
   SQLGetDescFieldStruct * myptr = (SQLGetDescFieldStruct *) ptr;
@@ -4453,6 +3326,21 @@ SQLGetDescFieldStruct * SQLGetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+  } else {
+    sqlrc = ILE_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
+}
 void * SQLGetDescFieldWThread (void *ptr)
 {
   SQLGetDescFieldWStruct * myptr = (SQLGetDescFieldWStruct *) ptr;
@@ -4503,6 +3391,21 @@ SQLGetDescFieldWStruct * SQLGetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetDescFieldWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+  } else {
+    sqlrc = ILE_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
 }
 void * SQLGetDescRecThread (void *ptr)
 {
@@ -4560,6 +3463,21 @@ SQLGetDescRecStruct * SQLGetDescRecJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+  } else {
+    sqlrc = ILE_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
+}
 void * SQLGetDescRecWThread (void *ptr)
 {
   SQLGetDescRecWStruct * myptr = (SQLGetDescRecWStruct *) ptr;
@@ -4616,6 +3534,19 @@ SQLGetDescRecWStruct * SQLGetDescRecWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+  } else {
+    sqlrc = ILE_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+  }
+  return sqlrc;
+}
 void * SQLGetDiagFieldThread (void *ptr)
 {
   SQLGetDiagFieldStruct * myptr = (SQLGetDiagFieldStruct *) ptr;
@@ -4665,6 +3596,19 @@ SQLGetDiagFieldStruct * SQLGetDiagFieldJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+  } else {
+    sqlrc = ILE_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+  }
+  return sqlrc;
+}
 void * SQLGetDiagFieldWThread (void *ptr)
 {
   SQLGetDiagFieldWStruct * myptr = (SQLGetDiagFieldWStruct *) ptr;
@@ -4713,6 +3657,19 @@ SQLGetDiagFieldWStruct * SQLGetDiagFieldWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetDiagFieldWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+  } else {
+    sqlrc = ILE_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+  }
+  return sqlrc;
 }
 void * SQLGetDiagRecThread (void *ptr)
 {
@@ -4764,6 +3721,19 @@ SQLGetDiagRecStruct * SQLGetDiagRecJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+  } else {
+    sqlrc = ILE_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+  }
+  return sqlrc;
+}
 void * SQLGetDiagRecWThread (void *ptr)
 {
   SQLGetDiagRecWStruct * myptr = (SQLGetDiagRecWStruct *) ptr;
@@ -4813,6 +3783,19 @@ SQLGetDiagRecWStruct * SQLGetDiagRecWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetDiagRecWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
+  } else {
+    sqlrc = ILE_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
+  }
+  return sqlrc;
 }
 void * SQLGetEnvAttrThread (void *ptr)
 {
@@ -4864,6 +3847,21 @@ SQLGetEnvAttrStruct * SQLGetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLINT * pfExists )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetFunctions( hdbc, fFunction, pfExists );
+  } else {
+    sqlrc = ILE_SQLGetFunctions( hdbc, fFunction, pfExists );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLGetFunctionsThread (void *ptr)
 {
   SQLGetFunctionsStruct * myptr = (SQLGetFunctionsStruct *) ptr;
@@ -4911,6 +3909,21 @@ SQLGetFunctionsStruct * SQLGetFunctionsJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetFunctionsStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+  } else {
+    sqlrc = ILE_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQLGetInfoThread (void *ptr)
 {
@@ -4962,6 +3975,21 @@ SQLGetInfoStruct * SQLGetInfoJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+  } else {
+    sqlrc = ILE_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLGetInfoWThread (void *ptr)
 {
   SQLGetInfoWStruct * myptr = (SQLGetInfoWStruct *) ptr;
@@ -5012,6 +4040,21 @@ SQLGetInfoWStruct * SQLGetInfoWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetLength( hstmt, locType, locator, sLength, ind );
+  } else {
+    sqlrc = ILE_SQLGetLength( hstmt, locType, locator, sLength, ind );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetLengthThread (void *ptr)
 {
   SQLGetLengthStruct * myptr = (SQLGetLengthStruct *) ptr;
@@ -5061,6 +4104,21 @@ SQLGetLengthStruct * SQLGetLengthJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetLengthStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+  } else {
+    sqlrc = ILE_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetPositionThread (void *ptr)
 {
@@ -5116,6 +4174,21 @@ SQLGetPositionStruct * SQLGetPositionJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+  } else {
+    sqlrc = ILE_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetPositionWThread (void *ptr)
 {
   SQLGetPositionWStruct * myptr = (SQLGetPositionWStruct *) ptr;
@@ -5170,6 +4243,21 @@ SQLGetPositionWStruct * SQLGetPositionWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
+  } else {
+    sqlrc = ILE_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetStmtAttrThread (void *ptr)
 {
   SQLGetStmtAttrStruct * myptr = (SQLGetStmtAttrStruct *) ptr;
@@ -5219,6 +4307,21 @@ SQLGetStmtAttrStruct * SQLGetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetStmtAttrStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
+  } else {
+    sqlrc = ILE_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetStmtAttrWThread (void *ptr)
 {
@@ -5270,6 +4373,21 @@ SQLGetStmtAttrWStruct * SQLGetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetStmtOption( hstmt, fOption, pvParam );
+  } else {
+    sqlrc = ILE_SQLGetStmtOption( hstmt, fOption, pvParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetStmtOptionThread (void *ptr)
 {
   SQLGetStmtOptionStruct * myptr = (SQLGetStmtOptionStruct *) ptr;
@@ -5318,6 +4436,21 @@ SQLGetStmtOptionStruct * SQLGetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetStmtOptionW( hstmt, fOption, pvParam );
+  } else {
+    sqlrc = ILE_SQLGetStmtOptionW( hstmt, fOption, pvParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetStmtOptionWThread (void *ptr)
 {
   SQLGetStmtOptionWStruct * myptr = (SQLGetStmtOptionWStruct *) ptr;
@@ -5365,6 +4498,21 @@ SQLGetStmtOptionWStruct * SQLGetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetStmtOptionWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+  } else {
+    sqlrc = ILE_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetSubStringThread (void *ptr)
 {
@@ -5421,6 +4569,21 @@ SQLGetSubStringStruct * SQLGetSubStringJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+  } else {
+    sqlrc = ILE_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetSubStringWThread (void *ptr)
 {
   SQLGetSubStringWStruct * myptr = (SQLGetSubStringWStruct *) ptr;
@@ -5476,6 +4639,21 @@ SQLGetSubStringWStruct * SQLGetSubStringWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetTypeInfo( hstmt, fSqlType );
+  } else {
+    sqlrc = ILE_SQLGetTypeInfo( hstmt, fSqlType );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLGetTypeInfoThread (void *ptr)
 {
   SQLGetTypeInfoStruct * myptr = (SQLGetTypeInfoStruct *) ptr;
@@ -5522,6 +4700,21 @@ SQLGetTypeInfoStruct * SQLGetTypeInfoJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLGetTypeInfoStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLGetTypeInfoW( hstmt, fSqlType );
+  } else {
+    sqlrc = ILE_SQLGetTypeInfoW( hstmt, fSqlType );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLGetTypeInfoWThread (void *ptr)
 {
@@ -5570,6 +4763,21 @@ SQLGetTypeInfoWStruct * SQLGetTypeInfoWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLLanguages( SQLHSTMT  hstmt )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLLanguages( hstmt );
+  } else {
+    sqlrc = ILE_SQLLanguages( hstmt );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLLanguagesThread (void *ptr)
 {
   SQLLanguagesStruct * myptr = (SQLLanguagesStruct *) ptr;
@@ -5616,6 +4824,21 @@ SQLLanguagesStruct * SQLLanguagesJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLMoreResults( SQLHSTMT  hstmt )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLMoreResults( hstmt );
+  } else {
+    sqlrc = ILE_SQLMoreResults( hstmt );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLMoreResultsThread (void *ptr)
 {
   SQLMoreResultsStruct * myptr = (SQLMoreResultsStruct *) ptr;
@@ -5661,6 +4884,21 @@ SQLMoreResultsStruct * SQLMoreResultsJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLMoreResultsStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+  } else {
+    sqlrc = ILE_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQLNativeSqlThread (void *ptr)
 {
@@ -5713,6 +4951,21 @@ SQLNativeSqlStruct * SQLNativeSqlJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+  } else {
+    sqlrc = ILE_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLNativeSqlWThread (void *ptr)
 {
   SQLNativeSqlWStruct * myptr = (SQLNativeSqlWStruct *) ptr;
@@ -5764,6 +5017,21 @@ SQLNativeSqlWStruct * SQLNativeSqlWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLNextResult( hstmt, hstmt2 );
+  } else {
+    sqlrc = ILE_SQLNextResult( hstmt, hstmt2 );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLNextResultThread (void *ptr)
 {
   SQLNextResultStruct * myptr = (SQLNextResultStruct *) ptr;
@@ -5810,6 +5078,21 @@ SQLNextResultStruct * SQLNextResultJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLNextResultStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLNumParams( hstmt, pcpar );
+  } else {
+    sqlrc = ILE_SQLNumParams( hstmt, pcpar );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLNumParamsThread (void *ptr)
 {
@@ -5858,6 +5141,21 @@ SQLNumParamsStruct * SQLNumParamsJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLNumResultCols( hstmt, pccol );
+  } else {
+    sqlrc = ILE_SQLNumResultCols( hstmt, pccol );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLNumResultColsThread (void *ptr)
 {
   SQLNumResultColsStruct * myptr = (SQLNumResultColsStruct *) ptr;
@@ -5905,6 +5203,21 @@ SQLNumResultColsStruct * SQLNumResultColsJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLParamData( hstmt, Value );
+  } else {
+    sqlrc = ILE_SQLParamData( hstmt, Value );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLParamDataThread (void *ptr)
 {
   SQLParamDataStruct * myptr = (SQLParamDataStruct *) ptr;
@@ -5951,6 +5264,21 @@ SQLParamDataStruct * SQLParamDataJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLParamDataStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * pirow )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLParamOptions( hstmt, crow, pirow );
+  } else {
+    sqlrc = ILE_SQLParamOptions( hstmt, crow, pirow );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLParamOptionsThread (void *ptr)
 {
@@ -6000,6 +5328,21 @@ SQLParamOptionsStruct * SQLParamOptionsJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
+  } else {
+    sqlrc = ILE_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLPrepareThread (void *ptr)
 {
   SQLPrepareStruct * myptr = (SQLPrepareStruct *) ptr;
@@ -6048,6 +5391,21 @@ SQLPrepareStruct * SQLPrepareJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
+  } else {
+    sqlrc = ILE_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLPrepareWThread (void *ptr)
 {
   SQLPrepareWStruct * myptr = (SQLPrepareWStruct *) ptr;
@@ -6095,6 +5453,21 @@ SQLPrepareWStruct * SQLPrepareWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLPrepareWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  } else {
+    sqlrc = ILE_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLPrimaryKeysThread (void *ptr)
 {
@@ -6148,6 +5521,21 @@ SQLPrimaryKeysStruct * SQLPrimaryKeysJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  } else {
+    sqlrc = ILE_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLPrimaryKeysWThread (void *ptr)
 {
   SQLPrimaryKeysWStruct * myptr = (SQLPrimaryKeysWStruct *) ptr;
@@ -6199,6 +5587,21 @@ SQLPrimaryKeysWStruct * SQLPrimaryKeysWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLPrimaryKeysWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+  } else {
+    sqlrc = ILE_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLProcedureColumnsThread (void *ptr)
 {
@@ -6254,6 +5657,21 @@ SQLProcedureColumnsStruct * SQLProcedureColumnsJoin (pthread_t tid, SQLINTEGER f
   }
   return myptr;
 }
+SQLRETURN SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+  } else {
+    sqlrc = ILE_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLProcedureColumnsWThread (void *ptr)
 {
   SQLProcedureColumnsWStruct * myptr = (SQLProcedureColumnsWStruct *) ptr;
@@ -6308,6 +5726,21 @@ SQLProcedureColumnsWStruct * SQLProcedureColumnsWJoin (pthread_t tid, SQLINTEGER
   }
   return myptr;
 }
+SQLRETURN SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+  } else {
+    sqlrc = ILE_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLProceduresThread (void *ptr)
 {
   SQLProceduresStruct * myptr = (SQLProceduresStruct *) ptr;
@@ -6359,6 +5792,21 @@ SQLProceduresStruct * SQLProceduresJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLProceduresStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+  } else {
+    sqlrc = ILE_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLProceduresWThread (void *ptr)
 {
@@ -6412,6 +5860,21 @@ SQLProceduresWStruct * SQLProceduresWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLPutData( hstmt, Data, SLen );
+  } else {
+    sqlrc = ILE_SQLPutData( hstmt, Data, SLen );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLPutDataThread (void *ptr)
 {
   SQLPutDataStruct * myptr = (SQLPutDataStruct *) ptr;
@@ -6460,6 +5923,19 @@ SQLPutDataStruct * SQLPutDataJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLReleaseEnv( SQLHENV  henv )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLReleaseEnv( henv );
+  } else {
+    sqlrc = ILE_SQLReleaseEnv( henv );
+  }
+  return sqlrc;
+}
 void * SQLReleaseEnvThread (void *ptr)
 {
   SQLReleaseEnvStruct * myptr = (SQLReleaseEnvStruct *) ptr;
@@ -6505,6 +5981,21 @@ SQLReleaseEnvStruct * SQLReleaseEnvJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLReleaseEnvStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLRowCount( hstmt, pcrow );
+  } else {
+    sqlrc = ILE_SQLRowCount( hstmt, pcrow );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLRowCountThread (void *ptr)
 {
@@ -6552,6 +6043,21 @@ SQLRowCountStruct * SQLRowCountJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLRowCountStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
+  } else {
+    sqlrc = ILE_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQLSetConnectAttrThread (void *ptr)
 {
@@ -6602,6 +6108,21 @@ SQLSetConnectAttrStruct * SQLSetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
+  } else {
+    sqlrc = ILE_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLSetConnectAttrWThread (void *ptr)
 {
   SQLSetConnectAttrWStruct * myptr = (SQLSetConnectAttrWStruct *) ptr;
@@ -6651,6 +6172,21 @@ SQLSetConnectAttrWStruct * SQLSetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
   }
   return myptr;
 }
+SQLRETURN SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetConnectOption( hdbc, fOption, vParam );
+  } else {
+    sqlrc = ILE_SQLSetConnectOption( hdbc, fOption, vParam );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQLSetConnectOptionThread (void *ptr)
 {
   SQLSetConnectOptionStruct * myptr = (SQLSetConnectOptionStruct *) ptr;
@@ -6698,6 +6234,21 @@ SQLSetConnectOptionStruct * SQLSetConnectOptionJoin (pthread_t tid, SQLINTEGER f
     return (SQLSetConnectOptionStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetConnectOptionW( hdbc, fOption, vParam );
+  } else {
+    sqlrc = ILE_SQLSetConnectOptionW( hdbc, fOption, vParam );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQLSetConnectOptionWThread (void *ptr)
 {
@@ -6747,6 +6298,21 @@ SQLSetConnectOptionWStruct * SQLSetConnectOptionWJoin (pthread_t tid, SQLINTEGER
   }
   return myptr;
 }
+SQLRETURN SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetCursorName( hstmt, szCursor, cbCursor );
+  } else {
+    sqlrc = ILE_SQLSetCursorName( hstmt, szCursor, cbCursor );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSetCursorNameThread (void *ptr)
 {
   SQLSetCursorNameStruct * myptr = (SQLSetCursorNameStruct *) ptr;
@@ -6795,6 +6361,21 @@ SQLSetCursorNameStruct * SQLSetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
+  } else {
+    sqlrc = ILE_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSetCursorNameWThread (void *ptr)
 {
   SQLSetCursorNameWStruct * myptr = (SQLSetCursorNameWStruct *) ptr;
@@ -6842,6 +6423,21 @@ SQLSetCursorNameWStruct * SQLSetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLSetCursorNameWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
+  } else {
+    sqlrc = ILE_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
 }
 void * SQLSetDescFieldThread (void *ptr)
 {
@@ -6893,6 +6489,21 @@ SQLSetDescFieldStruct * SQLSetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
+  } else {
+    sqlrc = ILE_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
+}
 void * SQLSetDescFieldWThread (void *ptr)
 {
   SQLSetDescFieldWStruct * myptr = (SQLSetDescFieldWStruct *) ptr;
@@ -6942,6 +6553,21 @@ SQLSetDescFieldWStruct * SQLSetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLSetDescFieldWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdesc, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
+  } else {
+    sqlrc = ILE_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
+  }
+  init_table_unlock(hdesc, 1);
+  return sqlrc;
 }
 void * SQLSetDescRecThread (void *ptr)
 {
@@ -6998,6 +6624,19 @@ SQLSetDescRecStruct * SQLSetDescRecJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
+  } else {
+    sqlrc = ILE_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
+  }
+  return sqlrc;
+}
 void * SQLSetEnvAttrThread (void *ptr)
 {
   SQLSetEnvAttrStruct * myptr = (SQLSetEnvAttrStruct *) ptr;
@@ -7046,6 +6685,21 @@ SQLSetEnvAttrStruct * SQLSetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLSetEnvAttrStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCType, SQLSMALLINT  fSqlType, SQLINTEGER  cbColDef, SQLSMALLINT  ibScale, SQLPOINTER  rgbValue, SQLINTEGER * pcbValue )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
+  } else {
+    sqlrc = ILE_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLSetParamThread (void *ptr)
 {
@@ -7100,6 +6754,21 @@ SQLSetParamStruct * SQLSetParamJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
+  } else {
+    sqlrc = ILE_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSetStmtAttrThread (void *ptr)
 {
   SQLSetStmtAttrStruct * myptr = (SQLSetStmtAttrStruct *) ptr;
@@ -7148,6 +6817,21 @@ SQLSetStmtAttrStruct * SQLSetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLSetStmtAttrStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
+  } else {
+    sqlrc = ILE_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLSetStmtAttrWThread (void *ptr)
 {
@@ -7198,6 +6882,21 @@ SQLSetStmtAttrWStruct * SQLSetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetStmtOption( hstmt, fOption, vParam );
+  } else {
+    sqlrc = ILE_SQLSetStmtOption( hstmt, fOption, vParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSetStmtOptionThread (void *ptr)
 {
   SQLSetStmtOptionStruct * myptr = (SQLSetStmtOptionStruct *) ptr;
@@ -7246,6 +6945,21 @@ SQLSetStmtOptionStruct * SQLSetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSetStmtOptionW( hstmt, fOption, vParam );
+  } else {
+    sqlrc = ILE_SQLSetStmtOptionW( hstmt, fOption, vParam );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSetStmtOptionWThread (void *ptr)
 {
   SQLSetStmtOptionWStruct * myptr = (SQLSetStmtOptionWStruct *) ptr;
@@ -7293,6 +7007,21 @@ SQLSetStmtOptionWStruct * SQLSetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLSetStmtOptionWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+  } else {
+    sqlrc = ILE_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLSpecialColumnsThread (void *ptr)
 {
@@ -7349,6 +7078,21 @@ SQLSpecialColumnsStruct * SQLSpecialColumnsJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+  } else {
+    sqlrc = ILE_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLSpecialColumnsWThread (void *ptr)
 {
   SQLSpecialColumnsWStruct * myptr = (SQLSpecialColumnsWStruct *) ptr;
@@ -7404,6 +7148,19 @@ SQLSpecialColumnsWStruct * SQLSpecialColumnsWJoin (pthread_t tid, SQLINTEGER fla
   }
   return myptr;
 }
+SQLRETURN SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLStartTran( htype, henv, mode, clevel );
+  } else {
+    sqlrc = ILE_SQLStartTran( htype, henv, mode, clevel );
+  }
+  return sqlrc;
+}
 void * SQLStartTranThread (void *ptr)
 {
   SQLStartTranStruct * myptr = (SQLStartTranStruct *) ptr;
@@ -7449,6 +7206,21 @@ SQLStartTranStruct * SQLStartTranJoin (pthread_t tid, SQLINTEGER flag)
     return (SQLStartTranStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+  } else {
+    sqlrc = ILE_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLStatisticsThread (void *ptr)
 {
@@ -7504,6 +7276,21 @@ SQLStatisticsStruct * SQLStatisticsJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+  } else {
+    sqlrc = ILE_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLStatisticsWThread (void *ptr)
 {
   SQLStatisticsWStruct * myptr = (SQLStatisticsWStruct *) ptr;
@@ -7558,6 +7345,21 @@ SQLStatisticsWStruct * SQLStatisticsWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  } else {
+    sqlrc = ILE_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLTablePrivilegesThread (void *ptr)
 {
   SQLTablePrivilegesStruct * myptr = (SQLTablePrivilegesStruct *) ptr;
@@ -7610,6 +7412,21 @@ SQLTablePrivilegesStruct * SQLTablePrivilegesJoin (pthread_t tid, SQLINTEGER fla
   }
   return myptr;
 }
+SQLRETURN SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  } else {
+    sqlrc = ILE_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLTablePrivilegesWThread (void *ptr)
 {
   SQLTablePrivilegesWStruct * myptr = (SQLTablePrivilegesWStruct *) ptr;
@@ -7661,6 +7478,21 @@ SQLTablePrivilegesWStruct * SQLTablePrivilegesWJoin (pthread_t tid, SQLINTEGER f
     return (SQLTablePrivilegesWStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+  } else {
+    sqlrc = ILE_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQLTablesThread (void *ptr)
 {
@@ -7716,6 +7548,21 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+  } else {
+    sqlrc = ILE_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQLTablesWThread (void *ptr)
 {
   SQLTablesWStruct * myptr = (SQLTablesWStruct *) ptr;
@@ -7770,6 +7617,19 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  if (i_am_big_chicken_flag) {
+    sqlrc = libdb400_SQLTransact( henv, hdbc, fType );
+  } else {
+    sqlrc = ILE_SQLTransact( henv, hdbc, fType );
+  }
+  return sqlrc;
+}
 void * SQLTransactThread (void *ptr)
 {
   SQLTransactStruct * myptr = (SQLTransactStruct *) ptr;
@@ -7818,6 +7678,17 @@ SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, inccsid );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQL400ToUtf8Thread (void *ptr)
 {
   SQL400ToUtf8Struct * myptr = (SQL400ToUtf8Struct *) ptr;
@@ -7864,6 +7735,17 @@ SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag)
     return (SQL400ToUtf8Struct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400FromUtf8( hdbc, inparm, inlen, outparm, outlen, outccsid );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQL400FromUtf8Thread (void *ptr)
 {
@@ -7912,6 +7794,17 @@ SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, inccsid );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
 void * SQL400ToUtf16Thread (void *ptr)
 {
   SQL400ToUtf16Struct * myptr = (SQL400ToUtf16Struct *) ptr;
@@ -7958,6 +7851,17 @@ SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag)
     return (SQL400ToUtf16Struct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400FromUtf16( hdbc, inparm, inlen, outparm, outlen, outccsid );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
 }
 void * SQL400FromUtf16Thread (void *ptr)
 {
@@ -8006,6 +7910,15 @@ SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400AddAttr( scope, attrib, vParam, inlen, onerr, flag, options );
+  return sqlrc;
+}
 void * SQL400AddAttrThread (void *ptr)
 {
   SQL400AddAttrStruct * myptr = (SQL400AddAttrStruct *) ptr;
@@ -8051,6 +7964,15 @@ SQL400AddAttrStruct * SQL400AddAttrJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400SetAttr( scope, hndl, flag, options );
+  return sqlrc;
+}
 void * SQL400SetAttrThread (void *ptr)
 {
   SQL400SetAttrStruct * myptr = (SQL400SetAttrStruct *) ptr;
@@ -8093,6 +8015,15 @@ SQL400SetAttrStruct * SQL400SetAttrJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400Environment( ohnd, options );
+  return sqlrc;
+}
 void * SQL400EnvironmentThread (void *ptr)
 {
   SQL400EnvironmentStruct * myptr = (SQL400EnvironmentStruct *) ptr;
@@ -8132,6 +8063,15 @@ SQL400EnvironmentStruct * SQL400EnvironmentJoin (pthread_t tid, SQLINTEGER flag)
     return (SQL400EnvironmentStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400Connect( henv, db, uid, pwd, ohnd, options );
+  return sqlrc;
 }
 void * SQL400ConnectThread (void *ptr)
 {
@@ -8180,6 +8120,15 @@ SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400ConnectW( henv, db, uid, pwd, ohnd, options );
+  return sqlrc;
+}
 void * SQL400ConnectWThread (void *ptr)
 {
   SQL400ConnectWStruct * myptr = (SQL400ConnectWStruct *) ptr;
@@ -8227,6 +8176,15 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
+  return sqlrc;
+}
 void * SQL400AddCVarThread (void *ptr)
 {
   SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) ptr;
@@ -8270,6 +8228,17 @@ SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
     return (SQL400AddCVarStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400AddDesc( hstmt, icol, flag, descs );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQL400AddDescThread (void *ptr)
 {
@@ -8316,6 +8285,17 @@ SQL400AddDescStruct * SQL400AddDescJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400Execute( hstmt, parms, desc_parms );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
 void * SQL400ExecuteThread (void *ptr)
 {
   SQL400ExecuteStruct * myptr = (SQL400ExecuteStruct *) ptr;
@@ -8359,6 +8339,17 @@ SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag)
     return (SQL400ExecuteStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400Fetch( hstmt, start_row, cols, desc_cols );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQL400FetchThread (void *ptr)
 {
@@ -8404,6 +8395,17 @@ SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag)
     return (SQL400FetchStruct *) NULL;
   }
   return myptr;
+}
+SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (i_am_big_chicken_flag) {
+    init_dlsym();
+  }
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
 }
 void * SQL400Stmt2HdbcThread (void *ptr)
 {
