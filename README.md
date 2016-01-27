@@ -32,7 +32,7 @@ In general, use normal APIs, which, enable correct locking for async and non-asy
 However, feel free to use new direct call ILE DB2 APIs. 
 ```
 example:
-=== CLI APIs UTF-8 or W for UTF-16  ===
+=== CLI APIs UTF-8 or APIWs UTF-16  ===
 === choose async and/or normal wait === 
 sqlrc = SQLExecDirect(..);
 sqlrc = SQLExecDirectW(..);
