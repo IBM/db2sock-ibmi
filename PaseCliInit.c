@@ -40,7 +40,7 @@ void init_unlock() {
 /* 
  * dlopen handle of PASE libdb400.a,
  * set all symbols for CLI APIs,
- * via load_dlsym (PaseCliAsync_gen.c).
+ * via libdb400_load_dlsym (PaseCliAsync_gen.c).
  * Note: dlhandle is checked twice,
  * second under global lock,
  * to avoid race conditions
@@ -56,7 +56,7 @@ void init_dlsym() {
         printf("Service %s Not Found:  %s\n", dlservice, dlerror());
         exit(-1);
       }
-      load_dlsym();
+      libdb400_load_dlsym();
     }
     init_unlock();
   }

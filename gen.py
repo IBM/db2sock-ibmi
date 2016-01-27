@@ -65,8 +65,9 @@ actual_call = ""
 chicken_call = ""
 line_func = ""
 libdb400_exp=""
+PaseCliLibDB400_h_symbol = ""
 PaseCliLibDB400_c_symbol = ""
-PaseCliLibDB400_c_load_dlsym = ""
+PaseCliLibDB400_c_libdb400_load_dlsym = ""
 PaseCliLibDB400_c_main = ""
 PaseCliAsync_h_struct = ""
 PaseCliAsync_c_main = ""
@@ -227,8 +228,8 @@ for line in f:
     # sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, ...
     #                                  ------------------------------------------
     normal_db400_args += ' ' + argname + comma
-    # static SQLRETURN (*libdb400_SQLPrimaryKeys)(SQLHSTMT,SQLCHAR*,SQLSMALLINT, ...
-    #                                             ------------------------------
+    # SQLRETURN (*libdb400_SQLPrimaryKeys)(SQLHSTMT,SQLCHAR*,SQLSMALLINT, ...
+    #                                      ------------------------------
     normal_call_types += ' ' + argsig + comma
 
     # ILE call structure
@@ -264,14 +265,15 @@ for line in f:
 
   if c400:
     # declare dlsym call each SQL function
-    # static SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
-    PaseCliLibDB400_c_symbol += "static SQLRETURN (*" + "libdb400_" + call_name + ')(' + normal_call_types + ' );' + "\n"
+    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
+    PaseCliLibDB400_h_symbol += "extern SQLRETURN (*" + "libdb400_" + call_name + ')(' + normal_call_types + ' );' + "\n"
+    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + ')(' + normal_call_types + ' );' + "\n"
   
     # init dlsym locate each SQL function in libdb400.a 
-    # void load_dlsym() {
+    # void libdb400_load_dlsym() {
     #   libdb400_SQLAllocEnv = dlsym(dlhandle, "SQLAllocEnv");
     # }
-    PaseCliLibDB400_c_load_dlsym += "  libdb400_" + call_name + ' = dlsym(dlhandle, "'+ call_name +'");' + "\n"
+    PaseCliLibDB400_c_libdb400_load_dlsym += "  libdb400_" + call_name + ' = dlsym(dlhandle, "'+ call_name +'");' + "\n"
 
     # each SQL400 function special (header)
     # SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
@@ -558,14 +560,14 @@ for line in f:
     PaseCliILE_c_main += '    db2_cli_srvpgm_mark = actMark;' +  "\n"
     PaseCliILE_c_main += '  }' + "\n"
     PaseCliILE_c_main += '  if (!'+ struct_ile_flag +') {' +  "\n"
-    PaseCliILE_c_main += '    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "' + call_name + '");' +  "\n"
+    PaseCliILE_c_main += '    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "' + call_name + '");' +  "\n"
     PaseCliILE_c_main += '    if (rc < 0) {' + "\n"
     PaseCliILE_c_main += '      return SQL_ERROR;' + "\n"
     PaseCliILE_c_main += '    }' + "\n"
     PaseCliILE_c_main += '    ' + struct_ile_flag + ' = 1;' +  "\n"
     PaseCliILE_c_main += '  }' + "\n"
     PaseCliILE_c_main += ILE_copyin_args
-    PaseCliILE_c_main += '  rc = _ILECALL(ileSymPtr, &arglist->base, ' + struct_ile_sig + ', RESULT_INT32);' +  "\n"
+    PaseCliILE_c_main += '  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, ' + struct_ile_sig + ', RESULT_INT32);' +  "\n"
     PaseCliILE_c_main += '  if (rc != ILECALL_NOERROR) {' + "\n"
     PaseCliILE_c_main += '    return SQL_ERROR;' + "\n"
     PaseCliILE_c_main += '  }' + "\n"
@@ -757,6 +759,19 @@ file_PaseCliILE_c += "" + "\n"
 with open("PaseCliILE_gen.c", "w") as text_file:
     text_file.write(file_PaseCliILE_c)
 
+# write PaseCliLibDB400_gen.c
+file_PaseCliLibDB400_c = ""
+file_PaseCliLibDB400_c += file_pase_incl
+file_PaseCliLibDB400_c += file_local_incl
+file_PaseCliLibDB400_c += "" + "\n"
+file_PaseCliLibDB400_c += PaseCliLibDB400_c_symbol + "\n"
+file_PaseCliLibDB400_c += "" + "\n"
+file_PaseCliLibDB400_c += "void libdb400_load_dlsym() {" + "\n"
+file_PaseCliLibDB400_c += PaseCliLibDB400_c_libdb400_load_dlsym + "\n"
+file_PaseCliLibDB400_c +=  "}" + "\n"
+file_PaseCliLibDB400_c += "" + "\n"
+with open("PaseCliLibDB400_gen.c", "w") as text_file:
+    text_file.write(file_PaseCliLibDB400_c)
 
 # write PaseCliAsync_gen.c
 file_PaseCliAsync_c = ""
@@ -771,14 +786,8 @@ file_PaseCliAsync_c += "/* composite calls to CLI also async  */" + "\n"
 file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliCustom_h_proto
 file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += PaseCliLibDB400_c_symbol + "\n"
-file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += "void load_dlsym() {" + "\n"
-file_PaseCliAsync_c += PaseCliLibDB400_c_load_dlsym + "\n"
-file_PaseCliAsync_c +=  "}" + "\n"
-file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += ""
 file_PaseCliAsync_c += PaseCliLibDB400_c_main
+file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliAsync_c_main
 with open("PaseCliAsync_gen.c", "w") as text_file:
     text_file.write(file_PaseCliAsync_c)
@@ -919,6 +928,10 @@ file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += "/* ILE call                          */" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliILE_h_proto
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += PaseCliLibDB400_h_symbol
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += "void libdb400_load_dlsym();" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '#endif /* _PASECLIASYNC_H */' + "\n"
 with open("PaseCliAsync.h", "w") as text_file:

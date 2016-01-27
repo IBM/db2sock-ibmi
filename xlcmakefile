@@ -8,7 +8,7 @@ AROPT       = -X32_64
 INCLUDEPATH = -I. -I/usr/include
 
 ###  shared lib
-LIBOBJS      = PaseCliILE_gen.o PaseCliAsync_gen.o PaseCliInit.o PaseCliCustom.o
+LIBOBJS      = PaseCliLibDB400_gen.o PaseCliILE_gen.o PaseCliAsync_gen.o PaseCliInit.o PaseCliCustom.o
 LIBEXPS      = -bE:libdb400.exp
 SHRLIB32     = libdb400.a
 SHROBJ32     = shr.o

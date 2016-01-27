@@ -403,7 +403,7 @@ SQLRETURN ILE_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLAllocConnectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -411,7 +411,7 @@ SQLRETURN ILE_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
   }
   arglist->henv = (SQLHENV) henv;
   arglist->phdbc.s.addr = (address64_t) phdbc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLAllocConnectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -437,14 +437,14 @@ SQLRETURN ILE_SQLAllocEnv( SQLHENV * phenv )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLAllocEnvLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLAllocEnvLoaded = 1;
   }
   arglist->phenv.s.addr = (address64_t) phenv;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLAllocEnvIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocEnvIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -470,7 +470,7 @@ SQLRETURN ILE_SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER *
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLAllocHandleLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocHandle");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocHandle");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -479,7 +479,7 @@ SQLRETURN ILE_SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER *
   arglist->htype = (SQLSMALLINT) htype;
   arglist->ihnd = (SQLINTEGER) ihnd;
   arglist->ohnd.s.addr = (address64_t) ohnd;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLAllocHandleIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocHandleIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -505,7 +505,7 @@ SQLRETURN ILE_SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLAllocStmtLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocStmt");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocStmt");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -513,7 +513,7 @@ SQLRETURN ILE_SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->phstmt.s.addr = (address64_t) phstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLAllocStmtIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocStmtIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -539,7 +539,7 @@ SQLRETURN ILE_SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLBindColLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLBindCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -551,7 +551,7 @@ SQLRETURN ILE_SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType
   arglist->rgbValue.s.addr = (address64_t) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLBindColIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -577,7 +577,7 @@ SQLRETURN ILE_SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLBindFileToColLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -591,7 +591,7 @@ SQLRETURN ILE_SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fN
   arglist->fValueMax = (SQLSMALLINT) fValueMax;
   arglist->sLen.s.addr = (address64_t) sLen;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLBindFileToColIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindFileToColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -617,7 +617,7 @@ SQLRETURN ILE_SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLBindFileToParamLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -631,7 +631,7 @@ SQLRETURN ILE_SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
   arglist->fOptions.s.addr = (address64_t) fOptions;
   arglist->fValueMax = (SQLSMALLINT) fValueMax;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLBindFileToParamIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindFileToParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -657,7 +657,7 @@ SQLRETURN ILE_SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLBindParamLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -671,7 +671,7 @@ SQLRETURN ILE_SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iT
   arglist->pScale = (SQLSMALLINT) pScale;
   arglist->pData.s.addr = (address64_t) pData;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLBindParamIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -697,7 +697,7 @@ SQLRETURN ILE_SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLBindParameterLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParameter");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParameter");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -713,7 +713,7 @@ SQLRETURN ILE_SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   arglist->pData.s.addr = (address64_t) pData;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLBindParameterIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindParameterIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -739,14 +739,14 @@ SQLRETURN ILE_SQLCancel( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLCancelLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLCancel");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCancel");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLCancelLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLCancelIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLCancelIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -772,14 +772,14 @@ SQLRETURN ILE_SQLCloseCursor( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLCloseCursorLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLCloseCursor");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCloseCursor");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLCloseCursorLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLCloseCursorIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLCloseCursorIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -805,7 +805,7 @@ SQLRETURN ILE_SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColAttributeLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttribute");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttribute");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -818,7 +818,7 @@ SQLRETURN ILE_SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
   arglist->cbDescMax = (SQLSMALLINT) cbDescMax;
   arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
   arglist->pfDesc.s.addr = (address64_t) pfDesc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColAttributeIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributeIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -844,7 +844,7 @@ SQLRETURN ILE_SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColAttributeWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributeW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributeW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -857,7 +857,7 @@ SQLRETURN ILE_SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist->cbDescMax = (SQLSMALLINT) cbDescMax;
   arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
   arglist->pfDesc.s.addr = (address64_t) pfDesc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColAttributeWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributeWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -883,7 +883,7 @@ SQLRETURN ILE_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColAttributesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributes");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributes");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -896,7 +896,7 @@ SQLRETURN ILE_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist->cbDescMax = (SQLINTEGER) cbDescMax;
   arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
   arglist->pfDesc.s.addr = (address64_t) pfDesc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColAttributesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -922,7 +922,7 @@ SQLRETURN ILE_SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColAttributesWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -935,7 +935,7 @@ SQLRETURN ILE_SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT
   arglist->cbDescMax = (SQLINTEGER) cbDescMax;
   arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
   arglist->pfDesc.s.addr = (address64_t) pfDesc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColAttributesWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -961,7 +961,7 @@ SQLRETURN ILE_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColumnPrivilegesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivileges");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivileges");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -976,7 +976,7 @@ SQLRETURN ILE_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, 
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColumnPrivilegesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnPrivilegesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1002,7 +1002,7 @@ SQLRETURN ILE_SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColumnPrivilegesWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivilegesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivilegesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1017,7 +1017,7 @@ SQLRETURN ILE_SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColumnPrivilegesWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnPrivilegesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1043,7 +1043,7 @@ SQLRETURN ILE_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLI
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColumnsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1058,7 +1058,7 @@ SQLRETURN ILE_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLI
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColumnsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1084,7 +1084,7 @@ SQLRETURN ILE_SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMAL
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLColumnsWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1099,7 +1099,7 @@ SQLRETURN ILE_SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMAL
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLColumnsWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1125,7 +1125,7 @@ SQLRETURN ILE_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQ
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLConnectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1138,7 +1138,7 @@ SQLRETURN ILE_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQ
   arglist->cbUID = (SQLSMALLINT) cbUID;
   arglist->szAuthStr.s.addr = (address64_t) szAuthStr;
   arglist->cbAuthStr = (SQLSMALLINT) cbAuthStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLConnectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1164,7 +1164,7 @@ SQLRETURN ILE_SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLConnectWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLConnectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLConnectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1177,7 +1177,7 @@ SQLRETURN ILE_SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, 
   arglist->cbUID = (SQLSMALLINT) cbUID;
   arglist->szAuthStr.s.addr = (address64_t) szAuthStr;
   arglist->cbAuthStr = (SQLSMALLINT) cbAuthStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLConnectWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLConnectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1203,7 +1203,7 @@ SQLRETURN ILE_SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLCopyDescLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLCopyDesc");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCopyDesc");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1211,7 +1211,7 @@ SQLRETURN ILE_SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
   }
   arglist->sDesc = (SQLHDESC) sDesc;
   arglist->tDesc = (SQLHDESC) tDesc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLCopyDescIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLCopyDescIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1237,7 +1237,7 @@ SQLRETURN ILE_SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDataSourcesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSources");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSources");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1251,7 +1251,7 @@ SQLRETURN ILE_SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * 
   arglist->szDescription.s.addr = (address64_t) szDescription;
   arglist->cbDescriptionMax = (SQLSMALLINT) cbDescriptionMax;
   arglist->pcbDescription.s.addr = (address64_t) pcbDescription;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDataSourcesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDataSourcesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1277,7 +1277,7 @@ SQLRETURN ILE_SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDataSourcesWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSourcesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSourcesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1291,7 +1291,7 @@ SQLRETURN ILE_SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR 
   arglist->szDescription.s.addr = (address64_t) szDescription;
   arglist->cbDescriptionMax = (SQLSMALLINT) cbDescriptionMax;
   arglist->pcbDescription.s.addr = (address64_t) pcbDescription;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDataSourcesWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDataSourcesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1317,7 +1317,7 @@ SQLRETURN ILE_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szCo
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDescribeColLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1332,7 +1332,7 @@ SQLRETURN ILE_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szCo
   arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
   arglist->pibScale.s.addr = (address64_t) pibScale;
   arglist->pfNullable.s.addr = (address64_t) pfNullable;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDescribeColIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1358,7 +1358,7 @@ SQLRETURN ILE_SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * sz
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDescribeColWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeColW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeColW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1373,7 +1373,7 @@ SQLRETURN ILE_SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * sz
   arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
   arglist->pibScale.s.addr = (address64_t) pibScale;
   arglist->pfNullable.s.addr = (address64_t) pfNullable;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDescribeColWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeColWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1399,7 +1399,7 @@ SQLRETURN ILE_SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDescribeParamLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1411,7 +1411,7 @@ SQLRETURN ILE_SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
   arglist->pibScale.s.addr = (address64_t) pibScale;
   arglist->pfNullable.s.addr = (address64_t) pfNullable;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDescribeParamIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1437,14 +1437,14 @@ SQLRETURN ILE_SQLDisconnect( SQLHDBC  hdbc )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDisconnectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDisconnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDisconnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLDisconnectLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDisconnectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDisconnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1470,7 +1470,7 @@ SQLRETURN ILE_SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szCon
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDriverConnectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1484,7 +1484,7 @@ SQLRETURN ILE_SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szCon
   arglist->cbConnStrOutMax = (SQLSMALLINT) cbConnStrOutMax;
   arglist->pcbConnStrOut.s.addr = (address64_t) pcbConnStrOut;
   arglist->fDriverCompletion = (SQLSMALLINT) fDriverCompletion;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDriverConnectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDriverConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1510,7 +1510,7 @@ SQLRETURN ILE_SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szC
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLDriverConnectWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1524,7 +1524,7 @@ SQLRETURN ILE_SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szC
   arglist->cbConnStrOutMax = (SQLSMALLINT) cbConnStrOutMax;
   arglist->pcbConnStrOut.s.addr = (address64_t) pcbConnStrOut;
   arglist->fDriverCompletion = (SQLSMALLINT) fDriverCompletion;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLDriverConnectWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDriverConnectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1550,7 +1550,7 @@ SQLRETURN ILE_SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLEndTranLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLEndTran");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLEndTran");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1559,7 +1559,7 @@ SQLRETURN ILE_SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype 
   arglist->htype = (SQLSMALLINT) htype;
   arglist->henv = (SQLHENV) henv;
   arglist->ctype = (SQLSMALLINT) ctype;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLEndTranIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLEndTranIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1585,7 +1585,7 @@ SQLRETURN ILE_SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR *
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLErrorLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLError");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLError");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1599,7 +1599,7 @@ SQLRETURN ILE_SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR *
   arglist->szErrorMsg.s.addr = (address64_t) szErrorMsg;
   arglist->cbErrorMsgMax = (SQLSMALLINT) cbErrorMsgMax;
   arglist->pcbErrorMsg.s.addr = (address64_t) pcbErrorMsg;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLErrorIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLErrorIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1625,7 +1625,7 @@ SQLRETURN ILE_SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLErrorWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLErrorW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLErrorW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1639,7 +1639,7 @@ SQLRETURN ILE_SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR
   arglist->szErrorMsg.s.addr = (address64_t) szErrorMsg;
   arglist->cbErrorMsgMax = (SQLSMALLINT) cbErrorMsgMax;
   arglist->pcbErrorMsg.s.addr = (address64_t) pcbErrorMsg;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLErrorWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLErrorWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1665,7 +1665,7 @@ SQLRETURN ILE_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cb
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLExecDirectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1674,7 +1674,7 @@ SQLRETURN ILE_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cb
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLExecDirectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExecDirectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1700,7 +1700,7 @@ SQLRETURN ILE_SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLExecDirectWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1709,7 +1709,7 @@ SQLRETURN ILE_SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLExecDirectWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExecDirectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1735,14 +1735,14 @@ SQLRETURN ILE_SQLExecute( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLExecuteLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLExecute");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecute");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLExecuteLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLExecuteIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExecuteIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1768,7 +1768,7 @@ SQLRETURN ILE_SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGE
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLExtendedFetchLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLExtendedFetch");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExtendedFetch");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1779,7 +1779,7 @@ SQLRETURN ILE_SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGE
   arglist->fOffset = (SQLINTEGER) fOffset;
   arglist->pcrow.s.addr = (address64_t) pcrow;
   arglist->rgfRowStatus.s.addr = (address64_t) rgfRowStatus;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLExtendedFetchIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExtendedFetchIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1805,14 +1805,14 @@ SQLRETURN ILE_SQLFetch( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFetchLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFetch");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFetch");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLFetchLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFetchIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFetchIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1838,7 +1838,7 @@ SQLRETURN ILE_SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFetchScrollLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFetchScroll");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFetchScroll");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1847,7 +1847,7 @@ SQLRETURN ILE_SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER 
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOrient = (SQLSMALLINT) fOrient;
   arglist->fOffset = (SQLINTEGER) fOffset;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFetchScrollIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFetchScrollIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1873,7 +1873,7 @@ SQLRETURN ILE_SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQL
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLForeignKeysLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeys");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeys");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1892,7 +1892,7 @@ SQLRETURN ILE_SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQL
   arglist->cbFkTableOwner = (SQLSMALLINT) cbFkTableOwner;
   arglist->szFkTableName.s.addr = (address64_t) szFkTableName;
   arglist->cbFkTableName = (SQLSMALLINT) cbFkTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLForeignKeysIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLForeignKeysIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1918,7 +1918,7 @@ SQLRETURN ILE_SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, S
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLForeignKeysWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeysW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeysW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1937,7 +1937,7 @@ SQLRETURN ILE_SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, S
   arglist->cbFkTableOwner = (SQLSMALLINT) cbFkTableOwner;
   arglist->szFkTableName.s.addr = (address64_t) szFkTableName;
   arglist->cbFkTableName = (SQLSMALLINT) cbFkTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLForeignKeysWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLForeignKeysWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1963,14 +1963,14 @@ SQLRETURN ILE_SQLFreeConnect( SQLHDBC  hdbc )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFreeConnectLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLFreeConnectLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFreeConnectIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFreeConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -1996,14 +1996,14 @@ SQLRETURN ILE_SQLFreeEnv( SQLHENV  henv )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFreeEnvLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLFreeEnvLoaded = 1;
   }
   arglist->henv = (SQLHENV) henv;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFreeEnvIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFreeEnvIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2029,7 +2029,7 @@ SQLRETURN ILE_SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFreeStmtLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeStmt");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeStmt");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2037,7 +2037,7 @@ SQLRETURN ILE_SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFreeStmtIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFreeStmtIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2063,7 +2063,7 @@ SQLRETURN ILE_SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLFreeHandleLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeHandle");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeHandle");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2071,7 +2071,7 @@ SQLRETURN ILE_SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
   }
   arglist->htype = (SQLSMALLINT) htype;
   arglist->hndl = (SQLINTEGER) hndl;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLFreeHandleIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLFreeHandleIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2097,7 +2097,7 @@ SQLRETURN ILE_SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype,
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetColLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2109,7 +2109,7 @@ SQLRETURN ILE_SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype,
   arglist->tval.s.addr = (address64_t) tval;
   arglist->blen = (SQLINTEGER) blen;
   arglist->olen.s.addr = (address64_t) olen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetColIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2135,7 +2135,7 @@ SQLRETURN ILE_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetColWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetColW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetColW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2147,7 +2147,7 @@ SQLRETURN ILE_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype
   arglist->tval.s.addr = (address64_t) tval;
   arglist->blen = (SQLINTEGER) blen;
   arglist->olen.s.addr = (address64_t) olen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetColWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetColWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2173,7 +2173,7 @@ SQLRETURN ILE_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  ov
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetConnectAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2184,7 +2184,7 @@ SQLRETURN ILE_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  ov
   arglist->oval.s.addr = (address64_t) oval;
   arglist->ilen = (SQLINTEGER) ilen;
   arglist->olen.s.addr = (address64_t) olen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetConnectAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2210,7 +2210,7 @@ SQLRETURN ILE_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  o
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetConnectAttrWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2221,7 +2221,7 @@ SQLRETURN ILE_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  o
   arglist->oval.s.addr = (address64_t) oval;
   arglist->ilen = (SQLINTEGER) ilen;
   arglist->olen.s.addr = (address64_t) olen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetConnectAttrWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2247,7 +2247,7 @@ SQLRETURN ILE_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetConnectOptionLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2256,7 +2256,7 @@ SQLRETURN ILE_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER 
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->iopt = (SQLSMALLINT) iopt;
   arglist->oval.s.addr = (address64_t) oval;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetConnectOptionIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2282,7 +2282,7 @@ SQLRETURN ILE_SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetConnectOptionWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2291,7 +2291,7 @@ SQLRETURN ILE_SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->iopt = (SQLSMALLINT) iopt;
   arglist->oval.s.addr = (address64_t) oval;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetConnectOptionWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2317,7 +2317,7 @@ SQLRETURN ILE_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetCursorNameLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorName");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorName");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2327,7 +2327,7 @@ SQLRETURN ILE_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
   arglist->szCursor.s.addr = (address64_t) szCursor;
   arglist->cbCursorMax = (SQLSMALLINT) cbCursorMax;
   arglist->pcbCursor.s.addr = (address64_t) pcbCursor;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetCursorNameIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetCursorNameIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2353,7 +2353,7 @@ SQLRETURN ILE_SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetCursorNameWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorNameW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorNameW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2363,7 +2363,7 @@ SQLRETURN ILE_SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
   arglist->szCursor.s.addr = (address64_t) szCursor;
   arglist->cbCursorMax = (SQLSMALLINT) cbCursorMax;
   arglist->pcbCursor.s.addr = (address64_t) pcbCursor;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetCursorNameWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetCursorNameWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2389,7 +2389,7 @@ SQLRETURN ILE_SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCTyp
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDataLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2401,7 +2401,7 @@ SQLRETURN ILE_SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCTyp
   arglist->rgbValue.s.addr = (address64_t) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDataIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2427,7 +2427,7 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDescFieldLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2439,7 +2439,7 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->fValue.s.addr = (address64_t) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (address64_t) stLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDescFieldIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2465,7 +2465,7 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDescFieldWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2477,7 +2477,7 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->fValue.s.addr = (address64_t) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (address64_t) stLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDescFieldWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2503,7 +2503,7 @@ SQLRETURN ILE_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fna
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDescRecLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2520,7 +2520,7 @@ SQLRETURN ILE_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fna
   arglist->fprec.s.addr = (address64_t) fprec;
   arglist->fscale.s.addr = (address64_t) fscale;
   arglist->fnull.s.addr = (address64_t) fnull;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDescRecIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2546,7 +2546,7 @@ SQLRETURN ILE_SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * f
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDescRecWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRecW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRecW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2563,7 +2563,7 @@ SQLRETURN ILE_SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * f
   arglist->fprec.s.addr = (address64_t) fprec;
   arglist->fscale.s.addr = (address64_t) fscale;
   arglist->fnull.s.addr = (address64_t) fnull;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDescRecWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescRecWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2589,7 +2589,7 @@ SQLRETURN ILE_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDiagFieldLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2602,7 +2602,7 @@ SQLRETURN ILE_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT
   arglist->dValue.s.addr = (address64_t) dValue;
   arglist->bLength = (SQLSMALLINT) bLength;
   arglist->sLength.s.addr = (address64_t) sLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDiagFieldIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2628,7 +2628,7 @@ SQLRETURN ILE_SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDiagFieldWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2641,7 +2641,7 @@ SQLRETURN ILE_SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLIN
   arglist->dValue.s.addr = (address64_t) dValue;
   arglist->bLength = (SQLSMALLINT) bLength;
   arglist->sLength.s.addr = (address64_t) sLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDiagFieldWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2667,7 +2667,7 @@ SQLRETURN ILE_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDiagRecLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2681,7 +2681,7 @@ SQLRETURN ILE_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  
   arglist->msgText.s.addr = (address64_t) msgText;
   arglist->bLength = (SQLSMALLINT) bLength;
   arglist->SLength.s.addr = (address64_t) SLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDiagRecIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2707,7 +2707,7 @@ SQLRETURN ILE_SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetDiagRecWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRecW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRecW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2721,7 +2721,7 @@ SQLRETURN ILE_SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT 
   arglist->msgText.s.addr = (address64_t) msgText;
   arglist->bLength = (SQLSMALLINT) bLength;
   arglist->SLength.s.addr = (address64_t) SLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetDiagRecWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagRecWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2747,7 +2747,7 @@ SQLRETURN ILE_SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetEnvAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetEnvAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetEnvAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2758,7 +2758,7 @@ SQLRETURN ILE_SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   arglist->pParam.s.addr = (address64_t) pParam;
   arglist->cbParamMax = (SQLINTEGER) cbParamMax;
   arglist->pcbParam.s.addr = (address64_t) pcbParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetEnvAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetEnvAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2784,7 +2784,7 @@ SQLRETURN ILE_SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetFunctionsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetFunctions");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetFunctions");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2793,7 +2793,7 @@ SQLRETURN ILE_SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLIN
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fFunction = (SQLSMALLINT) fFunction;
   arglist->pfExists.s.addr = (address64_t) pfExists;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetFunctionsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetFunctionsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2819,7 +2819,7 @@ SQLRETURN ILE_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgb
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetInfoLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfo");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfo");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2830,7 +2830,7 @@ SQLRETURN ILE_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgb
   arglist->rgbInfoValue.s.addr = (address64_t) rgbInfoValue;
   arglist->cbInfoValueMax = (SQLSMALLINT) cbInfoValueMax;
   arglist->pcbInfoValue.s.addr = (address64_t) pcbInfoValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetInfoIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetInfoIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2856,7 +2856,7 @@ SQLRETURN ILE_SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rg
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetInfoWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfoW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfoW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2867,7 +2867,7 @@ SQLRETURN ILE_SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rg
   arglist->rgbInfoValue.s.addr = (address64_t) rgbInfoValue;
   arglist->cbInfoValueMax = (SQLSMALLINT) cbInfoValueMax;
   arglist->pcbInfoValue.s.addr = (address64_t) pcbInfoValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetInfoWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetInfoWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2893,7 +2893,7 @@ SQLRETURN ILE_SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  l
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetLengthLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetLength");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetLength");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2904,7 +2904,7 @@ SQLRETURN ILE_SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  l
   arglist->locator = (SQLINTEGER) locator;
   arglist->sLength.s.addr = (address64_t) sLength;
   arglist->ind.s.addr = (address64_t) ind;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetLengthIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetLengthIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2930,7 +2930,7 @@ SQLRETURN ILE_SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetPositionLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPosition");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPosition");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2945,7 +2945,7 @@ SQLRETURN ILE_SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER 
   arglist->fPosition = (SQLINTEGER) fPosition;
   arglist->located.s.addr = (address64_t) located;
   arglist->ind.s.addr = (address64_t) ind;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetPositionIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetPositionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -2971,7 +2971,7 @@ SQLRETURN ILE_SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetPositionWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPositionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPositionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2986,7 +2986,7 @@ SQLRETURN ILE_SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist->fPosition = (SQLINTEGER) fPosition;
   arglist->located.s.addr = (address64_t) located;
   arglist->ind.s.addr = (address64_t) ind;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetPositionWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetPositionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3012,7 +3012,7 @@ SQLRETURN ILE_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pv
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetStmtAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3023,7 +3023,7 @@ SQLRETURN ILE_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pv
   arglist->pvParam.s.addr = (address64_t) pvParam;
   arglist->bLength = (SQLINTEGER) bLength;
   arglist->SLength.s.addr = (address64_t) SLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetStmtAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3049,7 +3049,7 @@ SQLRETURN ILE_SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetStmtAttrWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3060,7 +3060,7 @@ SQLRETURN ILE_SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   arglist->pvParam.s.addr = (address64_t) pvParam;
   arglist->bLength = (SQLINTEGER) bLength;
   arglist->SLength.s.addr = (address64_t) SLength;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetStmtAttrWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3086,7 +3086,7 @@ SQLRETURN ILE_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetStmtOptionLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3095,7 +3095,7 @@ SQLRETURN ILE_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->pvParam.s.addr = (address64_t) pvParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetStmtOptionIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3121,7 +3121,7 @@ SQLRETURN ILE_SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetStmtOptionWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3130,7 +3130,7 @@ SQLRETURN ILE_SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->pvParam.s.addr = (address64_t) pvParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetStmtOptionWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3156,7 +3156,7 @@ SQLRETURN ILE_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetSubStringLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubString");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubString");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3172,7 +3172,7 @@ SQLRETURN ILE_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
   arglist->StringLength.s.addr = (address64_t) StringLength;
   arglist->ind.s.addr = (address64_t) ind;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetSubStringIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetSubStringIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3198,7 +3198,7 @@ SQLRETURN ILE_SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGE
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetSubStringWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubStringW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubStringW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3214,7 +3214,7 @@ SQLRETURN ILE_SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGE
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
   arglist->StringLength.s.addr = (address64_t) StringLength;
   arglist->ind.s.addr = (address64_t) ind;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetSubStringWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetSubStringWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3240,7 +3240,7 @@ SQLRETURN ILE_SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetTypeInfoLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfo");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfo");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3248,7 +3248,7 @@ SQLRETURN ILE_SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fSqlType = (SQLSMALLINT) fSqlType;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetTypeInfoIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetTypeInfoIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3274,7 +3274,7 @@ SQLRETURN ILE_SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLGetTypeInfoWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfoW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfoW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3282,7 +3282,7 @@ SQLRETURN ILE_SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fSqlType = (SQLSMALLINT) fSqlType;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLGetTypeInfoWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetTypeInfoWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3308,14 +3308,14 @@ SQLRETURN ILE_SQLLanguages( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLLanguagesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLLanguages");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLLanguages");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLLanguagesLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLLanguagesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLLanguagesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3341,14 +3341,14 @@ SQLRETURN ILE_SQLMoreResults( SQLHSTMT  hstmt )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLMoreResultsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLMoreResults");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLMoreResults");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLMoreResultsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLMoreResultsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLMoreResultsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3374,7 +3374,7 @@ SQLRETURN ILE_SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbS
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLNativeSqlLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSql");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSql");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3386,7 +3386,7 @@ SQLRETURN ILE_SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbS
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStrMax = (SQLINTEGER) cbSqlStrMax;
   arglist->pcbSqlStr.s.addr = (address64_t) pcbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLNativeSqlIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNativeSqlIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3412,7 +3412,7 @@ SQLRETURN ILE_SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  c
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLNativeSqlWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSqlW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSqlW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3424,7 +3424,7 @@ SQLRETURN ILE_SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  c
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStrMax = (SQLINTEGER) cbSqlStrMax;
   arglist->pcbSqlStr.s.addr = (address64_t) pcbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLNativeSqlWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNativeSqlWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3450,7 +3450,7 @@ SQLRETURN ILE_SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLNextResultLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLNextResult");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNextResult");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3458,7 +3458,7 @@ SQLRETURN ILE_SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->hstmt2 = (SQLHSTMT) hstmt2;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLNextResultIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNextResultIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3484,7 +3484,7 @@ SQLRETURN ILE_SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLNumParamsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLNumParams");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNumParams");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3492,7 +3492,7 @@ SQLRETURN ILE_SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->pcpar.s.addr = (address64_t) pcpar;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLNumParamsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNumParamsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3518,7 +3518,7 @@ SQLRETURN ILE_SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLNumResultColsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLNumResultCols");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNumResultCols");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3526,7 +3526,7 @@ SQLRETURN ILE_SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->pccol.s.addr = (address64_t) pccol;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLNumResultColsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNumResultColsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3552,7 +3552,7 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLParamDataLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLParamData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLParamData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3560,7 +3560,7 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->Value.s.addr = (address64_t) Value;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLParamDataIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3586,7 +3586,7 @@ SQLRETURN ILE_SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * p
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLParamOptionsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLParamOptions");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLParamOptions");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3595,7 +3595,7 @@ SQLRETURN ILE_SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * p
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->crow = (SQLINTEGER) crow;
   arglist->pirow.s.addr = (address64_t) pirow;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLParamOptionsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamOptionsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3621,7 +3621,7 @@ SQLRETURN ILE_SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSql
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLPrepareLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepare");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepare");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3630,7 +3630,7 @@ SQLRETURN ILE_SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSql
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLPrepareIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrepareIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3656,7 +3656,7 @@ SQLRETURN ILE_SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbS
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLPrepareWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepareW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepareW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3665,7 +3665,7 @@ SQLRETURN ILE_SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbS
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLPrepareWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrepareWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3691,7 +3691,7 @@ SQLRETURN ILE_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSM
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLPrimaryKeysLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeys");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeys");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3704,7 +3704,7 @@ SQLRETURN ILE_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSM
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
   arglist->szTableName.s.addr = (address64_t) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLPrimaryKeysIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrimaryKeysIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3730,7 +3730,7 @@ SQLRETURN ILE_SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQL
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLPrimaryKeysWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeysW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeysW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3743,7 +3743,7 @@ SQLRETURN ILE_SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQL
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
   arglist->szTableName.s.addr = (address64_t) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLPrimaryKeysWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrimaryKeysWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3769,7 +3769,7 @@ SQLRETURN ILE_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, S
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLProcedureColumnsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3784,7 +3784,7 @@ SQLRETURN ILE_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, S
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLProcedureColumnsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProcedureColumnsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3810,7 +3810,7 @@ SQLRETURN ILE_SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier,
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLProcedureColumnsWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3825,7 +3825,7 @@ SQLRETURN ILE_SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier,
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
   arglist->szColumnName.s.addr = (address64_t) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLProcedureColumnsWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProcedureColumnsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3851,7 +3851,7 @@ SQLRETURN ILE_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMAL
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLProceduresLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedures");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedures");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3864,7 +3864,7 @@ SQLRETURN ILE_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMAL
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
   arglist->szProcName.s.addr = (address64_t) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLProceduresIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProceduresIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3890,7 +3890,7 @@ SQLRETURN ILE_SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSM
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLProceduresWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLProceduresW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProceduresW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3903,7 +3903,7 @@ SQLRETURN ILE_SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSM
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
   arglist->szProcName.s.addr = (address64_t) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLProceduresWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProceduresWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3929,7 +3929,7 @@ SQLRETURN ILE_SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLPutDataLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLPutData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPutData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3938,7 +3938,7 @@ SQLRETURN ILE_SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->Data.s.addr = (address64_t) Data;
   arglist->SLen = (SQLINTEGER) SLen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLPutDataIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPutDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3964,14 +3964,14 @@ SQLRETURN ILE_SQLReleaseEnv( SQLHENV  henv )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLReleaseEnvLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLReleaseEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLReleaseEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
     SQLReleaseEnvLoaded = 1;
   }
   arglist->henv = (SQLHENV) henv;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLReleaseEnvIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLReleaseEnvIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -3997,7 +3997,7 @@ SQLRETURN ILE_SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLRowCountLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLRowCount");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLRowCount");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4005,7 +4005,7 @@ SQLRETURN ILE_SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->pcrow.s.addr = (address64_t) pcrow;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLRowCountIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLRowCountIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4031,7 +4031,7 @@ SQLRETURN ILE_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetConnectAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4041,7 +4041,7 @@ SQLRETURN ILE_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  
   arglist->attrib = (SQLINTEGER) attrib;
   arglist->vParam.s.addr = (address64_t) vParam;
   arglist->inlen = (SQLINTEGER) inlen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetConnectAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4067,7 +4067,7 @@ SQLRETURN ILE_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER 
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetConnectAttrWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4077,7 +4077,7 @@ SQLRETURN ILE_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER 
   arglist->attrib = (SQLINTEGER) attrib;
   arglist->vParam.s.addr = (address64_t) vParam;
   arglist->inlen = (SQLINTEGER) inlen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetConnectAttrWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4103,7 +4103,7 @@ SQLRETURN ILE_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetConnectOptionLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4112,7 +4112,7 @@ SQLRETURN ILE_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINT
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->vParam.s.addr = (address64_t) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetConnectOptionIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4138,7 +4138,7 @@ SQLRETURN ILE_SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetConnectOptionWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4147,7 +4147,7 @@ SQLRETURN ILE_SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOIN
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->vParam.s.addr = (address64_t) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetConnectOptionWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4173,7 +4173,7 @@ SQLRETURN ILE_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetCursorNameLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorName");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorName");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4182,7 +4182,7 @@ SQLRETURN ILE_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szCursor.s.addr = (address64_t) szCursor;
   arglist->cbCursor = (SQLSMALLINT) cbCursor;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetCursorNameIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetCursorNameIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4208,7 +4208,7 @@ SQLRETURN ILE_SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetCursorNameWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorNameW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorNameW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4217,7 +4217,7 @@ SQLRETURN ILE_SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->szCursor.s.addr = (address64_t) szCursor;
   arglist->cbCursor = (SQLSMALLINT) cbCursor;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetCursorNameWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetCursorNameWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4243,7 +4243,7 @@ SQLRETURN ILE_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetDescFieldLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4254,7 +4254,7 @@ SQLRETURN ILE_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->fID = (SQLSMALLINT) fID;
   arglist->Value.s.addr = (address64_t) Value;
   arglist->buffLen = (SQLINTEGER) buffLen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetDescFieldIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4280,7 +4280,7 @@ SQLRETURN ILE_SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetDescFieldWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4291,7 +4291,7 @@ SQLRETURN ILE_SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->fID = (SQLSMALLINT) fID;
   arglist->Value.s.addr = (address64_t) Value;
   arglist->buffLen = (SQLINTEGER) buffLen;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetDescFieldWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4317,7 +4317,7 @@ SQLRETURN ILE_SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetDescRecLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4333,7 +4333,7 @@ SQLRETURN ILE_SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  
   arglist->Value.s.addr = (address64_t) Value;
   arglist->sLength.s.addr = (address64_t) sLength;
   arglist->indic.s.addr = (address64_t) indic;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetDescRecIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4359,7 +4359,7 @@ SQLRETURN ILE_SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetEnvAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetEnvAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetEnvAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4369,7 +4369,7 @@ SQLRETURN ILE_SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   arglist->fAttribute = (SQLINTEGER) fAttribute;
   arglist->pParam.s.addr = (address64_t) pParam;
   arglist->cbParam = (SQLINTEGER) cbParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetEnvAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetEnvAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4395,7 +4395,7 @@ SQLRETURN ILE_SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCTy
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetParamLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4409,7 +4409,7 @@ SQLRETURN ILE_SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCTy
   arglist->ibScale = (SQLSMALLINT) ibScale;
   arglist->rgbValue.s.addr = (address64_t) rgbValue;
   arglist->pcbValue.s.addr = (address64_t) pcbValue;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetParamIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4435,7 +4435,7 @@ SQLRETURN ILE_SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pP
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetStmtAttrLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4445,7 +4445,7 @@ SQLRETURN ILE_SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pP
   arglist->fAttr = (SQLINTEGER) fAttr;
   arglist->pParam.s.addr = (address64_t) pParam;
   arglist->vParam = (SQLINTEGER) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetStmtAttrIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4471,7 +4471,7 @@ SQLRETURN ILE_SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetStmtAttrWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4481,7 +4481,7 @@ SQLRETURN ILE_SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   arglist->fAttr = (SQLINTEGER) fAttr;
   arglist->pParam.s.addr = (address64_t) pParam;
   arglist->vParam = (SQLINTEGER) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetStmtAttrWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4507,7 +4507,7 @@ SQLRETURN ILE_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetStmtOptionLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4516,7 +4516,7 @@ SQLRETURN ILE_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->vParam.s.addr = (address64_t) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetStmtOptionIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4542,7 +4542,7 @@ SQLRETURN ILE_SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSetStmtOptionWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4551,7 +4551,7 @@ SQLRETURN ILE_SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
   arglist->vParam.s.addr = (address64_t) vParam;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSetStmtOptionWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4577,7 +4577,7 @@ SQLRETURN ILE_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSpecialColumnsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4593,7 +4593,7 @@ SQLRETURN ILE_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fScope = (SQLSMALLINT) fScope;
   arglist->fNullable = (SQLSMALLINT) fNullable;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSpecialColumnsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSpecialColumnsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4619,7 +4619,7 @@ SQLRETURN ILE_SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCH
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLSpecialColumnsWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4635,7 +4635,7 @@ SQLRETURN ILE_SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCH
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fScope = (SQLSMALLINT) fScope;
   arglist->fNullable = (SQLSMALLINT) fNullable;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLSpecialColumnsWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSpecialColumnsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4661,7 +4661,7 @@ SQLRETURN ILE_SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode,
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLStartTranLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLStartTran");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStartTran");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4671,7 +4671,7 @@ SQLRETURN ILE_SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode,
   arglist->henv = (SQLHENV) henv;
   arglist->mode = (SQLINTEGER) mode;
   arglist->clevel = (SQLINTEGER) clevel;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLStartTranIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLStartTranIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4697,7 +4697,7 @@ SQLRETURN ILE_SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMA
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLStatisticsLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLStatistics");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStatistics");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4712,7 +4712,7 @@ SQLRETURN ILE_SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMA
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fUnique = (SQLSMALLINT) fUnique;
   arglist->fres = (SQLSMALLINT) fres;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLStatisticsIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLStatisticsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4738,7 +4738,7 @@ SQLRETURN ILE_SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLS
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLStatisticsWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLStatisticsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStatisticsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4753,7 +4753,7 @@ SQLRETURN ILE_SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLS
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fUnique = (SQLSMALLINT) fUnique;
   arglist->fres = (SQLSMALLINT) fres;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLStatisticsWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLStatisticsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4779,7 +4779,7 @@ SQLRETURN ILE_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, S
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLTablePrivilegesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivileges");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivileges");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4792,7 +4792,7 @@ SQLRETURN ILE_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, S
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
   arglist->szTableName.s.addr = (address64_t) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLTablePrivilegesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablePrivilegesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4818,7 +4818,7 @@ SQLRETURN ILE_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier,
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLTablePrivilegesWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivilegesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivilegesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4831,7 +4831,7 @@ SQLRETURN ILE_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier,
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
   arglist->szTableName.s.addr = (address64_t) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLTablePrivilegesWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablePrivilegesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4857,7 +4857,7 @@ SQLRETURN ILE_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLIN
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLTablesLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLTables");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTables");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4872,7 +4872,7 @@ SQLRETURN ILE_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLIN
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szTableType.s.addr = (address64_t) szTableType;
   arglist->cbTableType = (SQLSMALLINT) cbTableType;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLTablesIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4898,7 +4898,7 @@ SQLRETURN ILE_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALL
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLTablesWLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLTablesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4913,7 +4913,7 @@ SQLRETURN ILE_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALL
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->szTableType.s.addr = (address64_t) szTableType;
   arglist->cbTableType = (SQLSMALLINT) cbTableType;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLTablesWIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
@@ -4939,7 +4939,7 @@ SQLRETURN ILE_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
     db2_cli_srvpgm_mark = actMark;
   }
   if (!SQLTransactLoaded) {
-    rc = _ILESYM(ileSymPtr, db2_cli_srvpgm_mark, "SQLTransact");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTransact");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4948,7 +4948,7 @@ SQLRETURN ILE_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
   arglist->henv = (SQLHENV) henv;
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fType = (SQLSMALLINT) fType;
-  rc = _ILECALL(ileSymPtr, &arglist->base, SQLTransactIleSigStruct, RESULT_INT32);
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTransactIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
   }
