@@ -7,6 +7,18 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
+/* === experimental (not finished) ===
+ * This module has fancy 'big helper' APIs.
+ *
+ * Goal enable many operatins in one async call. Similar to
+ * scripting APIs, one new SQL400xxx API (not CLI), many CLI calls
+ * set attributes, bind columns, etc.
+ *
+ * Warning: 
+ * Many bugs still here. Development is trial and error,
+ * so don't exepct these APIs to be solid until this
+ * warning is removed.
+ */
 
 static int utf8_charset_flag;
 static char *utf8_charset_Ascii, *utf8_charset_Utf;
