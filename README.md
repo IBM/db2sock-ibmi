@@ -25,6 +25,10 @@ Missing these options will result in ILE DB2 call failures.
 if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
 BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
+Direct PASE _ILECALL calls to ILE DB2 are supported by new libdb400.a (example: ILE_SQLExecDirect is ILE_SQLExecDirect).
+In general, use PASE APIs, which, enable correct locking for async and non-async db2 operations.
+However, feel free to use the new direct call ILE DB2 APIs. 
+
 
 This is a unicode driver lib, UTF-8 or UTF16. 
 New functions have added to assist in UTF-8/UTF-16 conversion (see PaseCliAsync.h).
@@ -46,6 +50,7 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 ##gen.py creates: 
 - PaseCliAsync.h      -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c  -- asynchronous driver APIs
+- PaseCliILE_gen.c    -- direct ILE call APIs (exported)
 - libdb400.exp        -- all CLI export APIs
 
 ##human coding:
