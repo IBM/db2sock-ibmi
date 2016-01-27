@@ -34,22 +34,20 @@ However, feel free to use new direct call ILE DB2 APIs.
 example:
 === CLI APIs UTF-8 or APIWs UTF-16  ===
 === choose async and/or normal wait === 
-sqlrc = SQLExecDirect(..);
-sqlrc = SQLExecDirectW(..);
-sqlrc = SQLExecDirectAsync(..);
-sqlrc = SQLExecDirectWAsync(..);
+SQLRETURN SQLExecDirect(..);
+SQLRETURN SQLExecDirectW(..);
+pthread_t SQLExecDirectAsync(..);
+pthread_t SQLExecDirectWAsync(..);
 == callback or reap/join with async ===
 void SQLExecDirectCallback(SQLExecDirectStruct* );
 SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag);
 void SQLExecDirectWCallback(SQLExecDirectWStruct* );
 SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
-=== bypass all, call ILE directly   ===
-=== (not recommended)               ===
-sqlrc = ILE_SQLExecDirect(..);
-
+=== bypass all, call ILE directly (not recommended) ===
+SQLRETURN ILE_SQLExecDirect(..);
+```
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
-```
 
 
 #Contributors
