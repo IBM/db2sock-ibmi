@@ -851,6 +851,13 @@ SQLRETURN SQL400Connect(SQLHENV henv,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
+SQLRETURN SQL400ConnectW(SQLHENV henv, 
+ SQLWCHAR * db, 
+ SQLWCHAR * uid, 
+ SQLWCHAR * pwd, 
+ SQLINTEGER * ohnd,
+ SQLPOINTER options)
+
 # custom interfaces, execute fetch
 
 SQLRETURN SQL400AddCVar(SQLSMALLINT icol, 

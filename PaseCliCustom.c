@@ -154,9 +154,25 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   SQLHDBC hdbc = 0;
-  SQLSMALLINT db_len = strlen(db);
-  SQLSMALLINT uid_len = strlen(uid);
-  SQLSMALLINT pwd_len = strlen(pwd);
+  SQLWCHAR * db_str = (SQLWCHAR *) db;
+  SQLWCHAR * uid_str = (SQLWCHAR *) uid;
+  SQLWCHAR * pwd_str = (SQLWCHAR *) pwd;
+  SQLSMALLINT db_len = SQL_NTS;
+  SQLSMALLINT uid_len = SQL_NTS;
+  SQLSMALLINT pwd_len = SQL_NTS;
+  /* null input */
+  if (db == NULL || *(unsigned short *)db == 0) {
+    db_str = (SQLWCHAR *) NULL;
+    db_len = 0;
+  }
+  if (uid == NULL || *(unsigned short *)uid == 0) {
+    uid_str = (SQLWCHAR *) NULL;
+    uid_len = 0;
+  }
+  if (pwd == NULL || *(unsigned short *)pwd == 0) {
+    pwd_str = (SQLWCHAR *) NULL;
+    pwd_len = 0;
+  }
   /* hdbc -- connection */
   sqlrc = SQLAllocHandle(SQL_HANDLE_DBC, henv, ohnd);
   if (sqlrc != SQL_SUCCESS) {
@@ -170,7 +186,7 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
     return sqlrc;
   }
   /* connect */
-  sqlrc = SQLConnect( (SQLHDBC)*ohnd, (SQLCHAR *)db, (SQLSMALLINT)db_len, (SQLCHAR *)uid, (SQLSMALLINT)uid_len, (SQLCHAR *)pwd, (SQLSMALLINT)pwd_len );
+  sqlrc = SQLConnect( (SQLHDBC)*ohnd, (SQLCHAR *)db_str, (SQLSMALLINT)db_len, (SQLCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
   if (sqlrc != SQL_SUCCESS) {
     init_table_unlock(hdbc, 0);
     return sqlrc;
@@ -183,6 +199,57 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
+
+SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  SQLHDBC hdbc = 0;
+  SQLWCHAR * db_str = (SQLWCHAR *) db;
+  SQLWCHAR * uid_str = (SQLWCHAR *) uid;
+  SQLWCHAR * pwd_str = (SQLWCHAR *) pwd;
+  SQLSMALLINT db_len = SQL_NTS;  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
+  SQLSMALLINT uid_len = SQL_NTS; /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
+  SQLSMALLINT pwd_len = SQL_NTS; /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
+  /* null input */
+  if (db == NULL || *(unsigned short *)db == 0) {
+    db_str = (SQLWCHAR *) NULL;
+    db_len = 0;
+  }
+  if (uid == NULL || *(unsigned short *)uid == 0) {
+    uid_str = (SQLWCHAR *) NULL;
+    uid_len = 0;
+  }
+  if (pwd == NULL || *(unsigned short *)pwd == 0) {
+    pwd_str = (SQLWCHAR *) NULL;
+    pwd_len = 0;
+  }
+  /* hdbc -- connection */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_DBC, henv, ohnd);
+  if (sqlrc != SQL_SUCCESS) {
+    return sqlrc;
+  }
+  hdbc = *ohnd;
+  init_table_lock(hdbc, 0);
+  sqlrc = SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_PRE_CONNECT, options);
+  if (sqlrc != SQL_SUCCESS) {
+    init_table_unlock(hdbc, 0);
+    return sqlrc;
+  }
+  /* connect */
+  sqlrc = SQLConnectW( (SQLHDBC)*ohnd, (SQLWCHAR *)db_str, (SQLSMALLINT)db_len, (SQLWCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLWCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
+  if (sqlrc != SQL_SUCCESS) {
+    init_table_unlock(hdbc, 0);
+    return sqlrc;
+  }
+  sqlrc = SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_POST_CONNECT, options);
+  if (sqlrc != SQL_SUCCESS) {
+    init_table_unlock(hdbc, 0);
+    return sqlrc;
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+
 
 /*
  * excute fetch
@@ -618,6 +685,7 @@ SQLRETURN utf16_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sour
  size_t sourceBytesLeft = sourceLen;
  size_t targetBytesLeft = bufSize;
 
+ memset(toBuffer,0,bufSize);
  if (isInput) {
   rc = iconv(utf16_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
  } else {
