@@ -72,7 +72,7 @@ SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
 
 ```
 (*) PASE libdb400.a does not support wide CLI APIs.
-Therefore, simply call ILE DB2 with data (your problem).
+Therefore, this libdb400.a simply calls ILE DB2.
 
 
 #Contributors
