@@ -62,7 +62,7 @@ SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
 
 === UTF-8 mode, most popular Windows/Java ===
 SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
--->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2 (future)
+-->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 
 === PASE default (original libdb400.a) ===

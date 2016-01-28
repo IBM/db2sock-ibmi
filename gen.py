@@ -58,6 +58,30 @@ def parse_method( line ):
   return [funcs,args]  
 
 # process PaseSqlCli.c (PASE cmvc)
+pre = open(PaseSqlCli_file,"r")
+ile_wide_api = {'nothing': 'nothing'}
+for line in pre:
+
+  # start of SQL function ..
+  # int SQLOverrideCCSID400
+  # SQLRETURN SQLxxx(
+  if "SQLRETURN SQL" in line:
+   # parse function
+   lesss = line.split("(")
+   parts = lesss[0].split(" ")
+   funcs = parts[1]
+   # forget
+   if "400" in funcs:
+     continue
+   # wide api
+   if "W" in funcs:
+     line_no_W = funcs.split("W")
+     assoc_name = line_no_W[0]
+     ile_wide_api[assoc_name] = funcs
+     # if call_name in ile_wide_api.values():
+     # print("ile_wide_api['" + assoc_name + "'] = '" + funcs + "'")
+
+# process PaseSqlCli.c (PASE cmvc)
 f = open(PaseSqlCli_file,"r")
 g = False
 c400 = True
@@ -470,7 +494,9 @@ for line in f:
   # SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
   elif c400_CCSID:
     PaseCliAsync_c_main += "  sqlrc = custom_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  # all other CLI APIs 
   else:
+    # normal cli function
     PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
     if argtype1st == "SQLHENV":
       if ile_or_custom_call == "custom_":
@@ -674,6 +700,7 @@ for line in f:
   if ile_or_custom_call == "custom_":
     PaseCliAsync_c_main += "  myptr->sqlrc = " + ile_or_custom_call + call_name + '(' + async_db400_args + ' );' + "\n"
   else:
+    # CLI call
     PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
     PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
     PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"

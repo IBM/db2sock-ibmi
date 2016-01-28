@@ -43,6 +43,8 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400ConnectW(henv, (SQLWCHAR *) &db_utf16, (SQLWCHAR *) &uid_utf16, (SQLWCHAR *) &pwd_utf16, &hdbc, (SQLPOINTER)&pophdbc);
   lang_check_sqlrc(SQL_HANDLE_DBC, hdbc, sqlrc, 1, &sqlcode);
   printf("SQL400ConnectW: complete\n");
+  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
+  sleep(10);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

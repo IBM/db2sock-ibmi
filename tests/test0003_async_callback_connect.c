@@ -56,7 +56,8 @@ int main(int argc, char * argv[]) {
   tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   printf("SQL400ConnectAsync (thread %d): hi there from main thread\n",ptid);
-  sleep(5);
+  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
+  sleep(10);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

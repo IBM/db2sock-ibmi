@@ -45,6 +45,8 @@ int main(int argc, char * argv[]) {
   tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)NULL);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   myptr = SQL400ConnectJoin (tid, SQL400_FLAG_JOIN_NO_WAIT);
+  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
+  sleep(10);
   if (!myptr) {
     printf("SQL400ConnectAsync (thread %d): connect still running\n", tid);
     myptr = SQL400ConnectJoin (tid, SQL400_FLAG_JOIN_WAIT);

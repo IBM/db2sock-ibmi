@@ -33,8 +33,10 @@ static SQLHANDLE env_hndl;
 
 int custom_strlen_utf16(unsigned int * src) {
   int len = 0;
-  while (*(unsigned short *)(src+len)) { 
+  char *tgt = (char *) src;
+  while (*(unsigned short *)tgt) { 
     len++;
+    tgt += 2;
   }
   return len;
 }
@@ -252,9 +254,9 @@ SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, S
   SQLSMALLINT db_len = SQL_NTS;
   SQLSMALLINT uid_len = SQL_NTS;
   SQLSMALLINT pwd_len = SQL_NTS;
-  int db_slen = custom_strlen_utf16(db);  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
-  int uid_slen = custom_strlen_utf16(uid); /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
-  int pwd_slen = custom_strlen_utf16(pwd); /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
+  int db_slen = custom_strlen_utf16((unsigned int*)db);  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
+  int uid_slen = custom_strlen_utf16((unsigned int*)uid); /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
+  int pwd_slen = custom_strlen_utf16((unsigned int*)pwd); /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
   /* null input */
   if (db == NULL || !db_slen) {
     db_str = (SQLWCHAR *) NULL;

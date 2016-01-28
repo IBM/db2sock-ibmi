@@ -174,7 +174,8 @@ int main(int argc, char * argv[]) {
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
   main_environ();
-  sleep(20);
+  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
+  sleep(10);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;
