@@ -18,10 +18,6 @@ but it isn't just for Node.js and can instead be applied to all PASE langs (PHP,
 
 ##Notes:
 
-This is a unicode driver libdb400.a, UTF-8 or UTF16. 
-New functions have added to assist in UTF-8/UTF-16 conversion (see PaseCliAsync.h).
-Test files will provide idea of how it all works (changing daily).
-
 Only compiled with xlc using -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
 if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
@@ -42,6 +38,8 @@ void SQLExecDirectCallback(SQLExecDirectStruct* );
 SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag);
 void SQLExecDirectWCallback(SQLExecDirectWStruct* );
 SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
+=== bypass all, call PASE libdb400.a directly  (not recommended) ===
+SQLRETURN libdb400_SQLExecDirect(..); (no wide interfaces)
 === bypass all, call ILE directly (not recommended) ===
 SQLRETURN ILE_SQLExecDirect(..);
 SQLRETURN ILE_SQLExecDirectW(..);
