@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <as400_types.h>
+#include <as400_protos.h>
 #include "PaseCliInit.h"
 
 /* static global resource table
@@ -23,6 +25,10 @@ static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
  * dlopen handle of PASE libdb400.a (real driver) 
  */
 void *dlhandle = NULL;
+/* 
+ * ile activate db2 
+ */
+int db2_cli_srvpgm_mark;
 
 /* global table lock
  * This lock is 'lock once'.
@@ -38,15 +44,13 @@ void init_unlock() {
 }
 
 /* 
- * dlopen handle of PASE libdb400.a,
- * set all symbols for CLI APIs,
- * via libdb400_load_dlsym (PaseCliAsync_gen.c).
+ * dlopen handle of PASE libdb400.a
  * Note: dlhandle is checked twice,
  * second under global lock,
  * to avoid race conditions
  * multiple threads starting.
  */
-void init_dlsym() {
+void * init_cli_dlsym() {
   char *dlservice = PASECLIDRIVER;
   if (dlhandle  == NULL) {
     init_lock();
@@ -56,10 +60,28 @@ void init_dlsym() {
         printf("Service %s Not Found:  %s\n", dlservice, dlerror());
         exit(-1);
       }
-      libdb400_load_dlsym();
+      dlclose(dlhandle);
     }
     init_unlock();
   }
+  return dlhandle;
+}
+/* activate db2 srvpgm */
+int init_cli_srvpgm() {
+  int actMark = 0;
+  if (!db2_cli_srvpgm_mark) {
+    init_lock();
+    if (!db2_cli_srvpgm_mark) {
+      actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
+      if (actMark < 0) {
+        printf("Service %s Not Found\n", DB2CLISRVPGM);
+        exit(-1);
+      }
+      db2_cli_srvpgm_mark = actMark;
+    }
+    init_unlock();
+  }
+  return db2_cli_srvpgm_mark;
 }
 
 /* caller hold resource level lock
@@ -72,6 +94,7 @@ void init_dlsym() {
  * (see init_table_lock to understand hstmt to hdbc map locks)
  */
 void init_table_ctor(int hstmt, int hdbc) {
+  init_lock();
   if (!IBMiTable[hstmt].hstmt) {
     pthread_mutexattr_init(&IBMiTable[hstmt].threadMutexAttr);
     pthread_mutexattr_settype(&IBMiTable[hstmt].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
@@ -80,6 +103,7 @@ void init_table_ctor(int hstmt, int hdbc) {
   }
   IBMiTable[hstmt].hstmt = hstmt;
   IBMiTable[hstmt].hdbc = hdbc;
+  init_unlock();
 }
 void init_table_dtor(int hstmt) {
   /* do nothing, 

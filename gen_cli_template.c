@@ -794,7 +794,7 @@ SQLRETURN SQLTransact(SQLHENV henv,
 # ------------------
 # custom interfaces, not CLI libdb400.a
 # ------------------
-# int SQLOverrideCCSID400(SQLINTEGER newCCSID)
+SQLRETURN SQLOverrideCCSID400(SQLINTEGER newCCSID)
 
 # custom convert to/from utf8
 SQLRETURN SQL400ToUtf8(SQLHDBC hdbc,

@@ -465,6 +465,7 @@ SQLTransact
 SQLTransactAsync
 SQLTransactJoin
 ILE_SQLTransact
+SQLOverrideCCSID400
 SQL400ToUtf8
 SQL400ToUtf8Async
 SQL400ToUtf8Join

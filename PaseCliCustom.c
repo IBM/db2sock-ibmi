@@ -28,6 +28,13 @@ static int utf16_charset_flag;
 static char *utf16_charset_Ascii, *utf16_charset_Utf;
 static iconv_t utf16_AsciiToUtf, utf16_UtfToAscii;
 
+/*
+ * ccsid decisions
+ */
+SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  return sqlrc;
+}
 
 /*
  * resource table
@@ -60,9 +67,9 @@ SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  f
     case SQL_HANDLE_ENV:
       if (scope == SQL_HANDLE_ENV ) {
         switch (opt->attrib) {
-        /* SQLRETURN SQLOverrideCCSID400 ( int  newCCSID )
+        /*
         case SQL400_ATTR_CCSID:
-          opt->sqlrc = SQLOverrideCCSID400((int)opt->vParam);
+          opt->sqlrc = custom_SQLOverrideCCSID400((int)opt->vParam);
           if (opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
           }

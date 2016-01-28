@@ -8,8 +8,6 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
-int db2_cli_srvpgm_mark;
-#define DB2CLISRVPGM "QSYS/QSQCLI"
 #define ROUND_QUAD(x) (((size_t)(x) + 0xf) & ~0xf)
 
 SQLINTEGER SQLAllocConnectLoaded;
@@ -395,15 +393,9 @@ SQLRETURN ILE_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
   arglist = (SQLAllocConnectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLAllocConnectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLAllocConnectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLAllocConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -429,15 +421,9 @@ SQLRETURN ILE_SQLAllocEnv( SQLHENV * phenv )
   arglist = (SQLAllocEnvIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLAllocEnvBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLAllocEnvLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLAllocEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -462,15 +448,9 @@ SQLRETURN ILE_SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER *
   arglist = (SQLAllocHandleIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLAllocHandleBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLAllocHandleLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocHandle");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLAllocHandle");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -497,15 +477,9 @@ SQLRETURN ILE_SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
   arglist = (SQLAllocStmtIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLAllocStmtBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLAllocStmtLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLAllocStmt");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLAllocStmt");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -531,15 +505,9 @@ SQLRETURN ILE_SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType
   arglist = (SQLBindColIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLBindColBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLBindColLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLBindCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -569,15 +537,9 @@ SQLRETURN ILE_SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fN
   arglist = (SQLBindFileToColIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLBindFileToColBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLBindFileToColLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLBindFileToCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -609,15 +571,9 @@ SQLRETURN ILE_SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
   arglist = (SQLBindFileToParamIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLBindFileToParamBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLBindFileToParamLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindFileToParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLBindFileToParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -649,15 +605,9 @@ SQLRETURN ILE_SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iT
   arglist = (SQLBindParamIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLBindParamBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLBindParamLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLBindParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -689,15 +639,9 @@ SQLRETURN ILE_SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   arglist = (SQLBindParameterIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLBindParameterBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLBindParameterLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLBindParameter");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLBindParameter");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -731,15 +675,9 @@ SQLRETURN ILE_SQLCancel( SQLHSTMT  hstmt )
   arglist = (SQLCancelIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLCancelBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLCancelLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCancel");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLCancel");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -764,15 +702,9 @@ SQLRETURN ILE_SQLCloseCursor( SQLHSTMT  hstmt )
   arglist = (SQLCloseCursorIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLCloseCursorBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLCloseCursorLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCloseCursor");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLCloseCursor");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -797,15 +729,9 @@ SQLRETURN ILE_SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
   arglist = (SQLColAttributeIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColAttributeBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColAttributeLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttribute");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColAttribute");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -836,15 +762,9 @@ SQLRETURN ILE_SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist = (SQLColAttributeWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColAttributeWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColAttributeWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributeW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColAttributeW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -875,15 +795,9 @@ SQLRETURN ILE_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist = (SQLColAttributesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColAttributesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColAttributesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributes");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColAttributes");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -914,15 +828,9 @@ SQLRETURN ILE_SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT
   arglist = (SQLColAttributesWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColAttributesWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColAttributesWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColAttributesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColAttributesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -953,15 +861,9 @@ SQLRETURN ILE_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, 
   arglist = (SQLColumnPrivilegesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColumnPrivilegesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColumnPrivilegesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivileges");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColumnPrivileges");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -994,15 +896,9 @@ SQLRETURN ILE_SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier
   arglist = (SQLColumnPrivilegesWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColumnPrivilegesWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColumnPrivilegesWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnPrivilegesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColumnPrivilegesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1035,15 +931,9 @@ SQLRETURN ILE_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLI
   arglist = (SQLColumnsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColumnsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColumnsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1076,15 +966,9 @@ SQLRETURN ILE_SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMAL
   arglist = (SQLColumnsWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLColumnsWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLColumnsWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1117,15 +1001,9 @@ SQLRETURN ILE_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQ
   arglist = (SQLConnectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLConnectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLConnectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1156,15 +1034,9 @@ SQLRETURN ILE_SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, 
   arglist = (SQLConnectWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLConnectWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLConnectWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLConnectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLConnectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1195,15 +1067,9 @@ SQLRETURN ILE_SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
   arglist = (SQLCopyDescIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLCopyDescBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLCopyDescLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLCopyDesc");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLCopyDesc");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1229,15 +1095,9 @@ SQLRETURN ILE_SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * 
   arglist = (SQLDataSourcesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDataSourcesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDataSourcesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSources");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDataSources");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1269,15 +1129,9 @@ SQLRETURN ILE_SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR 
   arglist = (SQLDataSourcesWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDataSourcesWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDataSourcesWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDataSourcesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDataSourcesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1309,15 +1163,9 @@ SQLRETURN ILE_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szCo
   arglist = (SQLDescribeColIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDescribeColBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDescribeColLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDescribeCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1350,15 +1198,9 @@ SQLRETURN ILE_SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * sz
   arglist = (SQLDescribeColWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDescribeColWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDescribeColWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeColW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDescribeColW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1391,15 +1233,9 @@ SQLRETURN ILE_SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   arglist = (SQLDescribeParamIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDescribeParamBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDescribeParamLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDescribeParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDescribeParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1429,15 +1265,9 @@ SQLRETURN ILE_SQLDisconnect( SQLHDBC  hdbc )
   arglist = (SQLDisconnectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDisconnectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDisconnectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDisconnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDisconnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1462,15 +1292,9 @@ SQLRETURN ILE_SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szCon
   arglist = (SQLDriverConnectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDriverConnectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDriverConnectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDriverConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1502,15 +1326,9 @@ SQLRETURN ILE_SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szC
   arglist = (SQLDriverConnectWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLDriverConnectWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLDriverConnectWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLDriverConnectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLDriverConnectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1542,15 +1360,9 @@ SQLRETURN ILE_SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype 
   arglist = (SQLEndTranIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLEndTranBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLEndTranLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLEndTran");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLEndTran");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1577,15 +1389,9 @@ SQLRETURN ILE_SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR *
   arglist = (SQLErrorIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLErrorBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLErrorLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLError");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLError");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1617,15 +1423,9 @@ SQLRETURN ILE_SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR
   arglist = (SQLErrorWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLErrorWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLErrorWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLErrorW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLErrorW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1657,15 +1457,9 @@ SQLRETURN ILE_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cb
   arglist = (SQLExecDirectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLExecDirectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLExecDirectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLExecDirect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1692,15 +1486,9 @@ SQLRETURN ILE_SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  
   arglist = (SQLExecDirectWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLExecDirectWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLExecDirectWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecDirectW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLExecDirectW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1727,15 +1515,9 @@ SQLRETURN ILE_SQLExecute( SQLHSTMT  hstmt )
   arglist = (SQLExecuteIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLExecuteBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLExecuteLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExecute");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLExecute");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1760,15 +1542,9 @@ SQLRETURN ILE_SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGE
   arglist = (SQLExtendedFetchIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLExtendedFetchBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLExtendedFetchLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLExtendedFetch");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLExtendedFetch");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1797,15 +1573,9 @@ SQLRETURN ILE_SQLFetch( SQLHSTMT  hstmt )
   arglist = (SQLFetchIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFetchBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFetchLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFetch");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFetch");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1830,15 +1600,9 @@ SQLRETURN ILE_SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER 
   arglist = (SQLFetchScrollIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFetchScrollBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFetchScrollLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFetchScroll");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFetchScroll");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1865,15 +1629,9 @@ SQLRETURN ILE_SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQL
   arglist = (SQLForeignKeysIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLForeignKeysBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLForeignKeysLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeys");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLForeignKeys");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1910,15 +1668,9 @@ SQLRETURN ILE_SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, S
   arglist = (SQLForeignKeysWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLForeignKeysWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLForeignKeysWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLForeignKeysW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLForeignKeysW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1955,15 +1707,9 @@ SQLRETURN ILE_SQLFreeConnect( SQLHDBC  hdbc )
   arglist = (SQLFreeConnectIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFreeConnectBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFreeConnectLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeConnect");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFreeConnect");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -1988,15 +1734,9 @@ SQLRETURN ILE_SQLFreeEnv( SQLHENV  henv )
   arglist = (SQLFreeEnvIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFreeEnvBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFreeEnvLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFreeEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2021,15 +1761,9 @@ SQLRETURN ILE_SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
   arglist = (SQLFreeStmtIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFreeStmtBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFreeStmtLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeStmt");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFreeStmt");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2055,15 +1789,9 @@ SQLRETURN ILE_SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
   arglist = (SQLFreeHandleIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLFreeHandleBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLFreeHandleLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLFreeHandle");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLFreeHandle");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2089,15 +1817,9 @@ SQLRETURN ILE_SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype,
   arglist = (SQLGetColIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetColBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetColLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCol");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetCol");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2127,15 +1849,9 @@ SQLRETURN ILE_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype
   arglist = (SQLGetColWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetColWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetColWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetColW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetColW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2165,15 +1881,9 @@ SQLRETURN ILE_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  ov
   arglist = (SQLGetConnectAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetConnectAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetConnectAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetConnectAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2202,15 +1912,9 @@ SQLRETURN ILE_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  o
   arglist = (SQLGetConnectAttrWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetConnectAttrWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetConnectAttrWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetConnectAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2239,15 +1943,9 @@ SQLRETURN ILE_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER 
   arglist = (SQLGetConnectOptionIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetConnectOptionBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetConnectOptionLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetConnectOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2274,15 +1972,9 @@ SQLRETURN ILE_SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER
   arglist = (SQLGetConnectOptionWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetConnectOptionWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetConnectOptionWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetConnectOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetConnectOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2309,15 +2001,9 @@ SQLRETURN ILE_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
   arglist = (SQLGetCursorNameIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetCursorNameBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetCursorNameLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorName");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetCursorName");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2345,15 +2031,9 @@ SQLRETURN ILE_SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
   arglist = (SQLGetCursorNameWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetCursorNameWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetCursorNameWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetCursorNameW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetCursorNameW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2381,15 +2061,9 @@ SQLRETURN ILE_SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCTyp
   arglist = (SQLGetDataIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDataBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDataLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2419,15 +2093,9 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist = (SQLGetDescFieldIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescFieldBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDescFieldLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDescField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2457,15 +2125,9 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist = (SQLGetDescFieldWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescFieldWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDescFieldWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDescFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2495,15 +2157,9 @@ SQLRETURN ILE_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fna
   arglist = (SQLGetDescRecIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescRecBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDescRecLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDescRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2538,15 +2194,9 @@ SQLRETURN ILE_SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * f
   arglist = (SQLGetDescRecWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescRecWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDescRecWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDescRecW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDescRecW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2581,15 +2231,9 @@ SQLRETURN ILE_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT
   arglist = (SQLGetDiagFieldIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDiagFieldBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDiagFieldLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDiagField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2620,15 +2264,9 @@ SQLRETURN ILE_SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLIN
   arglist = (SQLGetDiagFieldWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDiagFieldWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDiagFieldWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDiagFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2659,15 +2297,9 @@ SQLRETURN ILE_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  
   arglist = (SQLGetDiagRecIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDiagRecBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDiagRecLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDiagRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2699,15 +2331,9 @@ SQLRETURN ILE_SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT 
   arglist = (SQLGetDiagRecWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDiagRecWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetDiagRecWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetDiagRecW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetDiagRecW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2739,15 +2365,9 @@ SQLRETURN ILE_SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   arglist = (SQLGetEnvAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetEnvAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetEnvAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetEnvAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetEnvAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2776,15 +2396,9 @@ SQLRETURN ILE_SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLIN
   arglist = (SQLGetFunctionsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetFunctionsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetFunctionsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetFunctions");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetFunctions");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2811,15 +2425,9 @@ SQLRETURN ILE_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgb
   arglist = (SQLGetInfoIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetInfoBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetInfoLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfo");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetInfo");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2848,15 +2456,9 @@ SQLRETURN ILE_SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rg
   arglist = (SQLGetInfoWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetInfoWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetInfoWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetInfoW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetInfoW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2885,15 +2487,9 @@ SQLRETURN ILE_SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  l
   arglist = (SQLGetLengthIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetLengthBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetLengthLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetLength");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetLength");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2922,15 +2518,9 @@ SQLRETURN ILE_SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER 
   arglist = (SQLGetPositionIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetPositionBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetPositionLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPosition");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetPosition");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -2963,15 +2553,9 @@ SQLRETURN ILE_SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist = (SQLGetPositionWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetPositionWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetPositionWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetPositionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetPositionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3004,15 +2588,9 @@ SQLRETURN ILE_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pv
   arglist = (SQLGetStmtAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetStmtAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetStmtAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetStmtAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3041,15 +2619,9 @@ SQLRETURN ILE_SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   arglist = (SQLGetStmtAttrWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetStmtAttrWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetStmtAttrWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetStmtAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3078,15 +2650,9 @@ SQLRETURN ILE_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   arglist = (SQLGetStmtOptionIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetStmtOptionBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetStmtOptionLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetStmtOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3113,15 +2679,9 @@ SQLRETURN ILE_SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   arglist = (SQLGetStmtOptionWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetStmtOptionWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetStmtOptionWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetStmtOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetStmtOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3148,15 +2708,9 @@ SQLRETURN ILE_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist = (SQLGetSubStringIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetSubStringBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetSubStringLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubString");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetSubString");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3190,15 +2744,9 @@ SQLRETURN ILE_SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGE
   arglist = (SQLGetSubStringWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetSubStringWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetSubStringWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetSubStringW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetSubStringW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3232,15 +2780,9 @@ SQLRETURN ILE_SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
   arglist = (SQLGetTypeInfoIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetTypeInfoBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetTypeInfoLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfo");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetTypeInfo");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3266,15 +2808,9 @@ SQLRETURN ILE_SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
   arglist = (SQLGetTypeInfoWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetTypeInfoWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLGetTypeInfoWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLGetTypeInfoW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLGetTypeInfoW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3300,15 +2836,9 @@ SQLRETURN ILE_SQLLanguages( SQLHSTMT  hstmt )
   arglist = (SQLLanguagesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLLanguagesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLLanguagesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLLanguages");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLLanguages");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3333,15 +2863,9 @@ SQLRETURN ILE_SQLMoreResults( SQLHSTMT  hstmt )
   arglist = (SQLMoreResultsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLMoreResultsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLMoreResultsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLMoreResults");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLMoreResults");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3366,15 +2890,9 @@ SQLRETURN ILE_SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbS
   arglist = (SQLNativeSqlIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLNativeSqlBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLNativeSqlLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSql");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLNativeSql");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3404,15 +2922,9 @@ SQLRETURN ILE_SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  c
   arglist = (SQLNativeSqlWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLNativeSqlWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLNativeSqlWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNativeSqlW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLNativeSqlW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3442,15 +2954,9 @@ SQLRETURN ILE_SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
   arglist = (SQLNextResultIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLNextResultBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLNextResultLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNextResult");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLNextResult");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3476,15 +2982,9 @@ SQLRETURN ILE_SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
   arglist = (SQLNumParamsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLNumParamsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLNumParamsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNumParams");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLNumParams");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3510,15 +3010,9 @@ SQLRETURN ILE_SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
   arglist = (SQLNumResultColsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLNumResultColsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLNumResultColsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLNumResultCols");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLNumResultCols");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3544,15 +3038,9 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
   arglist = (SQLParamDataIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLParamDataBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLParamDataLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLParamData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLParamData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3578,15 +3066,9 @@ SQLRETURN ILE_SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * p
   arglist = (SQLParamOptionsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLParamOptionsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLParamOptionsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLParamOptions");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLParamOptions");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3613,15 +3095,9 @@ SQLRETURN ILE_SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSql
   arglist = (SQLPrepareIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLPrepareBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLPrepareLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepare");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLPrepare");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3648,15 +3124,9 @@ SQLRETURN ILE_SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbS
   arglist = (SQLPrepareWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLPrepareWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLPrepareWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrepareW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLPrepareW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3683,15 +3153,9 @@ SQLRETURN ILE_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSM
   arglist = (SQLPrimaryKeysIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLPrimaryKeysBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLPrimaryKeysLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeys");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLPrimaryKeys");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3722,15 +3186,9 @@ SQLRETURN ILE_SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQL
   arglist = (SQLPrimaryKeysWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLPrimaryKeysWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLPrimaryKeysWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPrimaryKeysW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLPrimaryKeysW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3761,15 +3219,9 @@ SQLRETURN ILE_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, S
   arglist = (SQLProcedureColumnsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLProcedureColumnsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLProcedureColumnsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLProcedureColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3802,15 +3254,9 @@ SQLRETURN ILE_SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier,
   arglist = (SQLProcedureColumnsWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLProcedureColumnsWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLProcedureColumnsWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedureColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLProcedureColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3843,15 +3289,9 @@ SQLRETURN ILE_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMAL
   arglist = (SQLProceduresIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLProceduresBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLProceduresLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProcedures");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLProcedures");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3882,15 +3322,9 @@ SQLRETURN ILE_SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSM
   arglist = (SQLProceduresWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLProceduresWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLProceduresWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLProceduresW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLProceduresW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3921,15 +3355,9 @@ SQLRETURN ILE_SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
   arglist = (SQLPutDataIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLPutDataBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLPutDataLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLPutData");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLPutData");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3956,15 +3384,9 @@ SQLRETURN ILE_SQLReleaseEnv( SQLHENV  henv )
   arglist = (SQLReleaseEnvIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLReleaseEnvBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLReleaseEnvLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLReleaseEnv");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLReleaseEnv");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -3989,15 +3411,9 @@ SQLRETURN ILE_SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
   arglist = (SQLRowCountIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLRowCountBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLRowCountLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLRowCount");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLRowCount");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4023,15 +3439,9 @@ SQLRETURN ILE_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  
   arglist = (SQLSetConnectAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetConnectAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetConnectAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetConnectAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4059,15 +3469,9 @@ SQLRETURN ILE_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER 
   arglist = (SQLSetConnectAttrWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetConnectAttrWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetConnectAttrWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetConnectAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4095,15 +3499,9 @@ SQLRETURN ILE_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINT
   arglist = (SQLSetConnectOptionIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetConnectOptionBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetConnectOptionLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetConnectOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4130,15 +3528,9 @@ SQLRETURN ILE_SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOIN
   arglist = (SQLSetConnectOptionWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetConnectOptionWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetConnectOptionWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetConnectOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetConnectOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4165,15 +3557,9 @@ SQLRETURN ILE_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
   arglist = (SQLSetCursorNameIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetCursorNameBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetCursorNameLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorName");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetCursorName");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4200,15 +3586,9 @@ SQLRETURN ILE_SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
   arglist = (SQLSetCursorNameWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetCursorNameWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetCursorNameWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetCursorNameW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetCursorNameW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4235,15 +3615,9 @@ SQLRETURN ILE_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist = (SQLSetDescFieldIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetDescFieldBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetDescFieldLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescField");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetDescField");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4272,15 +3646,9 @@ SQLRETURN ILE_SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist = (SQLSetDescFieldWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetDescFieldWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetDescFieldWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescFieldW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetDescFieldW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4309,15 +3677,9 @@ SQLRETURN ILE_SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  
   arglist = (SQLSetDescRecIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetDescRecBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetDescRecLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetDescRec");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetDescRec");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4351,15 +3713,9 @@ SQLRETURN ILE_SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   arglist = (SQLSetEnvAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetEnvAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetEnvAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetEnvAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetEnvAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4387,15 +3743,9 @@ SQLRETURN ILE_SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCTy
   arglist = (SQLSetParamIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetParamBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetParamLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetParam");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetParam");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4427,15 +3777,9 @@ SQLRETURN ILE_SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pP
   arglist = (SQLSetStmtAttrIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetStmtAttrBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetStmtAttrLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttr");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetStmtAttr");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4463,15 +3807,9 @@ SQLRETURN ILE_SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   arglist = (SQLSetStmtAttrWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetStmtAttrWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetStmtAttrWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtAttrW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetStmtAttrW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4499,15 +3837,9 @@ SQLRETURN ILE_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   arglist = (SQLSetStmtOptionIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetStmtOptionBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetStmtOptionLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOption");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetStmtOption");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4534,15 +3866,9 @@ SQLRETURN ILE_SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   arglist = (SQLSetStmtOptionWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSetStmtOptionWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSetStmtOptionWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSetStmtOptionW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSetStmtOptionW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4569,15 +3895,9 @@ SQLRETURN ILE_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR
   arglist = (SQLSpecialColumnsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSpecialColumnsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSpecialColumnsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumns");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSpecialColumns");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4611,15 +3931,9 @@ SQLRETURN ILE_SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCH
   arglist = (SQLSpecialColumnsWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLSpecialColumnsWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLSpecialColumnsWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLSpecialColumnsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLSpecialColumnsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4653,15 +3967,9 @@ SQLRETURN ILE_SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode,
   arglist = (SQLStartTranIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLStartTranBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLStartTranLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStartTran");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLStartTran");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4689,15 +3997,9 @@ SQLRETURN ILE_SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMA
   arglist = (SQLStatisticsIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLStatisticsBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLStatisticsLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStatistics");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLStatistics");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4730,15 +4032,9 @@ SQLRETURN ILE_SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLS
   arglist = (SQLStatisticsWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLStatisticsWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLStatisticsWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLStatisticsW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLStatisticsW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4771,15 +4067,9 @@ SQLRETURN ILE_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, S
   arglist = (SQLTablePrivilegesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLTablePrivilegesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLTablePrivilegesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivileges");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLTablePrivileges");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4810,15 +4100,9 @@ SQLRETURN ILE_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier,
   arglist = (SQLTablePrivilegesWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLTablePrivilegesWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLTablePrivilegesWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablePrivilegesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLTablePrivilegesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4849,15 +4133,9 @@ SQLRETURN ILE_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLIN
   arglist = (SQLTablesIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLTablesBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLTablesLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTables");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLTables");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4890,15 +4168,9 @@ SQLRETURN ILE_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALL
   arglist = (SQLTablesWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLTablesWBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLTablesWLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTablesW");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLTablesW");
     if (rc < 0) {
       return SQL_ERROR;
     }
@@ -4931,15 +4203,9 @@ SQLRETURN ILE_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
   arglist = (SQLTransactIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLTransactBuf);
   memset(buffer,0,sizeof(buffer));
-  if (!db2_cli_srvpgm_mark) {
-    actMark = _ILELOAD(DB2CLISRVPGM, ILELOAD_LIBOBJ);
-    if (actMark < 0) {
-      return SQL_ERROR;
-    }
-    db2_cli_srvpgm_mark = actMark;
-  }
+  actMark = init_cli_srvpgm();
   if (!SQLTransactLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, db2_cli_srvpgm_mark, "SQLTransact");
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "SQLTransact");
     if (rc < 0) {
       return SQL_ERROR;
     }

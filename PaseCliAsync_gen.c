@@ -17,10 +17,6 @@ SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
-  if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLAllocConnect( henv, phdbc );
   } else {
     sqlrc = ILE_SQLAllocConnect( henv, phdbc );
@@ -28,16 +24,11 @@ SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phdbc, *phdbc);
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLAllocEnv( SQLHENV * phenv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLAllocEnv( phenv );
   } else {
@@ -46,18 +37,13 @@ SQLRETURN SQLAllocEnv( SQLHENV * phenv )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phenv, *phenv);
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   switch (htype) {
   case SQL_HANDLE_ENV:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
     } else {
@@ -66,10 +52,8 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, *ohnd);
     }
-    init_unlock();
     break;
   case SQL_HANDLE_DBC:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
     } else {
@@ -78,10 +62,8 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, *ohnd);
     }
-    init_unlock();
     break;
   case SQL_HANDLE_STMT:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
     } else {
@@ -90,10 +72,8 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, ihnd);
     }
-    init_unlock();
     break;
   case SQL_HANDLE_DESC:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
     } else {
@@ -102,7 +82,6 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, ihnd);
     }
-    init_unlock();
     break;
   }
   return sqlrc;
@@ -111,10 +90,6 @@ SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
-  if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLAllocStmt( hdbc, phstmt );
   } else {
     sqlrc = ILE_SQLAllocStmt( hdbc, phstmt );
@@ -122,15 +97,11 @@ SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phstmt, hdbc);
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
@@ -162,9 +133,6 @@ pthread_t SQLBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iTy
   int rc = 0;
   pthread_t tid = 0;
   SQLBindColStruct * myptr = (SQLBindColStruct *) malloc(sizeof(SQLBindColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -180,9 +148,6 @@ SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindColStruct * myptr = (SQLBindColStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -194,9 +159,6 @@ SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLBindFileToCol( hstmt, icol, fName, fNameLen, fOptions, fValueMax, sLen, pcbValue );
@@ -228,9 +190,6 @@ pthread_t SQLBindFileToColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * 
   int rc = 0;
   pthread_t tid = 0;
   SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) malloc(sizeof(SQLBindFileToColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -248,9 +207,6 @@ SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -262,9 +218,6 @@ SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLBindFileToParam( hstmt, ipar, iType, fName, fNameLen, fOptions, fValueMax, pcbValue );
@@ -296,9 +249,6 @@ pthread_t SQLBindFileToParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) malloc(sizeof(SQLBindFileToParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->ipar = ipar;
@@ -316,9 +266,6 @@ SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -330,9 +277,6 @@ SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLBindParam( hstmt, iparm, iType, pType, pLen, pScale, pData, pcbValue );
@@ -364,9 +308,6 @@ pthread_t SQLBindParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  
   int rc = 0;
   pthread_t tid = 0;
   SQLBindParamStruct * myptr = (SQLBindParamStruct *) malloc(sizeof(SQLBindParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->iparm = iparm;
@@ -384,9 +325,6 @@ SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindParamStruct * myptr = (SQLBindParamStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -398,9 +336,6 @@ SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLBindParameter( hstmt, ipar, fParamType, fCType, fSQLType, pLen, pScale, pData, cbValueMax, pcbValue );
@@ -432,9 +367,6 @@ pthread_t SQLBindParameterAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
   int rc = 0;
   pthread_t tid = 0;
   SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) malloc(sizeof(SQLBindParameterStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->ipar = ipar;
@@ -454,9 +386,6 @@ SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -468,9 +397,6 @@ SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCancel( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLCancel( hstmt );
@@ -502,9 +428,6 @@ pthread_t SQLCancelAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLCancelStruct * myptr = (SQLCancelStruct *) malloc(sizeof(SQLCancelStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -515,9 +438,6 @@ SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCancelStruct * myptr = (SQLCancelStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -529,9 +449,6 @@ SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCloseCursor( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLCloseCursor( hstmt );
@@ -563,9 +480,6 @@ pthread_t SQLCloseCursorAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) malloc(sizeof(SQLCloseCursorStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -576,9 +490,6 @@ SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -590,9 +501,6 @@ SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColAttribute( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
@@ -624,9 +532,6 @@ pthread_t SQLColAttributeAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT
   int rc = 0;
   pthread_t tid = 0;
   SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) malloc(sizeof(SQLColAttributeStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -643,9 +548,6 @@ SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -657,9 +559,6 @@ SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColAttributeW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
@@ -691,9 +590,6 @@ pthread_t SQLColAttributeWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLIN
   int rc = 0;
   pthread_t tid = 0;
   SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) malloc(sizeof(SQLColAttributeWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -710,9 +606,6 @@ SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -724,9 +617,6 @@ SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColAttributes( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
@@ -758,9 +648,6 @@ pthread_t SQLColAttributesAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLIN
   int rc = 0;
   pthread_t tid = 0;
   SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) malloc(sizeof(SQLColAttributesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -777,9 +664,6 @@ SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -791,9 +675,6 @@ SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColAttributesW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
@@ -825,9 +706,6 @@ pthread_t SQLColAttributesWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) malloc(sizeof(SQLColAttributesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -844,9 +722,6 @@ SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -858,9 +733,6 @@ SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColumnPrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
@@ -892,9 +764,6 @@ pthread_t SQLColumnPrivilegesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier
   int rc = 0;
   pthread_t tid = 0;
   SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) malloc(sizeof(SQLColumnPrivilegesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -913,9 +782,6 @@ SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER f
 {
   SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -927,9 +793,6 @@ SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColumnPrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
@@ -961,9 +824,6 @@ pthread_t SQLColumnPrivilegesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifi
   int rc = 0;
   pthread_t tid = 0;
   SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) malloc(sizeof(SQLColumnPrivilegesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -982,9 +842,6 @@ SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER
 {
   SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -996,9 +853,6 @@ SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColumns( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
@@ -1030,9 +884,6 @@ pthread_t SQLColumnsAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMAL
   int rc = 0;
   pthread_t tid = 0;
   SQLColumnsStruct * myptr = (SQLColumnsStruct *) malloc(sizeof(SQLColumnsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -1051,9 +902,6 @@ SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColumnsStruct * myptr = (SQLColumnsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1065,9 +913,6 @@ SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLColumnsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
@@ -1099,9 +944,6 @@ pthread_t SQLColumnsWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSM
   int rc = 0;
   pthread_t tid = 0;
   SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) malloc(sizeof(SQLColumnsWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -1120,9 +962,6 @@ SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1134,9 +973,6 @@ SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLConnect( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
@@ -1168,9 +1004,6 @@ pthread_t SQLConnectAsync ( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, 
   int rc = 0;
   pthread_t tid = 0;
   SQLConnectStruct * myptr = (SQLConnectStruct *) malloc(sizeof(SQLConnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->szDSN = szDSN;
@@ -1187,9 +1020,6 @@ SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLConnectStruct * myptr = (SQLConnectStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1201,9 +1031,6 @@ SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLConnectW( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
@@ -1235,9 +1062,6 @@ pthread_t SQLConnectWAsync ( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN
   int rc = 0;
   pthread_t tid = 0;
   SQLConnectWStruct * myptr = (SQLConnectWStruct *) malloc(sizeof(SQLConnectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->szDSN = szDSN;
@@ -1254,9 +1078,6 @@ SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLConnectWStruct * myptr = (SQLConnectWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1268,9 +1089,6 @@ SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(sDesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLCopyDesc( sDesc, tDesc );
@@ -1302,9 +1120,6 @@ pthread_t SQLCopyDescAsync ( SQLHDESC  sDesc, SQLHDESC  tDesc, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) malloc(sizeof(SQLCopyDescStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->sDesc = sDesc;
   myptr->tDesc = tDesc;
@@ -1316,9 +1131,6 @@ SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->sDesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1330,9 +1142,6 @@ SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDataSources( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
   } else {
@@ -1362,9 +1171,6 @@ pthread_t SQLDataSourcesAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR 
   int rc = 0;
   pthread_t tid = 0;
   SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) malloc(sizeof(SQLDataSourcesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->fDirection = fDirection;
@@ -1382,9 +1188,6 @@ SQLDataSourcesStruct * SQLDataSourcesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1396,9 +1199,6 @@ SQLDataSourcesStruct * SQLDataSourcesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
   } else {
@@ -1428,9 +1228,6 @@ pthread_t SQLDataSourcesWAsync ( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHA
   int rc = 0;
   pthread_t tid = 0;
   SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) malloc(sizeof(SQLDataSourcesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->fDirection = fDirection;
@@ -1448,9 +1245,6 @@ SQLDataSourcesWStruct * SQLDataSourcesWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1462,9 +1256,6 @@ SQLDataSourcesWStruct * SQLDataSourcesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDescribeCol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
@@ -1496,9 +1287,6 @@ pthread_t SQLDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * sz
   int rc = 0;
   pthread_t tid = 0;
   SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) malloc(sizeof(SQLDescribeColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -1517,9 +1305,6 @@ SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1531,9 +1316,6 @@ SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDescribeColW( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
@@ -1565,9 +1347,6 @@ pthread_t SQLDescribeColWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * 
   int rc = 0;
   pthread_t tid = 0;
   SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) malloc(sizeof(SQLDescribeColWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -1586,9 +1365,6 @@ SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1600,9 +1376,6 @@ SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDescribeParam( hstmt, ipar, pfSqlType, pcbColDef, pibScale, pfNullable );
@@ -1634,9 +1407,6 @@ pthread_t SQLDescribeParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
   int rc = 0;
   pthread_t tid = 0;
   SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) malloc(sizeof(SQLDescribeParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->ipar = ipar;
@@ -1652,9 +1422,6 @@ SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1666,9 +1433,6 @@ SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDisconnect( SQLHDBC  hdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDisconnect( hdbc );
@@ -1700,9 +1464,6 @@ pthread_t SQLDisconnectAsync ( SQLHDBC  hdbc, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) malloc(sizeof(SQLDisconnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->callback = callback;
@@ -1713,9 +1474,6 @@ SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1727,9 +1485,6 @@ SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDriverConnect( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
@@ -1761,9 +1516,6 @@ pthread_t SQLDriverConnectAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szC
   int rc = 0;
   pthread_t tid = 0;
   SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) malloc(sizeof(SQLDriverConnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->hwnd = hwnd;
@@ -1781,9 +1533,6 @@ SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1795,9 +1544,6 @@ SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLDriverConnectW( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
@@ -1829,9 +1575,6 @@ pthread_t SQLDriverConnectWAsync ( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * s
   int rc = 0;
   pthread_t tid = 0;
   SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) malloc(sizeof(SQLDriverConnectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->hwnd = hwnd;
@@ -1849,9 +1592,6 @@ SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1863,9 +1603,6 @@ SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLEndTran( htype, henv, ctype );
   } else {
@@ -1893,9 +1630,6 @@ pthread_t SQLEndTranAsync ( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctyp
   int rc = 0;
   pthread_t tid = 0;
   SQLEndTranStruct * myptr = (SQLEndTranStruct *) malloc(sizeof(SQLEndTranStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->htype = htype;
   myptr->henv = henv;
@@ -1908,9 +1642,6 @@ SQLEndTranStruct * SQLEndTranJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLEndTranStruct * myptr = (SQLEndTranStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1921,9 +1652,6 @@ SQLEndTranStruct * SQLEndTranJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLError( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
   } else {
@@ -1953,9 +1681,6 @@ pthread_t SQLErrorAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR
   int rc = 0;
   pthread_t tid = 0;
   SQLErrorStruct * myptr = (SQLErrorStruct *) malloc(sizeof(SQLErrorStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->hdbc = hdbc;
@@ -1973,9 +1698,6 @@ SQLErrorStruct * SQLErrorJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLErrorStruct * myptr = (SQLErrorStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -1987,9 +1709,6 @@ SQLErrorStruct * SQLErrorJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
   } else {
@@ -2019,9 +1738,6 @@ pthread_t SQLErrorWAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCH
   int rc = 0;
   pthread_t tid = 0;
   SQLErrorWStruct * myptr = (SQLErrorWStruct *) malloc(sizeof(SQLErrorWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->hdbc = hdbc;
@@ -2039,9 +1755,6 @@ SQLErrorWStruct * SQLErrorWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLErrorWStruct * myptr = (SQLErrorWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2053,9 +1766,6 @@ SQLErrorWStruct * SQLErrorWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLExecDirect( hstmt, szSqlStr, cbSqlStr );
@@ -2087,9 +1797,6 @@ pthread_t SQLExecDirectAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  
   int rc = 0;
   pthread_t tid = 0;
   SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) malloc(sizeof(SQLExecDirectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szSqlStr = szSqlStr;
@@ -2102,9 +1809,6 @@ SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2116,9 +1820,6 @@ SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLExecDirectW( hstmt, szSqlStr, cbSqlStr );
@@ -2150,9 +1851,6 @@ pthread_t SQLExecDirectWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER
   int rc = 0;
   pthread_t tid = 0;
   SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) malloc(sizeof(SQLExecDirectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szSqlStr = szSqlStr;
@@ -2165,9 +1863,6 @@ SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2179,9 +1874,6 @@ SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecute( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLExecute( hstmt );
@@ -2213,9 +1905,6 @@ pthread_t SQLExecuteAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLExecuteStruct * myptr = (SQLExecuteStruct *) malloc(sizeof(SQLExecuteStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -2226,9 +1915,6 @@ SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecuteStruct * myptr = (SQLExecuteStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2240,9 +1926,6 @@ SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLExtendedFetch( hstmt, fOrient, fOffset, pcrow, rgfRowStatus );
@@ -2274,9 +1957,6 @@ pthread_t SQLExtendedFetchAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTE
   int rc = 0;
   pthread_t tid = 0;
   SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) malloc(sizeof(SQLExtendedFetchStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOrient = fOrient;
@@ -2291,9 +1971,6 @@ SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2305,9 +1982,6 @@ SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLFetch( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLFetch( hstmt );
@@ -2339,9 +2013,6 @@ pthread_t SQLFetchAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLFetchStruct * myptr = (SQLFetchStruct *) malloc(sizeof(SQLFetchStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -2352,9 +2023,6 @@ SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLFetchStruct * myptr = (SQLFetchStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2366,9 +2034,6 @@ SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLFetchScroll( hstmt, fOrient, fOffset );
@@ -2400,9 +2065,6 @@ pthread_t SQLFetchScrollAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGE
   int rc = 0;
   pthread_t tid = 0;
   SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) malloc(sizeof(SQLFetchScrollStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOrient = fOrient;
@@ -2415,9 +2077,6 @@ SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2429,9 +2088,6 @@ SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLForeignKeys( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
@@ -2463,9 +2119,6 @@ pthread_t SQLForeignKeysAsync ( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, S
   int rc = 0;
   pthread_t tid = 0;
   SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) malloc(sizeof(SQLForeignKeysStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szPkTableQualifier = szPkTableQualifier;
@@ -2488,9 +2141,6 @@ SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2502,9 +2152,6 @@ SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLForeignKeysW( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
@@ -2536,9 +2183,6 @@ pthread_t SQLForeignKeysWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier,
   int rc = 0;
   pthread_t tid = 0;
   SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) malloc(sizeof(SQLForeignKeysWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szPkTableQualifier = szPkTableQualifier;
@@ -2561,9 +2205,6 @@ SQLForeignKeysWStruct * SQLForeignKeysWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2576,10 +2217,6 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
-  if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLFreeConnect( hdbc );
   } else {
     sqlrc = ILE_SQLFreeConnect( hdbc );
@@ -2587,31 +2224,21 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hdbc);
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLFreeEnv( SQLHENV  henv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
-  if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLFreeEnv( henv );
   } else {
     sqlrc = ILE_SQLFreeEnv( henv );
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
-  init_lock();
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLFreeStmt( hstmt, fOption );
   } else {
@@ -2620,27 +2247,20 @@ SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hstmt);
   }
-  init_unlock();
   return sqlrc;
 }
 SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   switch (htype) {
   case SQL_HANDLE_ENV:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLFreeHandle( htype, hndl );
     } else {
       sqlrc = ILE_SQLFreeHandle( htype, hndl );
     }
-    init_unlock();
     break;
   case SQL_HANDLE_DBC:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLFreeHandle( htype, hndl );
     } else {
@@ -2649,10 +2269,8 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
     if (sqlrc == SQL_SUCCESS) {
       init_table_dtor(hndl);
     }
-    init_unlock();
     break;
   case SQL_HANDLE_STMT:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLFreeHandle( htype, hndl );
     } else {
@@ -2661,10 +2279,8 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
     if (sqlrc == SQL_SUCCESS) {
       init_table_dtor(hndl);
     }
-    init_unlock();
     break;
   case SQL_HANDLE_DESC:
-    init_lock();
     if (i_am_big_chicken_flag) {
       sqlrc = libdb400_SQLFreeHandle( htype, hndl );
     } else {
@@ -2673,7 +2289,6 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
     if (sqlrc == SQL_SUCCESS) {
       init_table_dtor(hndl);
     }
-    init_unlock();
     break;
   }
   return sqlrc;
@@ -2681,9 +2296,6 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
 SQLRETURN SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetCol( hstmt, icol, itype, tval, blen, olen );
@@ -2715,9 +2327,6 @@ pthread_t SQLGetColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  ityp
   int rc = 0;
   pthread_t tid = 0;
   SQLGetColStruct * myptr = (SQLGetColStruct *) malloc(sizeof(SQLGetColStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -2733,9 +2342,6 @@ SQLGetColStruct * SQLGetColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetColStruct * myptr = (SQLGetColStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2747,9 +2353,6 @@ SQLGetColStruct * SQLGetColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
@@ -2781,9 +2384,6 @@ pthread_t SQLGetColWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  ity
   int rc = 0;
   pthread_t tid = 0;
   SQLGetColWStruct * myptr = (SQLGetColWStruct *) malloc(sizeof(SQLGetColWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -2799,9 +2399,6 @@ SQLGetColWStruct * SQLGetColWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetColWStruct * myptr = (SQLGetColWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2813,9 +2410,6 @@ SQLGetColWStruct * SQLGetColWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
@@ -2847,9 +2441,6 @@ pthread_t SQLGetConnectAttrAsync ( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  
   int rc = 0;
   pthread_t tid = 0;
   SQLGetConnectAttrStruct * myptr = (SQLGetConnectAttrStruct *) malloc(sizeof(SQLGetConnectAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->attr = attr;
@@ -2864,9 +2455,6 @@ SQLGetConnectAttrStruct * SQLGetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetConnectAttrStruct * myptr = (SQLGetConnectAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2878,9 +2466,6 @@ SQLGetConnectAttrStruct * SQLGetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
@@ -2912,9 +2497,6 @@ pthread_t SQLGetConnectAttrWAsync ( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER 
   int rc = 0;
   pthread_t tid = 0;
   SQLGetConnectAttrWStruct * myptr = (SQLGetConnectAttrWStruct *) malloc(sizeof(SQLGetConnectAttrWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->attr = attr;
@@ -2929,9 +2511,6 @@ SQLGetConnectAttrWStruct * SQLGetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLGetConnectAttrWStruct * myptr = (SQLGetConnectAttrWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -2943,9 +2522,6 @@ SQLGetConnectAttrWStruct * SQLGetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetConnectOption( hdbc, iopt, oval );
@@ -2977,9 +2553,6 @@ pthread_t SQLGetConnectOptionAsync ( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTE
   int rc = 0;
   pthread_t tid = 0;
   SQLGetConnectOptionStruct * myptr = (SQLGetConnectOptionStruct *) malloc(sizeof(SQLGetConnectOptionStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->iopt = iopt;
@@ -2992,9 +2565,6 @@ SQLGetConnectOptionStruct * SQLGetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 {
   SQLGetConnectOptionStruct * myptr = (SQLGetConnectOptionStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3006,9 +2576,6 @@ SQLGetConnectOptionStruct * SQLGetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetConnectOptionW( hdbc, iopt, oval );
@@ -3040,9 +2607,6 @@ pthread_t SQLGetConnectOptionWAsync ( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINT
   int rc = 0;
   pthread_t tid = 0;
   SQLGetConnectOptionWStruct * myptr = (SQLGetConnectOptionWStruct *) malloc(sizeof(SQLGetConnectOptionWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->iopt = iopt;
@@ -3055,9 +2619,6 @@ SQLGetConnectOptionWStruct * SQLGetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 {
   SQLGetConnectOptionWStruct * myptr = (SQLGetConnectOptionWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3069,9 +2630,6 @@ SQLGetConnectOptionWStruct * SQLGetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
@@ -3103,9 +2661,6 @@ pthread_t SQLGetCursorNameAsync ( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLGetCursorNameStruct * myptr = (SQLGetCursorNameStruct *) malloc(sizeof(SQLGetCursorNameStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szCursor = szCursor;
@@ -3119,9 +2674,6 @@ SQLGetCursorNameStruct * SQLGetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetCursorNameStruct * myptr = (SQLGetCursorNameStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3133,9 +2685,6 @@ SQLGetCursorNameStruct * SQLGetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
@@ -3167,9 +2716,6 @@ pthread_t SQLGetCursorNameWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMAL
   int rc = 0;
   pthread_t tid = 0;
   SQLGetCursorNameWStruct * myptr = (SQLGetCursorNameWStruct *) malloc(sizeof(SQLGetCursorNameWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szCursor = szCursor;
@@ -3183,9 +2729,6 @@ SQLGetCursorNameWStruct * SQLGetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetCursorNameWStruct * myptr = (SQLGetCursorNameWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3197,9 +2740,6 @@ SQLGetCursorNameWStruct * SQLGetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
@@ -3231,9 +2771,6 @@ pthread_t SQLGetDataAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCT
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDataStruct * myptr = (SQLGetDataStruct *) malloc(sizeof(SQLGetDataStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -3249,9 +2786,6 @@ SQLGetDataStruct * SQLGetDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDataStruct * myptr = (SQLGetDataStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3263,9 +2797,6 @@ SQLGetDataStruct * SQLGetDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
@@ -3297,9 +2828,6 @@ pthread_t SQLGetDescFieldAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDescFieldStruct * myptr = (SQLGetDescFieldStruct *) malloc(sizeof(SQLGetDescFieldStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -3315,9 +2843,6 @@ SQLGetDescFieldStruct * SQLGetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescFieldStruct * myptr = (SQLGetDescFieldStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3329,9 +2854,6 @@ SQLGetDescFieldStruct * SQLGetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
@@ -3363,9 +2885,6 @@ pthread_t SQLGetDescFieldWAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDescFieldWStruct * myptr = (SQLGetDescFieldWStruct *) malloc(sizeof(SQLGetDescFieldWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -3381,9 +2900,6 @@ SQLGetDescFieldWStruct * SQLGetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescFieldWStruct * myptr = (SQLGetDescFieldWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3395,9 +2911,6 @@ SQLGetDescFieldWStruct * SQLGetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
@@ -3429,9 +2942,6 @@ pthread_t SQLGetDescRecAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * f
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDescRecStruct * myptr = (SQLGetDescRecStruct *) malloc(sizeof(SQLGetDescRecStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -3452,9 +2962,6 @@ SQLGetDescRecStruct * SQLGetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescRecStruct * myptr = (SQLGetDescRecStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3466,9 +2973,6 @@ SQLGetDescRecStruct * SQLGetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
@@ -3500,9 +3004,6 @@ pthread_t SQLGetDescRecWAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR *
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDescRecWStruct * myptr = (SQLGetDescRecWStruct *) malloc(sizeof(SQLGetDescRecWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -3523,9 +3024,6 @@ SQLGetDescRecWStruct * SQLGetDescRecWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescRecWStruct * myptr = (SQLGetDescRecWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3537,9 +3035,6 @@ SQLGetDescRecWStruct * SQLGetDescRecWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
   } else {
@@ -3567,9 +3062,6 @@ pthread_t SQLGetDiagFieldAsync ( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDiagFieldStruct * myptr = (SQLGetDiagFieldStruct *) malloc(sizeof(SQLGetDiagFieldStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hType = hType;
   myptr->hndl = hndl;
@@ -3586,9 +3078,6 @@ SQLGetDiagFieldStruct * SQLGetDiagFieldJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDiagFieldStruct * myptr = (SQLGetDiagFieldStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3599,9 +3088,6 @@ SQLGetDiagFieldStruct * SQLGetDiagFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
   } else {
@@ -3629,9 +3115,6 @@ pthread_t SQLGetDiagFieldWAsync ( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDiagFieldWStruct * myptr = (SQLGetDiagFieldWStruct *) malloc(sizeof(SQLGetDiagFieldWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hType = hType;
   myptr->hndl = hndl;
@@ -3648,9 +3131,6 @@ SQLGetDiagFieldWStruct * SQLGetDiagFieldWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDiagFieldWStruct * myptr = (SQLGetDiagFieldWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3661,9 +3141,6 @@ SQLGetDiagFieldWStruct * SQLGetDiagFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
   } else {
@@ -3691,9 +3168,6 @@ pthread_t SQLGetDiagRecAsync ( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDiagRecStruct * myptr = (SQLGetDiagRecStruct *) malloc(sizeof(SQLGetDiagRecStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hType = hType;
   myptr->hndl = hndl;
@@ -3711,9 +3185,6 @@ SQLGetDiagRecStruct * SQLGetDiagRecJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDiagRecStruct * myptr = (SQLGetDiagRecStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3724,9 +3195,6 @@ SQLGetDiagRecStruct * SQLGetDiagRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
   } else {
@@ -3754,9 +3222,6 @@ pthread_t SQLGetDiagRecWAsync ( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLIN
   int rc = 0;
   pthread_t tid = 0;
   SQLGetDiagRecWStruct * myptr = (SQLGetDiagRecWStruct *) malloc(sizeof(SQLGetDiagRecWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hType = hType;
   myptr->hndl = hndl;
@@ -3774,9 +3239,6 @@ SQLGetDiagRecWStruct * SQLGetDiagRecWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDiagRecWStruct * myptr = (SQLGetDiagRecWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3787,9 +3249,6 @@ SQLGetDiagRecWStruct * SQLGetDiagRecWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
   } else {
@@ -3819,9 +3278,6 @@ pthread_t SQLGetEnvAttrAsync ( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER
   int rc = 0;
   pthread_t tid = 0;
   SQLGetEnvAttrStruct * myptr = (SQLGetEnvAttrStruct *) malloc(sizeof(SQLGetEnvAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hEnv = hEnv;
   myptr->fAttribute = fAttribute;
@@ -3836,9 +3292,6 @@ SQLGetEnvAttrStruct * SQLGetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetEnvAttrStruct * myptr = (SQLGetEnvAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3850,9 +3303,6 @@ SQLGetEnvAttrStruct * SQLGetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLINT * pfExists )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetFunctions( hdbc, fFunction, pfExists );
@@ -3884,9 +3334,6 @@ pthread_t SQLGetFunctionsAsync ( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLGetFunctionsStruct * myptr = (SQLGetFunctionsStruct *) malloc(sizeof(SQLGetFunctionsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->fFunction = fFunction;
@@ -3899,9 +3346,6 @@ SQLGetFunctionsStruct * SQLGetFunctionsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetFunctionsStruct * myptr = (SQLGetFunctionsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3913,9 +3357,6 @@ SQLGetFunctionsStruct * SQLGetFunctionsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
@@ -3947,9 +3388,6 @@ pthread_t SQLGetInfoAsync ( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  r
   int rc = 0;
   pthread_t tid = 0;
   SQLGetInfoStruct * myptr = (SQLGetInfoStruct *) malloc(sizeof(SQLGetInfoStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->fInfoType = fInfoType;
@@ -3964,9 +3402,6 @@ SQLGetInfoStruct * SQLGetInfoJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetInfoStruct * myptr = (SQLGetInfoStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -3978,9 +3413,6 @@ SQLGetInfoStruct * SQLGetInfoJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
@@ -4012,9 +3444,6 @@ pthread_t SQLGetInfoWAsync ( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  
   int rc = 0;
   pthread_t tid = 0;
   SQLGetInfoWStruct * myptr = (SQLGetInfoWStruct *) malloc(sizeof(SQLGetInfoWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->fInfoType = fInfoType;
@@ -4029,9 +3458,6 @@ SQLGetInfoWStruct * SQLGetInfoWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetInfoWStruct * myptr = (SQLGetInfoWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4043,9 +3469,6 @@ SQLGetInfoWStruct * SQLGetInfoWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetLength( hstmt, locType, locator, sLength, ind );
@@ -4077,9 +3500,6 @@ pthread_t SQLGetLengthAsync ( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER 
   int rc = 0;
   pthread_t tid = 0;
   SQLGetLengthStruct * myptr = (SQLGetLengthStruct *) malloc(sizeof(SQLGetLengthStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->locType = locType;
@@ -4094,9 +3514,6 @@ SQLGetLengthStruct * SQLGetLengthJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetLengthStruct * myptr = (SQLGetLengthStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4108,9 +3525,6 @@ SQLGetLengthStruct * SQLGetLengthJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
@@ -4142,9 +3556,6 @@ pthread_t SQLGetPositionAsync ( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGE
   int rc = 0;
   pthread_t tid = 0;
   SQLGetPositionStruct * myptr = (SQLGetPositionStruct *) malloc(sizeof(SQLGetPositionStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->locType = locType;
@@ -4163,9 +3574,6 @@ SQLGetPositionStruct * SQLGetPositionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetPositionStruct * myptr = (SQLGetPositionStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4177,9 +3585,6 @@ SQLGetPositionStruct * SQLGetPositionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
@@ -4211,9 +3616,6 @@ pthread_t SQLGetPositionWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEG
   int rc = 0;
   pthread_t tid = 0;
   SQLGetPositionWStruct * myptr = (SQLGetPositionWStruct *) malloc(sizeof(SQLGetPositionWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->locType = locType;
@@ -4232,9 +3634,6 @@ SQLGetPositionWStruct * SQLGetPositionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetPositionWStruct * myptr = (SQLGetPositionWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4246,9 +3645,6 @@ SQLGetPositionWStruct * SQLGetPositionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
@@ -4280,9 +3676,6 @@ pthread_t SQLGetStmtAttrAsync ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  
   int rc = 0;
   pthread_t tid = 0;
   SQLGetStmtAttrStruct * myptr = (SQLGetStmtAttrStruct *) malloc(sizeof(SQLGetStmtAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fAttr = fAttr;
@@ -4297,9 +3690,6 @@ SQLGetStmtAttrStruct * SQLGetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtAttrStruct * myptr = (SQLGetStmtAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4311,9 +3701,6 @@ SQLGetStmtAttrStruct * SQLGetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
@@ -4345,9 +3732,6 @@ pthread_t SQLGetStmtAttrWAsync ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER 
   int rc = 0;
   pthread_t tid = 0;
   SQLGetStmtAttrWStruct * myptr = (SQLGetStmtAttrWStruct *) malloc(sizeof(SQLGetStmtAttrWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fAttr = fAttr;
@@ -4362,9 +3746,6 @@ SQLGetStmtAttrWStruct * SQLGetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtAttrWStruct * myptr = (SQLGetStmtAttrWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4376,9 +3757,6 @@ SQLGetStmtAttrWStruct * SQLGetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetStmtOption( hstmt, fOption, pvParam );
@@ -4410,9 +3788,6 @@ pthread_t SQLGetStmtOptionAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOIN
   int rc = 0;
   pthread_t tid = 0;
   SQLGetStmtOptionStruct * myptr = (SQLGetStmtOptionStruct *) malloc(sizeof(SQLGetStmtOptionStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOption = fOption;
@@ -4425,9 +3800,6 @@ SQLGetStmtOptionStruct * SQLGetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtOptionStruct * myptr = (SQLGetStmtOptionStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4439,9 +3811,6 @@ SQLGetStmtOptionStruct * SQLGetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetStmtOptionW( hstmt, fOption, pvParam );
@@ -4473,9 +3842,6 @@ pthread_t SQLGetStmtOptionWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOI
   int rc = 0;
   pthread_t tid = 0;
   SQLGetStmtOptionWStruct * myptr = (SQLGetStmtOptionWStruct *) malloc(sizeof(SQLGetStmtOptionWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOption = fOption;
@@ -4488,9 +3854,6 @@ SQLGetStmtOptionWStruct * SQLGetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtOptionWStruct * myptr = (SQLGetStmtOptionWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4502,9 +3865,6 @@ SQLGetStmtOptionWStruct * SQLGetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
@@ -4536,9 +3896,6 @@ pthread_t SQLGetSubStringAsync ( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEG
   int rc = 0;
   pthread_t tid = 0;
   SQLGetSubStringStruct * myptr = (SQLGetSubStringStruct *) malloc(sizeof(SQLGetSubStringStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->locType = locType;
@@ -4558,9 +3915,6 @@ SQLGetSubStringStruct * SQLGetSubStringJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetSubStringStruct * myptr = (SQLGetSubStringStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4572,9 +3926,6 @@ SQLGetSubStringStruct * SQLGetSubStringJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
@@ -4606,9 +3957,6 @@ pthread_t SQLGetSubStringWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTE
   int rc = 0;
   pthread_t tid = 0;
   SQLGetSubStringWStruct * myptr = (SQLGetSubStringWStruct *) malloc(sizeof(SQLGetSubStringWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->locType = locType;
@@ -4628,9 +3976,6 @@ SQLGetSubStringWStruct * SQLGetSubStringWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetSubStringWStruct * myptr = (SQLGetSubStringWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4642,9 +3987,6 @@ SQLGetSubStringWStruct * SQLGetSubStringWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetTypeInfo( hstmt, fSqlType );
@@ -4676,9 +4018,6 @@ pthread_t SQLGetTypeInfoAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType, void * c
   int rc = 0;
   pthread_t tid = 0;
   SQLGetTypeInfoStruct * myptr = (SQLGetTypeInfoStruct *) malloc(sizeof(SQLGetTypeInfoStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fSqlType = fSqlType;
@@ -4690,9 +4029,6 @@ SQLGetTypeInfoStruct * SQLGetTypeInfoJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetTypeInfoStruct * myptr = (SQLGetTypeInfoStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4704,9 +4040,6 @@ SQLGetTypeInfoStruct * SQLGetTypeInfoJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLGetTypeInfoW( hstmt, fSqlType );
@@ -4738,9 +4071,6 @@ pthread_t SQLGetTypeInfoWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType, void * 
   int rc = 0;
   pthread_t tid = 0;
   SQLGetTypeInfoWStruct * myptr = (SQLGetTypeInfoWStruct *) malloc(sizeof(SQLGetTypeInfoWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fSqlType = fSqlType;
@@ -4752,9 +4082,6 @@ SQLGetTypeInfoWStruct * SQLGetTypeInfoWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetTypeInfoWStruct * myptr = (SQLGetTypeInfoWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4766,9 +4093,6 @@ SQLGetTypeInfoWStruct * SQLGetTypeInfoWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLLanguages( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLLanguages( hstmt );
@@ -4800,9 +4124,6 @@ pthread_t SQLLanguagesAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLLanguagesStruct * myptr = (SQLLanguagesStruct *) malloc(sizeof(SQLLanguagesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -4813,9 +4134,6 @@ SQLLanguagesStruct * SQLLanguagesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLLanguagesStruct * myptr = (SQLLanguagesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4827,9 +4145,6 @@ SQLLanguagesStruct * SQLLanguagesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLMoreResults( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLMoreResults( hstmt );
@@ -4861,9 +4176,6 @@ pthread_t SQLMoreResultsAsync ( SQLHSTMT  hstmt, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLMoreResultsStruct * myptr = (SQLMoreResultsStruct *) malloc(sizeof(SQLMoreResultsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->callback = callback;
@@ -4874,9 +4186,6 @@ SQLMoreResultsStruct * SQLMoreResultsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLMoreResultsStruct * myptr = (SQLMoreResultsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4888,9 +4197,6 @@ SQLMoreResultsStruct * SQLMoreResultsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
@@ -4922,9 +4228,6 @@ pthread_t SQLNativeSqlAsync ( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  c
   int rc = 0;
   pthread_t tid = 0;
   SQLNativeSqlStruct * myptr = (SQLNativeSqlStruct *) malloc(sizeof(SQLNativeSqlStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->szSqlStrIn = szSqlStrIn;
@@ -4940,9 +4243,6 @@ SQLNativeSqlStruct * SQLNativeSqlJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNativeSqlStruct * myptr = (SQLNativeSqlStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -4954,9 +4254,6 @@ SQLNativeSqlStruct * SQLNativeSqlJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
@@ -4988,9 +4285,6 @@ pthread_t SQLNativeSqlWAsync ( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER 
   int rc = 0;
   pthread_t tid = 0;
   SQLNativeSqlWStruct * myptr = (SQLNativeSqlWStruct *) malloc(sizeof(SQLNativeSqlWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->szSqlStrIn = szSqlStrIn;
@@ -5006,9 +4300,6 @@ SQLNativeSqlWStruct * SQLNativeSqlWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNativeSqlWStruct * myptr = (SQLNativeSqlWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5020,9 +4311,6 @@ SQLNativeSqlWStruct * SQLNativeSqlWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLNextResult( hstmt, hstmt2 );
@@ -5054,9 +4342,6 @@ pthread_t SQLNextResultAsync ( SQLHSTMT  hstmt, SQLHSTMT  hstmt2, void * callbac
   int rc = 0;
   pthread_t tid = 0;
   SQLNextResultStruct * myptr = (SQLNextResultStruct *) malloc(sizeof(SQLNextResultStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->hstmt2 = hstmt2;
@@ -5068,9 +4353,6 @@ SQLNextResultStruct * SQLNextResultJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNextResultStruct * myptr = (SQLNextResultStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5082,9 +4364,6 @@ SQLNextResultStruct * SQLNextResultJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLNumParams( hstmt, pcpar );
@@ -5116,9 +4395,6 @@ pthread_t SQLNumParamsAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pcpar, void * callb
   int rc = 0;
   pthread_t tid = 0;
   SQLNumParamsStruct * myptr = (SQLNumParamsStruct *) malloc(sizeof(SQLNumParamsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->pcpar = pcpar;
@@ -5130,9 +4406,6 @@ SQLNumParamsStruct * SQLNumParamsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNumParamsStruct * myptr = (SQLNumParamsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5144,9 +4417,6 @@ SQLNumParamsStruct * SQLNumParamsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLNumResultCols( hstmt, pccol );
@@ -5178,9 +4448,6 @@ pthread_t SQLNumResultColsAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, void * c
   int rc = 0;
   pthread_t tid = 0;
   SQLNumResultColsStruct * myptr = (SQLNumResultColsStruct *) malloc(sizeof(SQLNumResultColsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->pccol = pccol;
@@ -5192,9 +4459,6 @@ SQLNumResultColsStruct * SQLNumResultColsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNumResultColsStruct * myptr = (SQLNumResultColsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5206,9 +4470,6 @@ SQLNumResultColsStruct * SQLNumResultColsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLParamData( hstmt, Value );
@@ -5240,9 +4501,6 @@ pthread_t SQLParamDataAsync ( SQLHSTMT  hstmt, SQLPOINTER * Value, void * callba
   int rc = 0;
   pthread_t tid = 0;
   SQLParamDataStruct * myptr = (SQLParamDataStruct *) malloc(sizeof(SQLParamDataStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->Value = Value;
@@ -5254,9 +4512,6 @@ SQLParamDataStruct * SQLParamDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLParamDataStruct * myptr = (SQLParamDataStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5268,9 +4523,6 @@ SQLParamDataStruct * SQLParamDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * pirow )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLParamOptions( hstmt, crow, pirow );
@@ -5302,9 +4554,6 @@ pthread_t SQLParamOptionsAsync ( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER *
   int rc = 0;
   pthread_t tid = 0;
   SQLParamOptionsStruct * myptr = (SQLParamOptionsStruct *) malloc(sizeof(SQLParamOptionsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->crow = crow;
@@ -5317,9 +4566,6 @@ SQLParamOptionsStruct * SQLParamOptionsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLParamOptionsStruct * myptr = (SQLParamOptionsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5331,9 +4577,6 @@ SQLParamOptionsStruct * SQLParamOptionsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
@@ -5365,9 +4608,6 @@ pthread_t SQLPrepareAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbS
   int rc = 0;
   pthread_t tid = 0;
   SQLPrepareStruct * myptr = (SQLPrepareStruct *) malloc(sizeof(SQLPrepareStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szSqlStr = szSqlStr;
@@ -5380,9 +4620,6 @@ SQLPrepareStruct * SQLPrepareJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrepareStruct * myptr = (SQLPrepareStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5394,9 +4631,6 @@ SQLPrepareStruct * SQLPrepareJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
@@ -5428,9 +4662,6 @@ pthread_t SQLPrepareWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  c
   int rc = 0;
   pthread_t tid = 0;
   SQLPrepareWStruct * myptr = (SQLPrepareWStruct *) malloc(sizeof(SQLPrepareWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szSqlStr = szSqlStr;
@@ -5443,9 +4674,6 @@ SQLPrepareWStruct * SQLPrepareWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrepareWStruct * myptr = (SQLPrepareWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5457,9 +4685,6 @@ SQLPrepareWStruct * SQLPrepareWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
@@ -5491,9 +4716,6 @@ pthread_t SQLPrimaryKeysAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQL
   int rc = 0;
   pthread_t tid = 0;
   SQLPrimaryKeysStruct * myptr = (SQLPrimaryKeysStruct *) malloc(sizeof(SQLPrimaryKeysStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -5510,9 +4732,6 @@ SQLPrimaryKeysStruct * SQLPrimaryKeysJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrimaryKeysStruct * myptr = (SQLPrimaryKeysStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5524,9 +4743,6 @@ SQLPrimaryKeysStruct * SQLPrimaryKeysJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
@@ -5558,9 +4774,6 @@ pthread_t SQLPrimaryKeysWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, S
   int rc = 0;
   pthread_t tid = 0;
   SQLPrimaryKeysWStruct * myptr = (SQLPrimaryKeysWStruct *) malloc(sizeof(SQLPrimaryKeysWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -5577,9 +4790,6 @@ SQLPrimaryKeysWStruct * SQLPrimaryKeysWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrimaryKeysWStruct * myptr = (SQLPrimaryKeysWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5591,9 +4801,6 @@ SQLPrimaryKeysWStruct * SQLPrimaryKeysWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
@@ -5625,9 +4832,6 @@ pthread_t SQLProcedureColumnsAsync ( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier,
   int rc = 0;
   pthread_t tid = 0;
   SQLProcedureColumnsStruct * myptr = (SQLProcedureColumnsStruct *) malloc(sizeof(SQLProcedureColumnsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szProcQualifier = szProcQualifier;
@@ -5646,9 +4850,6 @@ SQLProcedureColumnsStruct * SQLProcedureColumnsJoin (pthread_t tid, SQLINTEGER f
 {
   SQLProcedureColumnsStruct * myptr = (SQLProcedureColumnsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5660,9 +4861,6 @@ SQLProcedureColumnsStruct * SQLProcedureColumnsJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
@@ -5694,9 +4892,6 @@ pthread_t SQLProcedureColumnsWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifie
   int rc = 0;
   pthread_t tid = 0;
   SQLProcedureColumnsWStruct * myptr = (SQLProcedureColumnsWStruct *) malloc(sizeof(SQLProcedureColumnsWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szProcQualifier = szProcQualifier;
@@ -5715,9 +4910,6 @@ SQLProcedureColumnsWStruct * SQLProcedureColumnsWJoin (pthread_t tid, SQLINTEGER
 {
   SQLProcedureColumnsWStruct * myptr = (SQLProcedureColumnsWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5729,9 +4921,6 @@ SQLProcedureColumnsWStruct * SQLProcedureColumnsWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
@@ -5763,9 +4952,6 @@ pthread_t SQLProceduresAsync ( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSM
   int rc = 0;
   pthread_t tid = 0;
   SQLProceduresStruct * myptr = (SQLProceduresStruct *) malloc(sizeof(SQLProceduresStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szProcQualifier = szProcQualifier;
@@ -5782,9 +4968,6 @@ SQLProceduresStruct * SQLProceduresJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLProceduresStruct * myptr = (SQLProceduresStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5796,9 +4979,6 @@ SQLProceduresStruct * SQLProceduresJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
@@ -5830,9 +5010,6 @@ pthread_t SQLProceduresWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQL
   int rc = 0;
   pthread_t tid = 0;
   SQLProceduresWStruct * myptr = (SQLProceduresWStruct *) malloc(sizeof(SQLProceduresWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szProcQualifier = szProcQualifier;
@@ -5849,9 +5026,6 @@ SQLProceduresWStruct * SQLProceduresWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLProceduresWStruct * myptr = (SQLProceduresWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5863,9 +5037,6 @@ SQLProceduresWStruct * SQLProceduresWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLPutData( hstmt, Data, SLen );
@@ -5897,9 +5068,6 @@ pthread_t SQLPutDataAsync ( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen,
   int rc = 0;
   pthread_t tid = 0;
   SQLPutDataStruct * myptr = (SQLPutDataStruct *) malloc(sizeof(SQLPutDataStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->Data = Data;
@@ -5912,9 +5080,6 @@ SQLPutDataStruct * SQLPutDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPutDataStruct * myptr = (SQLPutDataStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5926,9 +5091,6 @@ SQLPutDataStruct * SQLPutDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLReleaseEnv( SQLHENV  henv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLReleaseEnv( henv );
   } else {
@@ -5958,9 +5120,6 @@ pthread_t SQLReleaseEnvAsync ( SQLHENV  henv, void * callback )
   int rc = 0;
   pthread_t tid = 0;
   SQLReleaseEnvStruct * myptr = (SQLReleaseEnvStruct *) malloc(sizeof(SQLReleaseEnvStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->callback = callback;
@@ -5971,9 +5130,6 @@ SQLReleaseEnvStruct * SQLReleaseEnvJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLReleaseEnvStruct * myptr = (SQLReleaseEnvStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -5985,9 +5141,6 @@ SQLReleaseEnvStruct * SQLReleaseEnvJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLRowCount( hstmt, pcrow );
@@ -6019,9 +5172,6 @@ pthread_t SQLRowCountAsync ( SQLHSTMT  hstmt, SQLINTEGER * pcrow, void * callbac
   int rc = 0;
   pthread_t tid = 0;
   SQLRowCountStruct * myptr = (SQLRowCountStruct *) malloc(sizeof(SQLRowCountStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->pcrow = pcrow;
@@ -6033,9 +5183,6 @@ SQLRowCountStruct * SQLRowCountJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLRowCountStruct * myptr = (SQLRowCountStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6047,9 +5194,6 @@ SQLRowCountStruct * SQLRowCountJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
@@ -6081,9 +5225,6 @@ pthread_t SQLSetConnectAttrAsync ( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER
   int rc = 0;
   pthread_t tid = 0;
   SQLSetConnectAttrStruct * myptr = (SQLSetConnectAttrStruct *) malloc(sizeof(SQLSetConnectAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->attrib = attrib;
@@ -6097,9 +5238,6 @@ SQLSetConnectAttrStruct * SQLSetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetConnectAttrStruct * myptr = (SQLSetConnectAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6111,9 +5249,6 @@ SQLSetConnectAttrStruct * SQLSetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
@@ -6145,9 +5280,6 @@ pthread_t SQLSetConnectAttrWAsync ( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTE
   int rc = 0;
   pthread_t tid = 0;
   SQLSetConnectAttrWStruct * myptr = (SQLSetConnectAttrWStruct *) malloc(sizeof(SQLSetConnectAttrWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->attrib = attrib;
@@ -6161,9 +5293,6 @@ SQLSetConnectAttrWStruct * SQLSetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLSetConnectAttrWStruct * myptr = (SQLSetConnectAttrWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6175,9 +5304,6 @@ SQLSetConnectAttrWStruct * SQLSetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetConnectOption( hdbc, fOption, vParam );
@@ -6209,9 +5335,6 @@ pthread_t SQLSetConnectOptionAsync ( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOI
   int rc = 0;
   pthread_t tid = 0;
   SQLSetConnectOptionStruct * myptr = (SQLSetConnectOptionStruct *) malloc(sizeof(SQLSetConnectOptionStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->fOption = fOption;
@@ -6224,9 +5347,6 @@ SQLSetConnectOptionStruct * SQLSetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 {
   SQLSetConnectOptionStruct * myptr = (SQLSetConnectOptionStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6238,9 +5358,6 @@ SQLSetConnectOptionStruct * SQLSetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetConnectOptionW( hdbc, fOption, vParam );
@@ -6272,9 +5389,6 @@ pthread_t SQLSetConnectOptionWAsync ( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPO
   int rc = 0;
   pthread_t tid = 0;
   SQLSetConnectOptionWStruct * myptr = (SQLSetConnectOptionWStruct *) malloc(sizeof(SQLSetConnectOptionWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->fOption = fOption;
@@ -6287,9 +5401,6 @@ SQLSetConnectOptionWStruct * SQLSetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 {
   SQLSetConnectOptionWStruct * myptr = (SQLSetConnectOptionWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6301,9 +5412,6 @@ SQLSetConnectOptionWStruct * SQLSetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetCursorName( hstmt, szCursor, cbCursor );
@@ -6335,9 +5443,6 @@ pthread_t SQLSetCursorNameAsync ( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLSetCursorNameStruct * myptr = (SQLSetCursorNameStruct *) malloc(sizeof(SQLSetCursorNameStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szCursor = szCursor;
@@ -6350,9 +5455,6 @@ SQLSetCursorNameStruct * SQLSetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetCursorNameStruct * myptr = (SQLSetCursorNameStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6364,9 +5466,6 @@ SQLSetCursorNameStruct * SQLSetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
@@ -6398,9 +5497,6 @@ pthread_t SQLSetCursorNameWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMAL
   int rc = 0;
   pthread_t tid = 0;
   SQLSetCursorNameWStruct * myptr = (SQLSetCursorNameWStruct *) malloc(sizeof(SQLSetCursorNameWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szCursor = szCursor;
@@ -6413,9 +5509,6 @@ SQLSetCursorNameWStruct * SQLSetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetCursorNameWStruct * myptr = (SQLSetCursorNameWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6427,9 +5520,6 @@ SQLSetCursorNameWStruct * SQLSetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
@@ -6461,9 +5551,6 @@ pthread_t SQLSetDescFieldAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLI
   int rc = 0;
   pthread_t tid = 0;
   SQLSetDescFieldStruct * myptr = (SQLSetDescFieldStruct *) malloc(sizeof(SQLSetDescFieldStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -6478,9 +5565,6 @@ SQLSetDescFieldStruct * SQLSetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescFieldStruct * myptr = (SQLSetDescFieldStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6492,9 +5576,6 @@ SQLSetDescFieldStruct * SQLSetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
@@ -6526,9 +5607,6 @@ pthread_t SQLSetDescFieldWAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLSetDescFieldWStruct * myptr = (SQLSetDescFieldWStruct *) malloc(sizeof(SQLSetDescFieldWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -6543,9 +5621,6 @@ SQLSetDescFieldWStruct * SQLSetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescFieldWStruct * myptr = (SQLSetDescFieldWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6557,9 +5632,6 @@ SQLSetDescFieldWStruct * SQLSetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdesc, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
@@ -6591,9 +5663,6 @@ pthread_t SQLSetDescRecAsync ( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   int rc = 0;
   pthread_t tid = 0;
   SQLSetDescRecStruct * myptr = (SQLSetDescRecStruct *) malloc(sizeof(SQLSetDescRecStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdesc = hdesc;
   myptr->rcdNum = rcdNum;
@@ -6613,9 +5682,6 @@ SQLSetDescRecStruct * SQLSetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescRecStruct * myptr = (SQLSetDescRecStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdesc, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6627,9 +5693,6 @@ SQLSetDescRecStruct * SQLSetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
   } else {
@@ -6659,9 +5722,6 @@ pthread_t SQLSetEnvAttrAsync ( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER
   int rc = 0;
   pthread_t tid = 0;
   SQLSetEnvAttrStruct * myptr = (SQLSetEnvAttrStruct *) malloc(sizeof(SQLSetEnvAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hEnv = hEnv;
   myptr->fAttribute = fAttribute;
@@ -6675,9 +5735,6 @@ SQLSetEnvAttrStruct * SQLSetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetEnvAttrStruct * myptr = (SQLSetEnvAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6689,9 +5746,6 @@ SQLSetEnvAttrStruct * SQLSetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCType, SQLSMALLINT  fSqlType, SQLINTEGER  cbColDef, SQLSMALLINT  ibScale, SQLPOINTER  rgbValue, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
@@ -6723,9 +5777,6 @@ pthread_t SQLSetParamAsync ( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fC
   int rc = 0;
   pthread_t tid = 0;
   SQLSetParamStruct * myptr = (SQLSetParamStruct *) malloc(sizeof(SQLSetParamStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->ipar = ipar;
@@ -6743,9 +5794,6 @@ SQLSetParamStruct * SQLSetParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetParamStruct * myptr = (SQLSetParamStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6757,9 +5805,6 @@ SQLSetParamStruct * SQLSetParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
@@ -6791,9 +5836,6 @@ pthread_t SQLSetStmtAttrAsync ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  
   int rc = 0;
   pthread_t tid = 0;
   SQLSetStmtAttrStruct * myptr = (SQLSetStmtAttrStruct *) malloc(sizeof(SQLSetStmtAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fAttr = fAttr;
@@ -6807,9 +5849,6 @@ SQLSetStmtAttrStruct * SQLSetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtAttrStruct * myptr = (SQLSetStmtAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6821,9 +5860,6 @@ SQLSetStmtAttrStruct * SQLSetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
@@ -6855,9 +5891,6 @@ pthread_t SQLSetStmtAttrWAsync ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER 
   int rc = 0;
   pthread_t tid = 0;
   SQLSetStmtAttrWStruct * myptr = (SQLSetStmtAttrWStruct *) malloc(sizeof(SQLSetStmtAttrWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fAttr = fAttr;
@@ -6871,9 +5904,6 @@ SQLSetStmtAttrWStruct * SQLSetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtAttrWStruct * myptr = (SQLSetStmtAttrWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6885,9 +5915,6 @@ SQLSetStmtAttrWStruct * SQLSetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetStmtOption( hstmt, fOption, vParam );
@@ -6919,9 +5946,6 @@ pthread_t SQLSetStmtOptionAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOIN
   int rc = 0;
   pthread_t tid = 0;
   SQLSetStmtOptionStruct * myptr = (SQLSetStmtOptionStruct *) malloc(sizeof(SQLSetStmtOptionStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOption = fOption;
@@ -6934,9 +5958,6 @@ SQLSetStmtOptionStruct * SQLSetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtOptionStruct * myptr = (SQLSetStmtOptionStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -6948,9 +5969,6 @@ SQLSetStmtOptionStruct * SQLSetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSetStmtOptionW( hstmt, fOption, vParam );
@@ -6982,9 +6000,6 @@ pthread_t SQLSetStmtOptionWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOI
   int rc = 0;
   pthread_t tid = 0;
   SQLSetStmtOptionWStruct * myptr = (SQLSetStmtOptionWStruct *) malloc(sizeof(SQLSetStmtOptionWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fOption = fOption;
@@ -6997,9 +6012,6 @@ SQLSetStmtOptionWStruct * SQLSetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtOptionWStruct * myptr = (SQLSetStmtOptionWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7011,9 +6023,6 @@ SQLSetStmtOptionWStruct * SQLSetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
@@ -7045,9 +6054,6 @@ pthread_t SQLSpecialColumnsAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCH
   int rc = 0;
   pthread_t tid = 0;
   SQLSpecialColumnsStruct * myptr = (SQLSpecialColumnsStruct *) malloc(sizeof(SQLSpecialColumnsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fColType = fColType;
@@ -7067,9 +6073,6 @@ SQLSpecialColumnsStruct * SQLSpecialColumnsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSpecialColumnsStruct * myptr = (SQLSpecialColumnsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7081,9 +6084,6 @@ SQLSpecialColumnsStruct * SQLSpecialColumnsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
@@ -7115,9 +6115,6 @@ pthread_t SQLSpecialColumnsWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLW
   int rc = 0;
   pthread_t tid = 0;
   SQLSpecialColumnsWStruct * myptr = (SQLSpecialColumnsWStruct *) malloc(sizeof(SQLSpecialColumnsWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->fColType = fColType;
@@ -7137,9 +6134,6 @@ SQLSpecialColumnsWStruct * SQLSpecialColumnsWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLSpecialColumnsWStruct * myptr = (SQLSpecialColumnsWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7151,9 +6145,6 @@ SQLSpecialColumnsWStruct * SQLSpecialColumnsWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLStartTran( htype, henv, mode, clevel );
   } else {
@@ -7181,9 +6172,6 @@ pthread_t SQLStartTranAsync ( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mod
   int rc = 0;
   pthread_t tid = 0;
   SQLStartTranStruct * myptr = (SQLStartTranStruct *) malloc(sizeof(SQLStartTranStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->htype = htype;
   myptr->henv = henv;
@@ -7197,9 +6185,6 @@ SQLStartTranStruct * SQLStartTranJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLStartTranStruct * myptr = (SQLStartTranStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7210,9 +6195,6 @@ SQLStartTranStruct * SQLStartTranJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
@@ -7244,9 +6226,6 @@ pthread_t SQLStatisticsAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLS
   int rc = 0;
   pthread_t tid = 0;
   SQLStatisticsStruct * myptr = (SQLStatisticsStruct *) malloc(sizeof(SQLStatisticsStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7265,9 +6244,6 @@ SQLStatisticsStruct * SQLStatisticsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLStatisticsStruct * myptr = (SQLStatisticsStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7279,9 +6255,6 @@ SQLStatisticsStruct * SQLStatisticsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
@@ -7313,9 +6286,6 @@ pthread_t SQLStatisticsWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQ
   int rc = 0;
   pthread_t tid = 0;
   SQLStatisticsWStruct * myptr = (SQLStatisticsWStruct *) malloc(sizeof(SQLStatisticsWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7334,9 +6304,6 @@ SQLStatisticsWStruct * SQLStatisticsWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLStatisticsWStruct * myptr = (SQLStatisticsWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7348,9 +6315,6 @@ SQLStatisticsWStruct * SQLStatisticsWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
@@ -7382,9 +6346,6 @@ pthread_t SQLTablePrivilegesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier,
   int rc = 0;
   pthread_t tid = 0;
   SQLTablePrivilegesStruct * myptr = (SQLTablePrivilegesStruct *) malloc(sizeof(SQLTablePrivilegesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7401,9 +6362,6 @@ SQLTablePrivilegesStruct * SQLTablePrivilegesJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLTablePrivilegesStruct * myptr = (SQLTablePrivilegesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7415,9 +6373,6 @@ SQLTablePrivilegesStruct * SQLTablePrivilegesJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
@@ -7449,9 +6404,6 @@ pthread_t SQLTablePrivilegesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifie
   int rc = 0;
   pthread_t tid = 0;
   SQLTablePrivilegesWStruct * myptr = (SQLTablePrivilegesWStruct *) malloc(sizeof(SQLTablePrivilegesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7468,9 +6420,6 @@ SQLTablePrivilegesWStruct * SQLTablePrivilegesWJoin (pthread_t tid, SQLINTEGER f
 {
   SQLTablePrivilegesWStruct * myptr = (SQLTablePrivilegesWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7482,9 +6431,6 @@ SQLTablePrivilegesWStruct * SQLTablePrivilegesWJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
@@ -7516,9 +6462,6 @@ pthread_t SQLTablesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALL
   int rc = 0;
   pthread_t tid = 0;
   SQLTablesStruct * myptr = (SQLTablesStruct *) malloc(sizeof(SQLTablesStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7537,9 +6480,6 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLTablesStruct * myptr = (SQLTablesStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7551,9 +6491,6 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
@@ -7585,9 +6522,6 @@ pthread_t SQLTablesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMA
   int rc = 0;
   pthread_t tid = 0;
   SQLTablesWStruct * myptr = (SQLTablesWStruct *) malloc(sizeof(SQLTablesWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->szTableQualifier = szTableQualifier;
@@ -7606,9 +6540,6 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLTablesWStruct * myptr = (SQLTablesWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7620,9 +6551,6 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (i_am_big_chicken_flag) {
     sqlrc = libdb400_SQLTransact( henv, hdbc, fType );
   } else {
@@ -7652,9 +6580,6 @@ pthread_t SQLTransactAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType, v
   int rc = 0;
   pthread_t tid = 0;
   SQLTransactStruct * myptr = (SQLTransactStruct *) malloc(sizeof(SQLTransactStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->hdbc = hdbc;
@@ -7667,9 +6592,6 @@ SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLTransactStruct * myptr = (SQLTransactStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7678,12 +6600,15 @@ SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_SQLOverrideCCSID400( newCCSID );
+  return sqlrc;
+}
 SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, inccsid );
   init_table_unlock(hdbc, 0);
@@ -7707,9 +6632,6 @@ pthread_t SQL400ToUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inl
   int rc = 0;
   pthread_t tid = 0;
   SQL400ToUtf8Struct * myptr = (SQL400ToUtf8Struct *) malloc(sizeof(SQL400ToUtf8Struct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->inparm = inparm;
@@ -7725,9 +6647,6 @@ SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ToUtf8Struct * myptr = (SQL400ToUtf8Struct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7739,9 +6658,6 @@ SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400FromUtf8( hdbc, inparm, inlen, outparm, outlen, outccsid );
   init_table_unlock(hdbc, 0);
@@ -7765,9 +6681,6 @@ pthread_t SQL400FromUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  i
   int rc = 0;
   pthread_t tid = 0;
   SQL400FromUtf8Struct * myptr = (SQL400FromUtf8Struct *) malloc(sizeof(SQL400FromUtf8Struct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->inparm = inparm;
@@ -7783,9 +6696,6 @@ SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400FromUtf8Struct * myptr = (SQL400FromUtf8Struct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7797,9 +6707,6 @@ SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, inccsid );
   init_table_unlock(hdbc, 0);
@@ -7823,9 +6730,6 @@ pthread_t SQL400ToUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  in
   int rc = 0;
   pthread_t tid = 0;
   SQL400ToUtf16Struct * myptr = (SQL400ToUtf16Struct *) malloc(sizeof(SQL400ToUtf16Struct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->inparm = inparm;
@@ -7841,9 +6745,6 @@ SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ToUtf16Struct * myptr = (SQL400ToUtf16Struct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7855,9 +6756,6 @@ SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400FromUtf16( hdbc, inparm, inlen, outparm, outlen, outccsid );
   init_table_unlock(hdbc, 0);
@@ -7881,9 +6779,6 @@ pthread_t SQL400FromUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  
   int rc = 0;
   pthread_t tid = 0;
   SQL400FromUtf16Struct * myptr = (SQL400FromUtf16Struct *) malloc(sizeof(SQL400FromUtf16Struct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hdbc = hdbc;
   myptr->inparm = inparm;
@@ -7899,9 +6794,6 @@ SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400FromUtf16Struct * myptr = (SQL400FromUtf16Struct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hdbc, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -7913,9 +6805,6 @@ SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400AddAttr( scope, attrib, vParam, inlen, onerr, flag, options );
   return sqlrc;
 }
@@ -7935,9 +6824,6 @@ pthread_t SQL400AddAttrAsync ( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER
   int rc = 0;
   pthread_t tid = 0;
   SQL400AddAttrStruct * myptr = (SQL400AddAttrStruct *) malloc(sizeof(SQL400AddAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->scope = scope;
   myptr->attrib = attrib;
@@ -7954,9 +6840,6 @@ SQL400AddAttrStruct * SQL400AddAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400AddAttrStruct * myptr = (SQL400AddAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7967,9 +6850,6 @@ SQL400AddAttrStruct * SQL400AddAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400SetAttr( scope, hndl, flag, options );
   return sqlrc;
 }
@@ -7989,9 +6869,6 @@ pthread_t SQL400SetAttrAsync ( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  f
   int rc = 0;
   pthread_t tid = 0;
   SQL400SetAttrStruct * myptr = (SQL400SetAttrStruct *) malloc(sizeof(SQL400SetAttrStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->scope = scope;
   myptr->hndl = hndl;
@@ -8005,9 +6882,6 @@ SQL400SetAttrStruct * SQL400SetAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400SetAttrStruct * myptr = (SQL400SetAttrStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8018,9 +6892,6 @@ SQL400SetAttrStruct * SQL400SetAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400Environment( ohnd, options );
   return sqlrc;
 }
@@ -8040,9 +6911,6 @@ pthread_t SQL400EnvironmentAsync ( SQLINTEGER * ohnd, SQLPOINTER  options, void 
   int rc = 0;
   pthread_t tid = 0;
   SQL400EnvironmentStruct * myptr = (SQL400EnvironmentStruct *) malloc(sizeof(SQL400EnvironmentStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->ohnd = ohnd;
   myptr->options = options;
@@ -8054,9 +6922,6 @@ SQL400EnvironmentStruct * SQL400EnvironmentJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400EnvironmentStruct * myptr = (SQL400EnvironmentStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8067,9 +6932,6 @@ SQL400EnvironmentStruct * SQL400EnvironmentJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400Connect( henv, db, uid, pwd, ohnd, options );
   return sqlrc;
 }
@@ -8091,9 +6953,6 @@ pthread_t SQL400ConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCH
   int rc = 0;
   pthread_t tid = 0;
   SQL400ConnectStruct * myptr = (SQL400ConnectStruct *) malloc(sizeof(SQL400ConnectStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->db = db;
@@ -8109,9 +6968,6 @@ SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ConnectStruct * myptr = (SQL400ConnectStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -8123,9 +6979,6 @@ SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400ConnectW( henv, db, uid, pwd, ohnd, options );
   return sqlrc;
 }
@@ -8147,9 +7000,6 @@ pthread_t SQL400ConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQ
   int rc = 0;
   pthread_t tid = 0;
   SQL400ConnectWStruct * myptr = (SQL400ConnectWStruct *) malloc(sizeof(SQL400ConnectWStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->henv = henv;
   myptr->db = db;
@@ -8165,9 +7015,6 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ConnectWStruct * myptr = (SQL400ConnectWStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   /* not lock */
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -8179,9 +7026,6 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
   return sqlrc;
 }
@@ -8201,9 +7045,6 @@ pthread_t SQL400AddCVarAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMA
   int rc = 0;
   pthread_t tid = 0;
   SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) malloc(sizeof(SQL400AddCVarStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->icol = icol;
   myptr->inOutType = inOutType;
@@ -8219,9 +7060,6 @@ SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8232,9 +7070,6 @@ SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400AddDesc( hstmt, icol, flag, descs );
   init_table_unlock(hstmt, 1);
@@ -8258,9 +7093,6 @@ pthread_t SQL400AddDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
   int rc = 0;
   pthread_t tid = 0;
   SQL400AddDescStruct * myptr = (SQL400AddDescStruct *) malloc(sizeof(SQL400AddDescStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->icol = icol;
@@ -8274,9 +7106,6 @@ SQL400AddDescStruct * SQL400AddDescJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400AddDescStruct * myptr = (SQL400AddDescStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -8288,9 +7117,6 @@ SQL400AddDescStruct * SQL400AddDescJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Execute( hstmt, parms, desc_parms );
   init_table_unlock(hstmt, 1);
@@ -8314,9 +7140,6 @@ pthread_t SQL400ExecuteAsync ( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  d
   int rc = 0;
   pthread_t tid = 0;
   SQL400ExecuteStruct * myptr = (SQL400ExecuteStruct *) malloc(sizeof(SQL400ExecuteStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->parms = parms;
@@ -8329,9 +7152,6 @@ SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ExecuteStruct * myptr = (SQL400ExecuteStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -8343,9 +7163,6 @@ SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Fetch( hstmt, start_row, cols, desc_cols );
   init_table_unlock(hstmt, 1);
@@ -8369,9 +7186,6 @@ pthread_t SQL400FetchAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER 
   int rc = 0;
   pthread_t tid = 0;
   SQL400FetchStruct * myptr = (SQL400FetchStruct *) malloc(sizeof(SQL400FetchStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->start_row = start_row;
@@ -8385,9 +7199,6 @@ SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400FetchStruct * myptr = (SQL400FetchStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
@@ -8399,9 +7210,6 @@ SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
   init_table_unlock(hstmt, 1);
@@ -8425,9 +7233,6 @@ pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * call
   int rc = 0;
   pthread_t tid = 0;
   SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) malloc(sizeof(SQL400Stmt2HdbcStruct));
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
   myptr->ohnd = ohnd;
@@ -8439,9 +7244,6 @@ SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) NULL;
   int active = 0;
-  if (i_am_big_chicken_flag) {
-    init_dlsym();
-  }
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
