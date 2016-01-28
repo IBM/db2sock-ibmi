@@ -1,27 +1,25 @@
-#IMPORTANT WARNING -------------------------
+#------IMPORTANT WARNING -------
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
 
 #db2sock
-Welcome to the db2sock project.  
 
-Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
-This new libdb400.a is replacement for PASE libdb400.a (default).
-Replacement was done to add missing wide APIs to PASE driver.
-Also, old driver was less than optimal dealing with CCSID.
-However, compile chicken switch exists in generated code to use old libdb400.a (not recommended).
+Welcome to the db2sock project. Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
 Follow on project maybe socket based driver (tbd).
+
+This libdb400.a should fit seamless under any exsiting scripting language db2 exetnsion. 
+That is to say, exports everything old PASE libdb400.a, while providing advanced functions.  
+
+A vast number of features have been added to new libdb400.a, async CLI, ILE direct APIs, 
+unicode APIs (UTF-8, UTF-16). These additions should make language extension writting easier.
+CCSID topic descibes new libdb400.a mode settings via SQLOverrideCCSID400(ccsid).
 
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
-##Usage:
 
-Only compiled with xlc using -qldbl128 -qalign=natural. 
-Missing these options will result in ILE DB2 call failures.
-if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
-BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
+##Usage:
 
 In general, use CLI APIs, which, enable correct locking for async and non-async db2 operations.
 However, feel free to use new direct call ILE DB2 APIs (ILE_SQLxxx). 
@@ -120,8 +118,13 @@ run 32-bit or 64-bit
 > testnnnn_32
 > testnnnn_64
 ```
-Note: APIs are changing daily, therefore, tests may change significantly.
 
+##Note:
+
+Only compiled with xlc using -qldbl128 -qalign=natural. 
+Missing these options will result in ILE DB2 call failures.
+if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
+BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
 #License
 BSD
