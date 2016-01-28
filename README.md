@@ -55,7 +55,7 @@ SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
 -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
--->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+-->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2 (future)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
 -->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
