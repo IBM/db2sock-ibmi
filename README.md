@@ -41,7 +41,8 @@ void SQLExecDirectWCallback(SQLExecDirectWStruct* );
 SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
 
 === bypass all, call PASE libdb400.a directly  (not recommended) ===
-SQLRETURN libdb400_SQLExecDirect(..); (no wide interfaces)
+SQLRETURN libdb400_SQLExecDirect(..);
+SQLRETURN libdb400_SQLExecDirectW(..); (*)
 
 === bypass all, call ILE directly (not recommended) ===
 SQLRETURN ILE_SQLExecDirect(..);
