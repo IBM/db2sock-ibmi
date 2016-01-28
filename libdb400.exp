@@ -587,7 +587,6 @@ SQLTransact
 SQLTransactAsync
 SQLTransactJoin
 ILE_SQLTransact
-libdb400_SQLOverrideCCSID400
 SQLOverrideCCSID400
 SQL400ToUtf8
 SQL400ToUtf8Async

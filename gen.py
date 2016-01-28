@@ -293,11 +293,11 @@ for line in f:
     PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
     PaseCliLibDB400_c_main += '}' + "\n"
 
-    libdb400_exp += "libdb400_" + call_name + "\n"
-
     # SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID )
     if c400_CCSID:
       PaseCliCustom_h_proto += call_retv + ' ' + "custom_" + call_name + '(' + normal_call_args + ' );' + "\n"
+    else:
+      libdb400_exp += "libdb400_" + call_name + "\n"
 
   else:
     # each SQL400 function special (header)
