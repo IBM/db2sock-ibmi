@@ -31,18 +31,22 @@ example:
 === choose async and/or normal wait === 
 SQLRETURN SQLExecDirect(..);
 SQLRETURN SQLExecDirectW(..);
+
+== callback or reap/join with async ===
 pthread_t SQLExecDirectAsync(..);
 pthread_t SQLExecDirectWAsync(..);
-== callback or reap/join with async ===
 void SQLExecDirectCallback(SQLExecDirectStruct* );
 SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag);
 void SQLExecDirectWCallback(SQLExecDirectWStruct* );
 SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
+
 === bypass all, call PASE libdb400.a directly  (not recommended) ===
 SQLRETURN libdb400_SQLExecDirect(..); (no wide interfaces)
+
 === bypass all, call ILE directly (not recommended) ===
 SQLRETURN ILE_SQLExecDirect(..);
 SQLRETURN ILE_SQLExecDirectW(..);
+
 ```
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
@@ -51,15 +55,21 @@ see libdb400.exp for all exported APIs.
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 ```
+=== UTF-8 mode, most popular AIX/PASE/Linux ===
 SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
 -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+
+=== UTF-8 mode, most popular Windows/Java ===
 SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
 -->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2 (future)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+
+=== PASE default (original libdb400.a) ===
 SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
 -->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
+
 ```
 (*) PASE libdb400.a does not support wide CLI APIs.
 Therefore, simply call ILE DB2 with data (your problem).
