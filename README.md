@@ -52,6 +52,9 @@ SQLRETURN ILE_SQLExecDirectW(..);
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
 
+(*) PASE libdb400.a does not support wide CLI APIs.
+Therefore, this libdb400.a simply calls ILE.
+
 #CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
