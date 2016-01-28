@@ -8,18 +8,19 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
-/* chicken switch use PASE libdb400.a */
-/* (maybe runtime env var someday)    */
-int i_am_big_chicken_flag;
-
 
 SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLAllocConnect( henv, phdbc );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLAllocConnect( henv, phdbc );
+    break;
+  default:
+    sqlrc = libdb400_SQLAllocConnect( henv, phdbc );
+    break;
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phdbc, *phdbc);
@@ -29,10 +30,15 @@ SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
 SQLRETURN SQLAllocEnv( SQLHENV * phenv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLAllocEnv( phenv );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLAllocEnv( phenv );
+    break;
+  default:
+    sqlrc = libdb400_SQLAllocEnv( phenv );
+    break;
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phenv, *phenv);
@@ -42,43 +48,29 @@ SQLRETURN SQLAllocEnv( SQLHENV * phenv )
 SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLAllocHandle( htype, ihnd, ohnd );
+    break;
+  default:
+    sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
+    break;
+  }
   switch (htype) {
   case SQL_HANDLE_ENV:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
-    } else {
-      sqlrc = ILE_SQLAllocHandle( htype, ihnd, ohnd );
-    }
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, *ohnd);
     }
     break;
   case SQL_HANDLE_DBC:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
-    } else {
-      sqlrc = ILE_SQLAllocHandle( htype, ihnd, ohnd );
-    }
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, *ohnd);
     }
     break;
   case SQL_HANDLE_STMT:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
-    } else {
-      sqlrc = ILE_SQLAllocHandle( htype, ihnd, ohnd );
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      init_table_ctor(*ohnd, ihnd);
-    }
-    break;
   case SQL_HANDLE_DESC:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLAllocHandle( htype, ihnd, ohnd );
-    } else {
-      sqlrc = ILE_SQLAllocHandle( htype, ihnd, ohnd );
-    }
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, ihnd);
     }
@@ -89,10 +81,15 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
 SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLAllocStmt( hdbc, phstmt );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLAllocStmt( hdbc, phstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLAllocStmt( hdbc, phstmt );
+    break;
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phstmt, hdbc);
@@ -102,23 +99,34 @@ SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
 SQLRETURN SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLBindColThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLBindColStruct * myptr = (SQLBindColStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLBindColCallback(SQLBindColStruct* ); */
@@ -159,23 +167,34 @@ SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLBindFileToCol( hstmt, icol, fName, fNameLen, fOptions, fValueMax, sLen, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLBindFileToCol( hstmt, icol, fName, fNameLen, fOptions, fValueMax, sLen, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindFileToCol( hstmt, icol, fName, fNameLen, fOptions, fValueMax, sLen, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLBindFileToColThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindFileToCol( myptr->hstmt, myptr->icol, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->sLen, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLBindFileToColCallback(SQLBindFileToColStruct* ); */
@@ -218,23 +237,34 @@ SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLBindFileToParam( hstmt, ipar, iType, fName, fNameLen, fOptions, fValueMax, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLBindFileToParam( hstmt, ipar, iType, fName, fNameLen, fOptions, fValueMax, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindFileToParam( hstmt, ipar, iType, fName, fNameLen, fOptions, fValueMax, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLBindFileToParamThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindFileToParam( myptr->hstmt, myptr->ipar, myptr->iType, myptr->fName, myptr->fNameLen, myptr->fOptions, myptr->fValueMax, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLBindFileToParamCallback(SQLBindFileToParamStruct* ); */
@@ -277,23 +307,34 @@ SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLBindParam( hstmt, iparm, iType, pType, pLen, pScale, pData, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLBindParam( hstmt, iparm, iType, pType, pLen, pScale, pData, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindParam( hstmt, iparm, iType, pType, pLen, pScale, pData, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLBindParamThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLBindParamStruct * myptr = (SQLBindParamStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindParam( myptr->hstmt, myptr->iparm, myptr->iType, myptr->pType, myptr->pLen, myptr->pScale, myptr->pData, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLBindParamCallback(SQLBindParamStruct* ); */
@@ -336,23 +377,34 @@ SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLBindParameter( hstmt, ipar, fParamType, fCType, fSQLType, pLen, pScale, pData, cbValueMax, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLBindParameter( hstmt, ipar, fParamType, fCType, fSQLType, pLen, pScale, pData, cbValueMax, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindParameter( hstmt, ipar, fParamType, fCType, fSQLType, pLen, pScale, pData, cbValueMax, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLBindParameterThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLBindParameter( myptr->hstmt, myptr->ipar, myptr->fParamType, myptr->fCType, myptr->fSQLType, myptr->pLen, myptr->pScale, myptr->pData, myptr->cbValueMax, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLBindParameterCallback(SQLBindParameterStruct* ); */
@@ -397,23 +449,34 @@ SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCancel( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLCancel( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLCancel( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLCancel( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLCancelThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLCancelStruct * myptr = (SQLCancelStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCancel( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLCancel( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLCancel( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLCancel( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLCancelCallback(SQLCancelStruct* ); */
@@ -449,23 +512,34 @@ SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCloseCursor( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLCloseCursor( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLCloseCursor( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLCloseCursor( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLCloseCursorThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCloseCursor( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLCloseCursor( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLCloseCursor( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLCloseCursor( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLCloseCursorCallback(SQLCloseCursorStruct* ); */
@@ -501,23 +575,34 @@ SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColAttribute( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColAttribute( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttribute( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColAttributeThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttribute( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColAttributeCallback(SQLColAttributeStruct* ); */
@@ -559,23 +644,34 @@ SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColAttributeW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColAttributeW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributeW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColAttributeWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributeW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColAttributeWCallback(SQLColAttributeWStruct* ); */
@@ -617,23 +713,34 @@ SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColAttributes( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColAttributes( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributes( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColAttributesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributes( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColAttributesCallback(SQLColAttributesStruct* ); */
@@ -675,23 +782,34 @@ SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColAttributesW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColAttributesW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributesW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColAttributesWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLColAttributesW( myptr->hstmt, myptr->icol, myptr->fDescType, myptr->rgbDesc, myptr->cbDescMax, myptr->pcbDesc, myptr->pfDesc );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColAttributesWCallback(SQLColAttributesWStruct* ); */
@@ -733,23 +851,34 @@ SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColumnPrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColumnPrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnPrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColumnPrivilegesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnPrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColumnPrivilegesCallback(SQLColumnPrivilegesStruct* ); */
@@ -793,23 +922,34 @@ SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColumnPrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColumnPrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnPrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColumnPrivilegesWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnPrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColumnPrivilegesWCallback(SQLColumnPrivilegesWStruct* ); */
@@ -853,23 +993,34 @@ SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColumns( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColumns( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumns( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColumnsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColumnsStruct * myptr = (SQLColumnsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumns( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColumnsCallback(SQLColumnsStruct* ); */
@@ -913,23 +1064,34 @@ SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLColumnsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLColumnsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLColumnsWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLColumnsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLColumnsWCallback(SQLColumnsWStruct* ); */
@@ -973,23 +1135,34 @@ SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLConnect( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLConnect( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLConnect( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLConnectThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLConnectStruct * myptr = (SQLConnectStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  } else {
-    myptr->sqlrc = ILE_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLConnect( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLConnectCallback(SQLConnectStruct* ); */
@@ -1031,23 +1204,34 @@ SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLConnectW( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLConnectW( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLConnectW( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLConnectWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLConnectWStruct * myptr = (SQLConnectWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
-  } else {
-    myptr->sqlrc = ILE_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLConnectW( myptr->hdbc, myptr->szDSN, myptr->cbDSN, myptr->szUID, myptr->cbUID, myptr->szAuthStr, myptr->cbAuthStr );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLConnectWCallback(SQLConnectWStruct* ); */
@@ -1089,23 +1273,34 @@ SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(sDesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLCopyDesc( sDesc, tDesc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLCopyDesc( sDesc, tDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLCopyDesc( sDesc, tDesc );
+    break;
   }
   init_table_unlock(sDesc, 1);
   return sqlrc;
 }
 void * SQLCopyDescThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) ptr;
   init_table_lock(myptr->sDesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
-  } else {
-    myptr->sqlrc = ILE_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
+    break;
+  default:
+    sqlrc = libdb400_SQLCopyDesc( myptr->sDesc, myptr->tDesc );
+    break;
   }
   init_table_unlock(myptr->sDesc, 1);
   /* void SQLCopyDescCallback(SQLCopyDescStruct* ); */
@@ -1142,21 +1337,32 @@ SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDataSources( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDataSources( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
+    break;
+  default:
+    sqlrc = libdb400_SQLDataSources( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
+    break;
   }
   return sqlrc;
 }
 void * SQLDataSourcesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDataSourcesStruct * myptr = (SQLDataSourcesStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  } else {
-    myptr->sqlrc = ILE_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+    break;
+  default:
+    sqlrc = libdb400_SQLDataSources( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+    break;
   }
   /* not lock */
   /* void SQLDataSourcesCallback(SQLDataSourcesStruct* ); */
@@ -1199,21 +1405,32 @@ SQLDataSourcesStruct * SQLDataSourcesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
+    break;
+  default:
+    sqlrc = libdb400_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
+    break;
   }
   return sqlrc;
 }
 void * SQLDataSourcesWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDataSourcesWStruct * myptr = (SQLDataSourcesWStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
-  } else {
-    myptr->sqlrc = ILE_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+    break;
+  default:
+    sqlrc = libdb400_SQLDataSourcesW( myptr->henv, myptr->fDirection, myptr->szDSN, myptr->cbDSNMax, myptr->pcbDSN, myptr->szDescription, myptr->cbDescriptionMax, myptr->pcbDescription );
+    break;
   }
   /* not lock */
   /* void SQLDataSourcesWCallback(SQLDataSourcesWStruct* ); */
@@ -1256,23 +1473,34 @@ SQLDataSourcesWStruct * SQLDataSourcesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDescribeCol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDescribeCol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeCol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLDescribeColThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLDescribeColCallback(SQLDescribeColStruct* ); */
@@ -1316,23 +1544,34 @@ SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDescribeColW( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDescribeColW( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeColW( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLDescribeColWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeColW( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLDescribeColWCallback(SQLDescribeColWStruct* ); */
@@ -1376,23 +1615,34 @@ SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDescribeParam( hstmt, ipar, pfSqlType, pcbColDef, pibScale, pfNullable );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDescribeParam( hstmt, ipar, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeParam( hstmt, ipar, pfSqlType, pcbColDef, pibScale, pfNullable );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLDescribeParamThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLDescribeParam( myptr->hstmt, myptr->ipar, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLDescribeParamCallback(SQLDescribeParamStruct* ); */
@@ -1433,23 +1683,34 @@ SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDisconnect( SQLHDBC  hdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDisconnect( hdbc );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDisconnect( hdbc );
+    break;
+  default:
+    sqlrc = libdb400_SQLDisconnect( hdbc );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLDisconnectThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDisconnect( myptr->hdbc );
-  } else {
-    myptr->sqlrc = ILE_SQLDisconnect( myptr->hdbc );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDisconnect( myptr->hdbc );
+    break;
+  default:
+    sqlrc = libdb400_SQLDisconnect( myptr->hdbc );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLDisconnectCallback(SQLDisconnectStruct* ); */
@@ -1485,23 +1746,34 @@ SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDriverConnect( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDriverConnect( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
+    break;
+  default:
+    sqlrc = libdb400_SQLDriverConnect( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLDriverConnectThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  } else {
-    myptr->sqlrc = ILE_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+    break;
+  default:
+    sqlrc = libdb400_SQLDriverConnect( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLDriverConnectCallback(SQLDriverConnectStruct* ); */
@@ -1544,23 +1816,34 @@ SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLDriverConnectW( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLDriverConnectW( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
+    break;
+  default:
+    sqlrc = libdb400_SQLDriverConnectW( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLDriverConnectWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
-  } else {
-    myptr->sqlrc = ILE_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+    break;
+  default:
+    sqlrc = libdb400_SQLDriverConnectW( myptr->hdbc, myptr->hwnd, myptr->szConnStrIn, myptr->cbConnStrin, myptr->szConnStrOut, myptr->cbConnStrOutMax, myptr->pcbConnStrOut, myptr->fDriverCompletion );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLDriverConnectWCallback(SQLDriverConnectWStruct* ); */
@@ -1603,20 +1886,31 @@ SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLEndTran( htype, henv, ctype );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLEndTran( htype, henv, ctype );
+    break;
+  default:
+    sqlrc = libdb400_SQLEndTran( htype, henv, ctype );
+    break;
   }
   return sqlrc;
 }
 void * SQLEndTranThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLEndTranStruct * myptr = (SQLEndTranStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
-  } else {
-    myptr->sqlrc = ILE_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
+    break;
+  default:
+    sqlrc = libdb400_SQLEndTran( myptr->htype, myptr->henv, myptr->ctype );
+    break;
   }
   /* void SQLEndTranCallback(SQLEndTranStruct* ); */
   if (myptr->callback) {
@@ -1652,21 +1946,32 @@ SQLEndTranStruct * SQLEndTranJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLError( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLError( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
+    break;
+  default:
+    sqlrc = libdb400_SQLError( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
+    break;
   }
   return sqlrc;
 }
 void * SQLErrorThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLErrorStruct * myptr = (SQLErrorStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  } else {
-    myptr->sqlrc = ILE_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+    break;
+  default:
+    sqlrc = libdb400_SQLError( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+    break;
   }
   /* not lock */
   /* void SQLErrorCallback(SQLErrorStruct* ); */
@@ -1709,21 +2014,32 @@ SQLErrorStruct * SQLErrorJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
+    break;
+  default:
+    sqlrc = libdb400_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
+    break;
   }
   return sqlrc;
 }
 void * SQLErrorWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLErrorWStruct * myptr = (SQLErrorWStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
-  } else {
-    myptr->sqlrc = ILE_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+    break;
+  default:
+    sqlrc = libdb400_SQLErrorW( myptr->henv, myptr->hdbc, myptr->hstmt, myptr->szSqlState, myptr->pfNativeError, myptr->szErrorMsg, myptr->cbErrorMsgMax, myptr->pcbErrorMsg );
+    break;
   }
   /* not lock */
   /* void SQLErrorWCallback(SQLErrorWStruct* ); */
@@ -1766,23 +2082,34 @@ SQLErrorWStruct * SQLErrorWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLExecDirect( hstmt, szSqlStr, cbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLExecDirect( hstmt, szSqlStr, cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecDirect( hstmt, szSqlStr, cbSqlStr );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLExecDirectThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLExecDirectCallback(SQLExecDirectStruct* ); */
@@ -1820,23 +2147,34 @@ SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLExecDirectW( hstmt, szSqlStr, cbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLExecDirectW( hstmt, szSqlStr, cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecDirectW( hstmt, szSqlStr, cbSqlStr );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLExecDirectWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecDirectW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLExecDirectWCallback(SQLExecDirectWStruct* ); */
@@ -1874,23 +2212,34 @@ SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExecute( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLExecute( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLExecute( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecute( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLExecuteThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLExecuteStruct * myptr = (SQLExecuteStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExecute( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLExecute( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLExecute( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLExecute( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLExecuteCallback(SQLExecuteStruct* ); */
@@ -1926,23 +2275,34 @@ SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLExtendedFetch( hstmt, fOrient, fOffset, pcrow, rgfRowStatus );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLExtendedFetch( hstmt, fOrient, fOffset, pcrow, rgfRowStatus );
+    break;
+  default:
+    sqlrc = libdb400_SQLExtendedFetch( hstmt, fOrient, fOffset, pcrow, rgfRowStatus );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLExtendedFetchThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
-  } else {
-    myptr->sqlrc = ILE_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
+    break;
+  default:
+    sqlrc = libdb400_SQLExtendedFetch( myptr->hstmt, myptr->fOrient, myptr->fOffset, myptr->pcrow, myptr->rgfRowStatus );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLExtendedFetchCallback(SQLExtendedFetchStruct* ); */
@@ -1982,23 +2342,34 @@ SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLFetch( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLFetch( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLFetch( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLFetch( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLFetchThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLFetchStruct * myptr = (SQLFetchStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLFetch( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLFetch( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLFetch( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLFetch( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLFetchCallback(SQLFetchStruct* ); */
@@ -2034,23 +2405,34 @@ SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLFetchScroll( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLFetchScroll( hstmt, fOrient, fOffset );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLFetchScroll( hstmt, fOrient, fOffset );
+    break;
+  default:
+    sqlrc = libdb400_SQLFetchScroll( hstmt, fOrient, fOffset );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLFetchScrollThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
-  } else {
-    myptr->sqlrc = ILE_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
+    break;
+  default:
+    sqlrc = libdb400_SQLFetchScroll( myptr->hstmt, myptr->fOrient, myptr->fOffset );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLFetchScrollCallback(SQLFetchScrollStruct* ); */
@@ -2088,23 +2470,34 @@ SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLForeignKeys( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLForeignKeys( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLForeignKeys( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLForeignKeysThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLForeignKeys( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLForeignKeysCallback(SQLForeignKeysStruct* ); */
@@ -2152,23 +2545,34 @@ SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLForeignKeysW( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLForeignKeysW( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLForeignKeysW( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLForeignKeysWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLForeignKeysW( myptr->hstmt, myptr->szPkTableQualifier, myptr->cbPkTableQualifier, myptr->szPkTableOwner, myptr->cbPkTableOwner, myptr->szPkTableName, myptr->cbPkTableName, myptr->szFkTableQualifier, myptr->cbFkTableQualifier, myptr->szFkTableOwner, myptr->cbFkTableOwner, myptr->szFkTableName, myptr->cbFkTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLForeignKeysWCallback(SQLForeignKeysWStruct* ); */
@@ -2216,10 +2620,15 @@ SQLForeignKeysWStruct * SQLForeignKeysWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLFreeConnect( hdbc );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLFreeConnect( hdbc );
+    break;
+  default:
+    sqlrc = libdb400_SQLFreeConnect( hdbc );
+    break;
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hdbc);
@@ -2229,20 +2638,30 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
 SQLRETURN SQLFreeEnv( SQLHENV  henv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLFreeEnv( henv );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLFreeEnv( henv );
+    break;
+  default:
+    sqlrc = libdb400_SQLFreeEnv( henv );
+    break;
   }
   return sqlrc;
 }
 SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLFreeStmt( hstmt, fOption );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLFreeStmt( hstmt, fOption );
+    break;
+  default:
+    sqlrc = libdb400_SQLFreeStmt( hstmt, fOption );
+    break;
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hstmt);
@@ -2252,40 +2671,20 @@ SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
 SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLFreeHandle( htype, hndl );
+    break;
+  default:
+    sqlrc = libdb400_SQLFreeHandle( htype, hndl );
+    break;
+  }
   switch (htype) {
   case SQL_HANDLE_ENV:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLFreeHandle( htype, hndl );
-    } else {
-      sqlrc = ILE_SQLFreeHandle( htype, hndl );
-    }
     break;
-  case SQL_HANDLE_DBC:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLFreeHandle( htype, hndl );
-    } else {
-      sqlrc = ILE_SQLFreeHandle( htype, hndl );
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      init_table_dtor(hndl);
-    }
-    break;
-  case SQL_HANDLE_STMT:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLFreeHandle( htype, hndl );
-    } else {
-      sqlrc = ILE_SQLFreeHandle( htype, hndl );
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      init_table_dtor(hndl);
-    }
-    break;
-  case SQL_HANDLE_DESC:
-    if (i_am_big_chicken_flag) {
-      sqlrc = libdb400_SQLFreeHandle( htype, hndl );
-    } else {
-      sqlrc = ILE_SQLFreeHandle( htype, hndl );
-    }
+  default:
     if (sqlrc == SQL_SUCCESS) {
       init_table_dtor(hndl);
     }
@@ -2296,23 +2695,34 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
 SQLRETURN SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetCol( hstmt, icol, itype, tval, blen, olen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetCol( hstmt, icol, itype, tval, blen, olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCol( hstmt, icol, itype, tval, blen, olen );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetColThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetColStruct * myptr = (SQLGetColStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetCol( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
-  } else {
-    myptr->sqlrc = ILE_SQLGetCol( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetCol( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCol( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetColCallback(SQLGetColStruct* ); */
@@ -2353,23 +2763,34 @@ SQLGetColStruct * SQLGetColJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetColWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetColWStruct * myptr = (SQLGetColWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetColW( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
-  } else {
-    myptr->sqlrc = ILE_SQLGetColW( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetColW( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetColW( myptr->hstmt, myptr->icol, myptr->itype, myptr->tval, myptr->blen, myptr->olen );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetColWCallback(SQLGetColWStruct* ); */
@@ -2410,23 +2831,34 @@ SQLGetColWStruct * SQLGetColWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetConnectAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetConnectAttrStruct * myptr = (SQLGetConnectAttrStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetConnectAttr( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
-  } else {
-    myptr->sqlrc = ILE_SQLGetConnectAttr( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetConnectAttr( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectAttr( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetConnectAttrCallback(SQLGetConnectAttrStruct* ); */
@@ -2466,23 +2898,34 @@ SQLGetConnectAttrStruct * SQLGetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetConnectAttrWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetConnectAttrWStruct * myptr = (SQLGetConnectAttrWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetConnectAttrW( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
-  } else {
-    myptr->sqlrc = ILE_SQLGetConnectAttrW( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetConnectAttrW( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectAttrW( myptr->hdbc, myptr->attr, myptr->oval, myptr->ilen, myptr->olen );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetConnectAttrWCallback(SQLGetConnectAttrWStruct* ); */
@@ -2522,23 +2965,34 @@ SQLGetConnectAttrWStruct * SQLGetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectOption( hdbc, iopt, oval );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetConnectOption( hdbc, iopt, oval );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectOption( hdbc, iopt, oval );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetConnectOptionThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetConnectOptionStruct * myptr = (SQLGetConnectOptionStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetConnectOption( myptr->hdbc, myptr->iopt, myptr->oval );
-  } else {
-    myptr->sqlrc = ILE_SQLGetConnectOption( myptr->hdbc, myptr->iopt, myptr->oval );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetConnectOption( myptr->hdbc, myptr->iopt, myptr->oval );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectOption( myptr->hdbc, myptr->iopt, myptr->oval );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetConnectOptionCallback(SQLGetConnectOptionStruct* ); */
@@ -2576,23 +3030,34 @@ SQLGetConnectOptionStruct * SQLGetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetConnectOptionW( hdbc, iopt, oval );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetConnectOptionW( hdbc, iopt, oval );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectOptionW( hdbc, iopt, oval );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetConnectOptionWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetConnectOptionWStruct * myptr = (SQLGetConnectOptionWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetConnectOptionW( myptr->hdbc, myptr->iopt, myptr->oval );
-  } else {
-    myptr->sqlrc = ILE_SQLGetConnectOptionW( myptr->hdbc, myptr->iopt, myptr->oval );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetConnectOptionW( myptr->hdbc, myptr->iopt, myptr->oval );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetConnectOptionW( myptr->hdbc, myptr->iopt, myptr->oval );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetConnectOptionWCallback(SQLGetConnectOptionWStruct* ); */
@@ -2630,23 +3095,34 @@ SQLGetConnectOptionWStruct * SQLGetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCursorName( hstmt, szCursor, cbCursorMax, pcbCursor );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetCursorNameThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetCursorNameStruct * myptr = (SQLGetCursorNameStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
-  } else {
-    myptr->sqlrc = ILE_SQLGetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetCursorNameCallback(SQLGetCursorNameStruct* ); */
@@ -2685,23 +3161,34 @@ SQLGetCursorNameStruct * SQLGetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetCursorNameWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetCursorNameWStruct * myptr = (SQLGetCursorNameWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
-  } else {
-    myptr->sqlrc = ILE_SQLGetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursorMax, myptr->pcbCursor );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetCursorNameWCallback(SQLGetCursorNameWStruct* ); */
@@ -2740,23 +3227,34 @@ SQLGetCursorNameWStruct * SQLGetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetData( hstmt, icol, fCType, rgbValue, cbValueMax, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetDataThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDataStruct * myptr = (SQLGetDataStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetData( myptr->hstmt, myptr->icol, myptr->fCType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLGetData( myptr->hstmt, myptr->icol, myptr->fCType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetData( myptr->hstmt, myptr->icol, myptr->fCType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetData( myptr->hstmt, myptr->icol, myptr->fCType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetDataCallback(SQLGetDataStruct* ); */
@@ -2797,23 +3295,34 @@ SQLGetDataStruct * SQLGetDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescField( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLGetDescFieldThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDescFieldStruct * myptr = (SQLGetDescFieldStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDescField( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDescField( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDescField( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescField( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLGetDescFieldCallback(SQLGetDescFieldStruct* ); */
@@ -2854,23 +3363,34 @@ SQLGetDescFieldStruct * SQLGetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLGetDescFieldWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDescFieldWStruct * myptr = (SQLGetDescFieldWStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fieldID, myptr->fValue, myptr->fLength, myptr->stLength );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLGetDescFieldWCallback(SQLGetDescFieldWStruct* ); */
@@ -2911,23 +3431,34 @@ SQLGetDescFieldWStruct * SQLGetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescRec( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLGetDescRecThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDescRecStruct * myptr = (SQLGetDescRecStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDescRec( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDescRec( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDescRec( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescRec( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLGetDescRecCallback(SQLGetDescRecStruct* ); */
@@ -2973,23 +3504,34 @@ SQLGetDescRecStruct * SQLGetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLGetDescRecWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDescRecWStruct * myptr = (SQLGetDescRecWStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDescRecW( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDescRecW( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDescRecW( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDescRecW( myptr->hdesc, myptr->rcdNum, myptr->fname, myptr->bufLen, myptr->sLength, myptr->sType, myptr->sbType, myptr->fLength, myptr->fprec, myptr->fscale, myptr->fnull );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLGetDescRecWCallback(SQLGetDescRecWStruct* ); */
@@ -3035,20 +3577,31 @@ SQLGetDescRecWStruct * SQLGetDescRecWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagField( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+    break;
   }
   return sqlrc;
 }
 void * SQLGetDiagFieldThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDiagFieldStruct * myptr = (SQLGetDiagFieldStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDiagField( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDiagField( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDiagField( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagField( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+    break;
   }
   /* void SQLGetDiagFieldCallback(SQLGetDiagFieldStruct* ); */
   if (myptr->callback) {
@@ -3088,20 +3641,31 @@ SQLGetDiagFieldStruct * SQLGetDiagFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+    break;
   }
   return sqlrc;
 }
 void * SQLGetDiagFieldWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDiagFieldWStruct * myptr = (SQLGetDiagFieldWStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDiagFieldW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDiagFieldW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDiagFieldW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagFieldW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->diagID, myptr->dValue, myptr->bLength, myptr->sLength );
+    break;
   }
   /* void SQLGetDiagFieldWCallback(SQLGetDiagFieldWStruct* ); */
   if (myptr->callback) {
@@ -3141,20 +3705,31 @@ SQLGetDiagFieldWStruct * SQLGetDiagFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagRec( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+    break;
   }
   return sqlrc;
 }
 void * SQLGetDiagRecThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDiagRecStruct * myptr = (SQLGetDiagRecStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDiagRec( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDiagRec( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDiagRec( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagRec( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+    break;
   }
   /* void SQLGetDiagRecCallback(SQLGetDiagRecStruct* ); */
   if (myptr->callback) {
@@ -3195,20 +3770,31 @@ SQLGetDiagRecStruct * SQLGetDiagRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+    break;
   }
   return sqlrc;
 }
 void * SQLGetDiagRecWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetDiagRecWStruct * myptr = (SQLGetDiagRecWStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetDiagRecW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetDiagRecW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetDiagRecW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetDiagRecW( myptr->hType, myptr->hndl, myptr->rcdNum, myptr->SQLstate, myptr->SQLcode, myptr->msgText, myptr->bLength, myptr->SLength );
+    break;
   }
   /* void SQLGetDiagRecWCallback(SQLGetDiagRecWStruct* ); */
   if (myptr->callback) {
@@ -3249,21 +3835,32 @@ SQLGetDiagRecWStruct * SQLGetDiagRecWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetEnvAttr( hEnv, fAttribute, pParam, cbParamMax, pcbParam );
+    break;
   }
   return sqlrc;
 }
 void * SQLGetEnvAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetEnvAttrStruct * myptr = (SQLGetEnvAttrStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParamMax, myptr->pcbParam );
-  } else {
-    myptr->sqlrc = ILE_SQLGetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParamMax, myptr->pcbParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParamMax, myptr->pcbParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParamMax, myptr->pcbParam );
+    break;
   }
   /* not lock */
   /* void SQLGetEnvAttrCallback(SQLGetEnvAttrStruct* ); */
@@ -3303,23 +3900,34 @@ SQLGetEnvAttrStruct * SQLGetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLINT * pfExists )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetFunctions( hdbc, fFunction, pfExists );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetFunctions( hdbc, fFunction, pfExists );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetFunctions( hdbc, fFunction, pfExists );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetFunctionsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetFunctionsStruct * myptr = (SQLGetFunctionsStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetFunctions( myptr->hdbc, myptr->fFunction, myptr->pfExists );
-  } else {
-    myptr->sqlrc = ILE_SQLGetFunctions( myptr->hdbc, myptr->fFunction, myptr->pfExists );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetFunctions( myptr->hdbc, myptr->fFunction, myptr->pfExists );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetFunctions( myptr->hdbc, myptr->fFunction, myptr->pfExists );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetFunctionsCallback(SQLGetFunctionsStruct* ); */
@@ -3357,23 +3965,34 @@ SQLGetFunctionsStruct * SQLGetFunctionsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetInfoThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetInfoStruct * myptr = (SQLGetInfoStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetInfo( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
-  } else {
-    myptr->sqlrc = ILE_SQLGetInfo( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetInfo( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetInfo( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetInfoCallback(SQLGetInfoStruct* ); */
@@ -3413,23 +4032,34 @@ SQLGetInfoStruct * SQLGetInfoJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLGetInfoWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetInfoWStruct * myptr = (SQLGetInfoWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetInfoW( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
-  } else {
-    myptr->sqlrc = ILE_SQLGetInfoW( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetInfoW( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetInfoW( myptr->hdbc, myptr->fInfoType, myptr->rgbInfoValue, myptr->cbInfoValueMax, myptr->pcbInfoValue );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLGetInfoWCallback(SQLGetInfoWStruct* ); */
@@ -3469,23 +4099,34 @@ SQLGetInfoWStruct * SQLGetInfoWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetLength( hstmt, locType, locator, sLength, ind );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetLength( hstmt, locType, locator, sLength, ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetLength( hstmt, locType, locator, sLength, ind );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetLengthThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetLengthStruct * myptr = (SQLGetLengthStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetLength( myptr->hstmt, myptr->locType, myptr->locator, myptr->sLength, myptr->ind );
-  } else {
-    myptr->sqlrc = ILE_SQLGetLength( myptr->hstmt, myptr->locType, myptr->locator, myptr->sLength, myptr->ind );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetLength( myptr->hstmt, myptr->locType, myptr->locator, myptr->sLength, myptr->ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetLength( myptr->hstmt, myptr->locType, myptr->locator, myptr->sLength, myptr->ind );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetLengthCallback(SQLGetLengthStruct* ); */
@@ -3525,23 +4166,34 @@ SQLGetLengthStruct * SQLGetLengthJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetPosition( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetPositionThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetPositionStruct * myptr = (SQLGetPositionStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetPosition( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
-  } else {
-    myptr->sqlrc = ILE_SQLGetPosition( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetPosition( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetPosition( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetPositionCallback(SQLGetPositionStruct* ); */
@@ -3585,23 +4237,34 @@ SQLGetPositionStruct * SQLGetPositionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetPositionWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetPositionWStruct * myptr = (SQLGetPositionWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetPositionW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
-  } else {
-    myptr->sqlrc = ILE_SQLGetPositionW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetPositionW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetPositionW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->srchLocator, myptr->srchLiteral, myptr->srchLiteralLen, myptr->fPosition, myptr->located, myptr->ind );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetPositionWCallback(SQLGetPositionWStruct* ); */
@@ -3645,23 +4308,34 @@ SQLGetPositionWStruct * SQLGetPositionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtAttr( hstmt, fAttr, pvParam, bLength, SLength );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetStmtAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetStmtAttrStruct * myptr = (SQLGetStmtAttrStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetStmtAttrCallback(SQLGetStmtAttrStruct* ); */
@@ -3701,23 +4375,34 @@ SQLGetStmtAttrStruct * SQLGetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetStmtAttrWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetStmtAttrWStruct * myptr = (SQLGetStmtAttrWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
-  } else {
-    myptr->sqlrc = ILE_SQLGetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pvParam, myptr->bLength, myptr->SLength );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetStmtAttrWCallback(SQLGetStmtAttrWStruct* ); */
@@ -3757,23 +4442,34 @@ SQLGetStmtAttrWStruct * SQLGetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtOption( hstmt, fOption, pvParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetStmtOption( hstmt, fOption, pvParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtOption( hstmt, fOption, pvParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetStmtOptionThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetStmtOptionStruct * myptr = (SQLGetStmtOptionStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetStmtOption( myptr->hstmt, myptr->fOption, myptr->pvParam );
-  } else {
-    myptr->sqlrc = ILE_SQLGetStmtOption( myptr->hstmt, myptr->fOption, myptr->pvParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetStmtOption( myptr->hstmt, myptr->fOption, myptr->pvParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtOption( myptr->hstmt, myptr->fOption, myptr->pvParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetStmtOptionCallback(SQLGetStmtOptionStruct* ); */
@@ -3811,23 +4507,34 @@ SQLGetStmtOptionStruct * SQLGetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetStmtOptionW( hstmt, fOption, pvParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetStmtOptionW( hstmt, fOption, pvParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtOptionW( hstmt, fOption, pvParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetStmtOptionWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetStmtOptionWStruct * myptr = (SQLGetStmtOptionWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->pvParam );
-  } else {
-    myptr->sqlrc = ILE_SQLGetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->pvParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->pvParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->pvParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetStmtOptionWCallback(SQLGetStmtOptionWStruct* ); */
@@ -3865,23 +4572,34 @@ SQLGetStmtOptionWStruct * SQLGetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetSubString( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetSubStringThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetSubStringStruct * myptr = (SQLGetSubStringStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetSubString( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
-  } else {
-    myptr->sqlrc = ILE_SQLGetSubString( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetSubString( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetSubString( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetSubStringCallback(SQLGetSubStringStruct* ); */
@@ -3926,23 +4644,34 @@ SQLGetSubStringStruct * SQLGetSubStringJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetSubStringWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetSubStringWStruct * myptr = (SQLGetSubStringWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetSubStringW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
-  } else {
-    myptr->sqlrc = ILE_SQLGetSubStringW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetSubStringW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetSubStringW( myptr->hstmt, myptr->locType, myptr->srceLocator, myptr->fPosition, myptr->length, myptr->tType, myptr->rgbValue, myptr->cbValueMax, myptr->StringLength, myptr->ind );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetSubStringWCallback(SQLGetSubStringWStruct* ); */
@@ -3987,23 +4716,34 @@ SQLGetSubStringWStruct * SQLGetSubStringWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetTypeInfo( hstmt, fSqlType );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetTypeInfo( hstmt, fSqlType );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetTypeInfo( hstmt, fSqlType );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetTypeInfoThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetTypeInfoStruct * myptr = (SQLGetTypeInfoStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetTypeInfo( myptr->hstmt, myptr->fSqlType );
-  } else {
-    myptr->sqlrc = ILE_SQLGetTypeInfo( myptr->hstmt, myptr->fSqlType );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetTypeInfo( myptr->hstmt, myptr->fSqlType );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetTypeInfo( myptr->hstmt, myptr->fSqlType );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetTypeInfoCallback(SQLGetTypeInfoStruct* ); */
@@ -4040,23 +4780,34 @@ SQLGetTypeInfoStruct * SQLGetTypeInfoJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLGetTypeInfoW( hstmt, fSqlType );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLGetTypeInfoW( hstmt, fSqlType );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetTypeInfoW( hstmt, fSqlType );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLGetTypeInfoWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLGetTypeInfoWStruct * myptr = (SQLGetTypeInfoWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLGetTypeInfoW( myptr->hstmt, myptr->fSqlType );
-  } else {
-    myptr->sqlrc = ILE_SQLGetTypeInfoW( myptr->hstmt, myptr->fSqlType );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLGetTypeInfoW( myptr->hstmt, myptr->fSqlType );
+    break;
+  default:
+    sqlrc = libdb400_SQLGetTypeInfoW( myptr->hstmt, myptr->fSqlType );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLGetTypeInfoWCallback(SQLGetTypeInfoWStruct* ); */
@@ -4093,23 +4844,34 @@ SQLGetTypeInfoWStruct * SQLGetTypeInfoWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLLanguages( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLLanguages( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLLanguages( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLLanguages( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLLanguagesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLLanguagesStruct * myptr = (SQLLanguagesStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLLanguages( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLLanguages( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLLanguages( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLLanguages( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLLanguagesCallback(SQLLanguagesStruct* ); */
@@ -4145,23 +4907,34 @@ SQLLanguagesStruct * SQLLanguagesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLMoreResults( SQLHSTMT  hstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLMoreResults( hstmt );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLMoreResults( hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLMoreResults( hstmt );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLMoreResultsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLMoreResultsStruct * myptr = (SQLMoreResultsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLMoreResults( myptr->hstmt );
-  } else {
-    myptr->sqlrc = ILE_SQLMoreResults( myptr->hstmt );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLMoreResults( myptr->hstmt );
+    break;
+  default:
+    sqlrc = libdb400_SQLMoreResults( myptr->hstmt );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLMoreResultsCallback(SQLMoreResultsStruct* ); */
@@ -4197,23 +4970,34 @@ SQLMoreResultsStruct * SQLMoreResultsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLNativeSql( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLNativeSqlThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLNativeSqlStruct * myptr = (SQLNativeSqlStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLNativeSql( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLNativeSql( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLNativeSql( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLNativeSql( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLNativeSqlCallback(SQLNativeSqlStruct* ); */
@@ -4254,23 +5038,34 @@ SQLNativeSqlStruct * SQLNativeSqlJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLNativeSqlWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLNativeSqlWStruct * myptr = (SQLNativeSqlWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLNativeSqlW( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLNativeSqlW( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLNativeSqlW( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLNativeSqlW( myptr->hdbc, myptr->szSqlStrIn, myptr->cbSqlStrIn, myptr->szSqlStr, myptr->cbSqlStrMax, myptr->pcbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLNativeSqlWCallback(SQLNativeSqlWStruct* ); */
@@ -4311,23 +5106,34 @@ SQLNativeSqlWStruct * SQLNativeSqlWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNextResult( hstmt, hstmt2 );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLNextResult( hstmt, hstmt2 );
+    break;
+  default:
+    sqlrc = libdb400_SQLNextResult( hstmt, hstmt2 );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLNextResultThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLNextResultStruct * myptr = (SQLNextResultStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLNextResult( myptr->hstmt, myptr->hstmt2 );
-  } else {
-    myptr->sqlrc = ILE_SQLNextResult( myptr->hstmt, myptr->hstmt2 );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLNextResult( myptr->hstmt, myptr->hstmt2 );
+    break;
+  default:
+    sqlrc = libdb400_SQLNextResult( myptr->hstmt, myptr->hstmt2 );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLNextResultCallback(SQLNextResultStruct* ); */
@@ -4364,23 +5170,34 @@ SQLNextResultStruct * SQLNextResultJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNumParams( hstmt, pcpar );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLNumParams( hstmt, pcpar );
+    break;
+  default:
+    sqlrc = libdb400_SQLNumParams( hstmt, pcpar );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLNumParamsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLNumParamsStruct * myptr = (SQLNumParamsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLNumParams( myptr->hstmt, myptr->pcpar );
-  } else {
-    myptr->sqlrc = ILE_SQLNumParams( myptr->hstmt, myptr->pcpar );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLNumParams( myptr->hstmt, myptr->pcpar );
+    break;
+  default:
+    sqlrc = libdb400_SQLNumParams( myptr->hstmt, myptr->pcpar );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLNumParamsCallback(SQLNumParamsStruct* ); */
@@ -4417,23 +5234,34 @@ SQLNumParamsStruct * SQLNumParamsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLNumResultCols( hstmt, pccol );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLNumResultCols( hstmt, pccol );
+    break;
+  default:
+    sqlrc = libdb400_SQLNumResultCols( hstmt, pccol );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLNumResultColsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLNumResultColsStruct * myptr = (SQLNumResultColsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLNumResultCols( myptr->hstmt, myptr->pccol );
-  } else {
-    myptr->sqlrc = ILE_SQLNumResultCols( myptr->hstmt, myptr->pccol );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLNumResultCols( myptr->hstmt, myptr->pccol );
+    break;
+  default:
+    sqlrc = libdb400_SQLNumResultCols( myptr->hstmt, myptr->pccol );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLNumResultColsCallback(SQLNumResultColsStruct* ); */
@@ -4470,23 +5298,34 @@ SQLNumResultColsStruct * SQLNumResultColsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLParamData( hstmt, Value );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLParamData( hstmt, Value );
+    break;
+  default:
+    sqlrc = libdb400_SQLParamData( hstmt, Value );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLParamDataThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLParamDataStruct * myptr = (SQLParamDataStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLParamData( myptr->hstmt, myptr->Value );
-  } else {
-    myptr->sqlrc = ILE_SQLParamData( myptr->hstmt, myptr->Value );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLParamData( myptr->hstmt, myptr->Value );
+    break;
+  default:
+    sqlrc = libdb400_SQLParamData( myptr->hstmt, myptr->Value );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLParamDataCallback(SQLParamDataStruct* ); */
@@ -4523,23 +5362,34 @@ SQLParamDataStruct * SQLParamDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * pirow )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLParamOptions( hstmt, crow, pirow );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLParamOptions( hstmt, crow, pirow );
+    break;
+  default:
+    sqlrc = libdb400_SQLParamOptions( hstmt, crow, pirow );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLParamOptionsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLParamOptionsStruct * myptr = (SQLParamOptionsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLParamOptions( myptr->hstmt, myptr->crow, myptr->pirow );
-  } else {
-    myptr->sqlrc = ILE_SQLParamOptions( myptr->hstmt, myptr->crow, myptr->pirow );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLParamOptions( myptr->hstmt, myptr->crow, myptr->pirow );
+    break;
+  default:
+    sqlrc = libdb400_SQLParamOptions( myptr->hstmt, myptr->crow, myptr->pirow );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLParamOptionsCallback(SQLParamOptionsStruct* ); */
@@ -4577,23 +5427,34 @@ SQLParamOptionsStruct * SQLParamOptionsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrepare( hstmt, szSqlStr, cbSqlStr );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLPrepareThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLPrepareStruct * myptr = (SQLPrepareStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLPrepare( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLPrepare( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLPrepare( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrepare( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLPrepareCallback(SQLPrepareStruct* ); */
@@ -4631,23 +5492,34 @@ SQLPrepareStruct * SQLPrepareJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLPrepareWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLPrepareWStruct * myptr = (SQLPrepareWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLPrepareW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
-  } else {
-    myptr->sqlrc = ILE_SQLPrepareW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLPrepareW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrepareW( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLPrepareWCallback(SQLPrepareWStruct* ); */
@@ -4685,23 +5557,34 @@ SQLPrepareWStruct * SQLPrepareWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrimaryKeys( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLPrimaryKeysThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLPrimaryKeysStruct * myptr = (SQLPrimaryKeysStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLPrimaryKeys( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLPrimaryKeys( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLPrimaryKeys( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrimaryKeys( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLPrimaryKeysCallback(SQLPrimaryKeysStruct* ); */
@@ -4743,23 +5626,34 @@ SQLPrimaryKeysStruct * SQLPrimaryKeysJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLPrimaryKeysWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLPrimaryKeysWStruct * myptr = (SQLPrimaryKeysWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLPrimaryKeysW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLPrimaryKeysW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLPrimaryKeysW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLPrimaryKeysW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLPrimaryKeysWCallback(SQLPrimaryKeysWStruct* ); */
@@ -4801,23 +5695,34 @@ SQLPrimaryKeysWStruct * SQLPrimaryKeysWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedureColumns( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLProcedureColumnsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLProcedureColumnsStruct * myptr = (SQLProcedureColumnsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLProcedureColumns( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLProcedureColumns( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLProcedureColumns( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedureColumns( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLProcedureColumnsCallback(SQLProcedureColumnsStruct* ); */
@@ -4861,23 +5766,34 @@ SQLProcedureColumnsStruct * SQLProcedureColumnsJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLProcedureColumnsWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLProcedureColumnsWStruct * myptr = (SQLProcedureColumnsWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLProcedureColumnsW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
-  } else {
-    myptr->sqlrc = ILE_SQLProcedureColumnsW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLProcedureColumnsW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedureColumnsW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName, myptr->szColumnName, myptr->cbColumnName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLProcedureColumnsWCallback(SQLProcedureColumnsWStruct* ); */
@@ -4921,23 +5837,34 @@ SQLProcedureColumnsWStruct * SQLProcedureColumnsWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedures( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLProceduresThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLProceduresStruct * myptr = (SQLProceduresStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLProcedures( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
-  } else {
-    myptr->sqlrc = ILE_SQLProcedures( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLProcedures( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProcedures( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLProceduresCallback(SQLProceduresStruct* ); */
@@ -4979,23 +5906,34 @@ SQLProceduresStruct * SQLProceduresJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLProceduresWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLProceduresWStruct * myptr = (SQLProceduresWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLProceduresW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
-  } else {
-    myptr->sqlrc = ILE_SQLProceduresW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLProceduresW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+    break;
+  default:
+    sqlrc = libdb400_SQLProceduresW( myptr->hstmt, myptr->szProcQualifier, myptr->cbProcQualifier, myptr->szProcOwner, myptr->cbProcOwner, myptr->szProcName, myptr->cbProcName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLProceduresWCallback(SQLProceduresWStruct* ); */
@@ -5037,23 +5975,34 @@ SQLProceduresWStruct * SQLProceduresWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLPutData( hstmt, Data, SLen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLPutData( hstmt, Data, SLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLPutData( hstmt, Data, SLen );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLPutDataThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLPutDataStruct * myptr = (SQLPutDataStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLPutData( myptr->hstmt, myptr->Data, myptr->SLen );
-  } else {
-    myptr->sqlrc = ILE_SQLPutData( myptr->hstmt, myptr->Data, myptr->SLen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLPutData( myptr->hstmt, myptr->Data, myptr->SLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLPutData( myptr->hstmt, myptr->Data, myptr->SLen );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLPutDataCallback(SQLPutDataStruct* ); */
@@ -5091,21 +6040,32 @@ SQLPutDataStruct * SQLPutDataJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLReleaseEnv( SQLHENV  henv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLReleaseEnv( henv );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLReleaseEnv( henv );
+    break;
+  default:
+    sqlrc = libdb400_SQLReleaseEnv( henv );
+    break;
   }
   return sqlrc;
 }
 void * SQLReleaseEnvThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLReleaseEnvStruct * myptr = (SQLReleaseEnvStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLReleaseEnv( myptr->henv );
-  } else {
-    myptr->sqlrc = ILE_SQLReleaseEnv( myptr->henv );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLReleaseEnv( myptr->henv );
+    break;
+  default:
+    sqlrc = libdb400_SQLReleaseEnv( myptr->henv );
+    break;
   }
   /* not lock */
   /* void SQLReleaseEnvCallback(SQLReleaseEnvStruct* ); */
@@ -5141,23 +6101,34 @@ SQLReleaseEnvStruct * SQLReleaseEnvJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLRowCount( hstmt, pcrow );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLRowCount( hstmt, pcrow );
+    break;
+  default:
+    sqlrc = libdb400_SQLRowCount( hstmt, pcrow );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLRowCountThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLRowCountStruct * myptr = (SQLRowCountStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLRowCount( myptr->hstmt, myptr->pcrow );
-  } else {
-    myptr->sqlrc = ILE_SQLRowCount( myptr->hstmt, myptr->pcrow );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLRowCount( myptr->hstmt, myptr->pcrow );
+    break;
+  default:
+    sqlrc = libdb400_SQLRowCount( myptr->hstmt, myptr->pcrow );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLRowCountCallback(SQLRowCountStruct* ); */
@@ -5194,23 +6165,34 @@ SQLRowCountStruct * SQLRowCountJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLSetConnectAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetConnectAttrStruct * myptr = (SQLSetConnectAttrStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetConnectAttr( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
-  } else {
-    myptr->sqlrc = ILE_SQLSetConnectAttr( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetConnectAttr( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectAttr( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLSetConnectAttrCallback(SQLSetConnectAttrStruct* ); */
@@ -5249,23 +6231,34 @@ SQLSetConnectAttrStruct * SQLSetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLSetConnectAttrWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetConnectAttrWStruct * myptr = (SQLSetConnectAttrWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetConnectAttrW( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
-  } else {
-    myptr->sqlrc = ILE_SQLSetConnectAttrW( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetConnectAttrW( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectAttrW( myptr->hdbc, myptr->attrib, myptr->vParam, myptr->inlen );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLSetConnectAttrWCallback(SQLSetConnectAttrWStruct* ); */
@@ -5304,23 +6297,34 @@ SQLSetConnectAttrWStruct * SQLSetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectOption( hdbc, fOption, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetConnectOption( hdbc, fOption, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectOption( hdbc, fOption, vParam );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLSetConnectOptionThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetConnectOptionStruct * myptr = (SQLSetConnectOptionStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetConnectOption( myptr->hdbc, myptr->fOption, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetConnectOption( myptr->hdbc, myptr->fOption, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetConnectOption( myptr->hdbc, myptr->fOption, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectOption( myptr->hdbc, myptr->fOption, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLSetConnectOptionCallback(SQLSetConnectOptionStruct* ); */
@@ -5358,23 +6362,34 @@ SQLSetConnectOptionStruct * SQLSetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetConnectOptionW( hdbc, fOption, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetConnectOptionW( hdbc, fOption, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectOptionW( hdbc, fOption, vParam );
+    break;
   }
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
 void * SQLSetConnectOptionWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetConnectOptionWStruct * myptr = (SQLSetConnectOptionWStruct *) ptr;
   init_table_lock(myptr->hdbc, 0);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetConnectOptionW( myptr->hdbc, myptr->fOption, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetConnectOptionW( myptr->hdbc, myptr->fOption, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetConnectOptionW( myptr->hdbc, myptr->fOption, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetConnectOptionW( myptr->hdbc, myptr->fOption, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hdbc, 0);
   /* void SQLSetConnectOptionWCallback(SQLSetConnectOptionWStruct* ); */
@@ -5412,23 +6427,34 @@ SQLSetConnectOptionWStruct * SQLSetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 SQLRETURN SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetCursorName( hstmt, szCursor, cbCursor );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetCursorName( hstmt, szCursor, cbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetCursorName( hstmt, szCursor, cbCursor );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetCursorNameThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetCursorNameStruct * myptr = (SQLSetCursorNameStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
-  } else {
-    myptr->sqlrc = ILE_SQLSetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetCursorName( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetCursorNameCallback(SQLSetCursorNameStruct* ); */
@@ -5466,23 +6492,34 @@ SQLSetCursorNameStruct * SQLSetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetCursorNameWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetCursorNameWStruct * myptr = (SQLSetCursorNameWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
-  } else {
-    myptr->sqlrc = ILE_SQLSetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetCursorNameW( myptr->hstmt, myptr->szCursor, myptr->cbCursor );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetCursorNameWCallback(SQLSetCursorNameWStruct* ); */
@@ -5520,23 +6557,34 @@ SQLSetCursorNameWStruct * SQLSetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescField( hdesc, rcdNum, fID, Value, buffLen );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLSetDescFieldThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetDescFieldStruct * myptr = (SQLSetDescFieldStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetDescField( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
-  } else {
-    myptr->sqlrc = ILE_SQLSetDescField( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetDescField( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescField( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLSetDescFieldCallback(SQLSetDescFieldStruct* ); */
@@ -5576,23 +6624,34 @@ SQLSetDescFieldStruct * SQLSetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLSetDescFieldWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetDescFieldWStruct * myptr = (SQLSetDescFieldWStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
-  } else {
-    myptr->sqlrc = ILE_SQLSetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescFieldW( myptr->hdesc, myptr->rcdNum, myptr->fID, myptr->Value, myptr->buffLen );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLSetDescFieldWCallback(SQLSetDescFieldWStruct* ); */
@@ -5632,23 +6691,34 @@ SQLSetDescFieldWStruct * SQLSetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescRec( hdesc, rcdNum, Type, subType, fLength, fPrec, fScale, Value, sLength, indic );
+    break;
   }
   init_table_unlock(hdesc, 1);
   return sqlrc;
 }
 void * SQLSetDescRecThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetDescRecStruct * myptr = (SQLSetDescRecStruct *) ptr;
   init_table_lock(myptr->hdesc, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetDescRec( myptr->hdesc, myptr->rcdNum, myptr->Type, myptr->subType, myptr->fLength, myptr->fPrec, myptr->fScale, myptr->Value, myptr->sLength, myptr->indic );
-  } else {
-    myptr->sqlrc = ILE_SQLSetDescRec( myptr->hdesc, myptr->rcdNum, myptr->Type, myptr->subType, myptr->fLength, myptr->fPrec, myptr->fScale, myptr->Value, myptr->sLength, myptr->indic );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetDescRec( myptr->hdesc, myptr->rcdNum, myptr->Type, myptr->subType, myptr->fLength, myptr->fPrec, myptr->fScale, myptr->Value, myptr->sLength, myptr->indic );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetDescRec( myptr->hdesc, myptr->rcdNum, myptr->Type, myptr->subType, myptr->fLength, myptr->fPrec, myptr->fScale, myptr->Value, myptr->sLength, myptr->indic );
+    break;
   }
   init_table_unlock(myptr->hdesc, 1);
   /* void SQLSetDescRecCallback(SQLSetDescRecStruct* ); */
@@ -5693,21 +6763,32 @@ SQLSetDescRecStruct * SQLSetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetEnvAttr( hEnv, fAttribute, pParam, cbParam );
+    break;
   }
   return sqlrc;
 }
 void * SQLSetEnvAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetEnvAttrStruct * myptr = (SQLSetEnvAttrStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetEnvAttr( myptr->hEnv, myptr->fAttribute, myptr->pParam, myptr->cbParam );
+    break;
   }
   /* not lock */
   /* void SQLSetEnvAttrCallback(SQLSetEnvAttrStruct* ); */
@@ -5746,23 +6827,34 @@ SQLSetEnvAttrStruct * SQLSetEnvAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCType, SQLSMALLINT  fSqlType, SQLINTEGER  cbColDef, SQLSMALLINT  ibScale, SQLPOINTER  rgbValue, SQLINTEGER * pcbValue )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetParam( hstmt, ipar, fCType, fSqlType, cbColDef, ibScale, rgbValue, pcbValue );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetParamThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetParamStruct * myptr = (SQLSetParamStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetParam( myptr->hstmt, myptr->ipar, myptr->fCType, myptr->fSqlType, myptr->cbColDef, myptr->ibScale, myptr->rgbValue, myptr->pcbValue );
-  } else {
-    myptr->sqlrc = ILE_SQLSetParam( myptr->hstmt, myptr->ipar, myptr->fCType, myptr->fSqlType, myptr->cbColDef, myptr->ibScale, myptr->rgbValue, myptr->pcbValue );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetParam( myptr->hstmt, myptr->ipar, myptr->fCType, myptr->fSqlType, myptr->cbColDef, myptr->ibScale, myptr->rgbValue, myptr->pcbValue );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetParam( myptr->hstmt, myptr->ipar, myptr->fCType, myptr->fSqlType, myptr->cbColDef, myptr->ibScale, myptr->rgbValue, myptr->pcbValue );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetParamCallback(SQLSetParamStruct* ); */
@@ -5805,23 +6897,34 @@ SQLSetParamStruct * SQLSetParamJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtAttr( hstmt, fAttr, pParam, vParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetStmtAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetStmtAttrStruct * myptr = (SQLSetStmtAttrStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtAttr( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetStmtAttrCallback(SQLSetStmtAttrStruct* ); */
@@ -5860,23 +6963,34 @@ SQLSetStmtAttrStruct * SQLSetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetStmtAttrWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetStmtAttrWStruct * myptr = (SQLSetStmtAttrWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtAttrW( myptr->hstmt, myptr->fAttr, myptr->pParam, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetStmtAttrWCallback(SQLSetStmtAttrWStruct* ); */
@@ -5915,23 +7029,34 @@ SQLSetStmtAttrWStruct * SQLSetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtOption( hstmt, fOption, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetStmtOption( hstmt, fOption, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtOption( hstmt, fOption, vParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetStmtOptionThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetStmtOptionStruct * myptr = (SQLSetStmtOptionStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetStmtOption( myptr->hstmt, myptr->fOption, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetStmtOption( myptr->hstmt, myptr->fOption, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetStmtOption( myptr->hstmt, myptr->fOption, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtOption( myptr->hstmt, myptr->fOption, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetStmtOptionCallback(SQLSetStmtOptionStruct* ); */
@@ -5969,23 +7094,34 @@ SQLSetStmtOptionStruct * SQLSetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSetStmtOptionW( hstmt, fOption, vParam );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSetStmtOptionW( hstmt, fOption, vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtOptionW( hstmt, fOption, vParam );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSetStmtOptionWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSetStmtOptionWStruct * myptr = (SQLSetStmtOptionWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->vParam );
-  } else {
-    myptr->sqlrc = ILE_SQLSetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->vParam );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->vParam );
+    break;
+  default:
+    sqlrc = libdb400_SQLSetStmtOptionW( myptr->hstmt, myptr->fOption, myptr->vParam );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSetStmtOptionWCallback(SQLSetStmtOptionWStruct* ); */
@@ -6023,23 +7159,34 @@ SQLSetStmtOptionWStruct * SQLSetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLSpecialColumns( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSpecialColumnsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSpecialColumnsStruct * myptr = (SQLSpecialColumnsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSpecialColumns( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLSpecialColumns( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSpecialColumns( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLSpecialColumns( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSpecialColumnsCallback(SQLSpecialColumnsStruct* ); */
@@ -6084,23 +7231,34 @@ SQLSpecialColumnsStruct * SQLSpecialColumnsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLSpecialColumnsWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLSpecialColumnsWStruct * myptr = (SQLSpecialColumnsWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLSpecialColumnsW( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
-  } else {
-    myptr->sqlrc = ILE_SQLSpecialColumnsW( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLSpecialColumnsW( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+    break;
+  default:
+    sqlrc = libdb400_SQLSpecialColumnsW( myptr->hstmt, myptr->fColType, myptr->szTableQual, myptr->cbTableQual, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fScope, myptr->fNullable );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLSpecialColumnsWCallback(SQLSpecialColumnsWStruct* ); */
@@ -6145,20 +7303,31 @@ SQLSpecialColumnsWStruct * SQLSpecialColumnsWJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStartTran( htype, henv, mode, clevel );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLStartTran( htype, henv, mode, clevel );
+    break;
+  default:
+    sqlrc = libdb400_SQLStartTran( htype, henv, mode, clevel );
+    break;
   }
   return sqlrc;
 }
 void * SQLStartTranThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLStartTranStruct * myptr = (SQLStartTranStruct *) ptr;
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLStartTran( myptr->htype, myptr->henv, myptr->mode, myptr->clevel );
-  } else {
-    myptr->sqlrc = ILE_SQLStartTran( myptr->htype, myptr->henv, myptr->mode, myptr->clevel );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLStartTran( myptr->htype, myptr->henv, myptr->mode, myptr->clevel );
+    break;
+  default:
+    sqlrc = libdb400_SQLStartTran( myptr->htype, myptr->henv, myptr->mode, myptr->clevel );
+    break;
   }
   /* void SQLStartTranCallback(SQLStartTranStruct* ); */
   if (myptr->callback) {
@@ -6195,23 +7364,34 @@ SQLStartTranStruct * SQLStartTranJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+    break;
+  default:
+    sqlrc = libdb400_SQLStatistics( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLStatisticsThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLStatisticsStruct * myptr = (SQLStatisticsStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLStatistics( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
-  } else {
-    myptr->sqlrc = ILE_SQLStatistics( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLStatistics( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+    break;
+  default:
+    sqlrc = libdb400_SQLStatistics( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLStatisticsCallback(SQLStatisticsStruct* ); */
@@ -6255,23 +7435,34 @@ SQLStatisticsStruct * SQLStatisticsJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+    break;
+  default:
+    sqlrc = libdb400_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLStatisticsWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLStatisticsWStruct * myptr = (SQLStatisticsWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLStatisticsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
-  } else {
-    myptr->sqlrc = ILE_SQLStatisticsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLStatisticsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+    break;
+  default:
+    sqlrc = libdb400_SQLStatisticsW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->fUnique, myptr->fres );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLStatisticsWCallback(SQLStatisticsWStruct* ); */
@@ -6315,23 +7506,34 @@ SQLStatisticsWStruct * SQLStatisticsWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablePrivileges( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLTablePrivilegesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLTablePrivilegesStruct * myptr = (SQLTablePrivilegesStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLTablePrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLTablePrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLTablePrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablePrivileges( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLTablePrivilegesCallback(SQLTablePrivilegesStruct* ); */
@@ -6373,23 +7575,34 @@ SQLTablePrivilegesStruct * SQLTablePrivilegesJoin (pthread_t tid, SQLINTEGER fla
 SQLRETURN SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLTablePrivilegesWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLTablePrivilegesWStruct * myptr = (SQLTablePrivilegesWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLTablePrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
-  } else {
-    myptr->sqlrc = ILE_SQLTablePrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLTablePrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablePrivilegesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLTablePrivilegesWCallback(SQLTablePrivilegesWStruct* ); */
@@ -6431,23 +7644,34 @@ SQLTablePrivilegesWStruct * SQLTablePrivilegesWJoin (pthread_t tid, SQLINTEGER f
 SQLRETURN SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTables( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLTablesThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLTablesStruct * myptr = (SQLTablesStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLTables( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
-  } else {
-    myptr->sqlrc = ILE_SQLTables( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLTables( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTables( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLTablesCallback(SQLTablesStruct* ); */
@@ -6491,23 +7715,34 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
-  } else {
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+    break;
   }
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
 void * SQLTablesWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLTablesWStruct * myptr = (SQLTablesWStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLTablesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
-  } else {
-    myptr->sqlrc = ILE_SQLTablesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLTablesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTablesW( myptr->hstmt, myptr->szTableQualifier, myptr->cbTableQualifier, myptr->szTableOwner, myptr->cbTableOwner, myptr->szTableName, myptr->cbTableName, myptr->szTableType, myptr->cbTableType );
+    break;
   }
   init_table_unlock(myptr->hstmt, 1);
   /* void SQLTablesWCallback(SQLTablesWStruct* ); */
@@ -6551,21 +7786,32 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  if (i_am_big_chicken_flag) {
-    sqlrc = libdb400_SQLTransact( henv, hdbc, fType );
-  } else {
+  int myccsid = init_CCSID400(0);
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
     sqlrc = ILE_SQLTransact( henv, hdbc, fType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTransact( henv, hdbc, fType );
+    break;
   }
   return sqlrc;
 }
 void * SQLTransactThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQLTransactStruct * myptr = (SQLTransactStruct *) ptr;
   /* not lock */
-  if (i_am_big_chicken_flag) {
-    myptr->sqlrc = libdb400_SQLTransact( myptr->henv, myptr->hdbc, myptr->fType );
-  } else {
-    myptr->sqlrc = ILE_SQLTransact( myptr->henv, myptr->hdbc, myptr->fType );
+  switch(myccsid) {
+  case 1208: /* UTF-8 */
+  case 1200: /* UTF-16 */
+    sqlrc = ILE_SQLTransact( myptr->henv, myptr->hdbc, myptr->fType );
+    break;
+  default:
+    sqlrc = libdb400_SQLTransact( myptr->henv, myptr->hdbc, myptr->fType );
+    break;
   }
   /* not lock */
   /* void SQLTransactCallback(SQLTransactStruct* ); */
@@ -6609,6 +7855,7 @@ SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
 SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, inccsid );
   init_table_unlock(hdbc, 0);
@@ -6616,6 +7863,8 @@ SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQ
 }
 void * SQL400ToUtf8Thread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400ToUtf8Struct * myptr = (SQL400ToUtf8Struct *) ptr;
   init_table_lock(myptr->hdbc, 0);
   myptr->sqlrc = custom_SQL400ToUtf8( myptr->hdbc, myptr->inparm, myptr->inlen, myptr->outparm, myptr->outlen, myptr->inccsid );
@@ -6658,6 +7907,7 @@ SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400FromUtf8( hdbc, inparm, inlen, outparm, outlen, outccsid );
   init_table_unlock(hdbc, 0);
@@ -6665,6 +7915,8 @@ SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, 
 }
 void * SQL400FromUtf8Thread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400FromUtf8Struct * myptr = (SQL400FromUtf8Struct *) ptr;
   init_table_lock(myptr->hdbc, 0);
   myptr->sqlrc = custom_SQL400FromUtf8( myptr->hdbc, myptr->inparm, myptr->inlen, myptr->outparm, myptr->outlen, myptr->outccsid );
@@ -6707,6 +7959,7 @@ SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, inccsid );
   init_table_unlock(hdbc, 0);
@@ -6714,6 +7967,8 @@ SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, S
 }
 void * SQL400ToUtf16Thread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400ToUtf16Struct * myptr = (SQL400ToUtf16Struct *) ptr;
   init_table_lock(myptr->hdbc, 0);
   myptr->sqlrc = custom_SQL400ToUtf16( myptr->hdbc, myptr->inparm, myptr->inlen, myptr->outparm, myptr->outlen, myptr->inccsid );
@@ -6756,6 +8011,7 @@ SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hdbc, 0);
   sqlrc = custom_SQL400FromUtf16( hdbc, inparm, inlen, outparm, outlen, outccsid );
   init_table_unlock(hdbc, 0);
@@ -6763,6 +8019,8 @@ SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen,
 }
 void * SQL400FromUtf16Thread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400FromUtf16Struct * myptr = (SQL400FromUtf16Struct *) ptr;
   init_table_lock(myptr->hdbc, 0);
   myptr->sqlrc = custom_SQL400FromUtf16( myptr->hdbc, myptr->inparm, myptr->inlen, myptr->outparm, myptr->outlen, myptr->outccsid );
@@ -6805,11 +8063,14 @@ SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400AddAttr( scope, attrib, vParam, inlen, onerr, flag, options );
   return sqlrc;
 }
 void * SQL400AddAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400AddAttrStruct * myptr = (SQL400AddAttrStruct *) ptr;
   myptr->sqlrc = custom_SQL400AddAttr( myptr->scope, myptr->attrib, myptr->vParam, myptr->inlen, myptr->onerr, myptr->flag, myptr->options );
   /* void SQL400AddAttrCallback(SQL400AddAttrStruct* ); */
@@ -6850,11 +8111,14 @@ SQL400AddAttrStruct * SQL400AddAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400SetAttr( scope, hndl, flag, options );
   return sqlrc;
 }
 void * SQL400SetAttrThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400SetAttrStruct * myptr = (SQL400SetAttrStruct *) ptr;
   myptr->sqlrc = custom_SQL400SetAttr( myptr->scope, myptr->hndl, myptr->flag, myptr->options );
   /* void SQL400SetAttrCallback(SQL400SetAttrStruct* ); */
@@ -6892,11 +8156,14 @@ SQL400SetAttrStruct * SQL400SetAttrJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400Environment( ohnd, options );
   return sqlrc;
 }
 void * SQL400EnvironmentThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400EnvironmentStruct * myptr = (SQL400EnvironmentStruct *) ptr;
   myptr->sqlrc = custom_SQL400Environment( myptr->ohnd, myptr->options );
   /* void SQL400EnvironmentCallback(SQL400EnvironmentStruct* ); */
@@ -6932,11 +8199,14 @@ SQL400EnvironmentStruct * SQL400EnvironmentJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400Connect( henv, db, uid, pwd, ohnd, options );
   return sqlrc;
 }
 void * SQL400ConnectThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400ConnectStruct * myptr = (SQL400ConnectStruct *) ptr;
   /* not lock */
   myptr->sqlrc = custom_SQL400Connect( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->ohnd, myptr->options );
@@ -6979,11 +8249,14 @@ SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400ConnectW( henv, db, uid, pwd, ohnd, options );
   return sqlrc;
 }
 void * SQL400ConnectWThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400ConnectWStruct * myptr = (SQL400ConnectWStruct *) ptr;
   /* not lock */
   myptr->sqlrc = custom_SQL400ConnectW( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->ohnd, myptr->options );
@@ -7026,11 +8299,14 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
   return sqlrc;
 }
 void * SQL400AddCVarThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) ptr;
   myptr->sqlrc = custom_SQL400AddCVar( myptr->icol, myptr->inOutType, myptr->pfSqlCType, myptr->pfSqlCValue, myptr->indPtr, myptr->parms );
   /* void SQL400AddCVarCallback(SQL400AddCVarStruct* ); */
@@ -7070,6 +8346,7 @@ SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400AddDesc( hstmt, icol, flag, descs );
   init_table_unlock(hstmt, 1);
@@ -7077,6 +8354,8 @@ SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, 
 }
 void * SQL400AddDescThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400AddDescStruct * myptr = (SQL400AddDescStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
   myptr->sqlrc = custom_SQL400AddDesc( myptr->hstmt, myptr->icol, myptr->flag, myptr->descs );
@@ -7117,6 +8396,7 @@ SQL400AddDescStruct * SQL400AddDescJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Execute( hstmt, parms, desc_parms );
   init_table_unlock(hstmt, 1);
@@ -7124,6 +8404,8 @@ SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_pa
 }
 void * SQL400ExecuteThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400ExecuteStruct * myptr = (SQL400ExecuteStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
   myptr->sqlrc = custom_SQL400Execute( myptr->hstmt, myptr->parms, myptr->desc_parms );
@@ -7163,6 +8445,7 @@ SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Fetch( hstmt, start_row, cols, desc_cols );
   init_table_unlock(hstmt, 1);
@@ -7170,6 +8453,8 @@ SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols,
 }
 void * SQL400FetchThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400FetchStruct * myptr = (SQL400FetchStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
   myptr->sqlrc = custom_SQL400Fetch( myptr->hstmt, myptr->start_row, myptr->cols, myptr->desc_cols );
@@ -7210,6 +8495,7 @@ SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag)
 SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
   sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
   init_table_unlock(hstmt, 1);
@@ -7217,6 +8503,8 @@ SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
 }
 void * SQL400Stmt2HdbcThread (void *ptr)
 {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
   SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
   myptr->sqlrc = custom_SQL400Stmt2Hdbc( myptr->hstmt, myptr->ohnd );

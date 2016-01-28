@@ -15,9 +15,6 @@
 
 #define SQL_IS_INTEGER 0
 
-#define SQL_CCSID 1208
-#define SQL_CCSID_UTF16 1200
-
 
 #endif /* _TEST_H */
 

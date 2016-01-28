@@ -28,11 +28,42 @@ static int utf16_charset_flag;
 static char *utf16_charset_Ascii, *utf16_charset_Utf;
 static iconv_t utf16_AsciiToUtf, utf16_UtfToAscii;
 
+static SQLHANDLE env_hndl;
+
+
+int custom_strlen_utf16(unsigned int * src) {
+  int len = 0;
+  while (*(unsigned short *)(src+len)) { 
+    len++;
+  }
+  return len;
+}
+
+
 /*
  * ccsid decisions
  */
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER yes = SQL_TRUE;
+  int myccsid = 0;
+  if (!env_hndl) {
+    myccsid = init_CCSID400(newCCSID);
+    switch(myccsid) {
+    case 1208: /* UTF-8 */
+      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL_ATTR_UTF8, (SQLPOINTER)&yes, (SQLINTEGER) 0);
+      break;
+    case 1200: /* UTF-16 */
+      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
+      break;
+    default:
+      libdb400_SQLOverrideCCSID400( newCCSID );
+      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
+      break;
+    }
+  }
   return sqlrc;
 }
 
@@ -67,18 +98,10 @@ SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  f
     case SQL_HANDLE_ENV:
       if (scope == SQL_HANDLE_ENV ) {
         switch (opt->attrib) {
-        /*
-        case SQL400_ATTR_CCSID:
-          opt->sqlrc = custom_SQLOverrideCCSID400((int)opt->vParam);
-          if (opt->onerr == SQL400_ONERR_STOP) {
-            return opt->sqlrc;
-          }
-          break;
-        */
         default:
           /* SQLRETURN SQLSetEnvAttr ( SQLHENV  henv; SQLINTEGER  Attribute; SQLPOINTER  Value; SQLINTEGER StringLength ) */
           opt->sqlrc = SQLSetEnvAttr((SQLHENV)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
-          if (opt->onerr == SQL400_ONERR_STOP) {
+          if (opt->sqlrc == SQL_ERROR && opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
           }
           break;
@@ -91,7 +114,7 @@ SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  f
         default:
           /* SQLRETURN SQLSetConnectAttr ( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) */
           opt->sqlrc = SQLSetConnectAttr((SQLHDBC)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
-          if (opt->onerr == SQL400_ONERR_STOP) {
+          if (opt->sqlrc == SQL_ERROR && opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
           }
           break;
@@ -104,7 +127,7 @@ SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  f
         default:
           /* SQLRETURN SQLSetStmtAttr ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) */
           opt->sqlrc = SQLSetStmtAttr((SQLHSTMT)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
-          if (opt->onerr == SQL400_ONERR_STOP) {
+          if (opt->sqlrc == SQL_ERROR && opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
           }
           break;
@@ -117,7 +140,7 @@ SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  f
         default:
           /* SQLRETURN SQLSetStmtOption( SQLHSTMT hstmt, SQLSMALLINT fOption, SQLPOINTER vParam ) */
           opt->sqlrc = SQLSetStmtOption((SQLHSTMT)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam );
-          if (opt->onerr == SQL400_ONERR_STOP) {
+          if (opt->sqlrc == SQL_ERROR && opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
           }
           break;
@@ -159,9 +182,6 @@ SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   /* henv -- IBM i only one env (always 1) */
   sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, ohnd);
-  if (sqlrc != SQL_SUCCESS) {
-    return sqlrc;
-  }
   sqlrc = SQL400SetAttr(SQL_HANDLE_ENV, *ohnd, SQL400_FLAG_IMMED, options);
   if (sqlrc != SQL_SUCCESS) {
     return sqlrc;
@@ -173,23 +193,26 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   SQLHDBC hdbc = 0;
-  SQLWCHAR * db_str = (SQLWCHAR *) db;
-  SQLWCHAR * uid_str = (SQLWCHAR *) uid;
-  SQLWCHAR * pwd_str = (SQLWCHAR *) pwd;
+  SQLCHAR * db_str = (SQLCHAR *) db;
+  SQLCHAR * uid_str = (SQLCHAR *) uid;
+  SQLCHAR * pwd_str = (SQLCHAR *) pwd;
   SQLSMALLINT db_len = SQL_NTS;
   SQLSMALLINT uid_len = SQL_NTS;
   SQLSMALLINT pwd_len = SQL_NTS;
+  int db_slen = strlen(db);
+  int uid_slen = strlen(uid);
+  int pwd_slen = strlen(pwd);
   /* null input */
-  if (db == NULL || *(unsigned short *)db == 0) {
-    db_str = (SQLWCHAR *) NULL;
+  if (db == NULL || !db_slen) {
+    db_str = (SQLCHAR *) NULL;
     db_len = 0;
   }
-  if (uid == NULL || *(unsigned short *)uid == 0) {
-    uid_str = (SQLWCHAR *) NULL;
+  if (uid == NULL || !uid_slen) {
+    uid_str = (SQLCHAR *) NULL;
     uid_len = 0;
   }
-  if (pwd == NULL || *(unsigned short *)pwd == 0) {
-    pwd_str = (SQLWCHAR *) NULL;
+  if (pwd == NULL || !pwd_slen) {
+    pwd_str = (SQLCHAR *) NULL;
     pwd_len = 0;
   }
   /* hdbc -- connection */
@@ -226,19 +249,22 @@ SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, S
   SQLWCHAR * db_str = (SQLWCHAR *) db;
   SQLWCHAR * uid_str = (SQLWCHAR *) uid;
   SQLWCHAR * pwd_str = (SQLWCHAR *) pwd;
-  SQLSMALLINT db_len = SQL_NTS;  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
-  SQLSMALLINT uid_len = SQL_NTS; /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
-  SQLSMALLINT pwd_len = SQL_NTS; /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
+  SQLSMALLINT db_len = SQL_NTS;
+  SQLSMALLINT uid_len = SQL_NTS;
+  SQLSMALLINT pwd_len = SQL_NTS;
+  int db_slen = custom_strlen_utf16(db);  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
+  int uid_slen = custom_strlen_utf16(uid); /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
+  int pwd_slen = custom_strlen_utf16(pwd); /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
   /* null input */
-  if (db == NULL || *(unsigned short *)db == 0) {
+  if (db == NULL || !db_slen) {
     db_str = (SQLWCHAR *) NULL;
     db_len = 0;
   }
-  if (uid == NULL || *(unsigned short *)uid == 0) {
+  if (uid == NULL || !uid_slen) {
     uid_str = (SQLWCHAR *) NULL;
     uid_len = 0;
   }
-  if (pwd == NULL || *(unsigned short *)pwd == 0) {
+  if (pwd == NULL || !pwd_slen) {
     pwd_str = (SQLWCHAR *) NULL;
     pwd_len = 0;
   }

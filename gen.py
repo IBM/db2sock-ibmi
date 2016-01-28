@@ -62,8 +62,9 @@ f = open(PaseSqlCli_file,"r")
 g = False
 c400 = True
 c400_CCSID = False
-actual_call = ""
-chicken_call = ""
+c400_not_wide = True
+ile_or_custom_call = ""
+ile_or_libdb400_call = ""
 line_func = ""
 libdb400_exp=""
 PaseCliLibDB400_h_proto = ""
@@ -123,16 +124,20 @@ for line in f:
   # ---------------
   # custom function (super api)
   # ---------------
+  c400_not_wide = True
   c400_CCSID = False
   c400 = True
+  ile_or_custom_call = "custom_"
+  ile_or_libdb400_call = "libdb400_"
   if "SQLOverrideCCSID400" in call_name:
     c400_CCSID = True
   if "SQL400" in call_name:
     c400 = False
-  actual_call = "custom_"
   if c400:
-    chicken_call = "libdb400_"
-    actual_call = "ILE_"
+    ile_or_custom_call = "ILE_"
+  if "W" in call_name:
+    ile_or_libdb400_call = "ILE_"
+    c400_not_wide = False
 
   # ---------------
   # arguments (params)
@@ -267,12 +272,6 @@ for line in f:
   # ===============================================
 
   if c400:
-    # declare dlsym call each SQL function
-    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
-    PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
-    PaseCliLibDB400_c_symbol += 'SQLINTEGER libdb400_' + call_name + '_flag' + ';' + "\n"
-    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + '_symbol)(' + normal_call_types + ' );' + "\n"
-
     # each SQL400 function special (header)
     # SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options )
     #
@@ -281,17 +280,31 @@ for line in f:
     # ===============================================
     # libdb400 call
     # ===============================================
-    PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-    PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-    PaseCliLibDB400_c_main += '  void *dlhandle = NULL;' + "\n"
-    PaseCliLibDB400_c_main += '  if (!libdb400_'+ call_name + '_flag' + ') {' +  "\n"
-    PaseCliLibDB400_c_main += '    dlhandle = init_cli_dlsym();' + "\n"
-    PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_symbol = dlsym(dlhandle, "'+ call_name +'");' + "\n"
-    PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_flag = 1;' +  "\n"
-    PaseCliLibDB400_c_main += '  }' + "\n"
-    PaseCliLibDB400_c_main += "  sqlrc = libdb400_" + call_name + '_symbol(' + normal_db400_args + ' );' + "\n"
-    PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-    PaseCliLibDB400_c_main += '}' + "\n"
+    # declare dlsym call each SQL function
+    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
+    PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
+    PaseCliLibDB400_c_symbol += 'SQLINTEGER libdb400_' + call_name + '_flag' + ';' + "\n"
+    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + '_symbol)(' + normal_call_types + ' );' + "\n"
+    # main
+    if c400_not_wide:
+      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+      PaseCliLibDB400_c_main += '  void *dlhandle = NULL;' + "\n"
+      PaseCliLibDB400_c_main += '  if (!libdb400_'+ call_name + '_flag' + ') {' +  "\n"
+      PaseCliLibDB400_c_main += '    dlhandle = init_cli_dlsym();' + "\n"
+      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_symbol = dlsym(dlhandle, "'+ call_name +'");' + "\n"
+      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_flag = 1;' +  "\n"
+      PaseCliLibDB400_c_main += '  }' + "\n"
+      PaseCliLibDB400_c_main += "  sqlrc = libdb400_" + call_name + '_symbol(' + normal_db400_args + ' );' + "\n"
+      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+      PaseCliLibDB400_c_main += '}' + "\n"
+    else:
+      PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
+      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+      PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+      PaseCliLibDB400_c_main += '}' + "\n"
 
     # SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID )
     if c400_CCSID:
@@ -318,73 +331,74 @@ for line in f:
   PaseCliAsync_c_main += "  SQLRETURN sqlrc = SQL_SUCCESS;" + "\n"
   # SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
   if call_name == "SQLAllocEnv":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLAllocConnect ( SQLHENV  henv, SQLHDBC * phdbc );
   elif call_name == "SQLAllocConnect":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "    init_table_ctor(*phdbc, *phdbc);" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLAllocStmt ( SQLHDBC  hdbc, SQLHSTMT * phstmt );
   elif call_name == "SQLAllocStmt":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "    init_table_ctor(*phstmt, hdbc);" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLAllocHandle ( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd );
   elif call_name == "SQLAllocHandle":
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  switch (htype) {" + "\n"
     PaseCliAsync_c_main += "  case SQL_HANDLE_ENV:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
     PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  case SQL_HANDLE_DBC:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
     PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  case SQL_HANDLE_STMT:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_ctor(*ohnd, ihnd);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  case SQL_HANDLE_DESC:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "      init_table_ctor(*ohnd, ihnd);" + "\n"
     PaseCliAsync_c_main += "    }" + "\n"
@@ -392,67 +406,62 @@ for line in f:
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLFreeEnv ( SQLHENV  henv );
   elif call_name == "SQLFreeEnv":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLFreeConnect ( SQLHDBC  hdbc );
   elif call_name == "SQLFreeConnect":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "    init_table_dtor(hdbc);" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLFreeStmt ( SQLHSTMT  hstmt, SQLSMALLINT  fOption );
   elif call_name == "SQLFreeStmt":
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "    init_table_dtor(hstmt);" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   # SQLRETURN SQLFreeHandle ( SQLSMALLINT  htype, SQLINTEGER  hndl );
   elif call_name == "SQLFreeHandle":
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += "  }" + "\n"
     PaseCliAsync_c_main += "  switch (htype) {" + "\n"
     PaseCliAsync_c_main += "  case SQL_HANDLE_ENV:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_DBC:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_dtor(hndl);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_STMT:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_dtor(hndl);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_DESC:" + "\n"
-    PaseCliAsync_c_main += "    if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    } else {" + "\n"
-    PaseCliAsync_c_main += "      sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
+    PaseCliAsync_c_main += "  default:" + "\n"
     PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
     PaseCliAsync_c_main += "      init_table_dtor(hndl);" + "\n"
     PaseCliAsync_c_main += "    }" + "\n"
@@ -462,56 +471,77 @@ for line in f:
   elif c400_CCSID:
     PaseCliAsync_c_main += "  sqlrc = custom_" + call_name + '(' + normal_db400_args + ' );' + "\n"
   else:
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
     if argtype1st == "SQLHENV":
-      if actual_call == "custom_":
-        PaseCliAsync_c_main += "  sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+      if ile_or_custom_call == "custom_":
+        PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
       else:
-        PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliAsync_c_main += "  } else {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+        PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+        PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
+        PaseCliAsync_c_main += '  default:' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
     elif argtype1st == "SQLHDBC":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 0);" + "\n"
-      if actual_call == "custom_":
-        PaseCliAsync_c_main += "  sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+      if ile_or_custom_call == "custom_":
+        PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
       else:
-        PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliAsync_c_main += "  } else {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+        PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+        PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
+        PaseCliAsync_c_main += '  default:' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 0);" + "\n"
     elif argtype1st == "SQLHSTMT":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 1);" + "\n"
-      if actual_call == "custom_":
-        PaseCliAsync_c_main += "  sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+      if ile_or_custom_call == "custom_":
+        PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
       else:
-        PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliAsync_c_main += "  } else {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+        PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+        PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
+        PaseCliAsync_c_main += '  default:' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 1);" + "\n"
     elif argtype1st == "SQLHDESC":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 1);" + "\n"
-      if actual_call == "custom_":
-        PaseCliAsync_c_main += "  sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+      if ile_or_custom_call == "custom_":
+        PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
       else:
-        PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliAsync_c_main += "  } else {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+        PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+        PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
+        PaseCliAsync_c_main += '  default:' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 1);" + "\n"
     else:
-      if actual_call == "custom_":
-        PaseCliAsync_c_main += "  sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+      if ile_or_custom_call == "custom_":
+        PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
       else:
-        PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + chicken_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliAsync_c_main += "  } else {" + "\n"
-        PaseCliAsync_c_main += "    sqlrc = " + actual_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+        PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+        PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
+        PaseCliAsync_c_main += '  default:' + "\n"
+        PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
   # common code
   PaseCliAsync_c_main += "  return sqlrc;" + "\n"
@@ -630,6 +660,8 @@ for line in f:
   # }
   PaseCliAsync_c_main += 'void * ' + call_name + 'Thread (void *ptr)' + "\n"
   PaseCliAsync_c_main += "{" + "\n"
+  PaseCliAsync_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+  PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
   PaseCliAsync_c_main += '  ' + struct_name + ' * myptr = (' + struct_name + ' *) ptr;' + "\n"
   if argtype1st == "SQLHENV":
     PaseCliAsync_c_main += "  /* not lock */" + "\n"
@@ -639,13 +671,17 @@ for line in f:
     PaseCliAsync_c_main += "  init_table_lock(myptr->" + argname1st + ", 1);" + "\n"
   elif argtype1st == "SQLHDESC":
     PaseCliAsync_c_main += "  init_table_lock(myptr->" + argname1st + ", 1);" + "\n"
-  if actual_call == "custom_":
-    PaseCliAsync_c_main += "  myptr->sqlrc = " + actual_call + call_name + '(' + async_db400_args + ' );' + "\n"
+  if ile_or_custom_call == "custom_":
+    PaseCliAsync_c_main += "  myptr->sqlrc = " + ile_or_custom_call + call_name + '(' + async_db400_args + ' );' + "\n"
   else:
-    PaseCliAsync_c_main += "  if (i_am_big_chicken_flag) {" + "\n"
-    PaseCliAsync_c_main += "    myptr->sqlrc = " + chicken_call + call_name + '(' + async_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "  } else {" + "\n"
-    PaseCliAsync_c_main += "    myptr->sqlrc = " + actual_call + call_name + '(' + async_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
+    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
+    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + async_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
+    PaseCliAsync_c_main += '  default:' + "\n"
+    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + async_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   if argtype1st == "SQLHENV":
     PaseCliAsync_c_main += "  /* not lock */" + "\n"
@@ -753,10 +789,6 @@ with open("PaseCliLibDB400_gen.c", "w") as text_file:
 file_PaseCliAsync_c = ""
 file_PaseCliAsync_c += file_pase_incl
 file_PaseCliAsync_c += file_local_incl
-file_PaseCliAsync_c += "" + "\n"
-file_PaseCliAsync_c += "/* chicken switch use PASE libdb400.a */" + "\n"
-file_PaseCliAsync_c += "/* (maybe runtime env var someday)    */" + "\n"
-file_PaseCliAsync_c += 'int i_am_big_chicken_flag;' + "\n"
 file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliAsync_c_main

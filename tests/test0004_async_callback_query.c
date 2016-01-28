@@ -15,7 +15,6 @@ SQL400SetAttrStruct options[100];
 SQLHANDLE henv;
 SQLHANDLE hdbc;
 SQLHANDLE hstmt;
-SQLINTEGER ccsid = SQL_CCSID;
 SQLINTEGER yes = SQL_TRUE;
 SQL400AttrStruct pophenv[3];
 SQL400AttrStruct pophdbc[3];
@@ -154,10 +153,8 @@ void main_environ() {
   SQLRETURN sqlrc = SQL_SUCCESS;
   printf("main_environ (thread %d): starting\n",ptid);
   /* async environment db2 */
-  sqlrc = SQL400AddAttr(SQL_HANDLE_ENV, SQL400_ATTR_PASE_CCSID, &ccsid, 0, SQL400_ONERR_CONT, SQL400_FLAG_IMMED, (SQLPOINTER)&pophenv);
-  if (ccsid == 1208) {
-    sqlrc = SQL400AddAttr(SQL_HANDLE_ENV, SQL_ATTR_UTF8, &yes, 0, SQL400_ONERR_CONT, SQL400_FLAG_IMMED, (SQLPOINTER)&pophenv);
-  }
+  sqlrc = SQLOverrideCCSID400( 1208 );
+  lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   sqlrc = SQL400AddAttr(SQL_HANDLE_ENV, SQL_ATTR_SERVER_MODE, &yes, 0, SQL400_ONERR_CONT, SQL400_FLAG_IMMED, (SQLPOINTER)&pophenv);
   tid = SQL400EnvironmentAsync( &henv, (SQLPOINTER)&pophenv, (void *)SQL400EnvironmentCallback);
   printf("main_environ (thread %d): leaving\n",ptid);

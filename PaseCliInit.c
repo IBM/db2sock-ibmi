@@ -29,6 +29,10 @@ void *dlhandle = NULL;
  * ile activate db2 
  */
 int db2_cli_srvpgm_mark;
+/*
+ * pase ccsid
+ */
+int db2_pase_ccsid;
 
 /* global table lock
  * This lock is 'lock once'.
@@ -60,7 +64,6 @@ void * init_cli_dlsym() {
         printf("Service %s Not Found:  %s\n", dlservice, dlerror());
         exit(-1);
       }
-      dlclose(dlhandle);
     }
     init_unlock();
   }
@@ -83,6 +86,23 @@ int init_cli_srvpgm() {
   }
   return db2_cli_srvpgm_mark;
 }
+int init_CCSID400( int newCCSID ) {
+  int paseMark = 0;
+  if (!db2_pase_ccsid) {
+    init_lock();
+    if (!db2_pase_ccsid) {
+      if (newCCSID) {
+        paseMark = newCCSID;
+      } else {
+        paseMark = Qp2paseCCSID();
+      }
+      db2_pase_ccsid = paseMark;
+    }
+    init_unlock();
+  }
+  return db2_pase_ccsid;
+}
+
 
 /* caller hold resource level lock
  * init_table_ctor(hdbc,0)     -- opening a hdbc (connection)

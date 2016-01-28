@@ -387,15 +387,10 @@ SQLRETURN libdb400_SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALL
   sqlrc = libdb400_SQLColAttribute_symbol( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLColAttributeW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLColAttributeW_symbol = dlsym(dlhandle, "SQLColAttributeW");
-    libdb400_SQLColAttributeW_flag = 1;
-  }
-  sqlrc = libdb400_SQLColAttributeW_symbol( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+  sqlrc = ILE_SQLColAttributeW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc ) {
@@ -409,15 +404,10 @@ SQLRETURN libdb400_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMAL
   sqlrc = libdb400_SQLColAttributes_symbol( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLColAttributesW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLColAttributesW_symbol = dlsym(dlhandle, "SQLColAttributesW");
-    libdb400_SQLColAttributesW_flag = 1;
-  }
-  sqlrc = libdb400_SQLColAttributesW_symbol( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
+  sqlrc = ILE_SQLColAttributesW( hstmt, icol, fDescType, rgbDesc, cbDescMax, pcbDesc, pfDesc );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -431,15 +421,10 @@ SQLRETURN libdb400_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualif
   sqlrc = libdb400_SQLColumnPrivileges_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLColumnPrivilegesW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLColumnPrivilegesW_symbol = dlsym(dlhandle, "SQLColumnPrivilegesW");
-    libdb400_SQLColumnPrivilegesW_flag = 1;
-  }
-  sqlrc = libdb400_SQLColumnPrivilegesW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+  sqlrc = ILE_SQLColumnPrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -453,15 +438,10 @@ SQLRETURN libdb400_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLS
   sqlrc = libdb400_SQLColumns_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLColumnsW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLColumnsW_symbol = dlsym(dlhandle, "SQLColumnsW");
-    libdb400_SQLColumnsW_flag = 1;
-  }
-  sqlrc = libdb400_SQLColumnsW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
+  sqlrc = ILE_SQLColumnsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szColumnName, cbColumnName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr ) {
@@ -475,15 +455,10 @@ SQLRETURN libdb400_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDS
   sqlrc = libdb400_SQLConnect_symbol( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLConnectW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLConnectW_symbol = dlsym(dlhandle, "SQLConnectW");
-    libdb400_SQLConnectW_flag = 1;
-  }
-  sqlrc = libdb400_SQLConnectW_symbol( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
+  sqlrc = ILE_SQLConnectW( hdbc, szDSN, cbDSN, szUID, cbUID, szAuthStr, cbAuthStr );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLCopyDesc( SQLHDESC  sDesc, SQLHDESC  tDesc ) {
@@ -508,15 +483,10 @@ SQLRETURN libdb400_SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCH
   sqlrc = libdb400_SQLDataSources_symbol( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLDataSourcesW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLDataSourcesW_symbol = dlsym(dlhandle, "SQLDataSourcesW");
-    libdb400_SQLDataSourcesW_flag = 1;
-  }
-  sqlrc = libdb400_SQLDataSourcesW_symbol( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
+  sqlrc = ILE_SQLDataSourcesW( henv, fDirection, szDSN, cbDSNMax, pcbDSN, szDescription, cbDescriptionMax, pcbDescription );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
@@ -530,15 +500,10 @@ SQLRETURN libdb400_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR *
   sqlrc = libdb400_SQLDescribeCol_symbol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLDescribeColW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLDescribeColW_symbol = dlsym(dlhandle, "SQLDescribeColW");
-    libdb400_SQLDescribeColW_flag = 1;
-  }
-  sqlrc = libdb400_SQLDescribeColW_symbol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+  sqlrc = ILE_SQLDescribeColW( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
@@ -574,15 +539,10 @@ SQLRETURN libdb400_SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * 
   sqlrc = libdb400_SQLDriverConnect_symbol( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLDriverConnectW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLDriverConnectW_symbol = dlsym(dlhandle, "SQLDriverConnectW");
-    libdb400_SQLDriverConnectW_flag = 1;
-  }
-  sqlrc = libdb400_SQLDriverConnectW_symbol( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
+  sqlrc = ILE_SQLDriverConnectW( hdbc, hwnd, szConnStrIn, cbConnStrin, szConnStrOut, cbConnStrOutMax, pcbConnStrOut, fDriverCompletion );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLEndTran( SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype ) {
@@ -607,15 +567,10 @@ SQLRETURN libdb400_SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLC
   sqlrc = libdb400_SQLError_symbol( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLErrorW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLErrorW_symbol = dlsym(dlhandle, "SQLErrorW");
-    libdb400_SQLErrorW_flag = 1;
-  }
-  sqlrc = libdb400_SQLErrorW_symbol( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
+  sqlrc = ILE_SQLErrorW( henv, hdbc, hstmt, szSqlState, pfNativeError, szErrorMsg, cbErrorMsgMax, pcbErrorMsg );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
@@ -629,15 +584,10 @@ SQLRETURN libdb400_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGE
   sqlrc = libdb400_SQLExecDirect_symbol( hstmt, szSqlStr, cbSqlStr );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLExecDirectW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLExecDirectW_symbol = dlsym(dlhandle, "SQLExecDirectW");
-    libdb400_SQLExecDirectW_flag = 1;
-  }
-  sqlrc = libdb400_SQLExecDirectW_symbol( hstmt, szSqlStr, cbSqlStr );
+  sqlrc = ILE_SQLExecDirectW( hstmt, szSqlStr, cbSqlStr );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLExecute( SQLHSTMT  hstmt ) {
@@ -695,15 +645,10 @@ SQLRETURN libdb400_SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier
   sqlrc = libdb400_SQLForeignKeys_symbol( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLForeignKeysW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLForeignKeysW_symbol = dlsym(dlhandle, "SQLForeignKeysW");
-    libdb400_SQLForeignKeysW_flag = 1;
-  }
-  sqlrc = libdb400_SQLForeignKeysW_symbol( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
+  sqlrc = ILE_SQLForeignKeysW( hstmt, szPkTableQualifier, cbPkTableQualifier, szPkTableOwner, cbPkTableOwner, szPkTableName, cbPkTableName, szFkTableQualifier, cbFkTableQualifier, szFkTableOwner, cbFkTableOwner, szFkTableName, cbFkTableName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLFreeConnect( SQLHDBC  hdbc ) {
@@ -761,15 +706,10 @@ SQLRETURN libdb400_SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  i
   sqlrc = libdb400_SQLGetCol_symbol( hstmt, icol, itype, tval, blen, olen );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetColW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetColW_symbol = dlsym(dlhandle, "SQLGetColW");
-    libdb400_SQLGetColW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetColW_symbol( hstmt, icol, itype, tval, blen, olen );
+  sqlrc = ILE_SQLGetColW( hstmt, icol, itype, tval, blen, olen );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen ) {
@@ -783,15 +723,10 @@ SQLRETURN libdb400_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTE
   sqlrc = libdb400_SQLGetConnectAttr_symbol( hdbc, attr, oval, ilen, olen );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetConnectAttrW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetConnectAttrW_symbol = dlsym(dlhandle, "SQLGetConnectAttrW");
-    libdb400_SQLGetConnectAttrW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetConnectAttrW_symbol( hdbc, attr, oval, ilen, olen );
+  sqlrc = ILE_SQLGetConnectAttrW( hdbc, attr, oval, ilen, olen );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval ) {
@@ -805,15 +740,10 @@ SQLRETURN libdb400_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOI
   sqlrc = libdb400_SQLGetConnectOption_symbol( hdbc, iopt, oval );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetConnectOptionW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetConnectOptionW_symbol = dlsym(dlhandle, "SQLGetConnectOptionW");
-    libdb400_SQLGetConnectOptionW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetConnectOptionW_symbol( hdbc, iopt, oval );
+  sqlrc = ILE_SQLGetConnectOptionW( hdbc, iopt, oval );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor ) {
@@ -827,15 +757,10 @@ SQLRETURN libdb400_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMA
   sqlrc = libdb400_SQLGetCursorName_symbol( hstmt, szCursor, cbCursorMax, pcbCursor );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetCursorNameW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetCursorNameW_symbol = dlsym(dlhandle, "SQLGetCursorNameW");
-    libdb400_SQLGetCursorNameW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetCursorNameW_symbol( hstmt, szCursor, cbCursorMax, pcbCursor );
+  sqlrc = ILE_SQLGetCursorNameW( hstmt, szCursor, cbCursorMax, pcbCursor );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue ) {
@@ -860,15 +785,10 @@ SQLRETURN libdb400_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMA
   sqlrc = libdb400_SQLGetDescField_symbol( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetDescFieldW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetDescFieldW_symbol = dlsym(dlhandle, "SQLGetDescFieldW");
-    libdb400_SQLGetDescFieldW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetDescFieldW_symbol( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
+  sqlrc = ILE_SQLGetDescFieldW( hdesc, rcdNum, fieldID, fValue, fLength, stLength );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull ) {
@@ -882,15 +802,10 @@ SQLRETURN libdb400_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR 
   sqlrc = libdb400_SQLGetDescRec_symbol( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetDescRecW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetDescRecW_symbol = dlsym(dlhandle, "SQLGetDescRecW");
-    libdb400_SQLGetDescRecW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetDescRecW_symbol( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
+  sqlrc = ILE_SQLGetDescRecW( hdesc, rcdNum, fname, bufLen, sLength, sType, sbType, fLength, fprec, fscale, fnull );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength ) {
@@ -904,15 +819,10 @@ SQLRETURN libdb400_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMA
   sqlrc = libdb400_SQLGetDiagField_symbol( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetDiagFieldW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetDiagFieldW_symbol = dlsym(dlhandle, "SQLGetDiagFieldW");
-    libdb400_SQLGetDiagFieldW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetDiagFieldW_symbol( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
+  sqlrc = ILE_SQLGetDiagFieldW( hType, hndl, rcdNum, diagID, dValue, bLength, sLength );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength ) {
@@ -926,15 +836,10 @@ SQLRETURN libdb400_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALL
   sqlrc = libdb400_SQLGetDiagRec_symbol( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetDiagRecW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetDiagRecW_symbol = dlsym(dlhandle, "SQLGetDiagRecW");
-    libdb400_SQLGetDiagRecW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetDiagRecW_symbol( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
+  sqlrc = ILE_SQLGetDiagRecW( hType, hndl, rcdNum, SQLstate, SQLcode, msgText, bLength, SLength );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam ) {
@@ -970,15 +875,10 @@ SQLRETURN libdb400_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER
   sqlrc = libdb400_SQLGetInfo_symbol( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetInfoW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetInfoW_symbol = dlsym(dlhandle, "SQLGetInfoW");
-    libdb400_SQLGetInfoW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetInfoW_symbol( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
+  sqlrc = ILE_SQLGetInfoW( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind ) {
@@ -1003,15 +903,10 @@ SQLRETURN libdb400_SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINT
   sqlrc = libdb400_SQLGetPosition_symbol( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetPositionW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetPositionW_symbol = dlsym(dlhandle, "SQLGetPositionW");
-    libdb400_SQLGetPositionW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetPositionW_symbol( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
+  sqlrc = ILE_SQLGetPositionW( hstmt, locType, srceLocator, srchLocator, srchLiteral, srchLiteralLen, fPosition, located, ind );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength ) {
@@ -1025,15 +920,10 @@ SQLRETURN libdb400_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTE
   sqlrc = libdb400_SQLGetStmtAttr_symbol( hstmt, fAttr, pvParam, bLength, SLength );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetStmtAttrW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetStmtAttrW_symbol = dlsym(dlhandle, "SQLGetStmtAttrW");
-    libdb400_SQLGetStmtAttrW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetStmtAttrW_symbol( hstmt, fAttr, pvParam, bLength, SLength );
+  sqlrc = ILE_SQLGetStmtAttrW( hstmt, fAttr, pvParam, bLength, SLength );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam ) {
@@ -1047,15 +937,10 @@ SQLRETURN libdb400_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLP
   sqlrc = libdb400_SQLGetStmtOption_symbol( hstmt, fOption, pvParam );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetStmtOptionW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetStmtOptionW_symbol = dlsym(dlhandle, "SQLGetStmtOptionW");
-    libdb400_SQLGetStmtOptionW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetStmtOptionW_symbol( hstmt, fOption, pvParam );
+  sqlrc = ILE_SQLGetStmtOptionW( hstmt, fOption, pvParam );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind ) {
@@ -1069,15 +954,10 @@ SQLRETURN libdb400_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLIN
   sqlrc = libdb400_SQLGetSubString_symbol( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetSubStringW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetSubStringW_symbol = dlsym(dlhandle, "SQLGetSubStringW");
-    libdb400_SQLGetSubStringW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetSubStringW_symbol( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
+  sqlrc = ILE_SQLGetSubStringW( hstmt, locType, srceLocator, fPosition, length, tType, rgbValue, cbValueMax, StringLength, ind );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType ) {
@@ -1091,15 +971,10 @@ SQLRETURN libdb400_SQLGetTypeInfo( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType ) {
   sqlrc = libdb400_SQLGetTypeInfo_symbol( hstmt, fSqlType );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLGetTypeInfoW( SQLHSTMT  hstmt, SQLSMALLINT  fSqlType ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLGetTypeInfoW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLGetTypeInfoW_symbol = dlsym(dlhandle, "SQLGetTypeInfoW");
-    libdb400_SQLGetTypeInfoW_flag = 1;
-  }
-  sqlrc = libdb400_SQLGetTypeInfoW_symbol( hstmt, fSqlType );
+  sqlrc = ILE_SQLGetTypeInfoW( hstmt, fSqlType );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLLanguages( SQLHSTMT  hstmt ) {
@@ -1135,15 +1010,10 @@ SQLRETURN libdb400_SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER
   sqlrc = libdb400_SQLNativeSql_symbol( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLNativeSqlW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLNativeSqlW_symbol = dlsym(dlhandle, "SQLNativeSqlW");
-    libdb400_SQLNativeSqlW_flag = 1;
-  }
-  sqlrc = libdb400_SQLNativeSqlW_symbol( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
+  sqlrc = ILE_SQLNativeSqlW( hdbc, szSqlStrIn, cbSqlStrIn, szSqlStr, cbSqlStrMax, pcbSqlStr );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLNextResult( SQLHSTMT  hstmt, SQLHSTMT  hstmt2 ) {
@@ -1212,15 +1082,10 @@ SQLRETURN libdb400_SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  
   sqlrc = libdb400_SQLPrepare_symbol( hstmt, szSqlStr, cbSqlStr );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLPrepareW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLPrepareW_symbol = dlsym(dlhandle, "SQLPrepareW");
-    libdb400_SQLPrepareW_flag = 1;
-  }
-  sqlrc = libdb400_SQLPrepareW_symbol( hstmt, szSqlStr, cbSqlStr );
+  sqlrc = ILE_SQLPrepareW( hstmt, szSqlStr, cbSqlStr );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -1234,15 +1099,10 @@ SQLRETURN libdb400_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, 
   sqlrc = libdb400_SQLPrimaryKeys_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLPrimaryKeysW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLPrimaryKeysW_symbol = dlsym(dlhandle, "SQLPrimaryKeysW");
-    libdb400_SQLPrimaryKeysW_flag = 1;
-  }
-  sqlrc = libdb400_SQLPrimaryKeysW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  sqlrc = ILE_SQLPrimaryKeysW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -1256,15 +1116,10 @@ SQLRETURN libdb400_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifi
   sqlrc = libdb400_SQLProcedureColumns_symbol( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLProcedureColumnsW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLProcedureColumnsW_symbol = dlsym(dlhandle, "SQLProcedureColumnsW");
-    libdb400_SQLProcedureColumnsW_flag = 1;
-  }
-  sqlrc = libdb400_SQLProcedureColumnsW_symbol( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
+  sqlrc = ILE_SQLProcedureColumnsW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName, szColumnName, cbColumnName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName ) {
@@ -1278,15 +1133,10 @@ SQLRETURN libdb400_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQ
   sqlrc = libdb400_SQLProcedures_symbol( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLProceduresW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLProceduresW_symbol = dlsym(dlhandle, "SQLProceduresW");
-    libdb400_SQLProceduresW_flag = 1;
-  }
-  sqlrc = libdb400_SQLProceduresW_symbol( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
+  sqlrc = ILE_SQLProceduresW( hstmt, szProcQualifier, cbProcQualifier, szProcOwner, cbProcOwner, szProcName, cbProcName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen ) {
@@ -1333,15 +1183,10 @@ SQLRETURN libdb400_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOIN
   sqlrc = libdb400_SQLSetConnectAttr_symbol( hdbc, attrib, vParam, inlen );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetConnectAttrW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetConnectAttrW_symbol = dlsym(dlhandle, "SQLSetConnectAttrW");
-    libdb400_SQLSetConnectAttrW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetConnectAttrW_symbol( hdbc, attrib, vParam, inlen );
+  sqlrc = ILE_SQLSetConnectAttrW( hdbc, attrib, vParam, inlen );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -1355,15 +1200,10 @@ SQLRETURN libdb400_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQL
   sqlrc = libdb400_SQLSetConnectOption_symbol( hdbc, fOption, vParam );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetConnectOptionW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetConnectOptionW_symbol = dlsym(dlhandle, "SQLSetConnectOptionW");
-    libdb400_SQLSetConnectOptionW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetConnectOptionW_symbol( hdbc, fOption, vParam );
+  sqlrc = ILE_SQLSetConnectOptionW( hdbc, fOption, vParam );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor ) {
@@ -1377,15 +1217,10 @@ SQLRETURN libdb400_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMA
   sqlrc = libdb400_SQLSetCursorName_symbol( hstmt, szCursor, cbCursor );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetCursorNameW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetCursorNameW_symbol = dlsym(dlhandle, "SQLSetCursorNameW");
-    libdb400_SQLSetCursorNameW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetCursorNameW_symbol( hstmt, szCursor, cbCursor );
+  sqlrc = ILE_SQLSetCursorNameW( hstmt, szCursor, cbCursor );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen ) {
@@ -1399,15 +1234,10 @@ SQLRETURN libdb400_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMA
   sqlrc = libdb400_SQLSetDescField_symbol( hdesc, rcdNum, fID, Value, buffLen );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetDescFieldW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetDescFieldW_symbol = dlsym(dlhandle, "SQLSetDescFieldW");
-    libdb400_SQLSetDescFieldW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetDescFieldW_symbol( hdesc, rcdNum, fID, Value, buffLen );
+  sqlrc = ILE_SQLSetDescFieldW( hdesc, rcdNum, fID, Value, buffLen );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic ) {
@@ -1454,15 +1284,10 @@ SQLRETURN libdb400_SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTE
   sqlrc = libdb400_SQLSetStmtAttr_symbol( hstmt, fAttr, pParam, vParam );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetStmtAttrW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetStmtAttrW_symbol = dlsym(dlhandle, "SQLSetStmtAttrW");
-    libdb400_SQLSetStmtAttrW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetStmtAttrW_symbol( hstmt, fAttr, pParam, vParam );
+  sqlrc = ILE_SQLSetStmtAttrW( hstmt, fAttr, pParam, vParam );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -1476,15 +1301,10 @@ SQLRETURN libdb400_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLP
   sqlrc = libdb400_SQLSetStmtOption_symbol( hstmt, fOption, vParam );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSetStmtOptionW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSetStmtOptionW_symbol = dlsym(dlhandle, "SQLSetStmtOptionW");
-    libdb400_SQLSetStmtOptionW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSetStmtOptionW_symbol( hstmt, fOption, vParam );
+  sqlrc = ILE_SQLSetStmtOptionW( hstmt, fOption, vParam );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable ) {
@@ -1498,15 +1318,10 @@ SQLRETURN libdb400_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQ
   sqlrc = libdb400_SQLSpecialColumns_symbol( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLSpecialColumnsW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLSpecialColumnsW_symbol = dlsym(dlhandle, "SQLSpecialColumnsW");
-    libdb400_SQLSpecialColumnsW_flag = 1;
-  }
-  sqlrc = libdb400_SQLSpecialColumnsW_symbol( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
+  sqlrc = ILE_SQLSpecialColumnsW( hstmt, fColType, szTableQual, cbTableQual, szTableOwner, cbTableOwner, szTableName, cbTableName, fScope, fNullable );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLStartTran( SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel ) {
@@ -1531,15 +1346,10 @@ SQLRETURN libdb400_SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, S
   sqlrc = libdb400_SQLStatistics_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLStatisticsW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLStatisticsW_symbol = dlsym(dlhandle, "SQLStatisticsW");
-    libdb400_SQLStatisticsW_flag = 1;
-  }
-  sqlrc = libdb400_SQLStatisticsW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
+  sqlrc = ILE_SQLStatisticsW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, fUnique, fres );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -1553,15 +1363,10 @@ SQLRETURN libdb400_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifi
   sqlrc = libdb400_SQLTablePrivileges_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLTablePrivilegesW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLTablePrivilegesW_symbol = dlsym(dlhandle, "SQLTablePrivilegesW");
-    libdb400_SQLTablePrivilegesW_flag = 1;
-  }
-  sqlrc = libdb400_SQLTablePrivilegesW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
+  sqlrc = ILE_SQLTablePrivilegesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType ) {
@@ -1575,15 +1380,10 @@ SQLRETURN libdb400_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSM
   sqlrc = libdb400_SQLTables_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
   return sqlrc;
 }
+/* PASE libdb400.a does not support wide interfaces, call ILE directly */
 SQLRETURN libdb400_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  void *dlhandle = NULL;
-  if (!libdb400_SQLTablesW_flag) {
-    dlhandle = init_cli_dlsym();
-    libdb400_SQLTablesW_symbol = dlsym(dlhandle, "SQLTablesW");
-    libdb400_SQLTablesW_flag = 1;
-  }
-  sqlrc = libdb400_SQLTablesW_symbol( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
+  sqlrc = ILE_SQLTablesW( hstmt, szTableQualifier, cbTableQualifier, szTableOwner, cbTableOwner, szTableName, cbTableName, szTableType, cbTableType );
   return sqlrc;
 }
 SQLRETURN libdb400_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType ) {

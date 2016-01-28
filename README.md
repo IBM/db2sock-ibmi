@@ -16,7 +16,7 @@ Follow on project maybe socket based driver (tbd).
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
-##Notes:
+##Usage:
 
 Only compiled with xlc using -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
@@ -46,6 +46,24 @@ SQLRETURN ILE_SQLExecDirectW(..);
 ```
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
+
+#CCSID
+You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
+Environment setting SQLOverrideCCSID400 defines how this libdb400.a functions.
+Only one 
+```
+SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
+-->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
+-->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
+-->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
+```
+(*) PASE libdb400.a does not support wide CLI APIs.
+Therefore, simply call ILE DB2 with data (your problem).
 
 
 #Contributors

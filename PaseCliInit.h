@@ -36,6 +36,7 @@ extern int init_table_stmt_2_conn(int hstmt);
 
 extern void * init_cli_dlsym();
 extern int init_cli_srvpgm();
+extern int init_CCSID400( int newCCSID );
 
 
 #endif /* _PASECLIINIT_H */
