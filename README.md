@@ -6,18 +6,27 @@ When this warning disappears, APIs will be considered stable.
 #db2sock
 
 Welcome to the db2sock project. Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
-Follow on project maybe socket based driver (tbd).
 
-This libdb400.a should fit seamless under any exsiting scripting language db2 exetnsion. 
-That is to say, exports everything old PASE libdb400.a, while providing advanced functions.  
-
-A vast number of features have been added to new libdb400.a, async CLI, ILE direct APIs, 
-unicode APIs (UTF-8, UTF-16). These additions should make language extension writting easier.
+A vast number of features have been added to new libdb400.a, async CLI, ILE direct CLI APIs, 
+unicode CLI "unix" API-mode (UTF-8), unicode CLI "wide" APIs (UTF-16), and more.
+These additions should make language extension writting easier.
 CCSID topic descibes new libdb400.a mode settings via SQLOverrideCCSID400(ccsid).
+
+Run time, libdb400.a should fit seamless under any exsiting scripting language db2 exetnsion. 
+That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
+You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
+
+Compile time, if you wish to exploit new features use the new header file PaseCliAsync.h.
+After compiling with new features, you are runtime dependent on new libdb400.a.
+Therefore, you will need to ship a copy of this shared library with your product.
+If you do not wish to exploit new features, continue compiling with ILE sqlcli.h.
 
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
+Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
+web based db2, json based db2, etc. Author two cents, when stable, start using this driver, 
+you will grow function by leaps with very little effort. 
 
 ##Usage:
 
