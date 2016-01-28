@@ -49,8 +49,7 @@ see libdb400.exp for all exported APIs.
 
 #CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
-Environment setting SQLOverrideCCSID400 defines how this libdb400.a functions.
-Only one 
+Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 ```
 SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
 -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
