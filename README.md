@@ -25,13 +25,38 @@ This project originated because of a need to create async DB2 requests for Node.
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. Wildly imagined, if custom interfaces work test well, one could
-imagine gutting all the languages extension to bare minimum script language interaction, leaving all
+web based db2, json based db2, etc. Wildly imagined, if custom interfaces test well, one could
+imagine gutting all languages extension to bare minimum script language interaction, leaving all
 the real DB2 work to this driver (aka, new SQL400Connection(W) with attributes). For example, flight of
 fancy, one could imagine, PHP mysql extension talking directly to this driver, wherein, any old 
 PHP+mysql application would be instant DB2 (no port). Ok, no promise, but, you get the idea.
 Author two cents, when stable, start using this driver, 
-you will grow function by leaps with very little effort.  
+you will grow function by leaps with very little effort.
+
+
+#CCSID
+You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
+Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
+```
+=== UTF-8 mode, most popular AIX/PASE/Linux ===
+SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
+-->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+
+=== UTF-8 mode, most popular Windows/Java ===
+SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
+-->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+
+=== PASE default (original libdb400.a) ===
+SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
+-->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
+-->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
+
+```
+(*) PASE libdb400.a does not support wide CLI APIs.
+Therefore, this libdb400.a simply calls ILE.
+
 
 ##Usage:
 
@@ -64,29 +89,6 @@ SQLRETURN ILE_SQLExecDirectW(..);
 SQLExecDirect is only an example,
 see libdb400.exp for all exported APIs.
 
-(*) PASE libdb400.a does not support wide CLI APIs.
-Therefore, this libdb400.a simply calls ILE.
-
-#CCSID
-You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
-Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
-```
-=== UTF-8 mode, most popular AIX/PASE/Linux ===
-SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
--->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
--->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
-
-=== UTF-8 mode, most popular Windows/Java ===
-SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
--->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2
--->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
-
-=== PASE default (original libdb400.a) ===
-SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
--->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
--->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
-
-```
 (*) PASE libdb400.a does not support wide CLI APIs.
 Therefore, this libdb400.a simply calls ILE.
 
