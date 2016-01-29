@@ -896,4 +896,8 @@ SQLRETURN SQL400FetchArray( SQLHSTMT hstmt,
  SQLINTEGER all_char, 
  SQLINTEGER expand_factor) 
 
+SQLRETURN SQL400FetchArrayFree(SQLPOINTER rows,
+ SQLPOINTER decs,
+ SQLINTEGER cnt_cols)
+
 

@@ -1137,7 +1137,9 @@ SQLRETURN custom_SQL400FetchArray( SQLHSTMT hstmt,
     }
     /* finished */
     if (sqlrc != SQL_SUCCESS) {
-      break;
+      /* output -- no more rows */
+      *more_rows = 0;
+      return sqlrc;
     }
     /* possible SQL_DATA_AT_EXEC */
     if (all_char) {
@@ -1148,6 +1150,48 @@ SQLRETURN custom_SQL400FetchArray( SQLHSTMT hstmt,
     /* output - number cols in result set */
     *cnt_rows = c + 1;
   } /* end c (rows) */
+  /* output -- MAYBE more rows */
+  *more_rows = 1;
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400FetchArrayFree(SQLPOINTER rows,
+ SQLPOINTER decs,
+ SQLINTEGER cnt_cols)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+  int i=0, j=0;
+  char ** argv = (char **)NULL;
+
+  /* rows */
+  if (rows) {
+    argv = (char **)rows;
+    for (i=0; argv[i]; i++) {
+      prms = (SQL400ParamStruct *) argv[i];
+      for (j=0; j < cnt_cols; j++) {
+        prm = (SQL400ParamStruct *)&prms[j];
+        if (prm->indPtr) {
+          free(prm->indPtr);
+        }
+        if (prm->pfSqlCValue) {
+          free(prm->pfSqlCValue);
+        }
+        free(prm);
+      }
+    }
+    free(argv);
+  }
+  /* decs */
+  if (decs) {
+    for (i=0; i < cnt_cols; i++) {
+      opt = (SQL400DescStruct *)&opts[i];
+      free(opt);
+    }
+  }
   return sqlrc;
 }
 

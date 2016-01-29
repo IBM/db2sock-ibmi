@@ -633,5 +633,8 @@ SQL400FetchJoin
 SQL400FetchArray
 SQL400FetchArrayAsync
 SQL400FetchArrayJoin
+SQL400FetchArrayFree
+SQL400FetchArrayFreeAsync
+SQL400FetchArrayFreeJoin
 
 

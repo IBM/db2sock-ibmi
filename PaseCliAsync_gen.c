@@ -8596,3 +8596,47 @@ SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400FetchArrayFree( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400FetchArrayFree( rows, decs, cnt_cols );
+  return sqlrc;
+}
+void * SQL400FetchArrayFreeThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400FetchArrayFreeStruct * myptr = (SQL400FetchArrayFreeStruct *) ptr;
+  myptr->sqlrc = custom_SQL400FetchArrayFree( myptr->rows, myptr->decs, myptr->cnt_cols );
+  /* void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400FetchArrayFreeStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400FetchArrayFreeAsync ( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400FetchArrayFreeStruct * myptr = (SQL400FetchArrayFreeStruct *) malloc(sizeof(SQL400FetchArrayFreeStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->rows = rows;
+  myptr->decs = decs;
+  myptr->cnt_cols = cnt_cols;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400FetchArrayFreeThread, (void *)myptr);
+  return tid;
+}
+SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400FetchArrayFreeStruct * myptr = (SQL400FetchArrayFreeStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400FetchArrayFreeStruct *) NULL;
+  }
+  return myptr;
+}

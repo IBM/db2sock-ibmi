@@ -85,6 +85,7 @@ void main_fetch(SQLHANDLE hstmt) {
       printf("%d) %s %s\n", j, opt->szColName, prm->pfSqlCValue);
     }
   }
+  sqlrc = SQL400FetchArrayFree(out_rows, out_decs, cnt_cols);
   printf("main_fetch (thread %d): leaving\n",ptid);
 }
 

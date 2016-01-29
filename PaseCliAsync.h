@@ -173,6 +173,7 @@ SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, 
 SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
 SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
 SQLRETURN SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
+SQLRETURN SQL400FetchArrayFree( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols );
 
 /* ===================================================
  * NORMAL CLI interfaces
@@ -443,6 +444,7 @@ typedef struct SQL400AddDescStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLI
 typedef struct SQL400ExecuteStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLPOINTER  parms; SQLPOINTER  desc_parms; void * callback; } SQL400ExecuteStruct;
 typedef struct SQL400FetchStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLPOINTER  cols; SQLPOINTER  desc_cols; void * callback; } SQL400FetchStruct;
 typedef struct SQL400FetchArrayStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLINTEGER  max_rows; SQLINTEGER * cnt_rows; SQLINTEGER * more_rows; SQLINTEGER * cnt_cols; SQLPOINTER * out_rows; SQLPOINTER * out_decs; SQLINTEGER  all_char; SQLINTEGER  expand_factor; void * callback; } SQL400FetchArrayStruct;
+typedef struct SQL400FetchArrayFreeStruct { SQLRETURN sqlrc; SQLPOINTER  rows; SQLPOINTER  decs; SQLINTEGER  cnt_cols; void * callback; } SQL400FetchArrayFreeStruct;
 
 
 /* join async thread                    */
@@ -712,6 +714,8 @@ SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag);
 SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400FetchArrayCallback(SQL400FetchArrayStruct* ); */
 SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* ); */
+SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag);
 
 
 /* start an async call to DB2 CLI */
@@ -848,6 +852,7 @@ pthread_t SQL400AddDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
 pthread_t SQL400ExecuteAsync ( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms, void * callback );
 pthread_t SQL400FetchAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols, void * callback );
 pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback );
+pthread_t SQL400FetchArrayFreeAsync ( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols, void * callback );
 
 /* ===================================================
  * ILE CLI interfaces
@@ -1127,6 +1132,7 @@ SQLRETURN custom_SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
 SQLRETURN custom_SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
 SQLRETURN custom_SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
 SQLRETURN custom_SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
+SQLRETURN custom_SQL400FetchArrayFree( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols );
 
 
 #endif /* _PASECLIASYNC_H */
