@@ -42,6 +42,96 @@ int custom_strlen_utf16(unsigned int * src) {
 }
 
 
+void utf8_iconv_open(int myccsid, int utfccsid) {
+  if (!utf8_charset_flag) {
+    utf8_charset_Ascii = ccsidtocs(myccsid);
+    utf8_charset_Utf = ccsidtocs(utfccsid);
+    utf8_AsciiToUtf = iconv_open(utf8_charset_Utf, utf8_charset_Ascii);
+    utf8_UtfToAscii = iconv_open(utf8_charset_Ascii, utf8_charset_Utf);
+    utf8_charset_flag = 1;
+  }
+}
+SQLRETURN utf8_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
+ int rc = 0;
+ char *source = fromBuffer;
+ char *target = toBuffer;
+ size_t sourceBytesLeft = sourceLen;
+ size_t targetBytesLeft = bufSize;
+
+ if (isInput) {
+  rc = iconv(utf8_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+ } else {
+  rc = iconv(utf8_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+ }
+ return rc;
+}
+void utf8_iconv_close() {
+  if (utf8_charset_flag) {
+    (void)iconv_close(utf8_AsciiToUtf);
+    (void)iconv_close(utf8_UtfToAscii);
+    utf8_charset_flag = 0;
+  }
+}
+
+void utf16_iconv_open(int myccsid, int utfccsid) {
+  if (!utf16_charset_flag) {
+    utf16_charset_Ascii = ccsidtocs(myccsid);
+    utf16_charset_Utf = ccsidtocs(utfccsid);
+    utf16_AsciiToUtf = iconv_open(utf16_charset_Utf, utf16_charset_Ascii);
+    utf16_UtfToAscii = iconv_open(utf16_charset_Ascii, utf16_charset_Utf);
+    utf16_charset_flag = 1;
+  }
+}
+SQLRETURN utf16_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
+ int rc = 0;
+ char *source = fromBuffer;
+ char *target = toBuffer;
+ size_t sourceBytesLeft = sourceLen;
+ size_t targetBytesLeft = bufSize;
+
+ memset(toBuffer,0,bufSize);
+ if (isInput) {
+  rc = iconv(utf16_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+ } else {
+  rc = iconv(utf16_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+ }
+ return rc;
+}
+void utf16_iconv_close() {
+  if (utf16_charset_flag) {
+    (void)iconv_close(utf16_AsciiToUtf);
+    (void)iconv_close(utf16_UtfToAscii);
+    utf16_charset_flag = 0;
+  }
+}
+
+
+SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  utf8_iconv_open(inccsid, 1208);
+  sqlrc = utf8_iconv(1, inparm, outparm, inlen, outlen);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  utf8_iconv_open(outccsid, 1208);
+  sqlrc = utf8_iconv(0, inparm, outparm, inlen, outlen);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ){
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  utf16_iconv_open(inccsid, 1200);
+  sqlrc = utf16_iconv(1, inparm, outparm, inlen, outlen);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  utf16_iconv_open(outccsid, 1200);
+  sqlrc = utf16_iconv(0, inparm, outparm, inlen, outlen);
+  return sqlrc;
+}
+
+
 /*
  * ccsid decisions
  */
@@ -455,6 +545,14 @@ SQLRETURN custom_SQL400Fetch(SQLHSTMT hstmt,
 }
 
 
+/* ... super fetch ...
+ * NOT tested advanced funtion
+ * simply storing code in git
+ * until have time to run
+ * (cool if it works, and async)
+ */
+
+
 SQLRETURN custom_SQL400AddCResultDesc(SQLHSTMT hstmt,
  SQLSMALLINT * pccol,
  SQL400DescStruct * opts) 
@@ -860,10 +958,6 @@ SQLRETURN custom_SQL400GetAtExecAsChar(SQLHSTMT hstmt,
   return sqlrc;
 }
 
-/*
- * NOT tested advanced funtion
- * (cool if it works, and async)
- */
 SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt, 
  SQLINTEGER start_row, 
  SQLINTEGER max_rows, 
@@ -936,96 +1030,6 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
     /* output - number cols in result set */
     *cnt_rows = c + 1;
   } /* end c (rows) */
-  return sqlrc;
-}
-
-
-void utf8_iconv_open(int myccsid, int utfccsid) {
-  if (!utf8_charset_flag) {
-    utf8_charset_Ascii = ccsidtocs(myccsid);
-    utf8_charset_Utf = ccsidtocs(utfccsid);
-    utf8_AsciiToUtf = iconv_open(utf8_charset_Utf, utf8_charset_Ascii);
-    utf8_UtfToAscii = iconv_open(utf8_charset_Ascii, utf8_charset_Utf);
-    utf8_charset_flag = 1;
-  }
-}
-SQLRETURN utf8_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
- int rc = 0;
- char *source = fromBuffer;
- char *target = toBuffer;
- size_t sourceBytesLeft = sourceLen;
- size_t targetBytesLeft = bufSize;
-
- if (isInput) {
-  rc = iconv(utf8_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- } else {
-  rc = iconv(utf8_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- }
- return rc;
-}
-void utf8_iconv_close() {
-  if (utf8_charset_flag) {
-    (void)iconv_close(utf8_AsciiToUtf);
-    (void)iconv_close(utf8_UtfToAscii);
-    utf8_charset_flag = 0;
-  }
-}
-
-void utf16_iconv_open(int myccsid, int utfccsid) {
-  if (!utf16_charset_flag) {
-    utf16_charset_Ascii = ccsidtocs(myccsid);
-    utf16_charset_Utf = ccsidtocs(utfccsid);
-    utf16_AsciiToUtf = iconv_open(utf16_charset_Utf, utf16_charset_Ascii);
-    utf16_UtfToAscii = iconv_open(utf16_charset_Ascii, utf16_charset_Utf);
-    utf16_charset_flag = 1;
-  }
-}
-SQLRETURN utf16_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
- int rc = 0;
- char *source = fromBuffer;
- char *target = toBuffer;
- size_t sourceBytesLeft = sourceLen;
- size_t targetBytesLeft = bufSize;
-
- memset(toBuffer,0,bufSize);
- if (isInput) {
-  rc = iconv(utf16_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- } else {
-  rc = iconv(utf16_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- }
- return rc;
-}
-void utf16_iconv_close() {
-  if (utf16_charset_flag) {
-    (void)iconv_close(utf16_AsciiToUtf);
-    (void)iconv_close(utf16_UtfToAscii);
-    utf16_charset_flag = 0;
-  }
-}
-
-
-SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  utf8_iconv_open(inccsid, 1208);
-  sqlrc = utf8_iconv(1, inparm, outparm, inlen, outlen);
-  return sqlrc;
-}
-SQLRETURN custom_SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  utf8_iconv_open(outccsid, 1208);
-  sqlrc = utf8_iconv(0, inparm, outparm, inlen, outlen);
-  return sqlrc;
-}
-SQLRETURN custom_SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ){
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  utf16_iconv_open(inccsid, 1200);
-  sqlrc = utf16_iconv(1, inparm, outparm, inlen, outlen);
-  return sqlrc;
-}
-SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  utf16_iconv_open(outccsid, 1200);
-  sqlrc = utf16_iconv(0, inparm, outparm, inlen, outlen);
   return sqlrc;
 }
 
