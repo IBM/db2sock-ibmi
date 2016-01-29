@@ -8,11 +8,11 @@ When this warning disappears, APIs will be considered stable.
 Welcome to the db2sock project. Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
 
 A vast number of features have been added to new libdb400.a, async CLI, ILE direct CLI APIs, 
-unicode CLI "unix" API-mode (UTF-8), unicode CLI "wide" APIs (UTF-16), and more.
-These additions should make language extension writting easier.
-CCSID topic descibes new libdb400.a mode settings via SQLOverrideCCSID400(ccsid).
+Unicode CLI "Unix" API (UTF-8), Unicode CLI "wide" APIs (UTF-16), and more.
+These additions should make language extension writing easier.
+CCSID topic describes new libdb400.a mode settings via SQLOverrideCCSID400(ccsid).
 
-Run time, libdb400.a should fit seamless under any exsiting scripting language db2 exetnsion. 
+Run time, libdb400.a should fit seamless under any existing scripting language db2 extension. 
 That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
 You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
 
@@ -25,8 +25,13 @@ This project originated because of a need to create async DB2 requests for Node.
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. Author two cents, when stable, start using this driver, 
-you will grow function by leaps with very little effort. 
+web based db2, json based db2, etc. Wildly imagined, if custom interfaces work test well, one could
+imagine gutting all the languages extension to bare minimum script language interaction, leaving all
+the real DB2 work to this driver (aka, new SQL400Connection(W) with attributes). For example, flight of
+fancy, one could imagine, PHP mysql extension talking directly to this driver, wherein, any old 
+PHP+mysql application would be instant DB2 (no port). Ok, no promise, but, you get the idea.
+Author two cents, when stable, start using this driver, 
+you will grow function by leaps with very little effort.  
 
 ##Usage:
 
