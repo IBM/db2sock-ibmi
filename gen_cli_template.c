@@ -796,6 +796,10 @@ SQLRETURN SQLTransact(SQLHENV henv,
 # ------------------
 SQLRETURN SQLOverrideCCSID400(SQLINTEGER newCCSID)
 
+
+SQLRETURN SQL400Stmt2Hdbc(SQLHSTMT hstmt,
+ SQLINTEGER * ohnd)
+
 # custom convert to/from utf8
 SQLRETURN SQL400ToUtf8(SQLHDBC hdbc,
  SQLPOINTER inparm,
@@ -881,8 +885,15 @@ SQLRETURN SQL400Fetch(SQLHSTMT hstmt,
  SQLPOINTER cols, 
  SQLPOINTER desc_cols) 
 
-SQLRETURN SQL400Stmt2Hdbc(SQLHSTMT hstmt,
- SQLINTEGER * ohnd)
-
+SQLRETURN SQL400FetchArray( SQLHSTMT hstmt, 
+ SQLINTEGER start_row, 
+ SQLINTEGER max_rows, 
+ SQLINTEGER *cnt_rows, 
+ SQLINTEGER *more_rows, 
+ SQLINTEGER *cnt_cols, 
+ SQLPOINTER *out_rows, 
+ SQLPOINTER *out_decs, 
+ SQLINTEGER all_char, 
+ SQLINTEGER expand_factor) 
 
 

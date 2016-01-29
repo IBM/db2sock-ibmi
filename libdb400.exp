@@ -588,6 +588,9 @@ SQLTransactAsync
 SQLTransactJoin
 ILE_SQLTransact
 SQLOverrideCCSID400
+SQL400Stmt2Hdbc
+SQL400Stmt2HdbcAsync
+SQL400Stmt2HdbcJoin
 SQL400ToUtf8
 SQL400ToUtf8Async
 SQL400ToUtf8Join
@@ -627,8 +630,8 @@ SQL400ExecuteJoin
 SQL400Fetch
 SQL400FetchAsync
 SQL400FetchJoin
-SQL400Stmt2Hdbc
-SQL400Stmt2HdbcAsync
-SQL400Stmt2HdbcJoin
+SQL400FetchArray
+SQL400FetchArrayAsync
+SQL400FetchArrayJoin
 
 

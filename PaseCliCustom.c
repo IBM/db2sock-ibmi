@@ -552,12 +552,12 @@ SQLRETURN custom_SQL400Fetch(SQLHSTMT hstmt,
  * (cool if it works, and async)
  */
 
-
 SQLRETURN custom_SQL400AddCResultDesc(SQLHSTMT hstmt,
  SQLSMALLINT * pccol,
- SQL400DescStruct * opts) 
+ SQLPOINTER * out_opts) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
   SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
   int i = 0;
   int szOpts = 0;
@@ -570,6 +570,7 @@ SQLRETURN custom_SQL400AddCResultDesc(SQLHSTMT hstmt,
   szOpts = (*pccol + 1) * sizeof(SQL400DescStruct);
   opts = (SQL400DescStruct *) malloc(szOpts);
   memset(opts,0,szOpts);
+  *out_opts = (SQLPOINTER) opts;
   /* loop each column */
   for (i=0; i < *pccol; i++) {
     opt = (SQL400DescStruct *)&opts[i];
@@ -582,13 +583,16 @@ SQLRETURN custom_SQL400AddCResultDesc(SQLHSTMT hstmt,
 }
 
 SQLRETURN custom_SQL400AddCRowDefault(SQLSMALLINT pccol,
- SQL400DescStruct * opts,
- SQL400ParamStruct * prms,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER * indPtr = (SQLINTEGER *) NULL;
+  SQL400DescStruct * opts = (SQL400DescStruct *)descs;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *)cparms;
   SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLPOINTER pfSqlCValue = (SQLPOINTER) NULL;
   int c = 0, i = 0, j = 0;
   short iAmShort = 0;
@@ -705,13 +709,16 @@ SQLRETURN custom_SQL400AddCRowDefault(SQLSMALLINT pccol,
 }
 
 SQLRETURN custom_SQL400AddCRowAsChar(SQLSMALLINT pccol,
- SQL400DescStruct * opts,
- SQL400ParamStruct * prms,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER * indPtr = (SQLINTEGER *) NULL;
+  SQL400DescStruct * opts = (SQL400DescStruct *)descs;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *)cparms;
   SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLPOINTER pfSqlCValue = (SQLPOINTER) NULL;
   int c = 0, i = 0, j = 0;
   short iAmShort = 0;
@@ -835,17 +842,35 @@ SQLRETURN custom_SQL400AddCRowAsChar(SQLSMALLINT pccol,
   return sqlrc;
 }
 
+int custom_trim_CVAR(SQL400ParamStruct * prm) {
+  int ib = 0;
+  char * ibc = (char *) NULL;
+
+  if (prm->indPtr) {
+    ib = *(prm->indPtr);
+    if (ib > 0) {
+      ib = *(prm->indPtr) - 1;
+      ibc = (char *) prm->pfSqlCValue;
+      for (; ib && (ibc[ib] == 0x00 || ibc[ib] == 0x20); ib--) ibc[ib] = '\0';
+    }
+    *(prm->indPtr) = ib;
+  }
+}
+
 
 SQLRETURN custom_SQL400GetAtExecDefault(SQLHSTMT hstmt,
  SQLSMALLINT pccol,
- SQL400DescStruct * opts,
- SQL400ParamStruct * prms) 
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLHANDLE hstmt2 = 0, hstmt3 = 0;
   SQLINTEGER pcbColDef2 = 0, pcbColDef3 = 0;
   SQLINTEGER indPtr2 = 0, indPtr3 = 0;
   SQLINTEGER lobLoc = 0;
+  SQL400DescStruct * opts = (SQL400DescStruct *)descs;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *)cparms;
   SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
   SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLSMALLINT targetCType = SQL_C_CHAR;
@@ -860,14 +885,50 @@ SQLRETURN custom_SQL400GetAtExecDefault(SQLHSTMT hstmt,
   for (i=0; i < pccol; i++) {
     opt = (SQL400DescStruct *)&opts[i];
     prm = (SQL400ParamStruct *)&prms[i];
+    if (prm->pfSqlCType == SQL_C_CHAR) {
+      custom_trim_CVAR(prm);
+    }
     targetCType = SQL_C_CHAR;
     switch (opt->pfSqlType) {
+    case SQL_CHAR:
+    case SQL_VARCHAR:
+    case SQL_UTF8_CHAR:
+    case SQL_WCHAR:
+    case SQL_WVARCHAR:
+    /* case SQL_LONGVARCHAR: */
+    /* case SQL_WLONGVARCHAR: */
+      break;
+    case SQL_GRAPHIC:
+    case SQL_VARGRAPHIC:
+    /* case SQL_LONGVARGRAPHIC: */
+      break;
+    case SQL_BINARY:
+    case SQL_VARBINARY:
+    /* case SQL_LONGVARBINARY: */
+      break;
+    case SQL_TYPE_DATE:
+    case SQL_TYPE_TIME:
+    case SQL_TYPE_TIMESTAMP:
+    case SQL_DATETIME:
+    case SQL_DECFLOAT:
+      break;
+    case SQL_SMALLINT:
+      break;
+    case SQL_INTEGER:
+      break;
+    case SQL_BIGINT:
+      break;
+    case SQL_FLOAT:
+      break;
+    case SQL_DOUBLE:
+      break;
+    case SQL_DECIMAL:
+    case SQL_NUMERIC:
+      break;
     case SQL_BLOB:
       targetCType = SQL_C_BINARY;
     case SQL_CLOB:
     case SQL_DBCLOB:
-      break;
-    default:
       /* sizeof LOB */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt2);
       pcbColDef2 = opt->pcbColDef + 1;
@@ -875,6 +936,7 @@ SQLRETURN custom_SQL400GetAtExecDefault(SQLHSTMT hstmt,
       lobLoc = *(SQLINTEGER *)(prm->pfSqlCValue);
       free(prm->pfSqlCValue);
       sqlrc = SQLGetLength(hstmt2, prm->pfSqlCType, lobLoc, &pcbColDef2, &indPtr2);
+      pcbColDef2 = pcbColDef2 * expand_factor;
       prm->pfSqlCValue = (SQLPOINTER) malloc(pcbColDef2 + 1);
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt2);
       /* get LOB data */
@@ -891,6 +953,8 @@ SQLRETURN custom_SQL400GetAtExecDefault(SQLHSTMT hstmt,
         for (; ib && (ibc[ib] == 0x00 || ibc[ib] == 0x20); ib--) ibc[ib] = '\0';
       }
       *(prm->indPtr) = ib;
+      break;
+    default:
       break;
     }
   }
@@ -900,14 +964,17 @@ SQLRETURN custom_SQL400GetAtExecDefault(SQLHSTMT hstmt,
 
 SQLRETURN custom_SQL400GetAtExecAsChar(SQLHSTMT hstmt,
  SQLSMALLINT pccol,
- SQL400DescStruct * opts,
- SQL400ParamStruct * prms) 
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLHANDLE hstmt2 = 0, hstmt3 = 0;
   SQLINTEGER pcbColDef2 = 0, pcbColDef3 = 0;
   SQLINTEGER indPtr2 = 0, indPtr3 = 0;
   SQLINTEGER lobLoc = 0;
+  SQL400DescStruct * opts = (SQL400DescStruct *)descs;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *)cparms;
   SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
   SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLSMALLINT targetCType = SQL_C_CHAR;
@@ -922,13 +989,49 @@ SQLRETURN custom_SQL400GetAtExecAsChar(SQLHSTMT hstmt,
   for (i=0; i < pccol; i++) {
     opt = (SQL400DescStruct *)&opts[i];
     prm = (SQL400ParamStruct *)&prms[i];
+    if (prm->pfSqlCType == SQL_C_CHAR) {
+      custom_trim_CVAR(prm);
+    }
     targetCType = SQL_C_CHAR;
     switch (opt->pfSqlType) {
+    case SQL_CHAR:
+    case SQL_VARCHAR:
+    case SQL_UTF8_CHAR:
+    case SQL_WCHAR:
+    case SQL_WVARCHAR:
+    /* case SQL_LONGVARCHAR: */
+    /* case SQL_WLONGVARCHAR: */
+      break;
+    case SQL_GRAPHIC:
+    case SQL_VARGRAPHIC:
+    /* case SQL_LONGVARGRAPHIC: */
+      break;
+    case SQL_BINARY:
+    case SQL_VARBINARY:
+    /* case SQL_LONGVARBINARY: */
+      break;
+    case SQL_TYPE_DATE:
+    case SQL_TYPE_TIME:
+    case SQL_TYPE_TIMESTAMP:
+    case SQL_DATETIME:
+    case SQL_DECFLOAT:
+      break;
+    case SQL_SMALLINT:
+      break;
+    case SQL_INTEGER:
+      break;
+    case SQL_BIGINT:
+      break;
+    case SQL_FLOAT:
+      break;
+    case SQL_DOUBLE:
+      break;
+    case SQL_DECIMAL:
+    case SQL_NUMERIC:
+      break;
     case SQL_BLOB:
     case SQL_CLOB:
     case SQL_DBCLOB:
-      break;
-    default:
       /* sizeof LOB */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt2);
       pcbColDef2 = opt->pcbColDef + 1;
@@ -936,6 +1039,7 @@ SQLRETURN custom_SQL400GetAtExecAsChar(SQLHSTMT hstmt,
       lobLoc = *(SQLINTEGER *)(prm->pfSqlCValue);
       free(prm->pfSqlCValue);
       sqlrc = SQLGetLength(hstmt2, prm->pfSqlCType, lobLoc, &pcbColDef2, &indPtr2);
+      pcbColDef2 = pcbColDef2 * expand_factor;
       prm->pfSqlCValue = (SQLPOINTER) malloc(pcbColDef2 + 1);
       SQLFreeHandle(SQL_HANDLE_STMT, hstmt2);
       /* get LOB data */
@@ -953,18 +1057,21 @@ SQLRETURN custom_SQL400GetAtExecAsChar(SQLHSTMT hstmt,
       }
       *(prm->indPtr) = ib;
       break;
+    default:
+      break;
     }
   }
   return sqlrc;
 }
 
-SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt, 
+SQLRETURN custom_SQL400FetchArray( SQLHSTMT hstmt, 
  SQLINTEGER start_row, 
  SQLINTEGER max_rows, 
  SQLINTEGER *cnt_rows, 
  SQLINTEGER *more_rows, 
  SQLINTEGER *cnt_cols, 
- SQLPOINTER output, 
+ SQLPOINTER *out_rows, 
+ SQLPOINTER *out_decs, 
  SQLINTEGER all_char, 
  SQLINTEGER expand_factor) 
 { 
@@ -983,23 +1090,26 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
   *cnt_rows = 0;
   *more_rows = 0;
   *cnt_cols = 0;
-  output = (SQLPOINTER) NULL;
+  *out_rows = (SQLPOINTER) NULL;
+  *out_decs = (SQLPOINTER) NULL;
   /* alloc expand factor (ccsid conversion) */
   if (expand_factor < 1) {
     expand_factor = 1;
   }
   /* descrip columns result set */
-  sqlrc = custom_SQL400AddCResultDesc(hstmt, &pccol, opts);
-  /* output - ptr to rows results
-   * output[0]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
+  sqlrc = custom_SQL400AddCResultDesc(hstmt, &pccol, (SQLPOINTER *)&opts);
+  *out_decs = (SQLPOINTER) opts;
+  *cnt_cols = (SQLINTEGER) pccol;
+  /* out_rows - ptr to rows results
+   * out_rows[0]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
    * :
-   * output[max_rows]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
+   * out_rows[max_rows]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
    */
   szPtrs = (max_rows +1) * sizeof(char *);
   outPtr = (void *)malloc(szPtrs);
   memset(outPtr,0,szPtrs);
   argv = (char **) outPtr;
-  output = (SQLPOINTER) outPtr;
+  *out_rows = (SQLPOINTER) outPtr;
   /* fetch each row */
   szPrms = (pccol + 1) * sizeof(SQL400ParamStruct);
   for (c=0; c < max_rows; c++) {
@@ -1021,11 +1131,15 @@ SQLRETURN custom_SQL400Fetch_Array( SQLHSTMT hstmt,
       sqlrc = SQL400Fetch(hstmt, start_row + (c - 1), prms, opts );
       break;
     }
+    /* finished */
+    if (sqlrc != SQL_SUCCESS) {
+      break;
+    }
     /* possible SQL_DATA_AT_EXEC */
     if (all_char) {
-      sqlrc = custom_SQL400GetAtExecAsChar(hstmt, pccol, opts, prms);
+      sqlrc = custom_SQL400GetAtExecAsChar(hstmt, pccol, opts, prms, expand_factor);
     } else {
-      sqlrc = custom_SQL400GetAtExecDefault(hstmt, pccol, opts, prms);
+      sqlrc = custom_SQL400GetAtExecDefault(hstmt, pccol, opts, prms, expand_factor);
     }
     /* output - number cols in result set */
     *cnt_rows = c + 1;

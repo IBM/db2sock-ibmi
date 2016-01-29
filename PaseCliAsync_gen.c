@@ -7852,6 +7852,54 @@ SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
   sqlrc = custom_SQLOverrideCCSID400( newCCSID );
   return sqlrc;
 }
+SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400Stmt2HdbcThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400Stmt2Hdbc( myptr->hstmt, myptr->ohnd );
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400Stmt2HdbcCallback(SQL400Stmt2HdbcStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400Stmt2HdbcStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) malloc(sizeof(SQL400Stmt2HdbcStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->ohnd = ohnd;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400Stmt2HdbcThread, (void *)myptr);
+  return tid;
+}
+SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400Stmt2HdbcStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -8492,51 +8540,59 @@ SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd )
+SQLRETURN SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
   init_table_lock(hstmt, 1);
-  sqlrc = custom_SQL400Stmt2Hdbc( hstmt, ohnd );
+  sqlrc = custom_SQL400FetchArray( hstmt, start_row, max_rows, cnt_rows, more_rows, cnt_cols, out_rows, out_decs, all_char, expand_factor );
   init_table_unlock(hstmt, 1);
   return sqlrc;
 }
-void * SQL400Stmt2HdbcThread (void *ptr)
+void * SQL400FetchArrayThread (void *ptr)
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
-  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) ptr;
+  SQL400FetchArrayStruct * myptr = (SQL400FetchArrayStruct *) ptr;
   init_table_lock(myptr->hstmt, 1);
-  myptr->sqlrc = custom_SQL400Stmt2Hdbc( myptr->hstmt, myptr->ohnd );
+  myptr->sqlrc = custom_SQL400FetchArray( myptr->hstmt, myptr->start_row, myptr->max_rows, myptr->cnt_rows, myptr->more_rows, myptr->cnt_cols, myptr->out_rows, myptr->out_decs, myptr->all_char, myptr->expand_factor );
   init_table_unlock(myptr->hstmt, 1);
-  /* void SQL400Stmt2HdbcCallback(SQL400Stmt2HdbcStruct* ); */
+  /* void SQL400FetchArrayCallback(SQL400FetchArrayStruct* ); */
   if (myptr->callback) {
-    void (*ptrFunc)(SQL400Stmt2HdbcStruct* ) = myptr->callback;
+    void (*ptrFunc)(SQL400FetchArrayStruct* ) = myptr->callback;
     ptrFunc( myptr );
   }
   pthread_exit((void *)myptr);
 }
-pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * callback )
+pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback )
 {
   int rc = 0;
   pthread_t tid = 0;
-  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) malloc(sizeof(SQL400Stmt2HdbcStruct));
+  SQL400FetchArrayStruct * myptr = (SQL400FetchArrayStruct *) malloc(sizeof(SQL400FetchArrayStruct));
   myptr->sqlrc = SQL_SUCCESS;
   myptr->hstmt = hstmt;
-  myptr->ohnd = ohnd;
+  myptr->start_row = start_row;
+  myptr->max_rows = max_rows;
+  myptr->cnt_rows = cnt_rows;
+  myptr->more_rows = more_rows;
+  myptr->cnt_cols = cnt_cols;
+  myptr->out_rows = out_rows;
+  myptr->out_decs = out_decs;
+  myptr->all_char = all_char;
+  myptr->expand_factor = expand_factor;
   myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQL400Stmt2HdbcThread, (void *)myptr);
+  rc = pthread_create(&tid, NULL, SQL400FetchArrayThread, (void *)myptr);
   return tid;
 }
-SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag)
+SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag)
 {
-  SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) NULL;
+  SQL400FetchArrayStruct * myptr = (SQL400FetchArrayStruct *) NULL;
   int active = 0;
   active = init_table_in_progress(myptr->hstmt, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
-    return (SQL400Stmt2HdbcStruct *) NULL;
+    return (SQL400FetchArrayStruct *) NULL;
   }
   return myptr;
 }
