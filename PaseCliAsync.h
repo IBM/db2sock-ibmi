@@ -9,39 +9,85 @@
 #include <as400_types.h>
 #include <as400_protos.h>
 
-/* special SQL400 aggregate functions */
-/* do common work for language driver */
-/* composite calls to CLI also async  */
+/* ===================================================
+ * Using the driver
+ * ===================================================
+ */
 
-#define SQL400_FLAG_JOIN_WAIT 0
-#define SQL400_FLAG_JOIN_NO_WAIT 1
-
-/* Use:
- * SQL400Environment
+/* 
+ * SQL400Environment -- set the mode of driver
  * 
- * ok, unicode please ...
+ * === UTF-8 mode, most popular AIX/PASE/Linux ===
+ * SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
+ * -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+ * -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
  * 
- * UTF8 normal interfaces (default 1208):
+ * === UTF-8 mode, most popular Windows/Java ===
+ * SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
+ * -->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2
+ * -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
+ * 
+ * === PASE default (original libdb400.a) ===
+ * SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
+ * -->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
+ * -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
+ * 
+ * PASE ccsid setting occurs before any other CLI operations
+ * at the environment level. Therefore the driver mode is
+ * established (restricted, if you choose). 
+ * 
+ * 1) non-Unicode interfaces (call old libdb400.a, messy stuff):
+ *   int ccsid = 819;
+ *   env attr SQL400_ATTR_PASE_CCSID &ccsid -- set pase ccsid
+ * 
+ * 2) UTF8 interfaces (call direct to ILE DB2):
  *   int ccsid = 1208;
  *   env attr SQL400_ATTR_PASE_CCSID &ccsid -- set pase ccsid
  *   if ccsid == 1208:
  *     env attr SQL_ATTR_UTF8 &true -- no conversion required by PASE
- *   *NOTE: do not set PASE_CCSID or ATTR_UTF8 in UTF-16 mode (below). 
  * 
- * UTF16 wide interfaces:
+ * 3) UTF16 wide interfaces (call direct to ILE DB2):
+ *   **** NEVER set PASE_CCSID or ATTR_UTF8 in UTF-16 mode. ****
  *   So, database exotic ebcdic column and PASE binds c type as WVARCHAR/WCHAR output is UTF16?
  *   Yes, the database will do the conversion from EBCDIC to UTF16 for data bound as WVARCHAR/WCHAR.
  *   not sure about DBCLOB -- I want to guess that is bound as UTF-16, not 100% sure.
  * 
- * IF your data not UTF-8 or UTF-16, use following interfaces to convert.
+ * IF your data not UTF-8 or UTF-16, interfaces to convert (experimental).
  *   SQL400ToUtf8    -- use before passing to CLI normal interfaces
  *   SQL400FromUtf8  -- use return output normal CLI (if needed)
  *   SQL400ToUtf16   -- use before passing to CLI wide interfaces
  *   SQL400FromUtf16 -- use return output wide CLI (if needed)
  * 
+ * A choice of exported APIs (SQLExecDirect one of many):
+ * 
+ * === CLI APIs UTF-8 or APIWs UTF-16  ===
+ * === choose async and/or normal wait ===
+ * SQLRETURN SQLExecDirect(..);
+ * SQLRETURN SQLExecDirectW(..);
+ * 
+ * == callback or reap/join with async ===
+ * pthread_t SQLExecDirectAsync(..);
+ * pthread_t SQLExecDirectWAsync(..);
+ * void SQLExecDirectCallback(SQLExecDirectStruct* );
+ * SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag);
+ * void SQLExecDirectWCallback(SQLExecDirectWStruct* );
+ * SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag);
+ * 
+ * === bypass all, call PASE libdb400.a directly  (not recommended) ===
+ * SQLRETURN libdb400_SQLExecDirect(..);
+ * SQLRETURN libdb400_SQLExecDirectW(..); (*)
+ * 
+ * === bypass all, call ILE directly (not recommended) ===
+ * SQLRETURN ILE_SQLExecDirect(..);
+ * SQLRETURN ILE_SQLExecDirectW(..);
+ * 
  */
-#define SQL400_ATTR_PASE_CCSID 10011
-#define SQL400_ATTR_CONN_JDBC 10201
+
+/* ===================================================
+ * CUSTOM interfaces
+ * ===================================================
+ */
+
 /* Use:
  *   SQL400Environment ( ..., SQLPOINTER  options )
  *   SQL400Connect ( ..., SQLPOINTER  options )
@@ -55,6 +101,8 @@
  *     s - StmtAttr
  *     o - StmtOption
  */
+#define SQL400_ATTR_PASE_CCSID 10011
+#define SQL400_ATTR_CONN_JDBC 10201
 #define SQL400_ONERR_CONT 1
 #define SQL400_ONERR_STOP 2
 #define SQL400_FLAG_IMMED 0
@@ -106,6 +154,10 @@ typedef struct SQL400DescStruct {
  SQLCHAR     bfColName[1024]; /*  c - bfColName    - column name buf (out) */
 } SQL400DescStruct;
 
+/* special SQL400 aggregate functions */
+/* do common work for language driver */
+/* composite calls to CLI also async  */
+
 SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
@@ -121,7 +173,12 @@ SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_pa
 SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
 SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
 
-/* === sqlcli.h === 
+/* ===================================================
+ * NORMAL CLI interfaces
+ * ===================================================
+ */
+
+/* === sqlcli.h -- normal CLI interfaces (copy) === 
  * SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc );
  * SQLRETURN SQLAllocEnv( SQLHENV * phenv );
  * SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd );
@@ -246,6 +303,11 @@ SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
  * SQLRETURN SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
  * SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID );
  * === sqlcli.h === */
+
+/* ===================================================
+ * ASYNC CLI interfaces
+ * ===================================================
+ */
 
 /* choose either callback or join    */
 /* following structures returned     */
@@ -387,6 +449,8 @@ typedef struct SQL400Stmt2HdbcStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTE
 /*     - block until complete           */
 /*   SQL400_FLAG_JOIN_NO_WAIT           */
 /*     - no block, NULL still executing */
+#define SQL400_FLAG_JOIN_WAIT 0
+#define SQL400_FLAG_JOIN_NO_WAIT 1
 
 /* void SQLBindColCallback(SQLBindColStruct* ); */
 SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag);
@@ -780,7 +844,10 @@ pthread_t SQL400ExecuteAsync ( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  d
 pthread_t SQL400FetchAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols, void * callback );
 pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * callback );
 
-/* ILE call                           */
+/* ===================================================
+ * ILE CLI interfaces
+ * ===================================================
+ */
 
 SQLRETURN ILE_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc );
 SQLRETURN ILE_SQLAllocEnv( SQLHENV * phenv );
@@ -905,7 +972,10 @@ SQLRETURN ILE_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLIN
 SQLRETURN ILE_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType );
 SQLRETURN ILE_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
 
-/* PASE libdb400.a call               */
+/* ===================================================
+ * LIBDB400.A CLI interfaces (PASE old CLI driver)
+ * ===================================================
+ */
 
 SQLRETURN libdb400_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc );
 SQLRETURN libdb400_SQLAllocEnv( SQLHENV * phenv );
@@ -1031,7 +1101,10 @@ SQLRETURN libdb400_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQL
 SQLRETURN libdb400_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
 SQLRETURN libdb400_SQLOverrideCCSID400( SQLINTEGER  newCCSID );
 
-/* === internal use ======            */
+/* ===================================================
+ * INTERNAL USE
+ * ===================================================
+ */
 
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID );
 SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
@@ -1049,6 +1122,5 @@ SQLRETURN custom_SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  
 SQLRETURN custom_SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
 SQLRETURN custom_SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
 
-/* === internal use ======            */
 
 #endif /* _PASECLIASYNC_H */
