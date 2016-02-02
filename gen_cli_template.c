@@ -845,6 +845,12 @@ SQLRETURN SQL400SetAttr(SQLINTEGER scope,
  SQLINTEGER flag,
  SQLPOINTER options)
 
+SQLRETURN SQL400SetAttrW(SQLINTEGER scope,
+ SQLHANDLE hndl,
+ SQLINTEGER flag,
+ SQLPOINTER options)
+
+
 SQLRETURN SQL400Environment(SQLINTEGER * ohnd,
  SQLPOINTER options)
 
@@ -876,6 +882,11 @@ SQLRETURN SQL400AddDesc(SQLHSTMT hstmt,
  SQLSMALLINT flag, 
  SQLPOINTER descs)
 
+SQLRETURN SQL400AddDescW(SQLHSTMT hstmt,
+ SQLSMALLINT icol,
+ SQLSMALLINT flag, 
+ SQLPOINTER descs)
+
 SQLRETURN SQL400Execute(SQLHSTMT hstmt, 
  SQLPOINTER parms, 
  SQLPOINTER desc_parms)
@@ -886,6 +897,17 @@ SQLRETURN SQL400Fetch(SQLHSTMT hstmt,
  SQLPOINTER desc_cols) 
 
 SQLRETURN SQL400FetchArray( SQLHSTMT hstmt, 
+ SQLINTEGER start_row, 
+ SQLINTEGER max_rows, 
+ SQLINTEGER *cnt_rows, 
+ SQLINTEGER *more_rows, 
+ SQLINTEGER *cnt_cols, 
+ SQLPOINTER *out_rows, 
+ SQLPOINTER *out_decs, 
+ SQLINTEGER all_char, 
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400FetchArrayW( SQLHSTMT hstmt, 
  SQLINTEGER start_row, 
  SQLINTEGER max_rows, 
  SQLINTEGER *cnt_rows, 

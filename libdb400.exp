@@ -609,6 +609,9 @@ SQL400AddAttrJoin
 SQL400SetAttr
 SQL400SetAttrAsync
 SQL400SetAttrJoin
+SQL400SetAttrW
+SQL400SetAttrWAsync
+SQL400SetAttrWJoin
 SQL400Environment
 SQL400EnvironmentAsync
 SQL400EnvironmentJoin
@@ -624,6 +627,9 @@ SQL400AddCVarJoin
 SQL400AddDesc
 SQL400AddDescAsync
 SQL400AddDescJoin
+SQL400AddDescW
+SQL400AddDescWAsync
+SQL400AddDescWJoin
 SQL400Execute
 SQL400ExecuteAsync
 SQL400ExecuteJoin
@@ -633,6 +639,9 @@ SQL400FetchJoin
 SQL400FetchArray
 SQL400FetchArrayAsync
 SQL400FetchArrayJoin
+SQL400FetchArrayW
+SQL400FetchArrayWAsync
+SQL400FetchArrayWJoin
 SQL400FetchArrayFree
 SQL400FetchArrayFreeAsync
 SQL400FetchArrayFreeJoin

@@ -1,4 +1,6 @@
 #!liblang400.a(shr.o)
 
+lang_strlen_utf16
 lang_check_sqlrc
+lang_check_sqlrcW
 
