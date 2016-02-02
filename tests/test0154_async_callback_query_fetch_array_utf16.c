@@ -155,7 +155,7 @@ void main_connect(SQLHANDLE henv) {
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   printf("main_connect (thread %d): starting\n",ptid);
   /* async connection */
-  sqlrc = SQL400ToUtf16(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf16, (SQLINTEGER)  sizeof(db_utf16), myccsid);
+  sqlrc = SQL400ToUtf16(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf16, (SQLINTEGER) sizeof(db_utf16), myccsid);
   sqlrc = SQL400ToUtf16(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf16, (SQLINTEGER) sizeof(uid_utf16), myccsid);
   sqlrc = SQL400ToUtf16(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf16, (SQLINTEGER) sizeof(pwd_utf16), myccsid);
   tid = SQL400ConnectWAsync(henv, (SQLWCHAR *) &db_utf16, (SQLWCHAR *) &uid_utf16, (SQLWCHAR *) &pwd_utf16, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);

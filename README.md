@@ -24,12 +24,14 @@ If you do not wish to exploit new features, continue compiling with ILE sqlcli.h
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
+#Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
 web based db2, json based db2, etc. Wildly imagined, if custom interfaces test well, one could
 imagine gutting all languages extension to bare minimum script language interaction, leaving all
 the real DB2 work to this driver (aka, new SQL400Connection(W) with attributes). For example, flight of
 fancy, one could imagine, PHP mysql extension talking directly to this driver, wherein, any old 
 PHP+mysql application would be instant DB2 (no port). Ok, no promise, but, you get the idea.
+
 Author two cents, when stable, start using this driver, 
 you will grow function by leaps with very little effort.
 
@@ -91,6 +93,76 @@ see libdb400.exp for all exported APIs.
 
 (*) PASE libdb400.a does not support wide CLI APIs.
 Therefore, this libdb400.a simply calls ILE.
+
+
+## Advanced features
+Experimental advanced features, large, complex operations in one async call.
+
+```
+SQLRETURN SQL400FetchArray( SQLHSTMT hstmt, 
+ SQLINTEGER start_row, 
+ SQLINTEGER max_rows, 
+ SQLINTEGER *cnt_rows, 
+ SQLINTEGER *more_rows, 
+ SQLINTEGER *cnt_cols, 
+ SQLPOINTER *out_rows, 
+ SQLPOINTER *out_decs, 
+ SQLINTEGER all_char, 
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400FetchArrayW( SQLHSTMT hstmt, 
+ SQLINTEGER start_row, 
+ SQLINTEGER max_rows, 
+ SQLINTEGER *cnt_rows, 
+ SQLINTEGER *more_rows, 
+ SQLINTEGER *cnt_cols, 
+ SQLPOINTER *out_rows, 
+ SQLPOINTER *out_decs, 
+ SQLINTEGER all_char, 
+ SQLINTEGER expand_factor)
+
+SQLRETURN SQL400FetchArrayFree(SQLPOINTER rows,
+ SQLPOINTER decs,
+ SQLINTEGER cnt_cols)
+
+
+void SQL400FetchArrayCallback(SQL400FetchArrayStruct* );
+SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag);
+void SQL400FetchArrayWCallback(SQL400FetchArrayWStruct* );
+SQL400FetchArrayWStruct * SQL400FetchArrayWJoin (pthread_t tid, SQLINTEGER flag);
+void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* );
+SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag);
+
+pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt,
+ SQLINTEGER  start_row,
+ SQLINTEGER  max_rows,
+ SQLINTEGER * cnt_rows,
+ SQLINTEGER * more_rows,
+ SQLINTEGER * cnt_cols,
+ SQLPOINTER * out_rows,
+ SQLPOINTER * out_decs,
+ SQLINTEGER  all_char,
+ SQLINTEGER  expand_factor,
+ void * callback );
+
+pthread_t SQL400FetchArrayWAsync ( SQLHSTMT  hstmt,
+ SQLINTEGER  start_row,
+ SQLINTEGER  max_rows,
+ SQLINTEGER * cnt_rows,
+ SQLINTEGER * more_rows,
+ SQLINTEGER * cnt_cols,
+ SQLPOINTER * out_rows,
+ SQLPOINTER * out_decs,
+ SQLINTEGER  all_char,
+ SQLINTEGER  expand_factor,
+ void * callback );
+
+pthread_t SQL400FetchArrayFreeAsync ( SQLPOINTER  rows,
+ SQLPOINTER  decs,
+ SQLINTEGER  cnt_cols,
+ void * callback );
+
+```
 
 
 #Contributors
