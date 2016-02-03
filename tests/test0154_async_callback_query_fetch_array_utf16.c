@@ -94,7 +94,7 @@ void main_fetch(SQLHANDLE hstmt) {
       printf("%d) %s %s\n", j, big_old_buf1, big_old_buf2);
     }
   }
-  sqlrc = SQL400FetchArrayFree(out_rows, out_decs, cnt_cols);
+  sqlrc = SQL400FetchArrayFree(cnt_cols, out_rows, out_decs);
   printf("main_fetch (thread %d): leaving\n",ptid);
 }
 

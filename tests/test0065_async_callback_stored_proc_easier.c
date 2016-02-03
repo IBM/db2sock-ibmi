@@ -25,100 +25,137 @@ SQLINTEGER indPtr = 0;
 SQL400ParamStruct call_cols[100];
 SQL400DescStruct desc_cols[100];
 SQLPOINTER data_cols[100];
-char * qry0 = "select * from qiws.qcustcdt where lstnam like 'Hen%'";
+SQLINTEGER indPtr1 = 0;
+SQLINTEGER indPtr2 = 0;
+SQLINTEGER indPtr3 = 0;
+SQLINTEGER indPtr4 = 0;
+char * qry1 = "call zendsvr6.iPLUG512K(?,?,?,?)";
+char * prm1 = "*nada";
+char * prm2 = "*here";
+char * prm3 = "\
+<?xml version='1.0'?>\
+<script>\
+<pgm name='ZZCALL' lib='XMLSERVICE'>\
+ <parm  io='both'>\
+   <data type='1A' var='INCHARA'>a</data>\
+ </parm>\
+ <parm  io='both'>\
+   <data type='1A' var='INCHARB'>b</data>\
+ </parm>\
+ <parm  io='both'>\
+   <data type='7p4' var='INDEC1'>11.1111</data>\
+ </parm>\
+ <parm  io='both'>\
+   <data type='12p2' var='INDEC2'>222.22</data>\
+ </parm>\
+ <parm  io='both'>\
+  <ds>\
+   <data type='1A' var='INDS1.DSCHARA'>x</data>\
+   <data type='1A' var='INDS1.DSCHARB'>y</data>\
+   <data type='7p4' var='INDS1.DSDEC1'>66.6666</data>\
+   <data type='12p2' var='INDS1.DSDEC2'>77777.77</data>\
+  </ds>\
+ </parm>\
+ <return>\
+  <data type='10i0'>0</data>\
+ </return>\
+</pgm>\
+</script>\
+";
 
 SQLINTEGER myccsid = 819;
 char db_utf8[11];
 char uid_utf8[11];
 char pwd_utf8[11];
 
-char qry0_utf8[1024];
+char qry1_utf8[1024];
+
+char prm1_utf8[1024];
+char prm2_utf8[1024];
+char prm3_utf8[2048];
+char prm4_utf8[512000];
+
+SQLPOINTER in_parms[] = {(SQLPOINTER)&prm1_utf8, (SQLPOINTER)&prm2_utf8, (SQLPOINTER)&prm3_utf8, (SQLPOINTER)&prm4_utf8};
+SQLINTEGER in_parms_len[] = {sizeof(prm1_utf8), sizeof(prm2_utf8), sizeof(prm3_utf8), sizeof(prm4_utf8)};
+SQLSMALLINT in_parms_ctype[] = {SQL_C_CHAR, SQL_C_CHAR, SQL_C_CHAR, SQL_C_CHAR};
 
 
 /* ====================
- * fetch
- * ====================
- */
-
-void main_fetch(SQLHANDLE hstmt) {
-  pthread_t ptid = pthread_self();
-  pthread_t tid = 0;
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  SQLINTEGER start_row = 0; 
-  SQLINTEGER max_rows = 10; 
-  SQLINTEGER cnt_rows = 0;
-  SQLINTEGER more_rows = 0; 
-  SQLINTEGER cnt_cols = 0; 
-  SQLPOINTER out_rows = (SQLPOINTER) NULL;
-  SQLPOINTER out_decs = (SQLPOINTER) NULL;
-  SQLINTEGER all_char = 1; 
-  SQLINTEGER expand_factor = 0;
-  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
-  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
-  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
-  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
-  char ** argv = (char **)NULL;
-  int i = 0, j = 0, k = 0;
-
-  sqlrc = SQL400FetchArray(hstmt, 
-    start_row, 
-    max_rows, 
-    (SQLINTEGER *) &cnt_rows, 
-    (SQLINTEGER *) &more_rows, 
-    (SQLINTEGER *) &cnt_cols, 
-    (SQLPOINTER *) &out_rows, 
-    (SQLPOINTER *) &out_decs, 
-    all_char, 
-    expand_factor);
-
-  opts = (SQL400DescStruct *) out_decs;
-  for (i=0; i < cnt_cols; i++) {
-    opt = (SQL400DescStruct *)&opts[i];
-    printf("%d) %s\n",i,opt->szColName);
-  }
-  argv = (char **) out_rows;
-  for (i=0; i < cnt_rows; i++) {
-    prms = (SQL400ParamStruct *) argv[i];
-    for (j=0; j < cnt_cols; j++) {
-      opt = (SQL400DescStruct *)&opts[j];
-      prm = (SQL400ParamStruct *)&prms[j];
-      printf("%d) %s %s\n", j, opt->szColName, prm->pfSqlCValue);
-    }
-  }
-  sqlrc = SQL400FetchArrayFree(cnt_cols, out_rows, out_decs);
-  printf("main_fetch (thread %d): leaving\n",ptid);
-}
-
-/* ====================
- * query
+ * execute
  * select * from qiws/qcustcdt where lstnam like 'Hen%'
  * ====================
  */
 
-/* callback sends SQLExecDirectStruct (PaseCliAsync.h) */
-void SQLExecDirectCallback(SQLExecDirectStruct* myptr) {
-  pthread_t ptid = pthread_self();
-  pthread_t tid = 0;
-  printf("SQLExecDirectCallback (thread %d): starting\n",ptid);
-  printf("SQLExecDirectCallback (thread %d): complete: sqlrc=%d, hstmt=%d, sql=%s len=%d callback=%p\n",
-    ptid, myptr->sqlrc, myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr, myptr->callback);
-  lang_check_sqlrc(SQL_HANDLE_STMT, myptr->hstmt, myptr->sqlrc, 1, &sqlcode);
-  /* query done, next fetch ...*/
-  main_fetch(myptr->hstmt);
-  free(myptr);
-  printf("SQLExecDirectCallback (thread %d): leaving\n",ptid);
-}
-
-void main_query(SQLHANDLE hdbc) {
+/* callback sends SQL400ExecuteStruct (PaseCliAsync.h) */
+void SQL400ExecuteCallback(SQL400ExecuteStruct* myptr) {
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
-  printf("main_query (thread %d): starting\n",ptid);
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL; 
+  printf("SQL400ExecuteCallback (thread %d): starting\n",ptid);
+  printf("SQL400ExecuteCallback (thread %d): complete: sqlrc=%d, hstmt=%d, parms=%p desc_parms=%p callback=%p\n",
+    ptid, myptr->sqlrc, myptr->hstmt, myptr->parms, myptr->desc_parms, myptr->callback);
+  lang_check_sqlrc(SQL_HANDLE_STMT, myptr->hstmt, myptr->sqlrc, 1, &sqlcode);
+  /* execute done, next ...*/
+  prms = (SQL400ParamStruct *) myptr->parms;
+  printf("SQL400ExecuteCallback (thread %d): output parm 4 = %s\n",ptid, prms[3].pfSqlCValue);
+  sqlrc = SQL400ParmsFree(4, myptr->parms, myptr->desc_parms);
+  free(myptr);
+  printf("SQL400ExecuteCallback (thread %d): leaving\n",ptid);
+}
+
+void main_execute(SQLHANDLE hstmt) {
+  pthread_t ptid = pthread_self();
+  pthread_t tid = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLSMALLINT pccol = 0;
+  SQL400DescStruct *descs = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct *parms = (SQL400ParamStruct *) NULL;
+  SQLINTEGER expand_factor = 0;
+
+  printf("main_execute (thread %d): starting\n",ptid);
+  sqlrc = SQL400AddCParmDesc(hstmt, (SQLSMALLINT *) &pccol, (SQLPOINTER *) &descs);
+  lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) prm1, (SQLINTEGER) strlen(prm1), (SQLPOINTER) &prm1_utf8, (SQLINTEGER) sizeof(prm1_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) prm2, (SQLINTEGER) strlen(prm2), (SQLPOINTER) &prm2_utf8, (SQLINTEGER) sizeof(prm2_utf8), myccsid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) prm3, (SQLINTEGER) strlen(prm3), (SQLPOINTER) &prm3_utf8, (SQLINTEGER) sizeof(prm3_utf8), myccsid);
+  sqlrc = SQL400AddCVarParms(pccol, descs, (SQLPOINTER) in_parms, (SQLINTEGER *) &in_parms_len, (SQLSMALLINT *) &in_parms_ctype, (SQLPOINTER *)&parms, expand_factor);
+  lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
+  tid = SQL400ExecuteAsync(hstmt, (SQLPOINTER)parms, (SQLPOINTER)descs, (void *)SQL400ExecuteCallback);
+  printf("main_execute (thread %d): leaving\n",ptid);
+}
+
+
+/* ====================
+ * prepare
+ * select * from qiws/qcustcdt where lstnam like 'Hen%'
+ * ====================
+ */
+
+/* callback sends SQLPrepareStruct (PaseCliAsync.h) */
+void SQLPrepareCallback(SQLPrepareStruct* myptr) {
+  pthread_t ptid = pthread_self();
+  pthread_t tid = 0;
+  printf("SQLPrepareCallback (thread %d): starting\n",ptid);
+  printf("SQLPrepareCallback (thread %d): complete: sqlrc=%d, hstmt=%d, sql=%s len=%d callback=%p\n",
+    ptid, myptr->sqlrc, myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr, myptr->callback);
+  lang_check_sqlrc(SQL_HANDLE_STMT, myptr->hstmt, myptr->sqlrc, 1, &sqlcode);
+  /* prepare done, next execute ...*/
+  main_execute(myptr->hstmt);
+  free(myptr);
+  printf("SQLPrepareCallback (thread %d): leaving\n",ptid);
+}
+
+void main_prepare(SQLHANDLE hdbc) {
+  pthread_t ptid = pthread_self();
+  pthread_t tid = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  printf("main_prepare (thread %d): starting\n",ptid);
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
   lang_check_sqlrc(SQL_HANDLE_STMT, hstmt, sqlrc, 1, &sqlcode);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) qry0, (SQLINTEGER) strlen(qry0), (SQLPOINTER) &qry0_utf8, (SQLINTEGER) sizeof(qry0_utf8), myccsid);
-  tid = SQLExecDirectAsync (hstmt, (SQLCHAR *)&qry0_utf8, strlen((SQLCHAR *)&qry0_utf8), (void *)SQLExecDirectCallback );
-  printf("main_query (thread %d): leaving\n",ptid);
+  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) qry1, (SQLINTEGER) strlen(qry1), (SQLPOINTER) &qry1_utf8, (SQLINTEGER) sizeof(qry1_utf8), myccsid);
+  tid = SQLPrepareAsync (hstmt, (SQLCHAR *)&qry1_utf8, strlen((SQLCHAR *)&qry1_utf8), (void *)SQLPrepareCallback );
+  printf("main_prepare (thread %d): leaving\n",ptid);
 }
 
 /* ====================
@@ -134,15 +171,15 @@ void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
   printf("SQL400ConnectCallback (thread %d): complete: sqlrc=%d, henv=%d, db=%s uid=%s pwd=xxxx *ohnd=%d options=%p callback=%p\n",
     ptid, myptr->sqlrc, myptr->henv, myptr->db, myptr->uid, *(myptr->ohnd), myptr->options, myptr->callback);
   lang_check_sqlrc(SQL_HANDLE_DBC, *(myptr->ohnd), myptr->sqlrc, 1, &sqlcode);
-  /* connect done, next query ...*/
-  main_query(*(myptr->ohnd));
+  /* connect done, next prepare ...*/
+  main_prepare(*(myptr->ohnd));
   free(myptr);
   printf("SQL400ConnectCallback (thread %d): leaving\n",ptid);
 }
 void main_connect(SQLHANDLE henv) {
-  SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   printf("main_connect (thread %d): starting\n",ptid);
   /* async connection */

@@ -451,26 +451,8 @@ SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, S
 
 
 /*
- * excute fetch
+ * SQL describe descriptions (parm or result)
  */
-
-SQLRETURN custom_SQL400AddCVar(SQLSMALLINT icol, SQLSMALLINT inOutType, SQLSMALLINT pfSqlCType, SQLPOINTER pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER parms )  { 
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0;
-  SQL400ParamStruct * opts = (SQL400ParamStruct *) parms;
-  SQL400ParamStruct * opt = (SQL400ParamStruct *) NULL;
-  if (opts == NULL) {
-    return sqlrc;
-  }
-  for (i=0; opts[i].icol; i++) {}
-  opt = &opts[i];
-  opt->icol = icol; 
-  opt->inOutType = inOutType; 
-  opt->pfSqlCType = pfSqlCType; 
-  opt->pfSqlCValue = pfSqlCValue;
-  opt->indPtr = indPtr;
-  return sqlrc;
-}
 
 SQLRETURN custom_SQL400AddDescBoth(SQLHSTMT hstmt, SQLSMALLINT icol, SQLSMALLINT flag, SQLPOINTER descs, SQLSMALLINT iswide) { 
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -534,109 +516,60 @@ SQLRETURN custom_SQL400AddDescW(SQLHSTMT hstmt, SQLSMALLINT icol, SQLSMALLINT fl
 }
 
 
-SQLRETURN custom_SQL400Execute( SQLHSTMT hstmt, SQLPOINTER parms, SQLPOINTER desc_parms ) { 
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0, j = 0;
-  SQLSMALLINT np = 0;
-  SQL400DescStruct * opts = (SQL400DescStruct *) desc_parms;
-  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
-  SQL400ParamStruct * prms = (SQL400ParamStruct *) parms;
-  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
-  SQLINTEGER bufferLength = 0;
-  SQLSMALLINT maxFileNameLength = 0;
-  SQLSMALLINT fileNameLength = 0; 
-  SQLSMALLINT * fileNameLengths = (SQLSMALLINT *) &fileNameLength;
-  SQLINTEGER fileOption = SQL_FILE_READ;
-  SQLINTEGER * fileOptions = (SQLINTEGER *) &fileOption;
+/*
+ * SQL describe parameter descriptions
+ */
 
-  /* bind params */
-  for (i=0; opts[i].icol; i++) {
-    opt = &opts[i];
-    for (j=0; opt->icol != prms[j].icol; j++) {}
-    prm = (SQL400ParamStruct *) &prms[j];
-    switch (prm->inOutType) {
-    case SQL400_PARM_IO_FILE:
-      *prm->indPtr = 0;
-      maxFileNameLength = fileNameLength = strlen(prm->pfSqlCValue);
-      sqlrc = SQLBindFileToParam((SQLHSTMT)hstmt, 
-                (SQLSMALLINT)   opt->icol, 
-                (SQLSMALLINT)   prm->pfSqlCType, /* SQL_BLOB, SQL_CLOB, SQL_DBCLOB*/
-                (SQLCHAR *)     prm->pfSqlCValue, 
-                (SQLSMALLINT *) fileNameLengths, 
-                (SQLINTEGER *)  fileOptions,
-                (SQLSMALLINT)   maxFileNameLength, 
-                (SQLINTEGER *)  prm->indPtr);
-      break;
-    default:
-      sqlrc = SQLBindParameter((SQLHSTMT)hstmt, 
-                (SQLSMALLINT)  opt->icol, 
-                (SQLSMALLINT)  prm->inOutType,
-                (SQLSMALLINT)  prm->pfSqlCType, 
-                (SQLSMALLINT)  opt->pfSqlType, 
-                (SQLINTEGER)   opt->pcbColDef, 
-                (SQLSMALLINT)  opt->pibScale, 
-                (SQLPOINTER)   prm->pfSqlCValue, 
-                (SQLINTEGER)   bufferLength, 
-                (SQLINTEGER *) prm->indPtr);
-      break;
-    }
+
+SQLRETURN custom_SQL400AddCParmDescBoth(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts,
+ SQLSMALLINT iswide) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  int i = 0;
+  int szOpts = 0;
+  /* number paramters */
+  sqlrc = SQLNumParams(hstmt, (SQLSMALLINT *)pccol);
+  if (sqlrc != SQL_SUCCESS) {
+    return sqlrc;
+  }
+  /* description of columns */
+  szOpts = (*pccol + 1) * sizeof(SQL400DescStruct);
+  opts = (SQL400DescStruct *) custom_alloc_zero(szOpts);
+  *out_opts = (SQLPOINTER) opts;
+  /* loop each column */
+  for (i=0; i < *pccol; i++) {
+    opt = (SQL400DescStruct *)&opts[i];
+    sqlrc = custom_SQL400AddDescBoth(hstmt, i + 1, SQL400_DESC_PARM, (SQLPOINTER)opts, iswide);
     if (sqlrc != SQL_SUCCESS) {
       return sqlrc;
     }
   }
-
-  /* execute */
-  sqlrc = SQLExecute((SQLHSTMT) hstmt);
-
   return sqlrc;
 }
-
-SQLRETURN custom_SQL400Fetch(SQLHSTMT hstmt, 
- SQLINTEGER start_row, 
- SQLPOINTER cols, 
- SQLPOINTER desc_cols ) 
+SQLRETURN custom_SQL400AddCParmDesc(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0, j = 0;
-  SQL400DescStruct * opts = (SQL400DescStruct *) desc_cols;
-  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
-  SQL400ParamStruct * prms = (SQL400ParamStruct *) cols;
-  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
-
-  /* bind columns */
-  for (i=0; opts[i].icol; i++) {
-    opt = &opts[i];
-    for (j=0; opt->icol != prms[j].icol; j++) {}
-    prm = (SQL400ParamStruct *) &prms[j];
-    sqlrc = SQLBindCol((SQLHSTMT)hstmt,
-              (SQLSMALLINT)   opt->icol,
-              (SQLSMALLINT)   prm->pfSqlCType, 
-              (SQLPOINTER)    prm->pfSqlCValue, 
-              (SQLINTEGER)    opt->pcbColDef, 
-              (SQLINTEGER *)  prm->indPtr);    
-      if (sqlrc != SQL_SUCCESS) {
-        return sqlrc;
-      }
-  }
-  /* fetch */
-  switch (start_row) {
-  case 0:
-    sqlrc = SQLFetch((SQLHSTMT)hstmt);
-    break;
-  default:
-    sqlrc = SQLFetchScroll((SQLHSTMT)hstmt, SQL_FETCH_ABSOLUTE, start_row);
-    break;
-  }
-
+  sqlrc = custom_SQL400AddCParmDescBoth(hstmt, pccol, out_opts, 0);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCParmDescW(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_SQL400AddCParmDescBoth(hstmt, pccol, out_opts, 1);
   return sqlrc;
 }
 
 
-/* ... super fetch ...
- * NOT tested advanced funtion
- * simply storing code in git
- * until have time to run
- * (cool if it works, and async)
+/*
+ * SQL describe result descriptions
  */
 
 SQLRETURN custom_SQL400AddCResultDescBoth(SQLHSTMT hstmt,
@@ -685,12 +618,38 @@ SQLRETURN custom_SQL400AddCResultDescW(SQLHSTMT hstmt,
   return sqlrc;
 }
 
-SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
+/*
+ * C host variables
+ */
+
+SQLRETURN custom_SQL400AddCVar(SQLSMALLINT icol, SQLSMALLINT inOutType, SQLSMALLINT pfSqlCType, SQLPOINTER pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER parms)  { 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  SQL400ParamStruct * opts = (SQL400ParamStruct *) parms;
+  SQL400ParamStruct * opt = (SQL400ParamStruct *) NULL;
+  if (opts == NULL) {
+    return sqlrc;
+  }
+  for (i=0; opts[i].icol; i++) {}
+  opt = &opts[i];
+  opt->icol = icol; 
+  opt->inOutType = inOutType; 
+  opt->pfSqlCType = pfSqlCType; 
+  opt->pfSqlCValue = pfSqlCValue;
+  opt->indPtr = indPtr;
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400AddCVarAnyBoth(SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor,
  SQLSMALLINT targetCType,
- SQLSMALLINT iswide) 
+ SQLSMALLINT iswide,
+ SQLSMALLINT flag,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype)
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER * indPtr = (SQLINTEGER *) NULL;
@@ -700,6 +659,7 @@ SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
   SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLPOINTER pfSqlCValue = (SQLPOINTER) NULL;
   SQLSMALLINT defaultCType = SQL_C_CHAR;
+  SQLSMALLINT parmCType = SQL_C_DEFAULT;
   int c = 0, i = 0, j = 0;
   short iAmShort = 0;
   int iAmInt = 0;
@@ -715,8 +675,21 @@ SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
     defaultCType = SQL_C_CHAR;
     break;
   }
-  for (i=0; i < pccol; i++) {
+  for (i=0; i < nbrcols; i++) {
     opt = (SQL400DescStruct *)&opts[i];
+    switch (flag) {
+    case SQL400_DESC_PARM:
+      indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
+      *indPtr = in_parms_len[i];
+      parmCType = in_parms_ctype[i];
+      pfSqlCValue = in_parms[i];
+      break;
+    default:
+      indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
+      pfSqlCValue = (SQLPOINTER) NULL;
+      parmCType = SQL_C_DEFAULT;
+      break;
+    }
     switch (opt->pfSqlType) {
     case SQL_CHAR:
     case SQL_VARCHAR:
@@ -725,65 +698,79 @@ SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
     case SQL_WVARCHAR:
     /* case SQL_LONGVARCHAR: */
     /* case SQL_WLONGVARCHAR: */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef * expand_factor + 1;
-        if (defaultCType == SQL_C_WCHAR) {
-          *indPtr = *indPtr * 2;
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = opt->pcbColDef * expand_factor + 1;
+          if (defaultCType == SQL_C_WCHAR) {
+            *indPtr = *indPtr * 2;
+          }
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
         }
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
       break;
     case SQL_GRAPHIC:
     case SQL_VARGRAPHIC:
     /* case SQL_LONGVARGRAPHIC: */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef * expand_factor + 1;
-        if (defaultCType == SQL_C_WCHAR) {
-          *indPtr = *indPtr * 2;
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = opt->pcbColDef * expand_factor + 1;
+          if (defaultCType == SQL_C_WCHAR) {
+            *indPtr = *indPtr * 2;
+          }
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
         }
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
       break;
     case SQL_BINARY:
     case SQL_VARBINARY:
     /* case SQL_LONGVARBINARY: */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + 1) * 4;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + 1) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef + 1;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_BINARY, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef + 1) * 4;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = (opt->pcbColDef + 1) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        default:
+          *indPtr = opt->pcbColDef + 1;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_BINARY, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
@@ -792,192 +779,244 @@ SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
     case SQL_TYPE_TIMESTAMP:
     case SQL_DATETIME:
     case SQL_DECFLOAT:
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + 1) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef + 1;
-        if (defaultCType == SQL_C_WCHAR) {
-          *indPtr = *indPtr * 2;
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef + 1) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = opt->pcbColDef + 1;
+          if (defaultCType == SQL_C_WCHAR) {
+            *indPtr = *indPtr * 2;
+          }
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
         }
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
       break;
     case SQL_SMALLINT:
       /* max 32,767 */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 14;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 7;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = sizeof(iAmFloat);
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = 14;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = 7;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = sizeof(iAmFloat);
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
     case SQL_INTEGER:
       /* max 2,147,483,647 */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 24;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 12;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = sizeof(iAmInt);
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = 24;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = 12;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = sizeof(iAmInt);
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
     case SQL_BIGINT:
       /* max 9,223,372,036,854,775,807 */
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 44;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = 22;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = sizeof(iAmBigInt);
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = 44;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = 22;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = sizeof(iAmBigInt);
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
     case SQL_FLOAT:
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef + opt->pibScale + 3;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = sizeof(iAmFloat);
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = opt->pcbColDef + opt->pibScale + 3;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = sizeof(iAmFloat);
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
     case SQL_DOUBLE:
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
-      case SQL_C_CHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef + opt->pibScale + 3;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = sizeof(iAmDouble);
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        case SQL_C_CHAR:
+          *indPtr = opt->pcbColDef + opt->pibScale + 3;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_CHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = sizeof(iAmDouble);
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_DEFAULT, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        }
         break;
       }
       break;
     case SQL_DECIMAL:
     case SQL_NUMERIC:
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef + opt->pibScale + 3;
-        if (defaultCType == SQL_C_WCHAR) {
-          *indPtr = *indPtr * 2;
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef + opt->pibScale + 3) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+        default:
+          *indPtr = opt->pcbColDef + opt->pibScale + 3;
+          if (defaultCType == SQL_C_WCHAR) {
+            *indPtr = *indPtr * 2;
+          }
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
         }
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
       break;
     case SQL_CLOB:
-      indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-      *indPtr = SQL_DATA_AT_EXEC;
-      pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
-      sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_CLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-      break;
-    case SQL_DBCLOB:
-      indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-      *indPtr = SQL_DATA_AT_EXEC;
-      pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
-      sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_DBCLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-      break;
-    case SQL_BLOB:
-      indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-      *indPtr = SQL_DATA_AT_EXEC;
-      pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
-      sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_BLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-      break;
-    default:
-      switch (targetCType) {
-      case SQL_C_WCHAR:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
-        break;
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       default:
-        indPtr = (SQLINTEGER *)custom_alloc_zero(sizeof(SQLINTEGER));
-        *indPtr = opt->pcbColDef * expand_factor + 1;
-        if (defaultCType == SQL_C_WCHAR) {
-          *indPtr = *indPtr * 2;
+        *indPtr = SQL_DATA_AT_EXEC;
+        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_CLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        break;
+      }
+      break;
+    case SQL_DBCLOB:
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+      default:
+        *indPtr = SQL_DATA_AT_EXEC;
+        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_DBCLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        break;
+      }
+      break;
+    case SQL_BLOB:
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        break;
+      default:
+        *indPtr = SQL_DATA_AT_EXEC;
+        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(sizeof(iAmInt));
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_BLOB_LOCATOR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        break;
+      }
+      break;
+    default:
+      switch (flag) {
+      case SQL400_DESC_PARM:
+        sqlrc = custom_SQL400AddCVar(i + 1, 0, parmCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+        break;
+      default:
+        switch (targetCType) {
+        case SQL_C_WCHAR:
+          *indPtr = (opt->pcbColDef * expand_factor + 1) * 2;
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, SQL_C_WCHAR, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
+          break;
+        default:
+          *indPtr = opt->pcbColDef * expand_factor + 1;
+          if (defaultCType == SQL_C_WCHAR) {
+            *indPtr = *indPtr * 2;
+          }
+          pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
+          sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
+          break;
         }
-        pfSqlCValue = (SQLPOINTER) custom_alloc_zero(*indPtr);
-        sqlrc = custom_SQL400AddCVar(i + 1, 0, defaultCType, (SQLPOINTER)pfSqlCValue, indPtr, (SQLPOINTER)prms);
         break;
       }
       break;
@@ -985,42 +1024,239 @@ SQLRETURN custom_SQL400AddCRowBoth(SQLSMALLINT pccol,
   }
   return sqlrc;
 }
-SQLRETURN custom_SQL400AddCRowAsChar(SQLSMALLINT pccol,
+SQLRETURN custom_SQL400AddCVarRowAsChar(SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc =  custom_SQL400AddCRowBoth(pccol, descs, cparms, expand_factor, SQL_C_CHAR, 0);
+  sqlrc =  custom_SQL400AddCVarAnyBoth(nbrcols, descs, cparms, expand_factor, SQL_C_CHAR, 0, SQL400_DESC_COL, (SQLPOINTER) NULL, (SQLPOINTER) NULL, (SQLPOINTER) NULL);
   return sqlrc;
 }
-SQLRETURN custom_SQL400AddCRowAsCharW(SQLSMALLINT pccol,
+SQLRETURN custom_SQL400AddCVarRowAsCharW(SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc =  custom_SQL400AddCRowBoth(pccol, descs, cparms, expand_factor, SQL_C_WCHAR, 1);
+  sqlrc =  custom_SQL400AddCVarAnyBoth(nbrcols, descs, cparms, expand_factor, SQL_C_WCHAR, 1, SQL400_DESC_COL, (SQLPOINTER) NULL, (SQLPOINTER) NULL, (SQLPOINTER) NULL);
   return sqlrc;
 }
-SQLRETURN custom_SQL400AddCRowAsDefault(SQLSMALLINT pccol,
+SQLRETURN custom_SQL400AddCVarRowAsDefault(SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc =  custom_SQL400AddCRowBoth(pccol, descs, cparms, expand_factor, SQL_C_DEFAULT, 0);
+  sqlrc =  custom_SQL400AddCVarAnyBoth(nbrcols, descs, cparms, expand_factor, SQL_C_DEFAULT, 0, SQL400_DESC_COL, (SQLPOINTER) NULL, (SQLPOINTER) NULL, (SQLPOINTER) NULL);
   return sqlrc;
 }
-SQLRETURN custom_SQL400AddCRowAsDefaultW(SQLSMALLINT pccol,
+SQLRETURN custom_SQL400AddCVarRowAsDefaultW(SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor) 
 { 
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc =  custom_SQL400AddCRowBoth(pccol, descs, cparms, expand_factor, SQL_C_DEFAULT, 1);
+  sqlrc =  custom_SQL400AddCVarAnyBoth(nbrcols, descs, cparms, expand_factor, SQL_C_DEFAULT, 1, SQL400_DESC_COL, (SQLPOINTER) NULL, (SQLPOINTER) NULL, (SQLPOINTER) NULL);
   return sqlrc;
 }
+
+SQLRETURN custom_SQL400AddCVarMultipleRowsBoth(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER all_char, 
+ SQLINTEGER expand_factor,
+ SQLSMALLINT iswide) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+  SQLSMALLINT defaultCType = SQL_C_CHAR;
+  int c = 0;
+  int szPtrs = 0, szPrms = 0;
+  void * outPtr = (void *)NULL;
+  char ** argv = (char **)NULL;
+
+  /* output - initial results */
+  *out_rows = (SQLPOINTER) NULL;
+
+  /* alloc expand factor (ccsid conversion) */
+  if (expand_factor < 1) {
+    expand_factor = 1;
+  }
+  switch (all_char) {
+  case 1:
+    defaultCType = SQL_C_CHAR;
+    break;
+  default:
+    defaultCType = SQL_C_DEFAULT;
+    break;
+  }
+  /* out_rows - ptr to rows results
+   * out_rows[0]->SQL400ParamStruct[0],..,SQL400ParamStruct[nbrcols]
+   * :
+   * out_rows[max_rows]->SQL400ParamStruct[0],..,SQL400ParamStruct[nbrcols]
+   */
+  szPtrs = (max_rows +1) * sizeof(char *);
+  outPtr = (void *)custom_alloc_zero(szPtrs);
+  argv = (char **) outPtr;
+  *out_rows = (SQLPOINTER) outPtr;
+  /* fetch location each row */
+  szPrms = (nbrcols + 1) * sizeof(SQL400ParamStruct);
+  for (c=0; c < max_rows; c++) {
+    /* each row, all columns */
+    prms = (SQL400ParamStruct *) custom_alloc_zero(szPrms);
+    opts = (SQL400DescStruct *) descs;
+    argv[c] = (char *) prms;
+    sqlrc = custom_SQL400AddCVarAnyBoth(nbrcols, opts, prms, expand_factor, defaultCType, iswide, SQL400_DESC_COL, (SQLPOINTER) NULL, (SQLPOINTER) NULL, (SQLPOINTER) NULL);
+  }
+
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400AddCVarMultipleRowsAsChar(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER all_char = 1;
+  SQLSMALLINT iswide = 0;
+  sqlrc = custom_SQL400AddCVarMultipleRowsBoth(nbrcols, descs, max_rows, out_rows, all_char, expand_factor, iswide);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCVarMultipleRowsAsCharW(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER all_char = 1;
+  SQLSMALLINT iswide = 1;
+  sqlrc = custom_SQL400AddCVarMultipleRowsBoth(nbrcols, descs, max_rows, out_rows, all_char, expand_factor, iswide);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCVarMultipleRowsAsDefault(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER all_char = 0;
+  SQLSMALLINT iswide = 0;
+  sqlrc = custom_SQL400AddCVarMultipleRowsBoth(nbrcols, descs, max_rows, out_rows, all_char, expand_factor, iswide);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCVarMultipleRowsAsDefaultW(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER all_char = 0;
+  SQLSMALLINT iswide = 1;
+  sqlrc = custom_SQL400AddCVarMultipleRowsBoth(nbrcols, descs, max_rows, out_rows, all_char, expand_factor, iswide);
+  return sqlrc;
+}
+
+/*
+ * C VAR host vars params
+ */
+
+SQLRETURN custom_SQL400AddCVarParmsBoth(SQLSMALLINT nbrparms, 
+ SQLPOINTER descs,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype,
+ SQLPOINTER * out_parms,
+ SQLINTEGER expand_factor,
+ SQLSMALLINT targetCType,
+ SQLSMALLINT iswide)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* alloc expand factor (ccsid conversion) */
+  if (expand_factor < 1) {
+    expand_factor = 1;
+  }
+  *out_parms = (SQLPOINTER) custom_alloc_zero((nbrparms + 1) * sizeof(SQL400ParamStruct));
+  sqlrc = custom_SQL400AddCVarAnyBoth(nbrparms, descs, *out_parms, expand_factor, targetCType, iswide, SQL400_DESC_PARM, (SQLPOINTER) in_parms, (SQLPOINTER) in_parms_len, (SQLPOINTER) in_parms_ctype);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCVarParms(SQLSMALLINT nbrparms,
+ SQLPOINTER descs,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype,
+ SQLPOINTER * out_parms,
+ SQLINTEGER expand_factor) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc =  custom_SQL400AddCVarParmsBoth(nbrparms, descs, in_parms, in_parms_len, in_parms_ctype, out_parms, expand_factor, SQL_C_DEFAULT, 0);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400AddCVarParmsW(SQLSMALLINT nbrparms,
+ SQLPOINTER descs,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype,
+ SQLPOINTER * out_parms,
+ SQLINTEGER expand_factor) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc =  custom_SQL400AddCVarParmsBoth(nbrparms, descs, in_parms, in_parms_len, in_parms_ctype, out_parms, expand_factor, SQL_C_DEFAULT, 1);
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400ParmsFree(SQLSMALLINT nbr_parms,
+ SQLPOINTER parms,
+ SQLPOINTER decs)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+  int i=0, j=0;
+  char ** argv = (char **)NULL;
+
+  /* parms */
+  if (parms) {
+    prms = (SQL400ParamStruct *) parms;
+    for (j=0; j < nbr_parms; j++) {
+      prm = (SQL400ParamStruct *)&prms[j];
+      if (prm->indPtr) {
+        free(prm->indPtr);
+      }
+      /* provided by caller
+      if (prm->pfSqlCValue) {
+        free(prm->pfSqlCValue);
+      }
+      */
+      free(prm);
+    }
+  }
+  /* decs */
+  if (decs) {
+    opts = (SQL400DescStruct *) decs;
+    for (i=0; i < nbr_parms; i++) {
+      opt = (SQL400DescStruct *)&opts[i];
+      free(opt);
+    }
+  }
+  return sqlrc;
+}
+
+
+/*
+ * C var at exec
+ */
 
 SQLRETURN custom_SQL400GetAtExecLobBoth(SQLHSTMT hstmt,
  SQLSMALLINT targetCType,
@@ -1085,7 +1321,7 @@ SQLRETURN custom_SQL400GetAtExecLobBoth(SQLHSTMT hstmt,
 
 
 SQLRETURN custom_SQL400GetAtExecBoth(SQLHSTMT hstmt,
- SQLSMALLINT pccol,
+ SQLSMALLINT nbrcols,
  SQLPOINTER descs,
  SQLPOINTER cparms,
  SQLINTEGER expand_factor,
@@ -1109,7 +1345,7 @@ SQLRETURN custom_SQL400GetAtExecBoth(SQLHSTMT hstmt,
     defaultCType = SQL_C_CHAR;
     break;
   }
-  for (i=0; i < pccol; i++) {
+  for (i=0; i < nbrcols; i++) {
     opt = (SQL400DescStruct *)&opts[i];
     prm = (SQL400ParamStruct *)&prms[i];
     if (prm->pfSqlCType == SQL_C_CHAR || prm->pfSqlCType == SQL_C_WCHAR) {
@@ -1167,6 +1403,112 @@ SQLRETURN custom_SQL400GetAtExecBoth(SQLHSTMT hstmt,
 }
 
 
+/*
+ * bind excute
+ */
+
+SQLRETURN custom_SQL400Execute( SQLHSTMT hstmt, SQLPOINTER parms, SQLPOINTER desc_parms ) { 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0, j = 0;
+  SQLSMALLINT np = 0;
+  SQL400DescStruct * opts = (SQL400DescStruct *) desc_parms;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) parms;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+  SQLINTEGER bufferLength = 0;
+  SQLSMALLINT maxFileNameLength = 0;
+  SQLSMALLINT fileNameLength = 0; 
+  SQLSMALLINT * fileNameLengths = (SQLSMALLINT *) &fileNameLength;
+  SQLINTEGER fileOption = SQL_FILE_READ;
+  SQLINTEGER * fileOptions = (SQLINTEGER *) &fileOption;
+
+  /* bind params */
+  for (i=0; opts[i].icol; i++) {
+    opt = &opts[i];
+    for (j=0; opt->icol != prms[j].icol; j++) {}
+    prm = (SQL400ParamStruct *) &prms[j];
+    switch (prm->inOutType) {
+    case SQL400_PARM_IO_FILE:
+      *prm->indPtr = 0;
+      maxFileNameLength = fileNameLength = strlen(prm->pfSqlCValue);
+      sqlrc = SQLBindFileToParam((SQLHSTMT)hstmt, 
+                (SQLSMALLINT)   opt->icol, 
+                (SQLSMALLINT)   prm->pfSqlCType, /* SQL_BLOB, SQL_CLOB, SQL_DBCLOB*/
+                (SQLCHAR *)     prm->pfSqlCValue, 
+                (SQLSMALLINT *) fileNameLengths, 
+                (SQLINTEGER *)  fileOptions,
+                (SQLSMALLINT)   maxFileNameLength, 
+                (SQLINTEGER *)  prm->indPtr);
+      break;
+    default:
+      sqlrc = SQLBindParameter((SQLHSTMT)hstmt, 
+                (SQLSMALLINT)  opt->icol, 
+                (SQLSMALLINT)  prm->inOutType,
+                (SQLSMALLINT)  prm->pfSqlCType, 
+                (SQLSMALLINT)  opt->pfSqlType, 
+                (SQLINTEGER)   opt->pcbColDef, 
+                (SQLSMALLINT)  opt->pibScale, 
+                (SQLPOINTER)   prm->pfSqlCValue, 
+                (SQLINTEGER)   bufferLength, 
+                (SQLINTEGER *) prm->indPtr);
+      break;
+    }
+    if (sqlrc != SQL_SUCCESS) {
+      return sqlrc;
+    }
+  }
+
+  /* execute */
+  sqlrc = SQLExecute((SQLHSTMT) hstmt);
+
+  return sqlrc;
+}
+
+
+/* 
+ * fetch
+ */
+
+SQLRETURN custom_SQL400Fetch(SQLHSTMT hstmt, 
+ SQLINTEGER start_row, 
+ SQLPOINTER cols, 
+ SQLPOINTER desc_cols ) 
+{ 
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0, j = 0;
+  SQL400DescStruct * opts = (SQL400DescStruct *) desc_cols;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) cols;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+
+  /* bind columns */
+  for (i=0; opts[i].icol; i++) {
+    opt = &opts[i];
+    for (j=0; opt->icol != prms[j].icol; j++) {}
+    prm = (SQL400ParamStruct *) &prms[j];
+    sqlrc = SQLBindCol((SQLHSTMT)hstmt,
+              (SQLSMALLINT)   opt->icol,
+              (SQLSMALLINT)   prm->pfSqlCType, 
+              (SQLPOINTER)    prm->pfSqlCValue, 
+              (SQLINTEGER)    opt->pcbColDef, 
+              (SQLINTEGER *)  prm->indPtr);    
+      if (sqlrc != SQL_SUCCESS) {
+        return sqlrc;
+      }
+  }
+  /* fetch */
+  switch (start_row) {
+  case 0:
+    sqlrc = SQLFetch((SQLHSTMT)hstmt);
+    break;
+  default:
+    sqlrc = SQLFetchScroll((SQLHSTMT)hstmt, SQL_FETCH_ABSOLUTE, start_row);
+    break;
+  }
+
+  return sqlrc;
+}
+
 SQLRETURN custom_SQL400FetchArrayBoth( SQLHSTMT hstmt, 
  SQLINTEGER start_row, 
  SQLINTEGER max_rows, 
@@ -1185,10 +1527,8 @@ SQLRETURN custom_SQL400FetchArrayBoth( SQLHSTMT hstmt,
   SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
   SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
   SQLSMALLINT defaultCType = SQL_C_CHAR;
-  SQLSMALLINT pccol = 0;
+  SQLSMALLINT nbrcols = 0;
   int c = 0;
-  int szPtrs = 0, szPrms = 0;
-  void * outPtr = (void *)NULL;
   char ** argv = (char **)NULL;
 
   /* output - initial results */
@@ -1210,26 +1550,19 @@ SQLRETURN custom_SQL400FetchArrayBoth( SQLHSTMT hstmt,
     break;
   }
   /* describe columns result set */
-  sqlrc = custom_SQL400AddCResultDescBoth(hstmt, &pccol, (SQLPOINTER *)&opts, iswide);
+  sqlrc = custom_SQL400AddCResultDescBoth(hstmt, &nbrcols, (SQLPOINTER *)&opts, iswide);
   *out_decs = (SQLPOINTER) opts;
-  *cnt_cols = (SQLINTEGER) pccol;
+  *cnt_cols = (SQLINTEGER) nbrcols;
   /* out_rows - ptr to rows results
-   * out_rows[0]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
+   * out_rows[0]->SQL400ParamStruct[0],..,SQL400ParamStruct[nbrcols]
    * :
-   * out_rows[max_rows]->SQL400ParamStruct[0],..,SQL400ParamStruct[pccol]
+   * out_rows[max_rows]->SQL400ParamStruct[0],..,SQL400ParamStruct[nbrcols]
    */
-  szPtrs = (max_rows +1) * sizeof(char *);
-  outPtr = (void *)custom_alloc_zero(szPtrs);
-  argv = (char **) outPtr;
-  *out_rows = (SQLPOINTER) outPtr;
+  sqlrc = custom_SQL400AddCVarMultipleRowsBoth(nbrcols, opts, max_rows, (SQLPOINTER *)&argv, all_char, expand_factor, iswide);
+  *out_rows = (SQLPOINTER *) argv;
   /* fetch each row */
-  szPrms = (pccol + 1) * sizeof(SQL400ParamStruct);
   for (c=0; c < max_rows; c++) {
-    /* each row, all columns */
-    prms = (SQL400ParamStruct *) custom_alloc_zero(szPrms);
-    argv[c] = (char *) prms;
-    sqlrc = custom_SQL400AddCRowBoth(pccol, opts, prms, expand_factor, defaultCType, iswide);
-    /* fetch */
+    prms = (SQL400ParamStruct *) argv[c];
     switch (start_row) {
     case 0:
       sqlrc = custom_SQL400Fetch(hstmt, start_row, prms, opts );
@@ -1245,7 +1578,7 @@ SQLRETURN custom_SQL400FetchArrayBoth( SQLHSTMT hstmt,
       return sqlrc;
     }
     /* possible SQL_DATA_AT_EXEC */
-    sqlrc = custom_SQL400GetAtExecBoth(hstmt, pccol, opts, prms, expand_factor, SQL_C_CHAR, iswide);
+    sqlrc = custom_SQL400GetAtExecBoth(hstmt, nbrcols, opts, prms, expand_factor, SQL_C_CHAR, iswide);
     /* output - number cols in result set */
     *cnt_rows = c + 1;
   } /* end c (rows) */
@@ -1284,9 +1617,9 @@ SQLRETURN custom_SQL400FetchArrayW( SQLHSTMT hstmt,
   return sqlrc;
 }
 
-SQLRETURN custom_SQL400FetchArrayFree(SQLPOINTER rows,
- SQLPOINTER decs,
- SQLINTEGER cnt_cols)
+SQLRETURN custom_SQL400FetchArrayFree(SQLINTEGER cnt_cols,
+ SQLPOINTER rows,
+ SQLPOINTER decs)
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
@@ -1316,6 +1649,7 @@ SQLRETURN custom_SQL400FetchArrayFree(SQLPOINTER rows,
   }
   /* decs */
   if (decs) {
+    opts = (SQL400DescStruct *) decs;
     for (i=0; i < cnt_cols; i++) {
       opt = (SQL400DescStruct *)&opts[i];
       free(opt);

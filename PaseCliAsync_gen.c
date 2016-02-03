@@ -8389,53 +8389,6 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int myccsid = init_CCSID400(0);
-  sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
-  return sqlrc;
-}
-void * SQL400AddCVarThread (void *ptr)
-{
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int myccsid = init_CCSID400(0);
-  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) ptr;
-  myptr->sqlrc = custom_SQL400AddCVar( myptr->icol, myptr->inOutType, myptr->pfSqlCType, myptr->pfSqlCValue, myptr->indPtr, myptr->parms );
-  /* void SQL400AddCVarCallback(SQL400AddCVarStruct* ); */
-  if (myptr->callback) {
-    void (*ptrFunc)(SQL400AddCVarStruct* ) = myptr->callback;
-    ptrFunc( myptr );
-  }
-  pthread_exit((void *)myptr);
-}
-pthread_t SQL400AddCVarAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms, void * callback )
-{
-  int rc = 0;
-  pthread_t tid = 0;
-  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) malloc(sizeof(SQL400AddCVarStruct));
-  myptr->sqlrc = SQL_SUCCESS;
-  myptr->icol = icol;
-  myptr->inOutType = inOutType;
-  myptr->pfSqlCType = pfSqlCType;
-  myptr->pfSqlCValue = pfSqlCValue;
-  myptr->indPtr = indPtr;
-  myptr->parms = parms;
-  myptr->callback = callback;
-  rc = pthread_create(&tid, NULL, SQL400AddCVarThread, (void *)myptr);
-  return tid;
-}
-SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
-{
-  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) NULL;
-  int active = 0;
-  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
-    pthread_join(tid,(void**)&myptr);
-  } else {
-    return (SQL400AddCVarStruct *) NULL;
-  }
-  return myptr;
-}
 SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -8533,6 +8486,753 @@ SQL400AddDescWStruct * SQL400AddDescWJoin (pthread_t tid, SQLINTEGER flag)
     pthread_join(tid,(void**)&myptr);
   } else {
     return (SQL400AddDescWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCParmDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400AddCParmDesc( hstmt, pccol, out_opts );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400AddCParmDescThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCParmDescStruct * myptr = (SQL400AddCParmDescStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400AddCParmDesc( myptr->hstmt, myptr->pccol, myptr->out_opts );
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400AddCParmDescCallback(SQL400AddCParmDescStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCParmDescStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCParmDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCParmDescStruct * myptr = (SQL400AddCParmDescStruct *) malloc(sizeof(SQL400AddCParmDescStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->pccol = pccol;
+  myptr->out_opts = out_opts;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCParmDescThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCParmDescStruct * SQL400AddCParmDescJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCParmDescStruct * myptr = (SQL400AddCParmDescStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCParmDescStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCParmDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400AddCParmDescW( hstmt, pccol, out_opts );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400AddCParmDescWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCParmDescWStruct * myptr = (SQL400AddCParmDescWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400AddCParmDescW( myptr->hstmt, myptr->pccol, myptr->out_opts );
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400AddCParmDescWCallback(SQL400AddCParmDescWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCParmDescWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCParmDescWAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCParmDescWStruct * myptr = (SQL400AddCParmDescWStruct *) malloc(sizeof(SQL400AddCParmDescWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->pccol = pccol;
+  myptr->out_opts = out_opts;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCParmDescWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCParmDescWStruct * SQL400AddCParmDescWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCParmDescWStruct * myptr = (SQL400AddCParmDescWStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCParmDescWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCResultDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400AddCResultDesc( hstmt, pccol, out_opts );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400AddCResultDescThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCResultDescStruct * myptr = (SQL400AddCResultDescStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400AddCResultDesc( myptr->hstmt, myptr->pccol, myptr->out_opts );
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400AddCResultDescCallback(SQL400AddCResultDescStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCResultDescStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCResultDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCResultDescStruct * myptr = (SQL400AddCResultDescStruct *) malloc(sizeof(SQL400AddCResultDescStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->pccol = pccol;
+  myptr->out_opts = out_opts;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCResultDescThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCResultDescStruct * SQL400AddCResultDescJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCResultDescStruct * myptr = (SQL400AddCResultDescStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCResultDescStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCResultDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400AddCResultDescW( hstmt, pccol, out_opts );
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400AddCResultDescWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCResultDescWStruct * myptr = (SQL400AddCResultDescWStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400AddCResultDescW( myptr->hstmt, myptr->pccol, myptr->out_opts );
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400AddCResultDescWCallback(SQL400AddCResultDescWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCResultDescWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCResultDescWAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCResultDescWStruct * myptr = (SQL400AddCResultDescWStruct *) malloc(sizeof(SQL400AddCResultDescWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->pccol = pccol;
+  myptr->out_opts = out_opts;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCResultDescWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCResultDescWStruct * SQL400AddCResultDescWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCResultDescWStruct * myptr = (SQL400AddCResultDescWStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCResultDescWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVar( icol, inOutType, pfSqlCType, pfSqlCValue, indPtr, parms );
+  return sqlrc;
+}
+void * SQL400AddCVarThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVar( myptr->icol, myptr->inOutType, myptr->pfSqlCType, myptr->pfSqlCValue, myptr->indPtr, myptr->parms );
+  /* void SQL400AddCVarCallback(SQL400AddCVarStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) malloc(sizeof(SQL400AddCVarStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->icol = icol;
+  myptr->inOutType = inOutType;
+  myptr->pfSqlCType = pfSqlCType;
+  myptr->pfSqlCValue = pfSqlCValue;
+  myptr->indPtr = indPtr;
+  myptr->parms = parms;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarStruct * myptr = (SQL400AddCVarStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarRowAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarRowAsChar( nbrcols, descs, cparms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarRowAsCharThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarRowAsCharStruct * myptr = (SQL400AddCVarRowAsCharStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarRowAsChar( myptr->nbrcols, myptr->descs, myptr->cparms, myptr->expand_factor );
+  /* void SQL400AddCVarRowAsCharCallback(SQL400AddCVarRowAsCharStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarRowAsCharStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarRowAsCharAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarRowAsCharStruct * myptr = (SQL400AddCVarRowAsCharStruct *) malloc(sizeof(SQL400AddCVarRowAsCharStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->cparms = cparms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarRowAsCharThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarRowAsCharStruct * SQL400AddCVarRowAsCharJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarRowAsCharStruct * myptr = (SQL400AddCVarRowAsCharStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarRowAsCharStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarRowAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarRowAsCharW( nbrcols, descs, cparms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarRowAsCharWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarRowAsCharWStruct * myptr = (SQL400AddCVarRowAsCharWStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarRowAsCharW( myptr->nbrcols, myptr->descs, myptr->cparms, myptr->expand_factor );
+  /* void SQL400AddCVarRowAsCharWCallback(SQL400AddCVarRowAsCharWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarRowAsCharWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarRowAsCharWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarRowAsCharWStruct * myptr = (SQL400AddCVarRowAsCharWStruct *) malloc(sizeof(SQL400AddCVarRowAsCharWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->cparms = cparms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarRowAsCharWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarRowAsCharWStruct * SQL400AddCVarRowAsCharWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarRowAsCharWStruct * myptr = (SQL400AddCVarRowAsCharWStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarRowAsCharWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarRowAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarRowAsDefault( nbrcols, descs, cparms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarRowAsDefaultThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarRowAsDefaultStruct * myptr = (SQL400AddCVarRowAsDefaultStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarRowAsDefault( myptr->nbrcols, myptr->descs, myptr->cparms, myptr->expand_factor );
+  /* void SQL400AddCVarRowAsDefaultCallback(SQL400AddCVarRowAsDefaultStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarRowAsDefaultStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarRowAsDefaultAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarRowAsDefaultStruct * myptr = (SQL400AddCVarRowAsDefaultStruct *) malloc(sizeof(SQL400AddCVarRowAsDefaultStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->cparms = cparms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarRowAsDefaultThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarRowAsDefaultStruct * SQL400AddCVarRowAsDefaultJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarRowAsDefaultStruct * myptr = (SQL400AddCVarRowAsDefaultStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarRowAsDefaultStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarRowAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarRowAsDefaultW( nbrcols, descs, cparms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarRowAsDefaultWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarRowAsDefaultWStruct * myptr = (SQL400AddCVarRowAsDefaultWStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarRowAsDefaultW( myptr->nbrcols, myptr->descs, myptr->cparms, myptr->expand_factor );
+  /* void SQL400AddCVarRowAsDefaultWCallback(SQL400AddCVarRowAsDefaultWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarRowAsDefaultWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarRowAsDefaultWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarRowAsDefaultWStruct * myptr = (SQL400AddCVarRowAsDefaultWStruct *) malloc(sizeof(SQL400AddCVarRowAsDefaultWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->cparms = cparms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarRowAsDefaultWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarRowAsDefaultWStruct * SQL400AddCVarRowAsDefaultWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarRowAsDefaultWStruct * myptr = (SQL400AddCVarRowAsDefaultWStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarRowAsDefaultWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarMultipleRowsAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarMultipleRowsAsChar( nbrcols, descs, max_rows, out_rows, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarMultipleRowsAsCharThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarMultipleRowsAsCharStruct * myptr = (SQL400AddCVarMultipleRowsAsCharStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarMultipleRowsAsChar( myptr->nbrcols, myptr->descs, myptr->max_rows, myptr->out_rows, myptr->expand_factor );
+  /* void SQL400AddCVarMultipleRowsAsCharCallback(SQL400AddCVarMultipleRowsAsCharStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarMultipleRowsAsCharStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarMultipleRowsAsCharAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarMultipleRowsAsCharStruct * myptr = (SQL400AddCVarMultipleRowsAsCharStruct *) malloc(sizeof(SQL400AddCVarMultipleRowsAsCharStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->max_rows = max_rows;
+  myptr->out_rows = out_rows;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarMultipleRowsAsCharThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarMultipleRowsAsCharStruct * SQL400AddCVarMultipleRowsAsCharJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarMultipleRowsAsCharStruct * myptr = (SQL400AddCVarMultipleRowsAsCharStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarMultipleRowsAsCharStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarMultipleRowsAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarMultipleRowsAsCharW( nbrcols, descs, max_rows, out_rows, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarMultipleRowsAsCharWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarMultipleRowsAsCharWStruct * myptr = (SQL400AddCVarMultipleRowsAsCharWStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarMultipleRowsAsCharW( myptr->nbrcols, myptr->descs, myptr->max_rows, myptr->out_rows, myptr->expand_factor );
+  /* void SQL400AddCVarMultipleRowsAsCharWCallback(SQL400AddCVarMultipleRowsAsCharWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarMultipleRowsAsCharWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarMultipleRowsAsCharWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarMultipleRowsAsCharWStruct * myptr = (SQL400AddCVarMultipleRowsAsCharWStruct *) malloc(sizeof(SQL400AddCVarMultipleRowsAsCharWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->max_rows = max_rows;
+  myptr->out_rows = out_rows;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarMultipleRowsAsCharWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarMultipleRowsAsCharWStruct * SQL400AddCVarMultipleRowsAsCharWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarMultipleRowsAsCharWStruct * myptr = (SQL400AddCVarMultipleRowsAsCharWStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarMultipleRowsAsCharWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarMultipleRowsAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarMultipleRowsAsDefault( nbrcols, descs, max_rows, out_rows, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarMultipleRowsAsDefaultThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarMultipleRowsAsDefaultStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarMultipleRowsAsDefault( myptr->nbrcols, myptr->descs, myptr->max_rows, myptr->out_rows, myptr->expand_factor );
+  /* void SQL400AddCVarMultipleRowsAsDefaultCallback(SQL400AddCVarMultipleRowsAsDefaultStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarMultipleRowsAsDefaultStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarMultipleRowsAsDefaultAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarMultipleRowsAsDefaultStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultStruct *) malloc(sizeof(SQL400AddCVarMultipleRowsAsDefaultStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->max_rows = max_rows;
+  myptr->out_rows = out_rows;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarMultipleRowsAsDefaultThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarMultipleRowsAsDefaultStruct * SQL400AddCVarMultipleRowsAsDefaultJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarMultipleRowsAsDefaultStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarMultipleRowsAsDefaultStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarMultipleRowsAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarMultipleRowsAsDefaultW( nbrcols, descs, max_rows, out_rows, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarMultipleRowsAsDefaultWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarMultipleRowsAsDefaultWStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultWStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarMultipleRowsAsDefaultW( myptr->nbrcols, myptr->descs, myptr->max_rows, myptr->out_rows, myptr->expand_factor );
+  /* void SQL400AddCVarMultipleRowsAsDefaultWCallback(SQL400AddCVarMultipleRowsAsDefaultWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarMultipleRowsAsDefaultWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarMultipleRowsAsDefaultWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarMultipleRowsAsDefaultWStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultWStruct *) malloc(sizeof(SQL400AddCVarMultipleRowsAsDefaultWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrcols = nbrcols;
+  myptr->descs = descs;
+  myptr->max_rows = max_rows;
+  myptr->out_rows = out_rows;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarMultipleRowsAsDefaultWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarMultipleRowsAsDefaultWStruct * SQL400AddCVarMultipleRowsAsDefaultWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarMultipleRowsAsDefaultWStruct * myptr = (SQL400AddCVarMultipleRowsAsDefaultWStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarMultipleRowsAsDefaultWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarParms( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarParms( nbrparms, descs, in_parms, in_parms_len, in_parms_ctype, out_parms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarParmsThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarParmsStruct * myptr = (SQL400AddCVarParmsStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarParms( myptr->nbrparms, myptr->descs, myptr->in_parms, myptr->in_parms_len, myptr->in_parms_ctype, myptr->out_parms, myptr->expand_factor );
+  /* void SQL400AddCVarParmsCallback(SQL400AddCVarParmsStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarParmsStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarParmsAsync ( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarParmsStruct * myptr = (SQL400AddCVarParmsStruct *) malloc(sizeof(SQL400AddCVarParmsStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrparms = nbrparms;
+  myptr->descs = descs;
+  myptr->in_parms = in_parms;
+  myptr->in_parms_len = in_parms_len;
+  myptr->in_parms_ctype = in_parms_ctype;
+  myptr->out_parms = out_parms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarParmsThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarParmsStruct * SQL400AddCVarParmsJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarParmsStruct * myptr = (SQL400AddCVarParmsStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarParmsStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400AddCVarParmsW( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400AddCVarParmsW( nbrparms, descs, in_parms, in_parms_len, in_parms_ctype, out_parms, expand_factor );
+  return sqlrc;
+}
+void * SQL400AddCVarParmsWThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400AddCVarParmsWStruct * myptr = (SQL400AddCVarParmsWStruct *) ptr;
+  myptr->sqlrc = custom_SQL400AddCVarParmsW( myptr->nbrparms, myptr->descs, myptr->in_parms, myptr->in_parms_len, myptr->in_parms_ctype, myptr->out_parms, myptr->expand_factor );
+  /* void SQL400AddCVarParmsWCallback(SQL400AddCVarParmsWStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400AddCVarParmsWStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400AddCVarParmsWAsync ( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400AddCVarParmsWStruct * myptr = (SQL400AddCVarParmsWStruct *) malloc(sizeof(SQL400AddCVarParmsWStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbrparms = nbrparms;
+  myptr->descs = descs;
+  myptr->in_parms = in_parms;
+  myptr->in_parms_len = in_parms_len;
+  myptr->in_parms_ctype = in_parms_ctype;
+  myptr->out_parms = out_parms;
+  myptr->expand_factor = expand_factor;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400AddCVarParmsWThread, (void *)myptr);
+  return tid;
+}
+SQL400AddCVarParmsWStruct * SQL400AddCVarParmsWJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400AddCVarParmsWStruct * myptr = (SQL400AddCVarParmsWStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400AddCVarParmsWStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400ParmsFree( SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400ParmsFree( nbr_parms, parms, decs );
+  return sqlrc;
+}
+void * SQL400ParmsFreeThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400ParmsFreeStruct * myptr = (SQL400ParmsFreeStruct *) ptr;
+  myptr->sqlrc = custom_SQL400ParmsFree( myptr->nbr_parms, myptr->parms, myptr->decs );
+  /* void SQL400ParmsFreeCallback(SQL400ParmsFreeStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400ParmsFreeStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400ParmsFreeAsync ( SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400ParmsFreeStruct * myptr = (SQL400ParmsFreeStruct *) malloc(sizeof(SQL400ParmsFreeStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->nbr_parms = nbr_parms;
+  myptr->parms = parms;
+  myptr->decs = decs;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400ParmsFreeThread, (void *)myptr);
+  return tid;
+}
+SQL400ParmsFreeStruct * SQL400ParmsFreeJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400ParmsFreeStruct * myptr = (SQL400ParmsFreeStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400ParmsFreeStruct *) NULL;
   }
   return myptr;
 }
@@ -8747,11 +9447,11 @@ SQL400FetchArrayWStruct * SQL400FetchArrayWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQL400FetchArrayFree( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols )
+SQLRETURN SQL400FetchArrayFree( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
-  sqlrc = custom_SQL400FetchArrayFree( rows, decs, cnt_cols );
+  sqlrc = custom_SQL400FetchArrayFree( cnt_cols, rows, decs );
   return sqlrc;
 }
 void * SQL400FetchArrayFreeThread (void *ptr)
@@ -8759,7 +9459,7 @@ void * SQL400FetchArrayFreeThread (void *ptr)
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
   SQL400FetchArrayFreeStruct * myptr = (SQL400FetchArrayFreeStruct *) ptr;
-  myptr->sqlrc = custom_SQL400FetchArrayFree( myptr->rows, myptr->decs, myptr->cnt_cols );
+  myptr->sqlrc = custom_SQL400FetchArrayFree( myptr->cnt_cols, myptr->rows, myptr->decs );
   /* void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* ); */
   if (myptr->callback) {
     void (*ptrFunc)(SQL400FetchArrayFreeStruct* ) = myptr->callback;
@@ -8767,15 +9467,15 @@ void * SQL400FetchArrayFreeThread (void *ptr)
   }
   pthread_exit((void *)myptr);
 }
-pthread_t SQL400FetchArrayFreeAsync ( SQLPOINTER  rows, SQLPOINTER  decs, SQLINTEGER  cnt_cols, void * callback )
+pthread_t SQL400FetchArrayFreeAsync ( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs, void * callback )
 {
   int rc = 0;
   pthread_t tid = 0;
   SQL400FetchArrayFreeStruct * myptr = (SQL400FetchArrayFreeStruct *) malloc(sizeof(SQL400FetchArrayFreeStruct));
   myptr->sqlrc = SQL_SUCCESS;
+  myptr->cnt_cols = cnt_cols;
   myptr->rows = rows;
   myptr->decs = decs;
-  myptr->cnt_cols = cnt_cols;
   myptr->callback = callback;
   rc = pthread_create(&tid, NULL, SQL400FetchArrayFreeThread, (void *)myptr);
   return tid;

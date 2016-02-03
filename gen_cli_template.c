@@ -794,13 +794,18 @@ SQLRETURN SQLTransact(SQLHENV henv,
 # ------------------
 # custom interfaces, not CLI libdb400.a
 # ------------------
+
+# mode set driver by ccsid
+
 SQLRETURN SQLOverrideCCSID400(SQLINTEGER newCCSID)
 
+# resource table map
 
 SQLRETURN SQL400Stmt2Hdbc(SQLHSTMT hstmt,
  SQLINTEGER * ohnd)
 
-# custom convert to/from utf8
+# custom conver
+
 SQLRETURN SQL400ToUtf8(SQLHDBC hdbc,
  SQLPOINTER inparm,
  SQLINTEGER inlen, 
@@ -815,7 +820,6 @@ SQLRETURN SQL400FromUtf8(SQLHDBC hdbc,
  SQLINTEGER outlen,
  SQLINTEGER outccsid)
 
-# custom convert to/from utf16
 SQLRETURN SQL400ToUtf16(SQLHDBC hdbc,
  SQLPOINTER inparm,
  SQLINTEGER inlen, 
@@ -830,7 +834,7 @@ SQLRETURN SQL400FromUtf16(SQLHDBC hdbc,
  SQLINTEGER outlen,
  SQLINTEGER outccsid)
 
-# custom interfaces, connect attributes
+# custom attributes
 
 SQLRETURN SQL400AddAttr(SQLINTEGER scope,
  SQLINTEGER attrib,
@@ -851,8 +855,12 @@ SQLRETURN SQL400SetAttrW(SQLINTEGER scope,
  SQLPOINTER options)
 
 
+# custom environment
+
 SQLRETURN SQL400Environment(SQLINTEGER * ohnd,
  SQLPOINTER options)
+
+# custom connection
 
 SQLRETURN SQL400Connect(SQLHENV henv, 
  SQLCHAR * db, 
@@ -868,14 +876,7 @@ SQLRETURN SQL400ConnectW(SQLHENV henv,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
-# custom interfaces, execute fetch
-
-SQLRETURN SQL400AddCVar(SQLSMALLINT icol, 
- SQLSMALLINT inOutType, 
- SQLSMALLINT pfSqlCType, 
- SQLPOINTER pfSqlCValue, 
- SQLINTEGER * indPtr, 
- SQLPOINTER parms) 
+# custom sql descriptions
 
 SQLRETURN SQL400AddDesc(SQLHSTMT hstmt,
  SQLSMALLINT icol,
@@ -887,9 +888,106 @@ SQLRETURN SQL400AddDescW(SQLHSTMT hstmt,
  SQLSMALLINT flag, 
  SQLPOINTER descs)
 
+SQLRETURN SQL400AddCParmDesc(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts)
+
+SQLRETURN SQL400AddCParmDescW(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts)
+
+SQLRETURN SQL400AddCResultDesc(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts)
+
+SQLRETURN SQL400AddCResultDescW(SQLHSTMT hstmt,
+ SQLSMALLINT * pccol,
+ SQLPOINTER * out_opts)
+
+# custom c host variable
+
+SQLRETURN SQL400AddCVar(SQLSMALLINT icol, 
+ SQLSMALLINT inOutType, 
+ SQLSMALLINT pfSqlCType, 
+ SQLPOINTER pfSqlCValue, 
+ SQLINTEGER * indPtr, 
+ SQLPOINTER parms)
+
+# custom c row of host variables
+
+SQLRETURN SQL400AddCVarRowAsChar(SQLSMALLINT nbrcols,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400AddCVarRowAsCharW(SQLSMALLINT nbrcols,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400AddCVarRowAsDefault(SQLSMALLINT nbrcols,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400AddCVarRowAsDefaultW(SQLSMALLINT nbrcols,
+ SQLPOINTER descs,
+ SQLPOINTER cparms,
+ SQLINTEGER expand_factor)
+
+SQLRETURN SQL400AddCVarMultipleRowsAsChar(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+
+SQLRETURN SQL400AddCVarMultipleRowsAsCharW(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+
+SQLRETURN SQL400AddCVarMultipleRowsAsDefault(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+
+SQLRETURN SQL400AddCVarMultipleRowsAsDefaultW(SQLSMALLINT nbrcols, 
+ SQLPOINTER descs,
+ SQLINTEGER max_rows, 
+ SQLPOINTER *out_rows,
+ SQLINTEGER expand_factor)
+
+# custom c params host variables
+
+SQLRETURN SQL400AddCVarParms(SQLSMALLINT nbrparms,
+ SQLPOINTER descs,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype,
+ SQLPOINTER * out_parms,
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400AddCVarParmsW(SQLSMALLINT nbrparms,
+ SQLPOINTER descs,
+ SQLPOINTER * in_parms,
+ SQLINTEGER * in_parms_len,
+ SQLSMALLINT * in_parms_ctype,
+ SQLPOINTER * out_parms,
+ SQLINTEGER expand_factor) 
+
+SQLRETURN SQL400ParmsFree(SQLSMALLINT nbr_parms,
+ SQLPOINTER parms,
+ SQLPOINTER decs)
+
+# custom bind execute
+
 SQLRETURN SQL400Execute(SQLHSTMT hstmt, 
  SQLPOINTER parms, 
  SQLPOINTER desc_parms)
+
+# custome fetch
 
 SQLRETURN SQL400Fetch(SQLHSTMT hstmt, 
  SQLINTEGER start_row, 
@@ -918,8 +1016,8 @@ SQLRETURN SQL400FetchArrayW( SQLHSTMT hstmt,
  SQLINTEGER all_char, 
  SQLINTEGER expand_factor) 
 
-SQLRETURN SQL400FetchArrayFree(SQLPOINTER rows,
- SQLPOINTER decs,
- SQLINTEGER cnt_cols)
+SQLRETURN SQL400FetchArrayFree(SQLINTEGER cnt_cols,
+ SQLPOINTER rows,
+ SQLPOINTER decs)
 
 
