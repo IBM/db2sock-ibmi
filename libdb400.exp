@@ -627,6 +627,9 @@ SQL400pConnectJoin
 SQL400pConnectW
 SQL400pConnectWAsync
 SQL400pConnectWJoin
+SQL400ChgCurLib
+SQL400ChgCurLibAsync
+SQL400ChgCurLibJoin
 SQL400AddDesc
 SQL400AddDescAsync
 SQL400AddDescJoin

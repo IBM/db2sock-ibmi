@@ -8489,6 +8489,54 @@ SQL400pConnectWStruct * SQL400pConnectWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400ChgCurLib( hdbc, curlib );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400ChgCurLibThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400ChgCurLibStruct * myptr = (SQL400ChgCurLibStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400ChgCurLib( myptr->hdbc, myptr->curlib );
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400ChgCurLibCallback(SQL400ChgCurLibStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400ChgCurLibStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400ChgCurLibAsync ( SQLHDBC  hdbc, SQLCHAR * curlib, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400ChgCurLibStruct * myptr = (SQL400ChgCurLibStruct *) malloc(sizeof(SQL400ChgCurLibStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->curlib = curlib;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400ChgCurLibThread, (void *)myptr);
+  return tid;
+}
+SQL400ChgCurLibStruct * SQL400ChgCurLibJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400ChgCurLibStruct * myptr = (SQL400ChgCurLibStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400ChgCurLibStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;

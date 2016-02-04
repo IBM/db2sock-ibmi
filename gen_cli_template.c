@@ -890,6 +890,16 @@ SQLRETURN SQL400pConnectW(SQLHENV henv,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
+SQLRETURN custom_SQL400Cmd(SQLHDBC hdbc,
+ SQLCHAR * cmd)
+
+SQLRETURN custom_SQL400ChgLibl(SQLHDBC hdbc,
+ SQLCHAR * libl)
+
+SQLRETURN SQL400ChgCurLib(SQLHDBC hdbc,
+ SQLCHAR * curlib)
+
+
 # custom sql descriptions
 
 SQLRETURN SQL400AddDesc(SQLHSTMT hstmt,
