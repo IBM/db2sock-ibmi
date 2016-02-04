@@ -123,6 +123,7 @@ void init_table_ctor(int hstmt, int hdbc) {
   }
   IBMiTable[hstmt].hstmt = hstmt;
   IBMiTable[hstmt].hdbc = hdbc;
+  IBMiTable[hstmt].hKey = NULL;
   init_unlock();
 }
 void init_table_dtor(int hstmt) {
@@ -132,6 +133,14 @@ void init_table_dtor(int hstmt) {
    * once done, we have lock scope
    * either statment or connection
    */
+  if (IBMiTable[hstmt].hKey) {
+    init_lock();
+    if (IBMiTable[hstmt].hKey) {
+      free(IBMiTable[hstmt].hKey);
+    IBMiTable[hstmt].hKey = (char *) NULL;
+    }
+    init_unlock();
+  }
 }
 void * init_table_addr(int hstmt) {
   return (void *) &IBMiTable[hstmt];
@@ -201,6 +210,105 @@ int init_table_in_progress(int hstmt,int flag) {
  */
 int init_table_stmt_2_conn(int hstmt) {
   return IBMiTable[hstmt].hdbc;
+}
+
+char * init_hkey( char * db, char * uid, char * pwd ) {
+  int hKeyLen = 0;
+  char *hKey = NULL;
+  char * key = "__db2_";
+  int key_len = strlen(key);
+  int db_len = strlen(db);
+  int uid_len = strlen(uid);
+  int pwd_len = strlen(pwd);
+  hKeyLen = key_len + db_len + uid_len + pwd_len + 1;
+  hKey = (char *) custom_alloc_zero(hKeyLen);
+  sprintf(hKey, "__db2_%s%s%s", uid, db, pwd);
+  return hKey;
+}
+
+char * init_hkey_W( unsigned int * db, unsigned int * uid, unsigned int * pwd ) {
+  int hKeyLen = 0;
+  char *hKey = NULL;
+  char * key = "__db2_";
+  int key_len = strlen(key);
+  int db_len = custom_strlen_utf16(db) * 2;
+  int uid_len = custom_strlen_utf16(uid) * 2;
+  int pwd_len = custom_strlen_utf16(pwd) * 2;
+  hKeyLen = key_len + db_len + uid_len + pwd_len + 2;
+  hKey = (char *) custom_alloc_zero(hKeyLen);
+  memcpy(hKey,key,key_len);
+  memcpy(hKey+key_len,db,db_len);
+  memcpy(hKey+key_len+db_len,uid,uid_len);
+  memcpy(hKey+key_len+db_len+uid_len,pwd,pwd_len);
+  return hKey;
+}
+
+
+void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, int flag) {
+  char * hKey = init_hkey( db, uid, pwd );
+  if (flag) {
+    IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
+  } else {
+    IBMiTable[hstmt].hKey = hKey;
+  }
+}
+extern int init_table_hash_2_conn(char * db, char * uid, char * pwd) {
+  char * hKey = init_hkey( db, uid, pwd );
+  int i = 0;
+  int len1 = strlen(hKey);
+  int len2 = 0;
+  for (i=0; i < PASECLIMAXRESOURCE; i++) {
+    len2 = strlen(IBMiTable[i].hKey);
+    if (len1 == len2) {
+      if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
+        return IBMiTable[i].hdbc;
+      }
+    }
+  }
+  free(hKey);
+  return 0;
+}
+void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, int flag) {
+  char * hKey = init_hkey_W( db, uid, pwd );
+  if (flag) {
+    IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
+  } else {
+    IBMiTable[hstmt].hKey = hKey;
+  }
+}
+extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd) {
+  char * hKey = init_hkey_W( db, uid, pwd );
+  int i = 0;
+  int len1 = custom_strlen_utf16((unsigned int *)hKey);
+  int len2 = 0;
+  for (i=0; i < PASECLIMAXRESOURCE; i++) {
+    len2 = custom_strlen_utf16((unsigned int *)IBMiTable[i].hKey);
+    if (len1 == len2) {
+      if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
+        return IBMiTable[i].hdbc;
+      }
+    }
+  }
+  free(hKey);
+  return 0;
+}
+
+
+int custom_strlen_utf16(unsigned int * src) {
+  int len = 0;
+  char *tgt = (char *) src;
+  while (*(unsigned short *)tgt) { 
+    len++;
+    tgt += 2;
+  }
+  return len;
+}
+
+
+void * custom_alloc_zero(int sz) {
+  void * ibc = (char *) malloc(sz);
+  memset(ibc,0,sz);
+  return ibc;
 }
 
 

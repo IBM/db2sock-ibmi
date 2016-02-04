@@ -25,6 +25,7 @@ typedef struct PaseCliResource {
   pthread_mutex_t threadMutexLock; /* lock hdbc or hstmt */
   pthread_mutexattr_t threadMutexAttr;
   int in_progress;
+  char *hKey;
 } PaseCliResource;
 extern PaseCliResource IBMiTable[PASECLIMAXRESOURCE];
 extern void init_table_ctor(int hstmt, int hdbc);
@@ -33,10 +34,17 @@ extern void init_table_lock(int hstmt,int flag);
 extern void init_table_unlock(int hstmt,int flag);
 extern int init_table_in_progress(int hstmt,int flag);
 extern int init_table_stmt_2_conn(int hstmt);
+extern void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, int flag);
+extern int init_table_hash_2_conn(char * db, char * uid, char * pwd);
+extern void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, int flag);
+extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd);
 
 extern void * init_cli_dlsym();
 extern int init_cli_srvpgm();
 extern int init_CCSID400( int newCCSID );
+
+extern int custom_strlen_utf16(unsigned int * src);
+extern void * custom_alloc_zero(int sz);
 
 
 #endif /* _PASECLIINIT_H */

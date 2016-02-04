@@ -34,16 +34,6 @@ static SQLHANDLE env_hndl;
  * utilities
  */ 
 
-int custom_strlen_utf16(unsigned int * src) {
-  int len = 0;
-  char *tgt = (char *) src;
-  while (*(unsigned short *)tgt) { 
-    len++;
-    tgt += 2;
-  }
-  return len;
-}
-
 int custom_trim_CVAR(SQL400ParamStruct * prm) {
   int ib = 0;
   char * ibc = (char *) NULL;
@@ -59,12 +49,6 @@ int custom_trim_CVAR(SQL400ParamStruct * prm) {
   }
 }
 
-
-void * custom_alloc_zero(int sz) {
-  void * ibc = (char *) malloc(sz);
-  memset(ibc,0,sz);
-  return ibc;
-}
 
 
 /*
@@ -208,12 +192,19 @@ SQLRETURN custom_SQL400SetAttrBoth( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGE
   }
   for (i=0; opts[i].scope; i++) {
     opt = &opts[i];
+    /*
+     * SQL400_FLAG_IMMED        -- apply now
+     * SQL400_FLAG_POST_CONNECT -- after connect
+     */
+    if (opt->flag != flag) {
+      continue;
+    }
     switch (opt->scope) {
     case SQL_HANDLE_ENV:
+      /* SQLRETURN SQLSetEnvAttr ( SQLHENV  henv; SQLINTEGER  Attribute; SQLPOINTER  Value; SQLINTEGER StringLength ) */
       if (scope == SQL_HANDLE_ENV ) {
         switch (opt->attrib) {
         default:
-          /* SQLRETURN SQLSetEnvAttr ( SQLHENV  henv; SQLINTEGER  Attribute; SQLPOINTER  Value; SQLINTEGER StringLength ) */
           opt->sqlrc = SQLSetEnvAttr((SQLHENV)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
           if (opt->sqlrc == SQL_ERROR && opt->onerr == SQL400_ONERR_STOP) {
             return opt->sqlrc;
@@ -223,10 +214,10 @@ SQLRETURN custom_SQL400SetAttrBoth( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGE
       }
       break;
     case SQL_HANDLE_DBC:
+      /* SQLRETURN SQLSetConnectAttr ( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) */
       if (scope == SQL_HANDLE_DBC ) {
         switch (opt->attrib) {
         default:
-          /* SQLRETURN SQLSetConnectAttr ( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) */
           switch (iswide) {
           case 1:
             opt->sqlrc = SQLSetConnectAttrW((SQLHDBC)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
@@ -242,10 +233,10 @@ SQLRETURN custom_SQL400SetAttrBoth( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGE
       }
       break;
     case SQL_HANDLE_STMT:
+      /* SQLRETURN SQLSetStmtAttr ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) */
       if (scope == SQL_HANDLE_STMT ) {
         switch (opt->attrib) {
         default:
-          /* SQLRETURN SQLSetStmtAttr ( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) */
           switch (iswide) {
           case 1:
             opt->sqlrc = SQLSetStmtAttr((SQLHSTMT)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam, (SQLINTEGER) opt->inlen);
@@ -262,10 +253,10 @@ SQLRETURN custom_SQL400SetAttrBoth( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGE
       }
       break;
     case SQL_HANDLE_DESC:
+      /* SQLRETURN SQLSetStmtOption( SQLHSTMT hstmt, SQLSMALLINT fOption, SQLPOINTER vParam ) */
       if (scope == SQL_HANDLE_DESC ) {
         switch (opt->attrib) {
         default:
-          /* SQLRETURN SQLSetStmtOption( SQLHSTMT hstmt, SQLSMALLINT fOption, SQLPOINTER vParam ) */
           switch (iswide) {
           case 1:
             opt->sqlrc = SQLSetStmtOptionW((SQLHSTMT)hndl, (SQLINTEGER)opt->attrib, (SQLPOINTER)opt->vParam );
@@ -297,6 +288,7 @@ SQLRETURN custom_SQL400SetAttrW( SQLINTEGER  scope, SQLHANDLE hndl, SQLINTEGER  
   sqlrc = custom_SQL400SetAttrBoth(scope, hndl, flag, options, 1);
   return sqlrc;
 }
+
 
 
 
@@ -343,7 +335,7 @@ SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options ) {
  * connect
  */
 
-SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, SQLSMALLINT iswide, SQLSMALLINT isPersistent) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   SQLHDBC hdbc = 0;
@@ -356,6 +348,22 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   int db_slen = strlen(db);
   int uid_slen = strlen(uid);
   int pwd_slen = strlen(pwd);
+
+  /* nothing open, so far */
+  *ohnd = 0;
+
+  switch(iswide) {
+  case 1:
+    db_slen = custom_strlen_utf16((unsigned int*)db);  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
+    uid_slen = custom_strlen_utf16((unsigned int*)uid); /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
+    pwd_slen = custom_strlen_utf16((unsigned int*)pwd); /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
+    break;
+  default:
+    db_slen = strlen(db);
+    uid_slen = strlen(uid);
+    pwd_slen = strlen(pwd);
+    break;
+  }
   /* null input */
   if (db == NULL || !db_slen) {
     db_str = (SQLCHAR *) NULL;
@@ -369,25 +377,76 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
     pwd_str = (SQLCHAR *) NULL;
     pwd_len = 0;
   }
-  /* hdbc -- connection */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_DBC, henv, ohnd);
-  if (sqlrc != SQL_SUCCESS) {
-    return sqlrc;
+  /* possible persistent connection */
+  if (isPersistent) {
+    switch(iswide) {
+    case 1:
+      *ohnd = init_table_hash_2_conn_W((unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd);
+      break;
+    default:
+      *ohnd = init_table_hash_2_conn(db, uid, pwd);
+      break;
+    }
   }
   hdbc = *ohnd;
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_PRE_CONNECT, options);
-  if (sqlrc != SQL_SUCCESS) {
-    init_table_unlock(hdbc, 0);
-    return sqlrc;
+  /* open a connection */
+  if (hdbc < 2) {
+    /* hdbc -- connection */
+    sqlrc = SQLAllocHandle(SQL_HANDLE_DBC, henv, ohnd);
+    if (sqlrc != SQL_SUCCESS) {
+      return sqlrc;
+    }
+    hdbc = *ohnd;
+    init_table_lock(hdbc, 0);
+    switch(iswide) {
+    case 1:
+      sqlrc = custom_SQL400SetAttrW(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_IMMED, options);
+      break;
+    default:
+      sqlrc = custom_SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_IMMED, options);
+      break;
+    }
+    if (sqlrc != SQL_SUCCESS) {
+      init_table_unlock(hdbc, 0);
+      return sqlrc;
+    }
+    /* connect */
+    switch(iswide) {
+    case 1:
+      sqlrc = SQLConnectW( (SQLHDBC)*ohnd, (SQLWCHAR *)db_str, (SQLSMALLINT)db_len, (SQLWCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLWCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
+      break;
+    default:
+      sqlrc = SQLConnect( (SQLHDBC)*ohnd, (SQLCHAR *)db_str, (SQLSMALLINT)db_len, (SQLCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
+      break;
+    }
+    if (sqlrc != SQL_SUCCESS) {
+      init_table_unlock(hdbc, 0);
+      return sqlrc;
+    }
+  
+    /* possible persistent connection */
+    if (isPersistent) {
+      switch(iswide) {
+      case 1:
+        init_table_add_hash_W(hdbc, (unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd, 0);
+        break;
+      default:
+        init_table_add_hash(hdbc, db, uid, pwd, 0);
+        break;
+      }
+    }
+  } else {
+    init_table_lock(hdbc, 0);
   }
-  /* connect */
-  sqlrc = SQLConnect( (SQLHDBC)*ohnd, (SQLCHAR *)db_str, (SQLSMALLINT)db_len, (SQLCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
-  if (sqlrc != SQL_SUCCESS) {
-    init_table_unlock(hdbc, 0);
-    return sqlrc;
+  /* post connection */
+  switch(iswide) {
+  case 1:
+    sqlrc = custom_SQL400SetAttrW(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_POST_CONNECT, options);
+    break;
+  default:
+    sqlrc = custom_SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_POST_CONNECT, options);
+    break;
   }
-  sqlrc = custom_SQL400SetAttr(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_POST_CONNECT, options);
   if (sqlrc != SQL_SUCCESS) {
     init_table_unlock(hdbc, 0);
     return sqlrc;
@@ -395,57 +454,24 @@ SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   init_table_unlock(hdbc, 0);
   return sqlrc;
 }
-
+SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, ohnd, options, 0, 0);
+  return sqlrc;
+}
 SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0;
-  SQLHDBC hdbc = 0;
-  SQLWCHAR * db_str = (SQLWCHAR *) db;
-  SQLWCHAR * uid_str = (SQLWCHAR *) uid;
-  SQLWCHAR * pwd_str = (SQLWCHAR *) pwd;
-  SQLSMALLINT db_len = SQL_NTS;
-  SQLSMALLINT uid_len = SQL_NTS;
-  SQLSMALLINT pwd_len = SQL_NTS;
-  int db_slen = custom_strlen_utf16((unsigned int*)db);  /* wcslen(db);  - not work 64 bit due to header wchar_t changed __64__ */
-  int uid_slen = custom_strlen_utf16((unsigned int*)uid); /* wcslen(uid); - not work 64 bit due to header wchar_t changed __64__  */
-  int pwd_slen = custom_strlen_utf16((unsigned int*)pwd); /* wcslen(pwd); - not work 64 bit due to header wchar_t changed __64__  */
-  /* null input */
-  if (db == NULL || !db_slen) {
-    db_str = (SQLWCHAR *) NULL;
-    db_len = 0;
-  }
-  if (uid == NULL || !uid_slen) {
-    uid_str = (SQLWCHAR *) NULL;
-    uid_len = 0;
-  }
-  if (pwd == NULL || !pwd_slen) {
-    pwd_str = (SQLWCHAR *) NULL;
-    pwd_len = 0;
-  }
-  /* hdbc -- connection */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_DBC, henv, ohnd);
-  if (sqlrc != SQL_SUCCESS) {
-    return sqlrc;
-  }
-  hdbc = *ohnd;
-  init_table_lock(hdbc, 0);
-  sqlrc = custom_SQL400SetAttrW(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_PRE_CONNECT, options);
-  if (sqlrc != SQL_SUCCESS) {
-    init_table_unlock(hdbc, 0);
-    return sqlrc;
-  }
-  /* connect */
-  sqlrc = SQLConnectW( (SQLHDBC)*ohnd, (SQLWCHAR *)db_str, (SQLSMALLINT)db_len, (SQLWCHAR *)uid_str, (SQLSMALLINT)uid_len, (SQLWCHAR *)pwd_str, (SQLSMALLINT)pwd_len );
-  if (sqlrc != SQL_SUCCESS) {
-    init_table_unlock(hdbc, 0);
-    return sqlrc;
-  }
-  sqlrc = custom_SQL400SetAttrW(SQL_HANDLE_DBC, *ohnd, SQL400_FLAG_POST_CONNECT, options);
-  if (sqlrc != SQL_SUCCESS) {
-    init_table_unlock(hdbc, 0);
-    return sqlrc;
-  }
-  init_table_unlock(hdbc, 0);
+  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, ohnd, options, 1, 0);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, ohnd, options, 0, 1);
+  return sqlrc;
+}
+SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, ohnd, options, 1, 1);
   return sqlrc;
 }
 

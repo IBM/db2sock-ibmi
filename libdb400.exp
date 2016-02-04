@@ -621,6 +621,12 @@ SQL400ConnectJoin
 SQL400ConnectW
 SQL400ConnectWAsync
 SQL400ConnectWJoin
+SQL400pConnect
+SQL400pConnectAsync
+SQL400pConnectJoin
+SQL400pConnectW
+SQL400pConnectWAsync
+SQL400pConnectWJoin
 SQL400AddDesc
 SQL400AddDescAsync
 SQL400AddDescJoin

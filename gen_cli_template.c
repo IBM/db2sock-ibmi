@@ -876,6 +876,20 @@ SQLRETURN SQL400ConnectW(SQLHENV henv,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
+SQLRETURN SQL400pConnect(SQLHENV henv, 
+ SQLCHAR * db, 
+ SQLCHAR * uid, 
+ SQLCHAR * pwd, 
+ SQLINTEGER * ohnd,
+ SQLPOINTER options)
+
+SQLRETURN SQL400pConnectW(SQLHENV henv, 
+ SQLWCHAR * db, 
+ SQLWCHAR * uid, 
+ SQLWCHAR * pwd, 
+ SQLINTEGER * ohnd,
+ SQLPOINTER options)
+
 # custom sql descriptions
 
 SQLRETURN SQL400AddDesc(SQLHSTMT hstmt,
