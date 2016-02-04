@@ -8489,6 +8489,102 @@ SQL400pConnectWStruct * SQL400pConnectWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400Cmd( hdbc, cmd );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400CmdThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400CmdStruct * myptr = (SQL400CmdStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400Cmd( myptr->hdbc, myptr->cmd );
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400CmdCallback(SQL400CmdStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400CmdStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400CmdAsync ( SQLHDBC  hdbc, SQLCHAR * cmd, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400CmdStruct * myptr = (SQL400CmdStruct *) malloc(sizeof(SQL400CmdStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->cmd = cmd;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400CmdThread, (void *)myptr);
+  return tid;
+}
+SQL400CmdStruct * SQL400CmdJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400CmdStruct * myptr = (SQL400CmdStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400CmdStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400ChgLibl( hdbc, libl );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400ChgLiblThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400ChgLiblStruct * myptr = (SQL400ChgLiblStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400ChgLibl( myptr->hdbc, myptr->libl );
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400ChgLiblCallback(SQL400ChgLiblStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400ChgLiblStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400ChgLiblAsync ( SQLHDBC  hdbc, SQLCHAR * libl, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400ChgLiblStruct * myptr = (SQL400ChgLiblStruct *) malloc(sizeof(SQL400ChgLiblStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->libl = libl;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400ChgLiblThread, (void *)myptr);
+  return tid;
+}
+SQL400ChgLiblStruct * SQL400ChgLiblJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400ChgLiblStruct * myptr = (SQL400ChgLiblStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400ChgLiblStruct *) NULL;
+  }
+  return myptr;
+}
 SQLRETURN SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
