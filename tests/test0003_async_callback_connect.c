@@ -39,6 +39,7 @@ int main(int argc, char * argv[]) {
   pthread_t tid = 0;
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
   pthread_t ptid = pthread_self();
+  int expect = 1;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
@@ -56,8 +57,8 @@ int main(int argc, char * argv[]) {
   tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)SQL400ConnectCallback);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   printf("SQL400ConnectAsync (thread %d): hi there from main thread\n",ptid);
-  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
-  sleep(10);
+  lang_out_jobs(uid);
+  lang_expect_count_jobs(expect, uid);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

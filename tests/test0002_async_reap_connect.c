@@ -28,6 +28,7 @@ int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t tid = 0;
   SQL400ConnectStruct *myptr = (SQL400ConnectStruct *) NULL;
+  int expect = 1;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
@@ -45,8 +46,6 @@ int main(int argc, char * argv[]) {
   tid = SQL400ConnectAsync(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc, (SQLPOINTER)&pophdbc, (void *)NULL);
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   myptr = SQL400ConnectJoin (tid, SQL400_FLAG_JOIN_NO_WAIT);
-  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
-  sleep(10);
   if (!myptr) {
     printf("SQL400ConnectAsync (thread %d): connect still running\n", tid);
     myptr = SQL400ConnectJoin (tid, SQL400_FLAG_JOIN_WAIT);
@@ -56,6 +55,8 @@ int main(int argc, char * argv[]) {
     tid, myptr->sqlrc, myptr->henv, myptr->db, myptr->uid, *(myptr->ohnd), myptr->options, myptr->callback);
   lang_check_sqlrc(SQL_HANDLE_DBC, *(myptr->ohnd), myptr->sqlrc, 1, &sqlcode);
   free(myptr);
+  lang_out_jobs(uid);
+  lang_expect_count_jobs(expect, uid);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

@@ -28,6 +28,9 @@ char pwd_utf8[11];
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0, j = 0;
+  int expect = 10;
+  int expect_hstmt = 1 + expect * expect + expect;
+  int actual_hstmt = 0;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
@@ -42,28 +45,30 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
   sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
   sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
-  for (i=0;i<10; i++) {
+  for (i=0;i<expect; i++) {
     sqlrc = SQL400Connect(henv, (SQLCHAR *) &db_utf8, (SQLCHAR *) &uid_utf8, (SQLCHAR *) &pwd_utf8, &hdbc[i], (SQLPOINTER)&pophdbc);
     printf("SQL400Connect: hdbc[%d]=%d\n",i,hdbc[i]);
     lang_check_sqlrc(SQL_HANDLE_DBC, hdbc[i], sqlrc, 1, &sqlcode);
-    for (j=0;j<10; j++) {
+    for (j=0;j<expect; j++) {
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc[i], &hstmt[i][j]);
       printf("SQLAllocHandle: hstmt[%d][%d]=%d\n",i,j,hstmt[i][j]);
       lang_check_sqlrc(SQL_HANDLE_STMT, hstmt[i][j], sqlrc, 1, &sqlcode);
+      actual_hstmt = hstmt[i][j];
     }
   }
-  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
-  sleep(10);
-  for (i=0;i<10; i++) {
-    for (j=0;j<10; j++) {
+  lang_out_jobs(uid);
+  lang_expect_count_jobs(expect, uid);
+  lang_expect_count("last hstmt number", expect_hstmt, actual_hstmt);
+  for (i=0;i<expect; i++) {
+    for (j=0;j<expect; j++) {
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt[i][j]);
-      printf("SQLFreeHandle: hstmt[%d][%d]=%d\n",i,j,hstmt[i][j]);
+      /* printf("SQLFreeHandle: hstmt[%d][%d]=%d\n",i,j,hstmt[i][j]); */
       lang_check_sqlrc(SQL_HANDLE_STMT, hstmt[i][j], sqlrc, 1, &sqlcode);
     }
     sqlrc = SQLDisconnect(hdbc[i]);
-    printf("SQLDisconnect: hdbc[%d]=%d\n",i,hdbc[i]);
+    /* printf("SQLDisconnect: hdbc[%d]=%d\n",i,hdbc[i]); */
     sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc[i]);
-    printf("SQLFreeHandle: hdbc[%d]=%d\n",i,hdbc[i]);
+    /* printf("SQLFreeHandle: hdbc[%d]=%d\n",i,hdbc[i]); */
   }
   return sqlrc;
 }

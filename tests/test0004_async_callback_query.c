@@ -168,14 +168,15 @@ int main(int argc, char * argv[]) {
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int expect = 1;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
   main_environ();
-  printf("sleeping few seconds, allow you check for QSQ server jobs\n");
-  sleep(10);
+  lang_out_jobs(uid);
+  lang_expect_count_jobs(expect, uid);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;
