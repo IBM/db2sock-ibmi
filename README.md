@@ -40,24 +40,20 @@ you will grow function by leaps with very little effort.
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 ```
-=== UTF-8 mode, most popular AIX/PASE/Linux ===
-SQLOverrideCCSID400(1208) -- UTF-8 mode, CLI normal/async direct ILE call
+=== UTF-8 ccsid, normal Unix mode (direct ILE call) ===
+SQLOverrideCCSID400(1208)
 -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
+
+=== UTF-16 ccsid, "W'ide interfaces (direct ILE call) ===
+SQLOverrideCCSID400(1200)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 
-=== UTF-8 mode, most popular Windows/Java ===
-SQLOverrideCCSID400(1200) -- UTF-16 mode, CLI normal/async direct ILE call
--->SQLExecDirect(Async)-->ILE_SQLExecDirectW-->DB2
--->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
-
-=== PASE default (original libdb400.a) ===
-SQLOverrideCCSID400(other) -- PASE ccsid, CLI API calls PASE libdb400.a
--->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2
--->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2 (*)
-
+=== PASE ccsid, original mode (call original libdb400.a) ===
+SQLOverrideCCSID400(0) -- job ccsid, best guess
+SQLOverrideCCSID400(pase_ccsid)
+-->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2 (*)
 ```
-(*) PASE libdb400.a does not support wide CLI APIs.
-Therefore, this libdb400.a simply calls ILE.
+(*) Calling old libdb400.a less desirable, so may change over time.
 
 
 ##Usage:
