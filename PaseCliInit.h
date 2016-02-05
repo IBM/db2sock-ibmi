@@ -37,6 +37,9 @@ typedef struct PaseConvResource {
   char * charset_Utf;
   iconv_t AsciiToUtf;
   iconv_t UtfToAscii;
+  int in_progress;
+  pthread_mutex_t threadMutexLock;
+  pthread_mutexattr_t threadMutexAttr;
 } PaseConvResource;
 
 void init_table_ctor(int hstmt, int hdbc);

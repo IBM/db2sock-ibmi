@@ -56,7 +56,7 @@ void init_unlock() {
 
 
 /*
- * conversion (dunno if threadsafe)
+ * conversion (not threadsafe)
  */
 int custom_iconv_open(int myccsid, int utfccsid) {
   int i = 0;
@@ -69,7 +69,7 @@ int custom_iconv_open(int myccsid, int utfccsid) {
   }
   init_lock();
   for (i=0;i<PASECLIMAXCCSID;i++) {
-    if (IBMiCCSID[i].cssid_Ascii == myccsid && IBMiCCSID[i].ccsid_Utf == utfccsid) {
+    if (IBMiCCSID[i].cssid_Ascii == myccsid && IBMiCCSID[i].ccsid_Utf == utfccsid && !IBMiCCSID[i].in_progress) {
       init_unlock();
       return i;
     }
@@ -80,6 +80,9 @@ int custom_iconv_open(int myccsid, int utfccsid) {
       IBMiCCSID[i].charset_Utf = ccsidtocs(utfccsid);
       IBMiCCSID[i].AsciiToUtf = iconv_open(IBMiCCSID[i].charset_Utf, IBMiCCSID[i].charset_Ascii);
       IBMiCCSID[i].UtfToAscii = iconv_open(IBMiCCSID[i].charset_Ascii, IBMiCCSID[i].charset_Utf);
+      pthread_mutexattr_init(&IBMiCCSID[i].threadMutexAttr);
+      pthread_mutexattr_settype(&IBMiCCSID[i].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
+      pthread_mutex_init(&IBMiCCSID[i].threadMutexLock, &IBMiCCSID[i].threadMutexAttr);
       init_unlock();
       return i;
     }
@@ -101,13 +104,16 @@ int custom_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen
   if (i < 0 ) {
     return -1;
   }
-  init_lock();
+  /* many same type converter running async */
+  pthread_mutex_lock(&IBMiCCSID[i].threadMutexLock);
+  IBMiCCSID[i].in_progress = 1;
   if (isInput) {
    rc = iconv(IBMiCCSID[i].AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
   } else {
    rc = iconv(IBMiCCSID[i].UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
   }
-  init_unlock();
+  IBMiCCSID[i].in_progress = 0;
+  pthread_mutex_unlock(&IBMiCCSID[i].threadMutexLock);
 
   return rc;
 }
