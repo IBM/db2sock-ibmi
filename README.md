@@ -44,7 +44,7 @@ Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 SQLOverrideCCSID400(1208)
 -->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2
 
-=== UTF-16 ccsid, "W'ide interfaces (direct ILE call) ===
+=== UTF-16 ccsid, 'W'ide interfaces (direct ILE call) ===
 SQLOverrideCCSID400(1200)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 
