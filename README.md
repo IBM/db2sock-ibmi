@@ -99,69 +99,128 @@ Therefore, this libdb400.a simply calls ILE.
 Experimental advanced features, large, complex operations in one async call.
 
 ```
-SQLRETURN SQL400FetchArray( SQLHSTMT hstmt, 
- SQLINTEGER start_row, 
- SQLINTEGER max_rows, 
- SQLINTEGER *cnt_rows, 
- SQLINTEGER *more_rows, 
- SQLINTEGER *cnt_cols, 
- SQLPOINTER *out_rows, 
- SQLPOINTER *out_decs, 
- SQLINTEGER all_char, 
- SQLINTEGER expand_factor) 
-
-SQLRETURN SQL400FetchArrayW( SQLHSTMT hstmt, 
- SQLINTEGER start_row, 
- SQLINTEGER max_rows, 
- SQLINTEGER *cnt_rows, 
- SQLINTEGER *more_rows, 
- SQLINTEGER *cnt_cols, 
- SQLPOINTER *out_rows, 
- SQLPOINTER *out_decs, 
- SQLINTEGER all_char, 
- SQLINTEGER expand_factor)
-
-SQLRETURN SQL400FetchArrayFree(SQLPOINTER rows,
- SQLPOINTER decs,
- SQLINTEGER cnt_cols)
-
-
-void SQL400FetchArrayCallback(SQL400FetchArrayStruct* );
-SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag);
-void SQL400FetchArrayWCallback(SQL400FetchArrayWStruct* );
-SQL400FetchArrayWStruct * SQL400FetchArrayWJoin (pthread_t tid, SQLINTEGER flag);
-void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* );
-SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag);
-
-pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt,
- SQLINTEGER  start_row,
- SQLINTEGER  max_rows,
- SQLINTEGER * cnt_rows,
- SQLINTEGER * more_rows,
- SQLINTEGER * cnt_cols,
- SQLPOINTER * out_rows,
- SQLPOINTER * out_decs,
- SQLINTEGER  all_char,
- SQLINTEGER  expand_factor,
- void * callback );
-
-pthread_t SQL400FetchArrayWAsync ( SQLHSTMT  hstmt,
- SQLINTEGER  start_row,
- SQLINTEGER  max_rows,
- SQLINTEGER * cnt_rows,
- SQLINTEGER * more_rows,
- SQLINTEGER * cnt_cols,
- SQLPOINTER * out_rows,
- SQLPOINTER * out_decs,
- SQLINTEGER  all_char,
- SQLINTEGER  expand_factor,
- void * callback );
-
-pthread_t SQL400FetchArrayFreeAsync ( SQLPOINTER  rows,
- SQLPOINTER  decs,
- SQLINTEGER  cnt_cols,
- void * callback );
-
+SQL400Stmt2HdbcAsync
+SQL400Stmt2HdbcJoin
+SQL400ToUtf8
+SQL400ToUtf8Async
+SQL400ToUtf8Join
+SQL400FromUtf8
+SQL400FromUtf8Async
+SQL400FromUtf8Join
+SQL400ToUtf16
+SQL400ToUtf16Async
+SQL400ToUtf16Join
+SQL400FromUtf16
+SQL400FromUtf16Async
+SQL400FromUtf16Join
+SQL400AddAttr
+SQL400AddAttrAsync
+SQL400AddAttrJoin
+SQL400SetAttr
+SQL400SetAttrAsync
+SQL400SetAttrJoin
+SQL400SetAttrW
+SQL400SetAttrWAsync
+SQL400SetAttrWJoin
+SQL400Environment
+SQL400EnvironmentAsync
+SQL400EnvironmentJoin
+SQL400Connect
+SQL400ConnectAsync
+SQL400ConnectJoin
+SQL400ConnectW
+SQL400ConnectWAsync
+SQL400ConnectWJoin
+SQL400pConnect
+SQL400pConnectAsync
+SQL400pConnectJoin
+SQL400pConnectW
+SQL400pConnectWAsync
+SQL400pConnectWJoin
+SQL400Close
+SQL400CloseAsync
+SQL400CloseJoin
+SQL400pClose
+SQL400pCloseAsync
+SQL400pCloseJoin
+SQL400Cmd
+SQL400CmdAsync
+SQL400CmdJoin
+SQL400ChgLibl
+SQL400ChgLiblAsync
+SQL400ChgLiblJoin
+SQL400ChgCurLib
+SQL400ChgCurLibAsync
+SQL400ChgCurLibJoin
+SQL400AddDesc
+SQL400AddDescAsync
+SQL400AddDescJoin
+SQL400AddDescW
+SQL400AddDescWAsync
+SQL400AddDescWJoin
+SQL400AddCParmDesc
+SQL400AddCParmDescAsync
+SQL400AddCParmDescJoin
+SQL400AddCParmDescW
+SQL400AddCParmDescWAsync
+SQL400AddCParmDescWJoin
+SQL400AddCResultDesc
+SQL400AddCResultDescAsync
+SQL400AddCResultDescJoin
+SQL400AddCResultDescW
+SQL400AddCResultDescWAsync
+SQL400AddCResultDescWJoin
+SQL400AddCVar
+SQL400AddCVarAsync
+SQL400AddCVarJoin
+SQL400AddCVarRowAsChar
+SQL400AddCVarRowAsCharAsync
+SQL400AddCVarRowAsCharJoin
+SQL400AddCVarRowAsCharW
+SQL400AddCVarRowAsCharWAsync
+SQL400AddCVarRowAsCharWJoin
+SQL400AddCVarRowAsDefault
+SQL400AddCVarRowAsDefaultAsync
+SQL400AddCVarRowAsDefaultJoin
+SQL400AddCVarRowAsDefaultW
+SQL400AddCVarRowAsDefaultWAsync
+SQL400AddCVarRowAsDefaultWJoin
+SQL400AddCVarMultipleRowsAsChar
+SQL400AddCVarMultipleRowsAsCharAsync
+SQL400AddCVarMultipleRowsAsCharJoin
+SQL400AddCVarMultipleRowsAsCharW
+SQL400AddCVarMultipleRowsAsCharWAsync
+SQL400AddCVarMultipleRowsAsCharWJoin
+SQL400AddCVarMultipleRowsAsDefault
+SQL400AddCVarMultipleRowsAsDefaultAsync
+SQL400AddCVarMultipleRowsAsDefaultJoin
+SQL400AddCVarMultipleRowsAsDefaultW
+SQL400AddCVarMultipleRowsAsDefaultWAsync
+SQL400AddCVarMultipleRowsAsDefaultWJoin
+SQL400AddCVarParms
+SQL400AddCVarParmsAsync
+SQL400AddCVarParmsJoin
+SQL400AddCVarParmsW
+SQL400AddCVarParmsWAsync
+SQL400AddCVarParmsWJoin
+SQL400ParmsFree
+SQL400ParmsFreeAsync
+SQL400ParmsFreeJoin
+SQL400Execute
+SQL400ExecuteAsync
+SQL400ExecuteJoin
+SQL400Fetch
+SQL400FetchAsync
+SQL400FetchJoin
+SQL400FetchArray
+SQL400FetchArrayAsync
+SQL400FetchArrayJoin
+SQL400FetchArrayW
+SQL400FetchArrayWAsync
+SQL400FetchArrayWJoin
+SQL400FetchArrayFree
+SQL400FetchArrayFreeAsync
+SQL400FetchArrayFreeJoin
 ```
 
 
