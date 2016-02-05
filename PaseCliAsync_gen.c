@@ -8389,11 +8389,11 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
+SQLRETURN SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
-  sqlrc = custom_SQL400pConnect( henv, db, uid, pwd, ohnd, options );
+  sqlrc = custom_SQL400pConnect( henv, db, uid, pwd, qual, ohnd, options );
   return sqlrc;
 }
 void * SQL400pConnectThread (void *ptr)
@@ -8402,7 +8402,7 @@ void * SQL400pConnectThread (void *ptr)
   int myccsid = init_CCSID400(0);
   SQL400pConnectStruct * myptr = (SQL400pConnectStruct *) ptr;
   /* not lock */
-  myptr->sqlrc = custom_SQL400pConnect( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->ohnd, myptr->options );
+  myptr->sqlrc = custom_SQL400pConnect( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->qual, myptr->ohnd, myptr->options );
   /* not lock */
   /* void SQL400pConnectCallback(SQL400pConnectStruct* ); */
   if (myptr->callback) {
@@ -8411,7 +8411,7 @@ void * SQL400pConnectThread (void *ptr)
   }
   pthread_exit((void *)myptr);
 }
-pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback )
+pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback )
 {
   int rc = 0;
   pthread_t tid = 0;
@@ -8421,6 +8421,7 @@ pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLC
   myptr->db = db;
   myptr->uid = uid;
   myptr->pwd = pwd;
+  myptr->qual = qual;
   myptr->ohnd = ohnd;
   myptr->options = options;
   myptr->callback = callback;
@@ -8439,11 +8440,11 @@ SQL400pConnectStruct * SQL400pConnectJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options )
+SQLRETURN SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
-  sqlrc = custom_SQL400pConnectW( henv, db, uid, pwd, ohnd, options );
+  sqlrc = custom_SQL400pConnectW( henv, db, uid, pwd, qual, ohnd, options );
   return sqlrc;
 }
 void * SQL400pConnectWThread (void *ptr)
@@ -8452,7 +8453,7 @@ void * SQL400pConnectWThread (void *ptr)
   int myccsid = init_CCSID400(0);
   SQL400pConnectWStruct * myptr = (SQL400pConnectWStruct *) ptr;
   /* not lock */
-  myptr->sqlrc = custom_SQL400pConnectW( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->ohnd, myptr->options );
+  myptr->sqlrc = custom_SQL400pConnectW( myptr->henv, myptr->db, myptr->uid, myptr->pwd, myptr->qual, myptr->ohnd, myptr->options );
   /* not lock */
   /* void SQL400pConnectWCallback(SQL400pConnectWStruct* ); */
   if (myptr->callback) {
@@ -8461,7 +8462,7 @@ void * SQL400pConnectWThread (void *ptr)
   }
   pthread_exit((void *)myptr);
 }
-pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback )
+pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback )
 {
   int rc = 0;
   pthread_t tid = 0;
@@ -8471,6 +8472,7 @@ pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, S
   myptr->db = db;
   myptr->uid = uid;
   myptr->pwd = pwd;
+  myptr->qual = qual;
   myptr->ohnd = ohnd;
   myptr->options = options;
   myptr->callback = callback;

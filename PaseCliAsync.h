@@ -174,8 +174,8 @@ SQLRETURN SQL400SetAttrW( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, 
 SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );
@@ -468,8 +468,8 @@ typedef struct SQL400SetAttrWStruct { SQLRETURN sqlrc; SQLINTEGER  scope; SQLHAN
 typedef struct SQL400EnvironmentStruct { SQLRETURN sqlrc; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400EnvironmentStruct;
 typedef struct SQL400ConnectStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400ConnectStruct;
 typedef struct SQL400ConnectWStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400ConnectWStruct;
-typedef struct SQL400pConnectStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectStruct;
-typedef struct SQL400pConnectWStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectWStruct;
+typedef struct SQL400pConnectStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectStruct;
+typedef struct SQL400pConnectWStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectWStruct;
 typedef struct SQL400CmdStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * cmd; void * callback; } SQL400CmdStruct;
 typedef struct SQL400ChgLiblStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * libl; void * callback; } SQL400ChgLiblStruct;
 typedef struct SQL400ChgCurLibStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * curlib; void * callback; } SQL400ChgCurLibStruct;
@@ -945,8 +945,8 @@ pthread_t SQL400SetAttrWAsync ( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  
 pthread_t SQL400EnvironmentAsync ( SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
 pthread_t SQL400ConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
 pthread_t SQL400ConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
+pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
+pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
 pthread_t SQL400CmdAsync ( SQLHDBC  hdbc, SQLCHAR * cmd, void * callback );
 pthread_t SQL400ChgLiblAsync ( SQLHDBC  hdbc, SQLCHAR * libl, void * callback );
 pthread_t SQL400ChgCurLibAsync ( SQLHDBC  hdbc, SQLCHAR * curlib, void * callback );
@@ -1248,8 +1248,8 @@ SQLRETURN custom_SQL400SetAttrW( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER 
 SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
 SQLRETURN custom_SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN custom_SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN custom_SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );

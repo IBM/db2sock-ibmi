@@ -212,48 +212,74 @@ int init_table_stmt_2_conn(int hstmt) {
   return IBMiTable[hstmt].hdbc;
 }
 
-char * init_hkey( char * db, char * uid, char * pwd ) {
+char * init_hkey_both( char * db, char * uid, char * pwd, char * qual, short iswide) {
   int hKeyLen = 0;
   char *hKey = NULL;
-  char * key = "__db2_";
-  int key_len = strlen(key);
-  int db_len = strlen(db);
-  int uid_len = strlen(uid);
-  int pwd_len = strlen(pwd);
-  hKeyLen = key_len + db_len + uid_len + pwd_len + 1;
-  hKey = (char *) custom_alloc_zero(hKeyLen);
-  sprintf(hKey, "__db2_%s%s%s", uid, db, pwd);
-  return hKey;
-}
-
-char * init_hkey_W( unsigned int * db, unsigned int * uid, unsigned int * pwd ) {
-  int hKeyLen = 0;
-  char *hKey = NULL;
-  char * key = "__db2_";
-  int key_len = strlen(key);
-  int db_len = custom_strlen_utf16(db) * 2;
-  int uid_len = custom_strlen_utf16(uid) * 2;
-  int pwd_len = custom_strlen_utf16(pwd) * 2;
-  hKeyLen = key_len + db_len + uid_len + pwd_len + 2;
+  char * key = NULL;
+  char key16[] = {0x00,0x5F,0x00,0x5F,0x00,0x64,0x00,0x98,0x00,0x32,0x00,0x5F,0x00,0x00}; /* _._.d.b.2._nil*/
+  int key_len = 0;
+  int db_len = 0;
+  int uid_len = 0;
+  int pwd_len = 0;
+  int qual_len = 0;
+  int null_len = 2;
+  switch(iswide){
+  case 1:
+    key = (char *)&key16;
+    key_len = custom_strlen_utf16((unsigned int *)key);
+    db_len = custom_strlen_utf16((unsigned int *)db);
+    uid_len = custom_strlen_utf16((unsigned int *)uid);
+    pwd_len = custom_strlen_utf16((unsigned int *)pwd);
+    qual_len = custom_strlen_utf16((unsigned int *)qual);
+    null_len = 2;
+    break;
+  default:
+    key = "__db2_";
+    key_len = strlen(key);
+    db_len = strlen(db);
+    uid_len = strlen(uid);
+    pwd_len = strlen(pwd);
+    qual_len = strlen(qual);
+    null_len = 2;
+    break;
+  }
+  hKeyLen = key_len + db_len + uid_len + pwd_len + qual_len + null_len;
   hKey = (char *) custom_alloc_zero(hKeyLen);
   memcpy(hKey,key,key_len);
-  memcpy(hKey+key_len,db,db_len);
-  memcpy(hKey+key_len+db_len,uid,uid_len);
-  memcpy(hKey+key_len+db_len+uid_len,pwd,pwd_len);
+  if (db_len) {
+    memcpy(hKey+key_len,db,db_len);
+  }
+  if (uid_len) {
+    memcpy(hKey+key_len+db_len,uid,uid_len);
+  }
+  if (pwd_len) {
+    memcpy(hKey+key_len+db_len+uid_len,pwd,pwd_len);
+  }
+  if (qual_len) {
+    memcpy(hKey+key_len+db_len+uid_len+pwd_len,qual,qual_len);
+  }
   return hKey;
 }
 
+char * init_hkey( char * db, char * uid, char * pwd, char * qual ) {
+  return init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 0);
+}
 
-void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, int flag) {
-  char * hKey = init_hkey( db, uid, pwd );
+char * init_hkey_W( unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
+  return init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
+}
+
+
+void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag) {
+  char * hKey = init_hkey( db, uid, pwd, qual );
   if (flag) {
     IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
   } else {
     IBMiTable[hstmt].hKey = hKey;
   }
 }
-extern int init_table_hash_2_conn(char * db, char * uid, char * pwd) {
-  char * hKey = init_hkey( db, uid, pwd );
+extern int init_table_hash_2_conn(char * db, char * uid, char * qual, char * pwd) {
+  char * hKey = init_hkey( db, uid, pwd, qual );
   int i = 0;
   int len1 = strlen(hKey);
   int len2 = 0;
@@ -268,16 +294,16 @@ extern int init_table_hash_2_conn(char * db, char * uid, char * pwd) {
   free(hKey);
   return 0;
 }
-void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, int flag) {
-  char * hKey = init_hkey_W( db, uid, pwd );
+void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag) {
+  char * hKey = init_hkey_W( db, uid, pwd, qual );
   if (flag) {
     IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
   } else {
     IBMiTable[hstmt].hKey = hKey;
   }
 }
-extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd) {
-  char * hKey = init_hkey_W( db, uid, pwd );
+extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
+  char * hKey = init_hkey_W( db, uid, pwd, qual );
   int i = 0;
   int len1 = custom_strlen_utf16((unsigned int *)hKey);
   int len2 = 0;

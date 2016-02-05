@@ -415,7 +415,7 @@ SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options ) {
  * connect
  */
 
-SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, SQLSMALLINT iswide, SQLSMALLINT isPersistent) {
+SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, SQLSMALLINT iswide, SQLSMALLINT isPersistent) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   SQLHDBC hdbc = 0;
@@ -461,10 +461,10 @@ SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, 
   if (isPersistent) {
     switch(iswide) {
     case 1:
-      *ohnd = init_table_hash_2_conn_W((unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd);
+      *ohnd = init_table_hash_2_conn_W((unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd, (unsigned int*)qual);
       break;
     default:
-      *ohnd = init_table_hash_2_conn(db, uid, pwd);
+      *ohnd = init_table_hash_2_conn((char *)db, (char *)uid, (char *)pwd, (char *)qual);
       break;
     }
   }
@@ -508,10 +508,10 @@ SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, 
     if (isPersistent) {
       switch(iswide) {
       case 1:
-        init_table_add_hash_W(hdbc, (unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd, 0);
+        init_table_add_hash_W(hdbc, (unsigned int*)db, (unsigned int*)uid, (unsigned int*)pwd, (unsigned int*)qual, 0);
         break;
       default:
-        init_table_add_hash(hdbc, db, uid, pwd, 0);
+        init_table_add_hash(hdbc, db, uid, pwd, qual, 0);
         break;
       }
     }
@@ -536,22 +536,22 @@ SQLRETURN custom_SQL400ConnectBoth( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, 
 }
 SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, ohnd, options, 0, 0);
+  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, NULL, ohnd, options, 0, 0);
   return sqlrc;
 }
 SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, ohnd, options, 1, 0);
+  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, NULL, ohnd, options, 1, 0);
   return sqlrc;
 }
-SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, ohnd, options, 0, 1);
+  sqlrc = custom_SQL400ConnectBoth( henv, db, uid, pwd, qual, ohnd, options, 0, 1);
   return sqlrc;
 }
-SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, ohnd, options, 1, 1);
+  sqlrc = custom_SQL400ConnectBoth( henv, (SQLCHAR *)db, (SQLCHAR *)uid, (SQLCHAR *)pwd, qual, ohnd, options, 1, 1);
   return sqlrc;
 }
 

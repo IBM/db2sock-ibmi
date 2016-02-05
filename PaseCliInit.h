@@ -34,10 +34,10 @@ extern void init_table_lock(int hstmt,int flag);
 extern void init_table_unlock(int hstmt,int flag);
 extern int init_table_in_progress(int hstmt,int flag);
 extern int init_table_stmt_2_conn(int hstmt);
-extern void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, int flag);
-extern int init_table_hash_2_conn(char * db, char * uid, char * pwd);
-extern void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, int flag);
-extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd);
+extern void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag);
+extern int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual);
+extern void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag);
+extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual);
 
 extern void * init_cli_dlsym();
 extern int init_cli_srvpgm();

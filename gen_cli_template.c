@@ -879,14 +879,16 @@ SQLRETURN SQL400ConnectW(SQLHENV henv,
 SQLRETURN SQL400pConnect(SQLHENV henv, 
  SQLCHAR * db, 
  SQLCHAR * uid, 
- SQLCHAR * pwd, 
+ SQLCHAR * pwd,
+ SQLCHAR * qual,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
 SQLRETURN SQL400pConnectW(SQLHENV henv, 
  SQLWCHAR * db, 
  SQLWCHAR * uid, 
- SQLWCHAR * pwd, 
+ SQLWCHAR * pwd,
+ SQLCHAR * qual,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
