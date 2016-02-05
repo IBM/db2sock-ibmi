@@ -55,7 +55,170 @@ def parse_method( line ):
     # SQLCHAR * szTableQualifier
     # 0       1 2
     args.append(parse_star(arg))
-  return [funcs,args]  
+  return [funcs,args]
+
+# SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
+def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLAllocConnect ( SQLHENV  henv, SQLHDBC * phdbc );
+def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "    init_table_ctor(*phdbc, *phdbc);" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLAllocStmt ( SQLHDBC  hdbc, SQLHSTMT * phstmt );
+def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "    init_table_ctor(*phstmt, hdbc);" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLAllocHandle ( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd );
+def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  switch (htype) {" + "\n"
+  c_main += "  case SQL_HANDLE_ENV:" + "\n"
+  c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
+  c_main += "    }" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  case SQL_HANDLE_DBC:" + "\n"
+  c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
+  c_main += "    }" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  case SQL_HANDLE_STMT:" + "\n"
+  c_main += "  case SQL_HANDLE_DESC:" + "\n"
+  c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "      init_table_ctor(*ohnd, ihnd);" + "\n"
+  c_main += "    }" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLFreeEnv ( SQLHENV  henv );
+def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLFreeConnect ( SQLHDBC  hdbc );
+def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "    init_table_dtor(hdbc);" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLFreeStmt ( SQLHSTMT  hstmt, SQLSMALLINT  fOption );
+def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "    init_table_dtor(hstmt);" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLFreeHandle ( SQLSMALLINT  htype, SQLINTEGER  hndl );
+def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  switch(myccsid) {" + "\n"
+  c_main += '  case 1208: /* UTF-8 */' + "\n"
+  c_main += '  case 1200: /* UTF-16 */' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  c_main += "  switch (htype) {" + "\n"
+  c_main += "  case SQL_HANDLE_ENV:" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  default:" + "\n"
+  c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
+  c_main += "      init_table_dtor(hndl);" + "\n"
+  c_main += "    }" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
 
 # process PaseSqlCli.c (PASE cmvc)
 pre = open(PaseSqlCli_file,"r")
@@ -353,144 +516,23 @@ for line in f:
   PaseCliAsync_c_main += call_retv + ' ' + call_name + '(' + normal_call_args + ' )' + "\n"
   PaseCliAsync_c_main += "{" + "\n"
   PaseCliAsync_c_main += "  SQLRETURN sqlrc = SQL_SUCCESS;" + "\n"
-  # SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
+  # special handling routines
   if call_name == "SQLAllocEnv":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLAllocConnect ( SQLHENV  henv, SQLHDBC * phdbc );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLAllocConnect":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "    init_table_ctor(*phdbc, *phdbc);" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLAllocStmt ( SQLHDBC  hdbc, SQLHSTMT * phstmt );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLAllocStmt":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "    init_table_ctor(*phstmt, hdbc);" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLAllocHandle ( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLAllocHandle":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  switch (htype) {" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_ENV:" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_DBC:" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_STMT:" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_DESC:" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_ctor(*ohnd, ihnd);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLFreeEnv ( SQLHENV  henv );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLFreeEnv":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLFreeConnect ( SQLHDBC  hdbc );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLFreeConnect":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "    init_table_dtor(hdbc);" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLFreeStmt ( SQLHSTMT  hstmt, SQLSMALLINT  fOption );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLFreeStmt":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "    init_table_dtor(hstmt);" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-  # SQLRETURN SQLFreeHandle ( SQLSMALLINT  htype, SQLINTEGER  hndl );
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_args)
   elif call_name == "SQLFreeHandle":
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
-    PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
-    PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
-    PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
-    PaseCliAsync_c_main += "  switch (htype) {" + "\n"
-    PaseCliAsync_c_main += "  case SQL_HANDLE_ENV:" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  default:" + "\n"
-    PaseCliAsync_c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
-    PaseCliAsync_c_main += "      init_table_dtor(hndl);" + "\n"
-    PaseCliAsync_c_main += "    }" + "\n"
-    PaseCliAsync_c_main += "    break;" + "\n"
-    PaseCliAsync_c_main += "  }" + "\n"
+    PaseCliAsync_c_main += PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db400_args)
   # SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
   elif c400_CCSID:
     PaseCliAsync_c_main += "  sqlrc = custom_" + call_name + '(' + normal_db400_args + ' );' + "\n"

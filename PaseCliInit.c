@@ -137,8 +137,8 @@ void init_table_dtor(int hstmt) {
     init_lock();
     if (IBMiTable[hstmt].hKey) {
       free(IBMiTable[hstmt].hKey);
-    IBMiTable[hstmt].hKey = (char *) NULL;
     }
+    IBMiTable[hstmt].hKey = (char *) NULL;
     init_unlock();
   }
 }
@@ -223,7 +223,7 @@ char * init_hkey_both( char * db, char * uid, char * pwd, char * qual, short isw
   int pwd_len = 0;
   int qual_len = 0;
   int null_len = 2;
-  switch(iswide){
+  switch (iswide) {
   case 1:
     key = (char *)&key16;
     key_len = custom_strlen_utf16((unsigned int *)key);
@@ -261,54 +261,52 @@ char * init_hkey_both( char * db, char * uid, char * pwd, char * qual, short isw
   return hKey;
 }
 
-char * init_hkey( char * db, char * uid, char * pwd, char * qual ) {
-  return init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 0);
-}
-
-char * init_hkey_W( unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
-  return init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
-}
-
-
-void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag) {
-  char * hKey = init_hkey( db, uid, pwd, qual );
+void init_table_add_hash_both(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag, short iswide) {
+  char * hKey = (char *) NULL;
+  switch (iswide) {
+  case 1:
+    hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
+    break;
+  default:
+    hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 0);
+    break;
+  }
   if (flag) {
     IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
   } else {
     IBMiTable[hstmt].hKey = hKey;
   }
 }
-extern int init_table_hash_2_conn(char * db, char * uid, char * qual, char * pwd) {
-  char * hKey = init_hkey( db, uid, pwd, qual );
-  int i = 0;
-  int len1 = strlen(hKey);
-  int len2 = 0;
-  for (i=0; i < PASECLIMAXRESOURCE; i++) {
-    len2 = strlen(IBMiTable[i].hKey);
-    if (len1 == len2) {
-      if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
-        return IBMiTable[i].hdbc;
-      }
-    }
-  }
-  free(hKey);
-  return 0;
+void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag) {
+  init_table_add_hash_both(hstmt, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 0);
 }
 void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag) {
-  char * hKey = init_hkey_W( db, uid, pwd, qual );
-  if (flag) {
-    IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
-  } else {
-    IBMiTable[hstmt].hKey = hKey;
-  }
+  init_table_add_hash_both(hstmt, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 1);
 }
-extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
-  char * hKey = init_hkey_W( db, uid, pwd, qual );
+
+int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, short iswide) {
+  char * hKey = (char *)NULL;
   int i = 0;
-  int len1 = custom_strlen_utf16((unsigned int *)hKey);
+  int len1 = 0;
   int len2 = 0;
+  switch (iswide) {
+  case 1:
+    hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
+    len1 = custom_strlen_utf16((unsigned int *)hKey);
+    break;
+  default:
+    hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 0);
+    len1 = strlen((char *)hKey);
+    break;
+  }
   for (i=0; i < PASECLIMAXRESOURCE; i++) {
-    len2 = custom_strlen_utf16((unsigned int *)IBMiTable[i].hKey);
+    switch (iswide) {
+    case 1:
+      len2 = custom_strlen_utf16((unsigned int *)IBMiTable[i].hKey);
+    default:
+      len2 = strlen((char *)IBMiTable[i].hKey);
+      break;
+    }
     if (len1 == len2) {
       if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
         return IBMiTable[i].hdbc;
@@ -317,6 +315,12 @@ extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsig
   }
   free(hKey);
   return 0;
+}
+int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual) {
+  return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 0 );
+}
+int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
+  return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 1 );
 }
 
 
