@@ -477,21 +477,26 @@ SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, 
 
 SQLRETURN custom_SQL400CloseBoth(SQLHDBC hdbc) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int auto_commit = 0;
   init_table_dtor(hdbc);
-  sqlrc = SQLGetConnectAttr(hdbc, SQL_ATTR_AUTOCOMMIT, &auto_commit, 0, NULL);
-  if (!auto_commit) {
-    sqlrc = SQLEndTran(SQL_HANDLE_DBC, hdbc, SQL_ROLLBACK);
-  }
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeConnect(hdbc);
   return sqlrc;
 }
 
-SQLRETURN custom_SQL400Close(SQLHDBC hdbc) {
+SQLRETURN custom_SQL400RollBackBoth(SQLHDBC hdbc) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int auto_commit = 0;
+  sqlrc = SQLGetConnectAttr(hdbc, SQL_ATTR_AUTOCOMMIT, &auto_commit, 0, NULL);
+  if (!auto_commit) {
+    sqlrc = SQLEndTran(SQL_HANDLE_DBC, hdbc, SQL_ROLLBACK);
+  }
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400Close(SQLHDBC hdbc) {
   int active = init_table_hash_active(hdbc, 0);
+  /* always rollback (dtor language safe call) */
+  SQLRETURN sqlrc = custom_SQL400RollBackBoth(hdbc);
   /* persistent connect only close with SQL400pClose */
   if (active) {
     return SQL_ERROR;
@@ -501,6 +506,8 @@ SQLRETURN custom_SQL400Close(SQLHDBC hdbc) {
 
 
 SQLRETURN custom_SQL400pClose(SQLHDBC hdbc) {
+  /* always rollback (dtor language safe call) */
+  SQLRETURN sqlrc = custom_SQL400RollBackBoth(hdbc);
   return custom_SQL400CloseBoth(hdbc);
 }
 
