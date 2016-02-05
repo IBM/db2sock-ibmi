@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <iconv.h>
 #include <as400_types.h>
 #include <as400_protos.h>
 #include "PaseCliInit.h"
@@ -21,6 +22,11 @@ PaseCliResource IBMiTable[PASECLIMAXRESOURCE];
 pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
 static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
 
+/*
+ * conversion
+ */
+PaseConvResource IBMiCCSID[PASECLIMAXCCSID];
+
 /* 
  * dlopen handle of PASE libdb400.a (real driver) 
  */
@@ -34,6 +40,7 @@ int db2_cli_srvpgm_mark;
  */
 int db2_pase_ccsid;
 
+
 /* global table lock
  * This lock is 'lock once'.
  * That is, not PTHREAD_MUTEX_RECURSIVE,
@@ -45,6 +52,77 @@ void init_lock() {
 
 void init_unlock() {
   pthread_mutex_unlock(&threadMutexLock);
+}
+
+
+/*
+ * conversion (dunno if threadsafe)
+ */
+int custom_iconv_open(int myccsid, int utfccsid) {
+  int i = 0;
+  init_CCSID400( 0 );
+  if (!myccsid) {
+    myccsid = db2_pase_ccsid;
+  }
+  if (!myccsid || !utfccsid || myccsid == utfccsid) {
+    return -1;
+  }
+  init_lock();
+  for (i=0;i<PASECLIMAXCCSID;i++) {
+    if (IBMiCCSID[i].cssid_Ascii == myccsid && IBMiCCSID[i].ccsid_Utf == utfccsid) {
+      init_unlock();
+      return i;
+    }
+  }
+  for (i=0;i<PASECLIMAXCCSID;i++) {
+    if (!IBMiCCSID[i].cssid_Ascii) {
+      IBMiCCSID[i].charset_Ascii = ccsidtocs(myccsid);
+      IBMiCCSID[i].charset_Utf = ccsidtocs(utfccsid);
+      IBMiCCSID[i].AsciiToUtf = iconv_open(IBMiCCSID[i].charset_Utf, IBMiCCSID[i].charset_Ascii);
+      IBMiCCSID[i].UtfToAscii = iconv_open(IBMiCCSID[i].charset_Ascii, IBMiCCSID[i].charset_Utf);
+      init_unlock();
+      return i;
+    }
+  }
+  init_unlock();
+  return -1;
+}
+int custom_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize, int myccsid, int utfccsid) {
+  int i = 0;
+  int rc = 0;
+  char *source = fromBuffer;
+  char *target = toBuffer;
+  size_t sourceBytesLeft = sourceLen;
+  size_t targetBytesLeft = bufSize;
+  /* clear buffer */
+  memset(toBuffer,0,bufSize);
+  /* get/open convert */
+  i = custom_iconv_open(myccsid, utfccsid);
+  if (i < 0 ) {
+    return -1;
+  }
+  init_lock();
+  if (isInput) {
+   rc = iconv(IBMiCCSID[i].AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+  } else {
+   rc = iconv(IBMiCCSID[i].UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
+  }
+  init_unlock();
+
+  return rc;
+}
+void custom_iconv_close(int myccsid, int utfccsid) {
+  int i = 0;
+  init_lock();
+  for (i=0;i<PASECLIMAXCCSID;i++) {
+    if (IBMiCCSID[i].cssid_Ascii == myccsid && IBMiCCSID[i].ccsid_Utf == utfccsid) {
+      (void)iconv_close(IBMiCCSID[i].AsciiToUtf);
+      (void)iconv_close(IBMiCCSID[i].UtfToAscii);
+      IBMiCCSID[i].cssid_Ascii = 0;
+      IBMiCCSID[i].ccsid_Utf = 0;
+    }
+  }
+  init_unlock();
 }
 
 /* 
@@ -212,6 +290,9 @@ int init_table_stmt_2_conn(int hstmt) {
   return IBMiTable[hstmt].hdbc;
 }
 
+/*
+ * persistent connection
+ */
 char * init_hkey_both( char * db, char * uid, char * pwd, char * qual, short iswide) {
   int hKeyLen = 0;
   char *hKey = NULL;
@@ -271,11 +352,13 @@ void init_table_add_hash_both(int hstmt, char * db, char * uid, char * pwd, char
     hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 0);
     break;
   }
+  init_lock();
   if (flag) {
     IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
   } else {
     IBMiTable[hstmt].hKey = hKey;
   }
+  init_unlock();
 }
 void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag) {
   init_table_add_hash_both(hstmt, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 0);
@@ -289,6 +372,7 @@ int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, 
   int i = 0;
   int len1 = 0;
   int len2 = 0;
+  int hdbc = 0;
   switch (iswide) {
   case 1:
     hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
@@ -299,6 +383,7 @@ int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, 
     len1 = strlen((char *)hKey);
     break;
   }
+  init_lock();
   for (i=0; i < PASECLIMAXRESOURCE; i++) {
     switch (iswide) {
     case 1:
@@ -309,12 +394,14 @@ int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, 
     }
     if (len1 == len2) {
       if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
-        return IBMiTable[i].hdbc;
+        hdbc = IBMiTable[i].hdbc;
+        break;
       }
     }
   }
+  init_unlock();
   free(hKey);
-  return 0;
+  return hdbc;
 }
 int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual) {
   return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 0 );
@@ -322,7 +409,6 @@ int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual) {
 int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
   return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 1 );
 }
-
 
 int custom_strlen_utf16(unsigned int * src) {
   int len = 0;
@@ -333,7 +419,6 @@ int custom_strlen_utf16(unsigned int * src) {
   }
   return len;
 }
-
 
 void * custom_alloc_zero(int sz) {
   void * ibc = (char *) malloc(sz);

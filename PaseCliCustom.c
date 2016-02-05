@@ -20,14 +20,6 @@
  * warning is removed.
  */
 
-static int utf8_charset_flag;
-static char *utf8_charset_Ascii, *utf8_charset_Utf;
-static iconv_t utf8_AsciiToUtf, utf8_UtfToAscii;
-
-static int utf16_charset_flag;
-static char *utf16_charset_Ascii, *utf16_charset_Utf;
-static iconv_t utf16_AsciiToUtf, utf16_UtfToAscii;
-
 static SQLHANDLE env_hndl;
 
 /*
@@ -50,97 +42,24 @@ int custom_trim_CVAR(SQL400ParamStruct * prm) {
 }
 
 
-
-/*
- * conversion
- */
-
-void utf8_iconv_open(int myccsid, int utfccsid) {
-  if (!utf8_charset_flag) {
-    utf8_charset_Ascii = ccsidtocs(myccsid);
-    utf8_charset_Utf = ccsidtocs(utfccsid);
-    utf8_AsciiToUtf = iconv_open(utf8_charset_Utf, utf8_charset_Ascii);
-    utf8_UtfToAscii = iconv_open(utf8_charset_Ascii, utf8_charset_Utf);
-    utf8_charset_flag = 1;
-  }
-}
-SQLRETURN utf8_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
- int rc = 0;
- char *source = fromBuffer;
- char *target = toBuffer;
- size_t sourceBytesLeft = sourceLen;
- size_t targetBytesLeft = bufSize;
-
- if (isInput) {
-  rc = iconv(utf8_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- } else {
-  rc = iconv(utf8_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- }
- return rc;
-}
-void utf8_iconv_close() {
-  if (utf8_charset_flag) {
-    (void)iconv_close(utf8_AsciiToUtf);
-    (void)iconv_close(utf8_UtfToAscii);
-    utf8_charset_flag = 0;
-  }
-}
-
-void utf16_iconv_open(int myccsid, int utfccsid) {
-  if (!utf16_charset_flag) {
-    utf16_charset_Ascii = ccsidtocs(myccsid);
-    utf16_charset_Utf = ccsidtocs(utfccsid);
-    utf16_AsciiToUtf = iconv_open(utf16_charset_Utf, utf16_charset_Ascii);
-    utf16_UtfToAscii = iconv_open(utf16_charset_Ascii, utf16_charset_Utf);
-    utf16_charset_flag = 1;
-  }
-}
-SQLRETURN utf16_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize) {
- int rc = 0;
- char *source = fromBuffer;
- char *target = toBuffer;
- size_t sourceBytesLeft = sourceLen;
- size_t targetBytesLeft = bufSize;
-
- memset(toBuffer,0,bufSize);
- if (isInput) {
-  rc = iconv(utf16_AsciiToUtf, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- } else {
-  rc = iconv(utf16_UtfToAscii, (char**)(&source), &sourceBytesLeft, &target, &targetBytesLeft);
- }
- return rc;
-}
-void utf16_iconv_close() {
-  if (utf16_charset_flag) {
-    (void)iconv_close(utf16_AsciiToUtf);
-    (void)iconv_close(utf16_UtfToAscii);
-    utf16_charset_flag = 0;
-  }
-}
-
-
 SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  utf8_iconv_open(inccsid, 1208);
-  sqlrc = utf8_iconv(1, inparm, outparm, inlen, outlen);
+  sqlrc = custom_iconv(1, inparm, outparm, inlen, outlen, inccsid, 1208);
   return sqlrc;
 }
 SQLRETURN custom_SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
   SQLRETURN sqlrc = SQL_SUCCESS;
-  utf8_iconv_open(1208, outccsid);
-  sqlrc = utf8_iconv(0, inparm, outparm, inlen, outlen);
+  sqlrc = custom_iconv(0, inparm, outparm, inlen, outlen, outccsid, 1208);
   return sqlrc;
 }
 SQLRETURN custom_SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ){
   SQLRETURN sqlrc = SQL_SUCCESS;
-  utf16_iconv_open(inccsid, 1200);
-  sqlrc = utf16_iconv(1, inparm, outparm, inlen, outlen);
+  sqlrc = custom_iconv(1, inparm, outparm, inlen, outlen, inccsid, 1200);
   return sqlrc;
 }
 SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ){
   SQLRETURN sqlrc = SQL_SUCCESS;
-  utf16_iconv_open(1200, outccsid);
-  sqlrc = utf16_iconv(0, inparm, outparm, inlen, outlen);
+  sqlrc = custom_iconv(0, inparm, outparm, inlen, outlen, outccsid, 1200);
   return sqlrc;
 }
 

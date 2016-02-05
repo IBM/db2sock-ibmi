@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <iconv.h>
 #include <as400_types.h>
 #include <as400_protos.h>
 
@@ -20,32 +21,43 @@
 
 #define PASECLIMAXRESOURCE 33000
 typedef struct PaseCliResource {
-  int hstmt;                       /* index hstmt or hdbc */
-  int hdbc;                        /* index to hdc (above) */ 
-  pthread_mutex_t threadMutexLock; /* lock hdbc or hstmt */
-  pthread_mutexattr_t threadMutexAttr;
-  int in_progress;
-  char *hKey;
+  int hstmt;                       /* index hstmt or hdbc   */
+  int hdbc;                        /* index to hdc (above)  */ 
+  pthread_mutex_t threadMutexLock; /* lock hdbc or hstmt    */
+  pthread_mutexattr_t threadMutexAttr; /* recursive lock    */
+  int in_progress;                 /* operation in progress */
+  char *hKey;                      /* persistent key        */
 } PaseCliResource;
-extern PaseCliResource IBMiTable[PASECLIMAXRESOURCE];
-extern void init_table_ctor(int hstmt, int hdbc);
-extern void init_table_dtor(int hstmt);
-extern void init_table_lock(int hstmt,int flag);
-extern void init_table_unlock(int hstmt,int flag);
-extern int init_table_in_progress(int hstmt,int flag);
-extern int init_table_stmt_2_conn(int hstmt);
-extern void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag);
-extern int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual);
-extern void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag);
-extern int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual);
 
-extern void * init_cli_dlsym();
-extern int init_cli_srvpgm();
-extern int init_CCSID400( int newCCSID );
+#define PASECLIMAXCCSID 1000
+typedef struct PaseConvResource {
+  int cssid_Ascii;
+  int ccsid_Utf;
+  char * charset_Ascii;
+  char * charset_Utf;
+  iconv_t AsciiToUtf;
+  iconv_t UtfToAscii;
+} PaseConvResource;
 
-extern int custom_strlen_utf16(unsigned int * src);
-extern void * custom_alloc_zero(int sz);
+void init_table_ctor(int hstmt, int hdbc);
+void init_table_dtor(int hstmt);
+void init_table_lock(int hstmt,int flag);
+void init_table_unlock(int hstmt,int flag);
+int init_table_in_progress(int hstmt,int flag);
+int init_table_stmt_2_conn(int hstmt);
+void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag);
+int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual);
+void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag);
+int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual);
 
+void * init_cli_dlsym();
+int init_cli_srvpgm();
+int init_CCSID400( int newCCSID );
+
+int custom_strlen_utf16(unsigned int * src);
+void * custom_alloc_zero(int sz);
+
+int custom_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize, int myccsid, int utfccsid);
 
 #endif /* _PASECLIINIT_H */
 
