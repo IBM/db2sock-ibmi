@@ -2,6 +2,10 @@
 # command:     python gen.py
 PaseSqlCli_file = "./gen_cli_template.c"
 
+# ===============================================
+# utilities
+# ===============================================
+
 def parse_sizeme( st ):
    sz = '4'
    if 'SMALL' in st:
@@ -56,6 +60,10 @@ def parse_method( line ):
     # 0       1 2
     args.append(parse_star(arg))
   return [funcs,args]
+
+# ===============================================
+# special processing CLI interfaces (unique gen)
+# ===============================================
 
 # SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
 def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_args):
@@ -219,8 +227,10 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += "  }" + "\n"
   return c_main
 
-
-# process PaseSqlCli.c (PASE cmvc)
+# ===============================================
+# pre-process CLI gen_cli_template.c
+# (future ... if wide interface or not)
+# ===============================================
 pre = open(PaseSqlCli_file,"r")
 ile_wide_api = {'nothing': 'nothing'}
 for line in pre:
@@ -244,7 +254,9 @@ for line in pre:
      # if call_name in ile_wide_api.values():
      # print("ile_wide_api['" + assoc_name + "'] = '" + funcs + "'")
 
-# process PaseSqlCli.c (PASE cmvc)
+# ===============================================
+# process CLI gen_cli_template.c
+# ===============================================
 f = open(PaseSqlCli_file,"r")
 g = False
 c400 = True
@@ -659,31 +671,22 @@ for line in f:
   # ===============================================
   # NO async SQL interfaces with thread
   # ===============================================
-  # SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
   if call_name == "SQLAllocEnv":
     continue
-  # SQLRETURN SQLAllocConnect ( SQLHENV  henv, SQLHDBC * phdbc );
   elif call_name == "SQLAllocConnect":
     continue
-  # SQLRETURN SQLAllocStmt ( SQLHDBC  hdbc, SQLHSTMT * phstmt );
   elif call_name == "SQLAllocStmt":
     continue
-  # SQLRETURN SQLAllocHandle ( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd );
   elif call_name == "SQLAllocHandle":
     continue
-  # SQLRETURN SQLFreeEnv ( SQLHENV  henv );
   elif call_name == "SQLFreeEnv":
     continue
-  # SQLRETURN SQLFreeConnect ( SQLHDBC  hdbc );
   elif call_name == "SQLFreeConnect":
     continue
-  # SQLRETURN SQLFreeStmt ( SQLHSTMT  hstmt, SQLSMALLINT  fOption );
   elif call_name == "SQLFreeStmt":
     continue
-  # SQLRETURN SQLFreeHandle ( SQLSMALLINT  htype, SQLINTEGER  hndl );
   elif call_name == "SQLFreeHandle":
     continue
-  # SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
   elif c400_CCSID:
     continue
 
@@ -807,6 +810,10 @@ for line in f:
   PaseCliAsync_c_main += "  return myptr;" + "\n"
   PaseCliAsync_c_main += "}" + "\n"
 
+
+# ===============================================
+# write files
+# ===============================================
 
 # pase includes
 file_pase_incl = ""
