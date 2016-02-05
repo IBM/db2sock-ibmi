@@ -378,7 +378,7 @@ int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, 
   int i = 0;
   int len1 = 0;
   int len2 = 0;
-  int hdbc = 0;
+  int retv_hdbc = 0;
   switch (iswide) {
   case 1:
     hKey = init_hkey_both((char *)db, (char *)uid, (char *)pwd, (char *)qual, 1);
@@ -400,14 +400,14 @@ int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, 
     }
     if (len1 == len2) {
       if (!memcmp(IBMiTable[i].hKey, hKey, len1)) {
-        hdbc = IBMiTable[i].hdbc;
+        retv_hdbc = IBMiTable[i].hdbc;
         break;
       }
     }
   }
   init_unlock();
   free(hKey);
-  return hdbc;
+  return retv_hdbc;
 }
 int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual) {
   return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 0 );
@@ -415,6 +415,26 @@ int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual) {
 int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual) {
   return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 1 );
 }
+
+int init_table_hash_active(int hstmt, int flag) {
+  int active = 0;
+  init_lock();
+  if (IBMiTable[hstmt].hKey) {
+    active = 1;
+  }
+  if (flag) {
+    if (IBMiTable[IBMiTable[hstmt].hdbc].hKey){
+      active = 1;
+    }
+  } else {
+    if (IBMiTable[hstmt].hKey){
+      active = 1;
+    }
+  }
+  init_unlock();
+  return active;
+}
+
 
 int custom_strlen_utf16(unsigned int * src) {
   int len = 0;

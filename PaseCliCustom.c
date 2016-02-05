@@ -474,6 +474,28 @@ SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, 
   return sqlrc;
 }
 
+SQLRETURN custom_SQL400Close(SQLHDBC hdbc) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int active = init_table_hash_active(hdbc, 0);
+  /* persistent connect only close with SQL400pClose */
+  if (active) {
+    return SQL_ERROR;
+  }
+  init_table_dtor(hdbc);
+  sqlrc = SQLDisconnect(hdbc);
+  sqlrc = SQLFreeConnect(hdbc);
+  return sqlrc;
+}
+
+
+SQLRETURN custom_SQL400pClose(SQLHDBC hdbc) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  init_table_dtor(hdbc);
+  sqlrc = SQLDisconnect(hdbc);
+  sqlrc = SQLFreeConnect(hdbc);
+  return sqlrc;
+}
+
 
 /*
  * SQL describe descriptions (parm or result)

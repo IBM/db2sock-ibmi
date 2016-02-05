@@ -892,6 +892,12 @@ SQLRETURN SQL400pConnectW(SQLHENV henv,
  SQLINTEGER * ohnd,
  SQLPOINTER options)
 
+SQLRETURN SQL400Close(SQLHDBC hdbc)
+
+SQLRETURN SQL400pClose(SQLHDBC hdbc)
+
+# ibm i utilitites 
+
 SQLRETURN SQL400Cmd(SQLHDBC hdbc,
  SQLCHAR * cmd)
 

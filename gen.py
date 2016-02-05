@@ -171,6 +171,11 @@ def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_a
 def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  int active = init_table_hash_active(hdbc, 0);" + "\n"
+  c_main += "  /* persistent connect only close with SQL400pClose */" + "\n"
+  c_main += "  if (active) {" + "\n"
+  c_main += "    return SQL_ERROR;" + "\n"
+  c_main += "  }" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -207,6 +212,17 @@ def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_
 def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  int persistent = init_table_hash_active(hndl, 0);" + "\n"
+  c_main += "  /* persistent connect only close with SQL400pClose */" + "\n"
+  c_main += "  switch (htype) {" + "\n"
+  c_main += "  case SQL_HANDLE_DBC:" + "\n"
+  c_main += "    if (persistent) {" + "\n"
+  c_main += "      return SQL_ERROR;" + "\n"
+  c_main += "    }" + "\n"
+  c_main += "    break;" + "\n"
+  c_main += '  default:' + "\n"
+  c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -224,6 +240,17 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += "      init_table_dtor(hndl);" + "\n"
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  return c_main
+
+# SQLRETURN SQLDisconnect( SQLHDBC  hdbc )
+def SQLDisconnect_check_persistent(hdbc_code, return_code, set_code):
+  c_main = ""
+  c_main += "  int persistent = init_table_hash_active(" + hdbc_code + ", 0);" + "\n"
+  c_main += "  /* persistent connect only close with SQL400pClose */" + "\n"
+  c_main += "  if (persistent) {" + "\n"
+  c_main += "    " + set_code + "\n"
+  c_main += "    " + return_code + "\n"
   c_main += "  }" + "\n"
   return c_main
 
@@ -552,6 +579,8 @@ for line in f:
   else:
     # normal cli function
     PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    if call_name == "SQLDisconnect":
+      PaseCliAsync_c_main += SQLDisconnect_check_persistent("hdbc","return SQL_ERROR;", "/* return now */")
     if argtype1st == "SQLHENV":
       if ile_or_custom_call == "custom_":
         PaseCliAsync_c_main += "  sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
@@ -734,6 +763,8 @@ for line in f:
   PaseCliAsync_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
   PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
   PaseCliAsync_c_main += '  ' + struct_name + ' * myptr = (' + struct_name + ' *) ptr;' + "\n"
+  if call_name == "SQLDisconnect":
+    PaseCliAsync_c_main += SQLDisconnect_check_persistent("myptr->hdbc","pthread_exit((void *)myptr);","myptr->sqlrc = SQL_ERROR;")
   if argtype1st == "SQLHENV":
     PaseCliAsync_c_main += "  /* not lock */" + "\n"
   elif argtype1st == "SQLHDBC":
@@ -749,10 +780,10 @@ for line in f:
     PaseCliAsync_c_main += "  switch(myccsid) {" + "\n"
     PaseCliAsync_c_main += '  case 1208: /* UTF-8 */' + "\n"
     PaseCliAsync_c_main += '  case 1200: /* UTF-16 */' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + async_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    myptr->sqlrc = " + ile_or_custom_call + call_name + '(' + async_db400_args + ' );' + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += '  default:' + "\n"
-    PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + async_db400_args + ' );' + "\n"
+    PaseCliAsync_c_main += "    myptr->sqlrc = libdb400_" + call_name + '(' + async_db400_args + ' );' + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
   if argtype1st == "SQLHENV":
