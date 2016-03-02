@@ -13,6 +13,10 @@ static char * run_main_keys[] = {"sql", (char *) NULL};
 static char * run_sql_keys[] = {"connect","prepare","execute","fetch", (char *) NULL};
 static char * run_sql_connect_keys[] = {"database","user","password","qualify",(char *) NULL};
 static char * run_sql_connect_error[] = {"invalid connection",(char *) NULL};
+static char * run_sql_prepare_error[] = {"invalid prepare",(char *) NULL};
+static char * run_sql_execute_error[] = {"invalid execute",(char *) NULL};
+static char * run_sql_fetch_row[] = {"row",(char *) NULL};
+static char * run_sql_fetch_assoc[] = {(char *) NULL,(char *) NULL,(char *) NULL};
 
 static int run_key(char * str, char *keys[]) 
 {
@@ -61,11 +65,12 @@ void run_output_invalid(int flag, char *outrun, int outlen, char *bad, char *arg
 
 static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, SQLINTEGER outlen, int rf)
 {
-  int i = 0, j = 0;
+  int i = 0, j = 0, c1 = 0, c2 = 0, c3 = 0, t = 0;
   int fatal = 0, expect = 0;
   SQLRETURN sqlrc = 0;
   SQLHANDLE henv = 0;
   SQLHANDLE hdbc = 0;
+  SQLHANDLE hstmt = 0;
   SQLINTEGER yes = SQL_TRUE;
   SQL400AttrStruct pophenv[3];
   SQL400AttrStruct pophdbc[3];
@@ -73,6 +78,17 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
   char * uid = (char *) NULL;
   char * pwd = (char *) NULL;
   char * qual = (char *) NULL;
+  char * parm = (char *) NULL;
+  char * parmval = (char *) NULL;
+  char * sql = (char *) NULL;
+  SQLINTEGER start_row = 0;
+  SQL400DescStruct desc_parms[100];
+  SQL400ParamStruct call_parms[100];
+  SQLINTEGER indPtr[100];
+  SQLSMALLINT pccol = 0;
+  SQL400ParamStruct call_cols[100];
+  SQL400DescStruct desc_cols[100];
+  SQLPOINTER data_cols[100];
 
   run_output(RUN_START,outrun,outlen,NULL,rf);
   for (i=0; i < argc && !fatal; i++) {
@@ -151,6 +167,138 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
           }
           run_output(RUN_END,outrun,outlen,NULL,rf);
           break;
+        /* ==========================
+         * sql prepare
+         * ========================== */
+        case 1: /* prepare */
+          run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+          run_output(RUN_START_NAME,outrun,outlen,&name[i],rf);
+          if (hdbc < 2) {
+            run_output(RUN_ERROR,outrun,outlen,run_sql_connect_error,rf);
+            fatal = 1;
+          }
+          if (!fatal) {
+            sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+            sql = value[i];
+            t = strlen(sql);
+            sqlrc = SQLPrepare(hstmt, sql , t);
+            if (sqlrc == SQL_ERROR) {
+              run_output(RUN_ERROR,outrun,outlen,run_sql_prepare_error,rf);
+              fatal = 1;
+            } else {
+              run_output(RUN_OK,outrun,outlen,NULL,rf);
+            }
+          }
+          run_output(RUN_END,outrun,outlen,NULL,rf);
+          break;
+        /* ==========================
+         * sql execute
+         * ========================== */
+        case 2: /* execute */
+          run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+          run_output(RUN_START_NAME,outrun,outlen,&name[i],rf);
+          if (hdbc < 2) {
+            run_output(RUN_ERROR,outrun,outlen,run_sql_connect_error,rf);
+            fatal = 1;
+          }
+          if (!fatal && hstmt < 2) {
+            run_output(RUN_ERROR,outrun,outlen,run_sql_prepare_error,rf);
+            fatal = 1;
+          }
+          if (!fatal) {
+            memset(desc_parms,0,sizeof(desc_parms));
+            memset(call_parms,0,sizeof(call_parms));
+            memset(indPtr,0,sizeof(indPtr));
+            t = 0;
+            parm = value[i];
+            c3 = strlen(parm);
+            for (c1=-1, c2=0; c2 <= c3; c2++) {
+              if (c1 < 0) {
+                if (*parm == '"' || *parm == ',' || *parm == '\0' || *parm == ' ') {
+                  /* not start parm */
+                } else {
+                  c1 = c2;
+                  parmval = parm;
+                }
+              } else {
+                if (*parm == '"' || *parm == ',' || *parm == '\0') {
+                  *parm = '\0';
+                  indPtr[t] = c2 - c1;
+                  sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
+                  sqlrc = SQL400AddCVar(t + 1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER) parmval, &indPtr[t], (SQLPOINTER) &call_parms);
+                  t++;
+                  c1 = -1;
+                }
+              }
+              parm += 1;
+            }
+            sqlrc = SQL400Execute(hstmt, (SQLPOINTER)&call_parms, (SQLPOINTER)&desc_parms);
+            if (sqlrc == SQL_ERROR) {
+              run_output(RUN_ERROR,outrun,outlen,run_sql_execute_error,rf);
+              fatal = 1;
+            } else {
+              run_output(RUN_OK,outrun,outlen,NULL,rf);
+            }
+          }
+          run_output(RUN_END,outrun,outlen,NULL,rf);
+          break;
+        /* ==========================
+         * sql fetch
+         * ========================== */
+        case 3: /* fetch */
+          run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+          run_output(RUN_START_NAME,outrun,outlen,&name[i],rf);
+          if (hdbc < 2) {
+            run_output(RUN_ERROR,outrun,outlen,run_sql_connect_error,rf);
+            fatal = 1;
+          }
+          if (!fatal && hstmt < 2) {
+            run_output(RUN_ERROR,outrun,outlen,run_sql_prepare_error,rf);
+            fatal = 1;
+          }
+          if (!fatal) {
+            memset(desc_cols,0,sizeof(desc_cols));
+            memset(call_cols,0,sizeof(call_cols));
+            memset(data_cols,0,sizeof(data_cols));
+            sqlrc = SQLNumResultCols(hstmt, (SQLSMALLINT *)&pccol );
+            for (t=0; t < pccol; t++) {
+              sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_COL, (SQLPOINTER)&desc_cols);
+              data_cols[t] = (SQLPOINTER) malloc(1024);
+              indPtr[t] = 1024;
+              sqlrc = SQL400AddCVar(t + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[t], &indPtr[t], (SQLPOINTER) &call_cols);
+            }
+            sqlrc == SQL_SUCCESS;
+            c1 = 0;
+            while (sqlrc == SQL_SUCCESS) {
+              for (t=0; t < pccol; t++) {
+                memset(data_cols[t],0,1024);
+              }
+              sqlrc = SQL400Fetch(hstmt, start_row, (SQLPOINTER)&call_cols, (SQLPOINTER)&desc_cols);
+              if (sqlrc == SQL_SUCCESS) {
+                if (!c1) {
+                  run_output(RUN_START_ARRAY_NAME,outrun,outlen,run_sql_fetch_row,rf);
+                  c1 = 1;
+                } else {
+                  run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+                }
+                run_output(RUN_START,outrun,outlen,NULL,rf);
+                for (t=0; t < pccol; t++) {
+                  run_sql_fetch_assoc[0] = desc_cols[t].szColName;
+                  run_sql_fetch_assoc[1] = data_cols[t];
+                  run_output(RUN_NAME_VALUE_STRING,outrun,outlen,run_sql_fetch_assoc,rf);
+                  if (t < pccol - 1) {
+                    run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+                  }
+                }
+                run_output(RUN_END,outrun,outlen,NULL,rf);
+              }
+            }
+            if (c1) {
+              run_output(RUN_END_ARRAY,outrun,outlen,NULL,rf);
+            }
+          }
+          run_output(RUN_END,outrun,outlen,NULL,rf);
+          break;
         default:
           break;
         }
@@ -170,6 +318,36 @@ static void run_spin_me() {
   sleep(30);
 }
 
+/*
+ * Invalid utf-8 bytes 0xC0, 0xC1, and 0xF5..0xFF
+ */
+static int valid_utf8(char * j) 
+{
+  while (j[0]) {
+    switch(j[0]) {
+    case 0xC0:
+    case 0xC1:
+    case 0xF5:
+    case 0xF6:
+    case 0xF7:
+    case 0xF8:
+    case 0xF9:
+    case 0xFA:
+    case 0xFB:
+    case 0xFC:
+    case 0xFD:
+    case 0xFE:
+    case 0xFF:
+      return 0;
+      break;
+    default:
+      break;
+    }
+    j += 1;
+  }
+  return 1;
+}
+
 SQLRETURN run_main(
  SQLCHAR * inrun,
  SQLINTEGER inlen,
@@ -181,14 +359,21 @@ SQLRETURN run_main(
   char * run_input = (char *) NULL;
   char ** name = (char **) NULL;
   char ** value = (char **) NULL;
+  SQLRETURN sqlrc = 0;
+  SQLHANDLE henv = 0;
 
   /* debug only */
   /* run_spin_me(); */
 
   /* copy in for parse */
   memset(outrun,0,outlen);
-  run_input = malloc(inlen) + 1;
-  strcpy(run_input,inrun);
+  if (valid_utf8(inrun)) {
+    run_input = malloc(inlen + 1);
+    strcpy(run_input,inrun);
+  } else {
+    run_input = malloc(inlen * 3 + 1);
+    sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) inrun, (SQLINTEGER) inlen, (SQLPOINTER) run_input, (SQLINTEGER) (inlen * 3 + 1), 819);
+  }
 
   switch(rf) {
   case 0:

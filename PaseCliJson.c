@@ -11,13 +11,20 @@
 
 static char * run_start = 
  "{";
-static char * run_end = 
- "}";
 static char * run_start_name[] = 
  {
  "\"",
  "\":{"
  };
+static char * run_end = 
+ "}";
+static char * run_start_array[] = 
+ {
+ "\"",
+ "\":["
+ };
+static char * run_end_array = 
+ "]";
 static char * run_error[] = 
  {
  "\"ok\":false,\"reason\":\"",
@@ -25,6 +32,19 @@ static char * run_error[] =
  };
 static char * run_ok = 
  "\"ok\":true";
+static char * run_name_value_string[] = 
+ {
+ "\"",
+ "\":\"",
+ "\""
+ };
+static char * run_name_value_misc[] = 
+ {
+ "\"",
+ "\":",
+ };
+static char * run_comma = 
+ ",";
 
 void json_output(int flag, char *outrun, int outlen, char *argv[])
 {
@@ -38,6 +58,24 @@ void json_output(int flag, char *outrun, int outlen, char *argv[])
     strcat(outrun,argv[0]);
     strcat(outrun,run_start_name[1]);
     break;
+  case RUN_START_ARRAY_NAME:
+    strcat(outrun,run_start_array[0]);
+    strcat(outrun,argv[0]);
+    strcat(outrun,run_start_array[1]);
+    break;
+  case RUN_NAME_VALUE_MISC:
+    strcat(outrun,run_name_value_misc[0]);
+    strcat(outrun,argv[0]);
+    strcat(outrun,run_name_value_misc[1]);
+    strcat(outrun,argv[1]);
+    break;
+  case RUN_NAME_VALUE_STRING:
+    strcat(outrun,run_name_value_string[0]);
+    strcat(outrun,argv[0]);
+    strcat(outrun,run_name_value_string[1]);
+    strcat(outrun,argv[1]);
+    strcat(outrun,run_name_value_string[2]);
+    break;
   case RUN_OK:
     strcat(outrun,run_ok);
     break;
@@ -47,6 +85,12 @@ void json_output(int flag, char *outrun, int outlen, char *argv[])
       strcat(outrun,argv[i]);
     }
     strcat(outrun,run_error[1]);
+    break;
+  case RUN_END_ARRAY:
+    strcat(outrun,run_end_array);
+    break;
+  case RUN_COMMA:
+    strcat(outrun,run_comma);
     break;
   case RUN_END:
     strcat(outrun,run_end);
