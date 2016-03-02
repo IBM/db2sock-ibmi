@@ -13,11 +13,6 @@ static char * run_start =
  "{";
 static char * run_end = 
  "}";
-static char * run_nothing[] = 
- {
- "\"ok\":false,\"reason\":\"missing keywords (",
- ")\""
- };
 static char * run_start_name[] = 
  {
  "\"",
@@ -54,16 +49,7 @@ void json_output(int flag, char *outrun, int outlen, char *argv[])
     strcat(outrun,run_error[1]);
     break;
   case RUN_END:
-    i = strlen(outrun);
-    if (i && outrun[i-1] == '{') {
-      strcat(outrun,run_nothing[0]);
-      for (i=0; argv[i]; i++) {
-        strcat(outrun,argv[i]);
-      }
-      strcat(outrun,run_nothing[1]);
-    } else {
-      strcat(outrun,run_end);
-    }
+    strcat(outrun,run_end);
     break;
   default:
     break;
