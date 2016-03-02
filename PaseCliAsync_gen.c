@@ -9859,3 +9859,48 @@ SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER
   }
   return myptr;
 }
+SQLRETURN SQL400Json( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* json handles SQLOverrideCCSID400 */
+  sqlrc = custom_SQL400Json( injson, inlen, outjson, outlen );
+  return sqlrc;
+}
+void * SQL400JsonThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* json handles SQLOverrideCCSID400 */
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) ptr;
+  myptr->sqlrc = custom_SQL400Json( myptr->injson, myptr->inlen, myptr->outjson, myptr->outlen );
+  /* void SQL400JsonCallback(SQL400JsonStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400JsonStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400JsonAsync ( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) malloc(sizeof(SQL400JsonStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->injson = injson;
+  myptr->inlen = inlen;
+  myptr->outjson = outjson;
+  myptr->outlen = outlen;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400JsonThread, (void *)myptr);
+  return tid;
+}
+SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400JsonStruct *) NULL;
+  }
+  return myptr;
+}

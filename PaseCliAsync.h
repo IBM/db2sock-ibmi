@@ -204,6 +204,7 @@ SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols,
 SQLRETURN SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
 SQLRETURN SQL400FetchArrayW( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
 SQLRETURN SQL400FetchArrayFree( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs );
+SQLRETURN SQL400Json( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
 
 /* ===================================================
  * NORMAL CLI interfaces
@@ -500,6 +501,7 @@ typedef struct SQL400FetchStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER 
 typedef struct SQL400FetchArrayStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLINTEGER  max_rows; SQLINTEGER * cnt_rows; SQLINTEGER * more_rows; SQLINTEGER * cnt_cols; SQLPOINTER * out_rows; SQLPOINTER * out_decs; SQLINTEGER  all_char; SQLINTEGER  expand_factor; void * callback; } SQL400FetchArrayStruct;
 typedef struct SQL400FetchArrayWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLINTEGER  max_rows; SQLINTEGER * cnt_rows; SQLINTEGER * more_rows; SQLINTEGER * cnt_cols; SQLPOINTER * out_rows; SQLPOINTER * out_decs; SQLINTEGER  all_char; SQLINTEGER  expand_factor; void * callback; } SQL400FetchArrayWStruct;
 typedef struct SQL400FetchArrayFreeStruct { SQLRETURN sqlrc; SQLINTEGER  cnt_cols; SQLPOINTER  rows; SQLPOINTER  decs; void * callback; } SQL400FetchArrayFreeStruct;
+typedef struct SQL400JsonStruct { SQLRETURN sqlrc; SQLCHAR * injson; SQLINTEGER  inlen; SQLCHAR * outjson; SQLINTEGER  outlen; void * callback; } SQL400JsonStruct;
 
 
 /* join async thread                    */
@@ -821,6 +823,8 @@ SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag);
 SQL400FetchArrayWStruct * SQL400FetchArrayWJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* ); */
 SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400JsonCallback(SQL400JsonStruct* ); */
+SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag);
 
 
 /* start an async call to DB2 CLI */
@@ -983,6 +987,7 @@ pthread_t SQL400FetchAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER 
 pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback );
 pthread_t SQL400FetchArrayWAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback );
 pthread_t SQL400FetchArrayFreeAsync ( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs, void * callback );
+pthread_t SQL400JsonAsync ( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback );
 
 /* ===================================================
  * ILE CLI interfaces
@@ -1288,6 +1293,7 @@ SQLRETURN custom_SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER
 SQLRETURN custom_SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
 SQLRETURN custom_SQL400FetchArrayW( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
 SQLRETURN custom_SQL400FetchArrayFree( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs );
+SQLRETURN custom_SQL400Json( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
 
 
 #endif /* _PASECLIASYNC_H */

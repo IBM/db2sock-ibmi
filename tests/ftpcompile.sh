@@ -6,8 +6,10 @@ user $2 $MYPWD
 quote namefmt 1
 bin
 
-mkdir /home/adc/PaseCliAsync/tests
-cd /home/adc/PaseCliAsync/tests
+mkdir /QOpenSys/QIBM/ProdData/OPS
+mkdir /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync
+mkdir /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync/tests
+cd /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync/tests
 mput *
 
 quit

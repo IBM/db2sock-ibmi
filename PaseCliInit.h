@@ -10,6 +10,7 @@
 #include <iconv.h>
 #include <as400_types.h>
 #include <as400_protos.h>
+#include "PaseCliLic.h"
 
 #ifdef __64BIT__
 #define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"

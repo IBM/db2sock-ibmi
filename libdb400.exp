@@ -711,5 +711,8 @@ SQL400FetchArrayWJoin
 SQL400FetchArrayFree
 SQL400FetchArrayFreeAsync
 SQL400FetchArrayFreeJoin
+SQL400Json
+SQL400JsonAsync
+SQL400JsonJoin
 
 

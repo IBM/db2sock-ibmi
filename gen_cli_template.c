@@ -1052,4 +1052,11 @@ SQLRETURN SQL400FetchArrayFree(SQLINTEGER cnt_cols,
  SQLPOINTER rows,
  SQLPOINTER decs)
 
+# json interface
+SQLRETURN SQL400Json(
+ SQLCHAR * injson,
+ SQLINTEGER inlen,
+ SQLCHAR * outjson,
+ SQLINTEGER outlen)
+
 

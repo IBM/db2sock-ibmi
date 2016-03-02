@@ -5,6 +5,7 @@
 #include <iconv.h>
 #include <sqlcli1.h>
 #include "PaseCliInit.h"
+#include "PaseCliRun.h"
 #include "PaseCliAsync.h"
 
 /* === experimental (not finished) ===
@@ -1720,4 +1721,12 @@ SQLRETURN custom_SQL400FetchArrayFree(SQLINTEGER cnt_cols,
   return sqlrc;
 }
 
+SQLRETURN custom_SQL400Json(
+ SQLCHAR * injson,
+ SQLINTEGER inlen,
+ SQLCHAR * outjson,
+ SQLINTEGER outlen)
+{
+  return run_main(injson, inlen, outjson, outlen, 0);
+}
 

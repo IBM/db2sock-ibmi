@@ -170,6 +170,7 @@ int init_cli_srvpgm() {
   }
   return db2_cli_srvpgm_mark;
 }
+
 int init_CCSID400( int newCCSID ) {
   int paseMark = 0;
   if (!db2_pase_ccsid) {

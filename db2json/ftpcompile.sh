@@ -8,7 +8,8 @@ bin
 
 mkdir /QOpenSys/QIBM/ProdData/OPS
 mkdir /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync
-cd /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync
+mkdir /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync/db2json
+cd /QOpenSys/QIBM/ProdData/OPS/PaseCliAsync/db2json
 mput *
 
 quit
