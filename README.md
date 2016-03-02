@@ -170,6 +170,11 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 > python gen.py
 > ./xlcmakeall
 ```
+Alternative pre-compiled Yips binary
+
+* http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver 
+* (test only, not production)
+
 
 ##gen.py creates: 
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
