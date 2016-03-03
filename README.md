@@ -223,8 +223,10 @@ Alternative pre-compiled Yips binary
 - PaseCliCustom.c        -- 'big function' APIs (experimental)
 - PaseCliInit.c          -- db2 resource table manager (read)
 - PaseCliInit.h          -- db2 resource table header
-- PaseCliJson.h          -- db2 json interface (experimental)
-- PaseCliJson.c          -- db2 json interface (experimental)
+- PaseCliJson.h          -- db2 json parse interface (experimental)
+- PaseCliJson.c          -- db2 json parse interface (experimental)
+- PaseCliRun.h           -- db2 json/xml graph run interface (experimental)
+- PaseCliRun.c           -- db2 json/xml graph run interface (experimental)
 
 ##examples
 ```
