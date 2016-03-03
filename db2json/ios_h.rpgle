@@ -27,7 +27,7 @@
          nBufLen UNS(10) VALUE;
        end-pr;
 
-       dcl-pr readIFS INT(20) EXTPROC('write');
+       dcl-pr readIFS INT(20) EXTPROC('read');
          fd INT(10) VALUE;
          buf POINTER VALUE;
          size INT(10) VALUE;

@@ -157,6 +157,42 @@ SQL400FetchArrayFreeJoin
 ... many more ...
 ```
 
+## JSON based web socket
+```
+assumes basic authorization (httpd.conf)
+
+<Directory />       
+   AuthType Basic
+   AuthName "IBMi OS User Profile"
+   Require valid-user
+   PasswdFile %%SYSTEM%%
+   Order Deny,Allow 
+   Deny From all     
+</Directory>
+ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
+<Directory /QSYS.LIB/DB2JSON.LIB/>
+  AllowOverride None
+  order allow,deny
+  allow from all
+  SetHandler cgi-script
+  Options +ExecCGI
+  CGIConvMode BINARY
+</Directory>
+
+set test authorization (shell)
+> export SQL_HOST400=lp0364d
+> export SQL_DB400=*LOCAL
+> export SQL_UID400=MYUID
+> export SQL_PWD400=MYPWD
+
+== node test db2 json 
+> node nodejsrest.js
+
+== curl test db2 json
+> ./curltest.sh
+> ./curltestnull.sh
+```
+
 
 #Contributors
 - Tony Cairns, IBM

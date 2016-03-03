@@ -9,6 +9,7 @@
 #include <sqlcli1.h>
 
 
+#define SQL_HOST400 "lp0364d"
 #define SQL_DB400 "SQL_DB400"
 #define SQL_UID400 "SQL_UID400"
 #define SQL_PWD400 "SQL_PWD400"

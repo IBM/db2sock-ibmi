@@ -1,3 +1,4 @@
+#!/bin/sh
 MYCONN="myconn"
 SQL="{\"sql\":"\
 "{\"connect\":"\
@@ -18,7 +19,7 @@ echo "$SQL"
 echo "================="
 
 curl -u "$SQL_UID400:$SQL_PWD400" \
--G "http://lp0364d/db2/db2json.pgm" \
+-G -v "http://lp0364d/db2/db2json.pgm" \
 --data-urlencode "$SQL"
 
 echo "\n"

@@ -1,3 +1,4 @@
+#!/bin/sh
 MYCONN="myconn"
 SQL="{\"sql\":"\
 "{\"connect\":"\
