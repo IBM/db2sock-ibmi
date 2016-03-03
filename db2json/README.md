@@ -14,6 +14,16 @@ $ ./makedb2json.sh
 # configure
 
 ```
+assumes basic authorization (httpd.conf)
+
+<Directory />       
+   AuthType Basic
+   AuthName "IBMi OS User Profile"
+   Require valid-user
+   PasswdFile %%SYSTEM%%
+   Order Deny,Allow 
+   Deny From all     
+</Directory>
 ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
 <Directory /QSYS.LIB/DB2JSON.LIB/>
   AllowOverride None
@@ -23,6 +33,19 @@ ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
   Options +ExecCGI
   CGIConvMode BINARY
 </Directory>
+
+set test authorization (shell)
+> export SQL_HOST400=lp0364d
+> export SQL_DB400=*LOCAL
+> export SQL_UID400=MYUID
+> export SQL_PWD400=MYPWD
+
+== node test db2 json 
+> node tests/nodejsrest.js
+
+== curl test db2 json
+> tests/curltest.sh
+> tests/curltestnull.sh
 ```
 
 Note: Must use CGIConvMode BINARY for directory.
@@ -36,29 +59,6 @@ Query:
 "prepare":"select * from qiws.qcustcdt where lstnam like ?",
 "execute":"Hen%",
 "fetch":"*"
-}
-Ok:
-{
-"connect":{"ok":true},
-"prepare":{"ok":true},
-"execute":{"ok":true},
-"fetch":
- {
-   "ok":true,
-   "row":[
-    {"fld1":"frog1","fld2":"toad1"},
-    {"fld1":"frog2","fld2":"toad2"}
-   ]
- }
-}
-Error:
-{
-"connect":{
-  "ok":false,
-  "reason":"SQL error",
-  "sqlcode":"99999",
-  "sqlmsg":"sample"
-  }
 }
 ```
 
