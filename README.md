@@ -186,11 +186,11 @@ set test authorization (shell)
 > export SQL_PWD400=MYPWD
 
 == node test db2 json 
-> node nodejsrest.js
+> node tests/nodejsrest.js
 
 == curl test db2 json
-> ./curltest.sh
-> ./curltestnull.sh
+> tests/curltest.sh
+> tests/curltestnull.sh
 ```
 
 
