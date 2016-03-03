@@ -9,15 +9,6 @@
 #include "PaseCliJson.h"
 #include "PaseCliRun.h"
 
-static char * run_main_keys[] = {"sql", (char *) NULL};
-static char * run_sql_keys[] = {"connect","prepare","execute","fetch", (char *) NULL};
-static char * run_sql_connect_keys[] = {"database","user","password","qualify",(char *) NULL};
-static char * run_sql_connect_error[] = {"invalid connection",(char *) NULL};
-static char * run_sql_prepare_error[] = {"invalid prepare",(char *) NULL};
-static char * run_sql_execute_error[] = {"invalid execute",(char *) NULL};
-static char * run_sql_fetch_row[] = {"row",(char *) NULL};
-static char * run_sql_fetch_assoc[] = {(char *) NULL,(char *) NULL,(char *) NULL};
-
 static int run_key(char * str, char *keys[]) 
 {
   int i = 0;
@@ -89,6 +80,14 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
   SQL400ParamStruct call_cols[100];
   SQL400DescStruct desc_cols[100];
   SQLPOINTER data_cols[100];
+  static char * run_main_keys[] = {"sql", (char *) NULL};
+  static char * run_sql_keys[] = {"connect","prepare","execute","fetch", (char *) NULL};
+  static char * run_sql_connect_keys[] = {"database","user","password","qualify",(char *) NULL};
+  char * run_sql_connect_error[] = {"invalid connection",(char *) NULL};
+  char * run_sql_prepare_error[] = {"invalid prepare",(char *) NULL};
+  char * run_sql_execute_error[] = {"invalid execute",(char *) NULL};
+  char * run_sql_fetch_row[] = {"row",(char *) NULL};
+  char * run_sql_fetch_assoc[] = {(char *) NULL,(char *) NULL,(char *) NULL};
 
   run_output(RUN_START,outrun,outlen,NULL,rf);
   for (i=0; i < argc && !fatal; i++) {
@@ -223,10 +222,12 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
               } else {
                 if (*parm == '"' || *parm == ',' || *parm == '\0') {
                   *parm = '\0';
-                  indPtr[t] = c2 - c1;
-                  sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
-                  sqlrc = SQL400AddCVar(t + 1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER) parmval, &indPtr[t], (SQLPOINTER) &call_parms);
-                  t++;
+                  if (strcmp(parmval,"null")) {
+                    indPtr[t] = c2 - c1;
+                    sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
+                    sqlrc = SQL400AddCVar(t + 1, SQL_PARAM_INPUT, SQL_C_CHAR, (SQLPOINTER) parmval, &indPtr[t], (SQLPOINTER) &call_parms);
+                    t++;
+                  }
                   c1 = -1;
                 }
               }

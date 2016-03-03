@@ -100,37 +100,6 @@ void json_output(int flag, char *outrun, int outlen, char *argv[])
   }
 }
 
-static char * json_bracket(char * j) 
-{
-  while (j[0]) {
-    switch(j[0]) {
-    case '[':
-      return j;
-      break;
-    default:
-      break;
-    }
-    j += 1;
-  }
-  return NULL;
-}
-
-static char * json_brace(char * j) 
-{
-  while (j[0]) {
-    switch(j[0]) {
-    case '{':
-      return j;
-      break;
-    default:
-      break;
-    }
-    j += 1;
-  }
-  return NULL;
-}
-
-
 static char * json_colon(char * j) 
 {
   while (j[0]) {
@@ -181,6 +150,7 @@ static char * json_value_end(char * j)
   while (j[0]) {
     switch(j[0]) {
     case ' ':
+    case ']':
     case '}':
     case ',':
       return j;
@@ -281,8 +251,8 @@ int json_parse_hash(char * jsoni, void **out_name, void **out_value)
       break;
     default:
       /* "name":(v)alue */
-      ptr += 1;
       value_beg = ptr;
+      ptr += 1;
       /* "name":value() */
       ptr = json_value_end(ptr);
       ptr[0] = '\0';

@@ -10,8 +10,8 @@ $SQL_PWD400\
 "\",\"qualify\":\""\
 $MYCONN\
 "\"},"\
-"\"prepare\":\"select * from qiws.qcustcdt where lstnam like ?\","\
-"\"execute\":\"Hen%\","\
+"\"prepare\":\"select * from qiws.qcustcdt\","\
+"\"execute\":null,"\
 "\"fetch\":\"*\"}}"
 echo "================="
 echo "$SQL"
