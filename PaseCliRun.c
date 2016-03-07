@@ -101,7 +101,7 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
   char * run_sql_connect_error[] = {"invalid connection",(char *) NULL};
   char * run_sql_prepare_error[] = {"invalid prepare",(char *) NULL};
   char * run_sql_execute_error[] = {"invalid execute",(char *) NULL};
-  char * run_sql_fetch_error[] = {"invalid execute",(char *) NULL};
+  char * run_sql_fetch_error[] = {"invalid fetch",(char *) NULL};
   char * run_sql_fetch_row[] = {"row",(char *) NULL};
   char * run_sql_fetch_assoc[] = {(char *) NULL,(char *) NULL,(char *) NULL};
 
@@ -154,7 +154,8 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
               i--;
               break;
             }
-            if (strcmp(value[i],"null")) {
+            /* check json null sign-on (Basic auth, etc) */
+            if (!strcmp(value[i],"null")) {
               value[i] = (char *)NULL;
             }
             switch (j) {
