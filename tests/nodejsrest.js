@@ -50,6 +50,22 @@ var myreq =
    "fetch": "*"
  }
 };
+// already using Basic auth
+// no need for DB2 sign-on
+var myreq = 
+{
+ "sql": {
+   "connect": {
+     "database": null,
+     "user": null,
+     "password": null,
+     "qualify": "myconn"
+   },
+   "prepare": "select * from qiws.qcustcdt",
+   "execute": null,
+   "fetch": "*"
+ }
+};
 var myjson = JSON.stringify(myreq);
 console.log(myjson);
 
