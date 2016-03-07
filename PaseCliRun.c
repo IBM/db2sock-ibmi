@@ -54,10 +54,11 @@ void run_output_invalid(int flag, char *outrun, int outlen, char *bad, char *arg
   run_output(RUN_ERROR,outrun,outlen,errv,rf);
 }
 
+
 static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, SQLINTEGER outlen, int rf)
 {
-  int i = 0, j = 0, c1 = 0, c2 = 0, c3 = 0, t = 0;
-  int fatal = 0, expect = 0;
+  int i = 0, j = 0, c1 = 0, c2 = 0, c3 = 0, t = 0, sz = 0;
+  int fatal = 0, expect = 0, connect = 0;
   SQLRETURN sqlrc = 0;
   SQLHANDLE henv = 0;
   SQLHANDLE hdbc = 0;
@@ -72,20 +73,35 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
   char * parm = (char *) NULL;
   char * parmval = (char *) NULL;
   char * sql = (char *) NULL;
-  SQLINTEGER start_row = 0;
-  SQL400DescStruct desc_parms[100];
-  SQL400ParamStruct call_parms[100];
-  SQLINTEGER indPtr[100];
-  SQLSMALLINT pccol = 0;
-  SQL400ParamStruct call_cols[100];
-  SQL400DescStruct desc_cols[100];
-  SQLPOINTER data_cols[100];
+
+  SQL400DescStruct desc_parms[1024];
+  SQL400ParamStruct call_parms[1024];
+  SQLINTEGER indPtr[1024];
+
+  SQLINTEGER start_row = 0; 
+  SQLINTEGER max_rows = 9999; 
+  SQLINTEGER cnt_rows = 0;
+  SQLINTEGER more_rows = 0; 
+  SQLINTEGER cnt_cols = 0; 
+  SQLPOINTER out_rows = (SQLPOINTER) NULL;
+  SQLPOINTER out_decs = (SQLPOINTER) NULL;
+  SQLINTEGER all_char = 1; 
+  SQLINTEGER expand_factor = 0;
+
+  SQL400DescStruct * opts = (SQL400DescStruct *) NULL;
+  SQL400DescStruct * opt = (SQL400DescStruct *) NULL;
+  SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL;
+  SQL400ParamStruct * prm = (SQL400ParamStruct *) NULL;
+  char ** argv = (char **)NULL;
+
   static char * run_main_keys[] = {"sql", (char *) NULL};
   static char * run_sql_keys[] = {"connect","prepare","execute","fetch", (char *) NULL};
   static char * run_sql_connect_keys[] = {"database","user","password","qualify",(char *) NULL};
+
   char * run_sql_connect_error[] = {"invalid connection",(char *) NULL};
   char * run_sql_prepare_error[] = {"invalid prepare",(char *) NULL};
   char * run_sql_execute_error[] = {"invalid execute",(char *) NULL};
+  char * run_sql_fetch_error[] = {"invalid execute",(char *) NULL};
   char * run_sql_fetch_row[] = {"row",(char *) NULL};
   char * run_sql_fetch_assoc[] = {(char *) NULL,(char *) NULL,(char *) NULL};
 
@@ -125,6 +141,7 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
          * sql connect
          * ========================== */
         case 0: /* connect */
+          connect = 0;
           run_output(RUN_START_NAME,outrun,outlen,&name[i],rf);
           memset(pophdbc,0,sizeof(pophdbc));
           for (i++; i < argc && !fatal; i++) {
@@ -137,23 +154,30 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
               i--;
               break;
             }
+            if (strcmp(value[i],"null")) {
+              value[i] = (char *)NULL;
+            }
             switch (j) {
             case 0: /* database */
               db = value[i];
+              connect += 1;
               break;
             case 1: /* user */
               uid = value[i];
+              connect += 1;
               break;
             case 2: /* password */
               pwd = value[i];
+              connect += 1;
               break;
             case 3: /* qualify */
               qual = value[i];
+              connect += 1;
               break;
             default:
               break;
             }
-            if (db && uid && pwd && qual) {
+            if (connect >= 4) {
               sqlrc = SQL400pConnect(henv, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, (SQLCHAR *) qual, (SQLINTEGER *)&hdbc, (SQLPOINTER)&pophdbc);
               if (sqlrc == SQL_ERROR) {
                 run_output(RUN_ERROR,outrun,outlen,run_sql_connect_error,rf);
@@ -222,6 +246,7 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
               } else {
                 if (*parm == '"' || *parm == ',' || *parm == '\0') {
                   *parm = '\0';
+                  /* non-NULL data */
                   if (strcmp(parmval,"null")) {
                     indPtr[t] = c2 - c1;
                     sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_PARM, (SQLPOINTER)&desc_parms);
@@ -242,6 +267,10 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
             }
           }
           run_output(RUN_END,outrun,outlen,NULL,rf);
+          if (fatal && hstmt > 0) {
+            sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+            hstmt = 0;
+          }
           break;
         /* ==========================
          * sql fetch
@@ -258,47 +287,55 @@ static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, S
             fatal = 1;
           }
           if (!fatal) {
-            memset(desc_cols,0,sizeof(desc_cols));
-            memset(call_cols,0,sizeof(call_cols));
-            memset(data_cols,0,sizeof(data_cols));
-            sqlrc = SQLNumResultCols(hstmt, (SQLSMALLINT *)&pccol );
-            for (t=0; t < pccol; t++) {
-              sqlrc = SQL400AddDesc(hstmt, t + 1, SQL400_DESC_COL, (SQLPOINTER)&desc_cols);
-              data_cols[t] = (SQLPOINTER) malloc(1024);
-              indPtr[t] = 1024;
-              sqlrc = SQL400AddCVar(t + 1, 0, SQL_C_CHAR, (SQLPOINTER)data_cols[t], &indPtr[t], (SQLPOINTER) &call_cols);
-            }
-            sqlrc == SQL_SUCCESS;
-            c1 = 0;
-            while (sqlrc == SQL_SUCCESS) {
-              for (t=0; t < pccol; t++) {
-                memset(data_cols[t],0,1024);
-              }
-              sqlrc = SQL400Fetch(hstmt, start_row, (SQLPOINTER)&call_cols, (SQLPOINTER)&desc_cols);
-              if (sqlrc == SQL_SUCCESS) {
-                if (!c1) {
-                  run_output(RUN_START_ARRAY_NAME,outrun,outlen,run_sql_fetch_row,rf);
-                  c1 = 1;
-                } else {
-                  run_output(RUN_COMMA,outrun,outlen,NULL,rf);
-                }
-                run_output(RUN_START,outrun,outlen,NULL,rf);
-                for (t=0; t < pccol; t++) {
-                  run_sql_fetch_assoc[0] = desc_cols[t].szColName;
-                  run_sql_fetch_assoc[1] = data_cols[t];
-                  run_output(RUN_NAME_VALUE_STRING,outrun,outlen,run_sql_fetch_assoc,rf);
-                  if (t < pccol - 1) {
-                    run_output(RUN_COMMA,outrun,outlen,NULL,rf);
-                  }
-                }
-                run_output(RUN_END,outrun,outlen,NULL,rf);
-              }
-            }
-            if (c1) {
-              run_output(RUN_END_ARRAY,outrun,outlen,NULL,rf);
+            sqlrc = SQL400FetchArray(hstmt, 
+              start_row, 
+              max_rows, 
+              (SQLINTEGER *) &cnt_rows, 
+              (SQLINTEGER *) &more_rows, 
+              (SQLINTEGER *) &cnt_cols, 
+              (SQLPOINTER *) &out_rows, 
+              (SQLPOINTER *) &out_decs, 
+              all_char, 
+              expand_factor);
+            if (sqlrc == SQL_ERROR) {
+              run_output(RUN_ERROR,outrun,outlen,run_sql_fetch_error,rf);
+              fatal = 1;
             }
           }
+          if (!fatal) {
+            sqlrc == SQL_SUCCESS;
+            argv = (char **) out_rows;
+            opts = (SQL400DescStruct *) out_decs;
+            for (t=0; t < cnt_rows; t++) {
+              prms = (SQL400ParamStruct *) argv[t];
+              if (!t) {
+                run_output(RUN_START_ARRAY_NAME,outrun,outlen,run_sql_fetch_row,rf);
+                run_output(RUN_START,outrun,outlen,NULL,rf);
+              } else {
+                run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+                run_output(RUN_START,outrun,outlen,NULL,rf);
+              }
+              for (j=0; j < cnt_cols; j++) {
+                opt = (SQL400DescStruct *)&opts[j];
+                prm = (SQL400ParamStruct *)&prms[j];
+                run_sql_fetch_assoc[0] = opt->szColName;
+                run_sql_fetch_assoc[1] = prm->pfSqlCValue;
+                run_output(RUN_NAME_VALUE_STRING,outrun,outlen,run_sql_fetch_assoc,rf);
+                if (j < cnt_cols - 1) {
+                  run_output(RUN_COMMA,outrun,outlen,NULL,rf);
+                } /* for j */
+              }
+              run_output(RUN_END,outrun,outlen,NULL,rf);
+            } /* for t */
+            if (cnt_rows > 0) {
+              run_output(RUN_END_ARRAY,outrun,outlen,NULL,rf);
+            }
+            sqlrc = SQL400FetchArrayFree(cnt_cols, out_rows, out_decs);
+          }
           run_output(RUN_END,outrun,outlen,NULL,rf);
+          if (hstmt > 0) {
+            sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+          }
           break;
         default:
           break;
