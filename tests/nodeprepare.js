@@ -41,7 +41,12 @@ var auth = "Basic " + new Buffer(usern + ":" + passw).toString("base64");
 var myreq = 
 {
  "sql": {
-   "frog": null
+   "connect": {
+     "qualify": "myconn"
+   },
+   "prepare": "select * from qiws.qcustcdt where LSTNAM like ?",
+   "execute": {"parm":"J%"},
+   "fetch": "*"
  }
 };
 var myjson = JSON.stringify(myreq);

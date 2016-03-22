@@ -9,6 +9,10 @@
 #include "PaseCliRun.h"
 #include "PaseCliJson.h"
 
+static char * run_junk = 
+ "junk";
+
+
 static char * run_start = 
  "{";
 static char * run_start_name[] = 
@@ -186,7 +190,7 @@ int json_parse_hash(char * jsoni, void **out_name, void **out_value)
   ptr = jsoni;
   for (i=0; ; i++) {
     /* pointer(s) to name(s) and value(s) */
-    if (argc < i + 1) {
+    if (argc < i + 2) {
       oldSz = argc * sizeof(name_beg);
       argc += 256;
       newSz = argc * sizeof(name_beg);
@@ -262,7 +266,10 @@ int json_parse_hash(char * jsoni, void **out_name, void **out_value)
       break;
     }
   }
-  return i;
+  ptr = run_junk;
+  name[i] = ptr;
+  value[i] = ptr;
+  return i+1;
 }
 
 

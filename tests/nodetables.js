@@ -41,7 +41,15 @@ var auth = "Basic " + new Buffer(usern + ":" + passw).toString("base64");
 var myreq = 
 {
  "sql": {
-   "frog": null
+   "connect": {
+     "qualify": "myconn"
+   },
+   "tables": {
+     "schema": "QIWS",
+     "name": "QCUST%",
+     "type": "ALL"
+   },
+   "fetch": "*"
  }
 };
 var myjson = JSON.stringify(myreq);
