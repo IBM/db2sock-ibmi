@@ -253,5 +253,4 @@ if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align co
 BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
 
 #License
-BSD
-
+MIT
