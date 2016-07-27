@@ -202,10 +202,18 @@ set test authorization (shell)
 We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
 
 # build
+All make files have been converted to gcc compiles.
 ```
 > python gen.py
-> ./xlcmakeall
+> ./make_libdb400.sh
 ```
+
+I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
+```
+> pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
+```
+
+
 Alternative pre-compiled Yips binary
 
 * http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver 
