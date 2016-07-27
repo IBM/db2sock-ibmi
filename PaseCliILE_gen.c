@@ -9,11 +9,11 @@
 #include "PaseCliAsync.h"
 
   /* gcc compiler
-   * as400_types.h  
+   * as400_types.h (edit change required)
    * #if defined( __GNUC__ )
-   *   long double align __attribute__((aligned(16))); gcc force
+   *   long double align __attribute__((aligned(16)));
    * #else 
-   *   long double; Force xlc quadword alignment (with -qldbl128 -qalign=natural)
+   *   long double;
    * #endif 
    * 
    * Use we also need cast ulong to match size of pointer 32/64 
