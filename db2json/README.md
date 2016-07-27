@@ -34,8 +34,15 @@ ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
   CGIConvMode BINARY
 </Directory>
 
+
+Note: Must use CGIConvMode BINARY for directory.
+```
+
+# run
+
+```
 set test authorization (shell)
-> export SQL_HOST400=lp0364d
+> export SQL_HOST400=myibmi
 > export SQL_DB400=*LOCAL
 > export SQL_UID400=MYUID
 > export SQL_PWD400=MYPWD
@@ -48,14 +55,12 @@ set test authorization (shell)
 > tests/curltestnull.sh
 ```
 
-Note: Must use CGIConvMode BINARY for directory.
-
 
 # json
 ```
 Query:
 {
-"connect":{"database":"*LOCAL","user":"DB2","password":"NICE2DB2", "qualify":"myconn"},
+"connect":{"database":"*LOCAL","user":"DB2","password":"XXXXX", "qualify":"myconn"},
 "prepare":"select * from qiws.qcustcdt where lstnam like ?",
 "execute":"Hen%",
 "fetch":"*"

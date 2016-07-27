@@ -2,7 +2,6 @@
 
 lang_wait_init
 lang_wait_complete
-lang_wait_read
 lang_wait_done
 lang_strlen_utf16
 lang_expect_count

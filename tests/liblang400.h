@@ -10,7 +10,6 @@
 
 int lang_wait_init();
 int lang_wait_complete();
-int lang_wait_read();
 int lang_wait_done(int loop, int secs);
 
 void lang_expect_count(char * msg, int expect, int actual); 

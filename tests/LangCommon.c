@@ -4,12 +4,14 @@
 #include <unistd.h>
 #include <string.h>
 #include <sqlcli1.h>
+#include "test.h"
 #include "PaseCliAsync.h"
 #include "liblang400.h"
 
 pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
 static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
 static int lang_waiter = 0;
+static int lang_debug = 0;
 
 /* global table lock
  * This lock is 'lock once'.
@@ -25,31 +27,56 @@ void lang_unlock() {
 }
 
 int lang_wait_init() {
+  int rc = 0;
+  char * bug = getenv(SQL_DEBUG400);
   lang_lock();
+  if (bug) {
+    lang_debug = 1;
+  } else {
+    lang_debug = 0;
+  }
   lang_waiter = 0;
   lang_unlock();
+  if (bug) {
+    rc = lang_wait_done(1, 1);
+  }
 }
-int lang_wait_complete() {
-  lang_lock();
-  lang_waiter = 1;
-  lang_unlock();
-}
-int lang_wait_read() {
+int lang_wait_read_wait() {
   int rc = 0;
   lang_lock();
   rc = lang_waiter;
   lang_unlock();
   return rc;
 }
+int lang_wait_read_debug(int secs) {
+  int rc = 0;
+  lang_lock();
+  rc = lang_debug;
+  lang_unlock();
+  if (rc) {
+    rc = 30;
+    printf("--DEBUG MODE--\nLong sleep, attach pid %d\n--DEBUG MODE--\n", getpid());
+  } else {
+    rc = secs;
+  }
+  return rc;
+}
+int lang_wait_complete() {
+  lang_lock();
+  lang_waiter = 1;
+  lang_unlock();
+}
 int lang_wait_done(int loop, int secs) {
   int i = 0;
   int rc = 0;
+  int sleepy = secs;
   for (i=0;i < loop; i++) {
-    rc = lang_wait_read();
+    rc = lang_wait_read_wait();
     if (rc) {
       break;
     }
-    sleep(secs);
+    sleepy = lang_wait_read_debug(secs);
+    sleep(sleepy);
   }
   return rc;
 }

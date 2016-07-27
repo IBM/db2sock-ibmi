@@ -204,7 +204,10 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 # build
 All make files have been converted to gcc compiles.
 ```
+optional (git) ...
 > python gen.py
+
+gcc compiles ...
 > ./make_libdb400.sh
 ```
 
