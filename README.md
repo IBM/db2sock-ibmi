@@ -246,12 +246,9 @@ run 32-bit or 64-bit
 ```
 
 ##Note:
-
-When using xlc, use options -qldbl128 -qalign=natural. 
-Missing these options will result in ILE DB2 call failures.
-See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
-
+All make files have been converted to gcc compiles. 
 In switching to gcc, you have to edit PASE header.
+
 ```
 /usr/include/as400_types.h:
 /*
@@ -263,9 +260,9 @@ typedef union _ILEpointer {
 #endif
 /* CAUTION: Some compilers only provide 64-bits for long double */
 #if defined( __GNUC__ )
-    long double	align __attribute__((aligned(16)));
+    long double	align __attribute__((aligned(16))); /* force gcc align quadword */
 #else
-    long double;	/* Force xlc quadword alignment (with -qldbl128 -qalign=natural) */
+    long double align;	/* Force xlc quadword alignment (with -qldbl128 -qalign=natural) */
 #endif
 #ifndef _AIX
     void		*openPtr; /* MI open pointer (tagged quadword) */
@@ -276,9 +273,19 @@ typedef union _ILEpointer {
     } s;
 } ILEpointer;
 
+
+gcc code tip unsigned long long ...
+
 gcc bug cast to unsigned long long not work (bad sign extend), 
 therefore we also need cast ulong to match size of pointer 32/64 
    arglist->ohnd.s.addr = (ulong) ohnd; /* silly gcc compiler */
+
+xlc no longer supported ...
+
+When using xlc, use options -qldbl128 -qalign=natural. 
+Missing these options will result in ILE DB2 call failures.
+See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
+
 
 
 extra stuff i use ...
