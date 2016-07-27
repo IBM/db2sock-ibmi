@@ -1059,4 +1059,11 @@ SQLRETURN SQL400Json(
  SQLCHAR * outjson,
  SQLINTEGER outlen)
 
+SQLRETURN SQL400Json2(
+ SQLHDBC hdbc,
+ SQLCHAR * injson,
+ SQLINTEGER inlen,
+ SQLCHAR * outjson,
+ SQLINTEGER outlen)
+
 

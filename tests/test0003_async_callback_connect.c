@@ -26,12 +26,15 @@ char pwd_utf8[11];
 
 /* callback sends SQL400ConnectStruct (PaseCliAsync.h) */
 void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t ptid = pthread_self();
   printf("SQL400ConnectCallback (thread %d): hi there from callback thread\n",ptid);
   printf("SQL400ConnectCallback (thread %d): complete: sqlrc=%d, henv=%d, db=%s uid=%s pwd=xxxx *ohnd=%d options=%p callback=%p\n",
     ptid, myptr->sqlrc, myptr->henv, myptr->db, myptr->uid, *(myptr->ohnd), myptr->options, myptr->callback);
   lang_check_sqlrc(SQL_HANDLE_DBC, *(myptr->ohnd), myptr->sqlrc, 1, &sqlcode);
   free(myptr);
+  sqlrc = lang_wait_complete();
+  printf("SQL400ConnectCallback (thread %d): leaving\n",ptid);
 }
 
 int main(int argc, char * argv[]) {
@@ -51,6 +54,7 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400Environment( &henv, (SQLPOINTER)&pophenv );
   lang_check_sqlrc(SQL_HANDLE_ENV, henv, sqlrc, 1, &sqlcode);
   /* async connection */
+  sqlrc = lang_wait_init();
   sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
   sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
   sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
@@ -58,6 +62,8 @@ int main(int argc, char * argv[]) {
   printf("SQL400ConnectAsync (thread %d): connect running\n", tid);
   printf("SQL400ConnectAsync (thread %d): hi there from main thread\n",ptid);
   lang_expect_greater("tid valid",expect,tid);
+  sqlrc = lang_wait_done(3, 2);
+  lang_expect_count("operation complete", expect, sqlrc);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

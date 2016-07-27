@@ -29,7 +29,7 @@ SQLINTEGER indPtr1 = 0;
 SQLINTEGER indPtr2 = 0;
 SQLINTEGER indPtr3 = 0;
 SQLINTEGER indPtr4 = 0;
-char * qry1 = "call zendsvr6.iPLUG512K(?,?,?,?)";
+char * qry1 = "call xmlservice.iPLUG512K(?,?,?,?)";
 char * prm1 = "*nada";
 char * prm2 = "*here";
 char * prm3 = "\
@@ -83,6 +83,7 @@ char prm3_utf8[2048];
 
 /* callback sends SQL400ExecuteStruct (PaseCliAsync.h) */
 void SQL400ExecuteCallback(SQL400ExecuteStruct* myptr) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   SQL400ParamStruct * prms = (SQL400ParamStruct *) NULL; 
@@ -94,6 +95,7 @@ void SQL400ExecuteCallback(SQL400ExecuteStruct* myptr) {
   prms = (SQL400ParamStruct *) myptr->parms;
   printf("SQL400ExecuteCallback (thread %d): output parm 4 = %s\n",ptid, prms[3].pfSqlCValue);
   free(myptr);
+  sqlrc = lang_wait_complete();
   printf("SQL400ExecuteCallback (thread %d): leaving\n",ptid);
 }
 
@@ -237,7 +239,10 @@ int main(int argc, char * argv[]) {
   uid = getenv(SQL_UID400);
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
+  sqlrc = lang_wait_init();
   main_environ();
+  sqlrc = lang_wait_done(3, 2);
+  lang_expect_count("operation complete", expect, sqlrc);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;

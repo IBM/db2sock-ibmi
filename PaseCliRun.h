@@ -9,6 +9,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <iconv.h>
+#include <sqlcli1.h>
 #include <as400_types.h>
 #include <as400_protos.h>
 
@@ -28,6 +29,7 @@ enum run_out {
 };
 
 SQLRETURN run_main(
+ SQLHDBC  hdbc,
  SQLCHAR * injson,
  SQLINTEGER inlen,
  SQLCHAR * outjson,
@@ -583,5 +585,5 @@ SQLRETURN run_main(
 */
 
 
-#endif /* _PASECLIJSON_H */
+#endif /* _PASECLIRUN_H */
 

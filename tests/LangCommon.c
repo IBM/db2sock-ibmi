@@ -7,6 +7,53 @@
 #include "PaseCliAsync.h"
 #include "liblang400.h"
 
+pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
+static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
+static int lang_waiter = 0;
+
+/* global table lock
+ * This lock is 'lock once'.
+ * That is, not PTHREAD_MUTEX_RECURSIVE,
+ * therefore do not call twice, will hang.
+ */
+void lang_lock() {
+  pthread_mutex_lock(&threadMutexLock);
+}
+
+void lang_unlock() {
+  pthread_mutex_unlock(&threadMutexLock);
+}
+
+int lang_wait_init() {
+  lang_lock();
+  lang_waiter = 0;
+  lang_unlock();
+}
+int lang_wait_complete() {
+  lang_lock();
+  lang_waiter = 1;
+  lang_unlock();
+}
+int lang_wait_read() {
+  int rc = 0;
+  lang_lock();
+  rc = lang_waiter;
+  lang_unlock();
+  return rc;
+}
+int lang_wait_done(int loop, int secs) {
+  int i = 0;
+  int rc = 0;
+  for (i=0;i < loop; i++) {
+    rc = lang_wait_read();
+    if (rc) {
+      break;
+    }
+    sleep(secs);
+  }
+  return rc;
+}
+
 
 int lang_strlen_utf16(unsigned int * src) {
   int len = 0;

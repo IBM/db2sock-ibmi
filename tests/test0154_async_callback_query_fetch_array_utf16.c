@@ -95,6 +95,7 @@ void main_fetch(SQLHANDLE hstmt) {
     }
   }
   sqlrc = SQL400FetchArrayFree(cnt_cols, out_rows, out_decs);
+  sqlrc = lang_wait_complete();
   printf("main_fetch (thread %d): leaving\n",ptid);
 }
 
@@ -207,7 +208,10 @@ int main(int argc, char * argv[]) {
   uid = getenv(SQL_UID400);
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
+  sqlrc = lang_wait_init();
   main_environ();
+  sqlrc = lang_wait_done(3, 2);
+  lang_expect_count("operation complete", expect, sqlrc);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;

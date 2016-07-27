@@ -29,7 +29,7 @@ SQLINTEGER indPtr1 = 0;
 SQLINTEGER indPtr2 = 0;
 SQLINTEGER indPtr3 = 0;
 SQLINTEGER indPtr4 = 0;
-char * qry1 = "call zendsvr6.iPLUG512K(?,?,?,?)";
+char * qry1 = "call xmlservice.iPLUG512K(?,?,?,?)";
 char * prm1 = "*nada";
 char * prm2 = "*here";
 char * prm3 = "\
@@ -101,6 +101,7 @@ void SQL400ExecuteCallback(SQL400ExecuteStruct* myptr) {
   printf("SQL400ExecuteCallback (thread %d): output parm 4 = %s\n",ptid, prms[3].pfSqlCValue);
   sqlrc = SQL400ParmsFree(4, myptr->parms, myptr->desc_parms);
   free(myptr);
+  sqlrc = lang_wait_complete();
   printf("SQL400ExecuteCallback (thread %d): leaving\n",ptid);
 }
 
@@ -235,7 +236,10 @@ int main(int argc, char * argv[]) {
   uid = getenv(SQL_UID400);
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
+  sqlrc = lang_wait_init();
   main_environ();
+  sqlrc = lang_wait_done(3, 2);
+  lang_expect_count("operation complete", expect, sqlrc);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;

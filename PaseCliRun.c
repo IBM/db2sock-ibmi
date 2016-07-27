@@ -64,13 +64,13 @@ void run_output_invalid(int flag, char *outrun, int outlen, char *bad, char *arg
 }
 
 
-static int run_script(int argc, char *name[], char *value[], SQLCHAR * outrun, SQLINTEGER outlen, int rf)
+static int run_script(SQLHANDLE hdbc_user, int argc, char *name[], char *value[], SQLCHAR * outrun, SQLINTEGER outlen, int rf)
 {
   int i = 0, j = 0, t = 0, sz = 0;
   int fatal = 0, expect = 0;
   SQLRETURN sqlrc = 0;
   SQLHANDLE henv = 0;
-  SQLHANDLE hdbc = 0;
+  SQLHANDLE hdbc = hdbc_user;
   SQLHANDLE hstmt = 0;
   SQLINTEGER yes = SQL_TRUE;
   SQL400AttrStruct pophenv[3];
@@ -455,6 +455,7 @@ static int valid_utf8(char * j)
 }
 
 SQLRETURN run_main(
+ SQLHDBC  hdbc,
  SQLCHAR * inrun,
  SQLINTEGER inlen,
  SQLCHAR * outrun,
@@ -494,7 +495,7 @@ SQLRETURN run_main(
     break;
   }
 
-  rc = run_script(argc, name, value, outrun, outlen, rf);
+  rc = run_script(hdbc, argc, name, value, outrun, outlen, rf);
 
   return rc;
 }

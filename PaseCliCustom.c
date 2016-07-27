@@ -1727,6 +1727,17 @@ SQLRETURN custom_SQL400Json(
  SQLCHAR * outjson,
  SQLINTEGER outlen)
 {
-  return run_main(injson, inlen, outjson, outlen, 0);
+  return run_main(0, injson, inlen, outjson, outlen, 0);
+}
+
+
+SQLRETURN custom_SQL400Json2(
+ SQLHDBC  hdbc,
+ SQLCHAR * injson,
+ SQLINTEGER inlen,
+ SQLCHAR * outjson,
+ SQLINTEGER outlen)
+{
+  return run_main(hdbc, injson, inlen, outjson, outlen, 0);
 }
 

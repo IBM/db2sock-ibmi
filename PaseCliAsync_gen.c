@@ -9904,3 +9904,54 @@ SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400Json2( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400Json2( hdbc, injson, inlen, outjson, outlen );
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400Json2Thread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400Json2Struct * myptr = (SQL400Json2Struct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400Json2( myptr->hdbc, myptr->injson, myptr->inlen, myptr->outjson, myptr->outlen );
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400Json2Callback(SQL400Json2Struct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400Json2Struct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400Json2Async ( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400Json2Struct * myptr = (SQL400Json2Struct *) malloc(sizeof(SQL400Json2Struct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->injson = injson;
+  myptr->inlen = inlen;
+  myptr->outjson = outjson;
+  myptr->outlen = outlen;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400Json2Thread, (void *)myptr);
+  return tid;
+}
+SQL400Json2Struct * SQL400Json2Join (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400Json2Struct * myptr = (SQL400Json2Struct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400Json2Struct *) NULL;
+  }
+  return myptr;
+}
