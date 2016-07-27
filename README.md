@@ -290,5 +290,4 @@ scp -r . adc@ut28p63:/QOpenSys/monoroot/home/monoroot/libdb400
 ```
 
 #License
-BSD
-
+MIT
