@@ -1,7 +1,0 @@
-#!/bin/sh
-rm *.o
-gmake -f xlcmakefile
-rm *.o
-gmake -f xlcmakefile TGT64=64
-rm *.o
-
