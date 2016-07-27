@@ -282,6 +282,18 @@ typedef union _ILEpointer {
 } ILEpointer;
 
 
+gcc options in Makefile ...
+
+### gmake
+### gmake TGT64=64
+### gcc options
+### -v            - verbose compile
+### -Wl,-bnoquiet - verbose linker
+### -shared       - shared object
+### -maix64       - 64bit
+### -isystem      - compile PASE system headers
+### -nostdlib     - remove libgcc_s.a and crtcxa_s.o
+
 gcc code tip unsigned long long ...
 
 gcc bug cast to unsigned long long not work (bad sign extend), 
