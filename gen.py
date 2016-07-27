@@ -263,7 +263,6 @@ ile_wide_api = {'nothing': 'nothing'}
 for line in pre:
 
   # start of SQL function ..
-  # int SQLOverrideCCSID400
   # SQLRETURN SQLxxx(
   if "SQLRETURN SQL" in line:
    # parse function
@@ -310,7 +309,6 @@ PaseCliILE_c_main = ""
 for line in f:
 
   # start of SQL function ..
-  # int SQLOverrideCCSID400
   # SQLRETURN SQLxxx(
   if "SQLRETURN SQL" in line:
     g = True
@@ -472,7 +470,7 @@ for line in f:
     ILE_struct_sigs += ' ' + sigile + comma
     # ILE copyin params
     if sigile == 'ARG_MEMPTR':
-      ILE_copyin_args += '  arglist->' + argname + '.s.addr = (address64_t) ' + argname + ";" + "\n"
+      ILE_copyin_args += '  arglist->' + argname + '.s.addr = (ulong) ' + argname + ";" + "\n"
     else:
       ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
 
@@ -552,7 +550,10 @@ for line in f:
   # SQLRETURN SQLAllocEnv( SQLHENV * phenv )
   # { 
   # }
-  PaseCliAsync_c_main += call_retv + ' ' + call_name + '(' + normal_call_args + ' )' + "\n"
+  if c400_CCSID:
+    PaseCliAsync_c_main += 'int SQLOverrideCCSID400(int newCCSID)' + "\n"
+  else:
+    PaseCliAsync_c_main += call_retv + ' ' + call_name + '(' + normal_call_args + ' )' + "\n"
   PaseCliAsync_c_main += "{" + "\n"
   PaseCliAsync_c_main += "  SQLRETURN sqlrc = SQL_SUCCESS;" + "\n"
   # special handling routines
@@ -872,6 +873,18 @@ file_local_incl += '#include "PaseCliAsync.h"' + "\n"
 file_PaseCliILE_c = ""
 file_PaseCliILE_c += file_pase_incl
 file_PaseCliILE_c += file_local_incl
+file_PaseCliILE_c += "" + "\n"
+file_PaseCliILE_c += '  /* gcc compiler' + "\n"
+file_PaseCliILE_c += '   * as400_types.h  ' + "\n"
+file_PaseCliILE_c += '   * #if defined( __GNUC__ )' + "\n"
+file_PaseCliILE_c += '   *   long double align __attribute__((aligned(16))); gcc force' + "\n"
+file_PaseCliILE_c += '   * #else ' + "\n"
+file_PaseCliILE_c += '   *   long double; Force xlc quadword alignment (with -qldbl128 -qalign=natural)' + "\n"
+file_PaseCliILE_c += '   * #endif ' + "\n"
+file_PaseCliILE_c += '   * ' + "\n"
+file_PaseCliILE_c += '   * Use we also need cast ulong to match size of pointer 32/64 ' + "\n"
+file_PaseCliILE_c += '   *   arglist->ohnd.s.addr = (ulong) ohnd;' + "\n"
+file_PaseCliILE_c += '   */' + "\n"
 file_PaseCliILE_c += "" + "\n"
 file_PaseCliILE_c += '#define ROUND_QUAD(x) (((size_t)(x) + 0xf) & ~0xf)' + "\n"
 file_PaseCliILE_c += "" + "\n"

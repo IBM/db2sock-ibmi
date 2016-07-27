@@ -2,8 +2,7 @@
 
 lang_strlen_utf16
 lang_expect_count
-lang_expect_count_jobs
-lang_out_jobs
+lang_expect_greater
 lang_check_sqlrc
 lang_check_sqlrcW
 

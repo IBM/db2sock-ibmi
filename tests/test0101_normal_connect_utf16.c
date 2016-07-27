@@ -26,7 +26,7 @@ char pwd_utf16[22];
 
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int expect = 1;
+  int expect = 2;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
@@ -44,8 +44,7 @@ int main(int argc, char * argv[]) {
   sqlrc = SQL400ConnectW(henv, (SQLWCHAR *) &db_utf16, (SQLWCHAR *) &uid_utf16, (SQLWCHAR *) &pwd_utf16, &hdbc, (SQLPOINTER)&pophdbc);
   lang_check_sqlrc(SQL_HANDLE_DBC, hdbc, sqlrc, 1, &sqlcode);
   printf("SQL400ConnectW: complete\n");
-  lang_out_jobs(uid);
-  lang_expect_count_jobs(expect, uid);
+  lang_expect_count("expect connect handle number", expect, hdbc);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

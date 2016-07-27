@@ -8,6 +8,18 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
+  /* gcc compiler
+   * as400_types.h  
+   * #if defined( __GNUC__ )
+   *   long double align __attribute__((aligned(16))); gcc force
+   * #else 
+   *   long double; Force xlc quadword alignment (with -qldbl128 -qalign=natural)
+   * #endif 
+   * 
+   * Use we also need cast ulong to match size of pointer 32/64 
+   *   arglist->ohnd.s.addr = (ulong) ohnd;
+   */
+
 #define ROUND_QUAD(x) (((size_t)(x) + 0xf) & ~0xf)
 
 SQLINTEGER SQLAllocConnectLoaded;
@@ -402,7 +414,7 @@ SQLRETURN ILE_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
     SQLAllocConnectLoaded = 1;
   }
   arglist->henv = (SQLHENV) henv;
-  arglist->phdbc.s.addr = (address64_t) phdbc;
+  arglist->phdbc.s.addr = (ulong) phdbc;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -429,7 +441,7 @@ SQLRETURN ILE_SQLAllocEnv( SQLHENV * phenv )
     }
     SQLAllocEnvLoaded = 1;
   }
-  arglist->phenv.s.addr = (address64_t) phenv;
+  arglist->phenv.s.addr = (ulong) phenv;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocEnvIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -458,7 +470,7 @@ SQLRETURN ILE_SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER *
   }
   arglist->htype = (SQLSMALLINT) htype;
   arglist->ihnd = (SQLINTEGER) ihnd;
-  arglist->ohnd.s.addr = (address64_t) ohnd;
+  arglist->ohnd.s.addr = (ulong) ohnd;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocHandleIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -486,7 +498,7 @@ SQLRETURN ILE_SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
     SQLAllocStmtLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->phstmt.s.addr = (address64_t) phstmt;
+  arglist->phstmt.s.addr = (ulong) phstmt;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLAllocStmtIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -516,9 +528,9 @@ SQLRETURN ILE_SQLBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->iType = (SQLSMALLINT) iType;
-  arglist->rgbValue.s.addr = (address64_t) rgbValue;
+  arglist->rgbValue.s.addr = (ulong) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -547,12 +559,12 @@ SQLRETURN ILE_SQLBindFileToCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fN
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
-  arglist->fName.s.addr = (address64_t) fName;
-  arglist->fNameLen.s.addr = (address64_t) fNameLen;
-  arglist->fOptions.s.addr = (address64_t) fOptions;
+  arglist->fName.s.addr = (ulong) fName;
+  arglist->fNameLen.s.addr = (ulong) fNameLen;
+  arglist->fOptions.s.addr = (ulong) fOptions;
   arglist->fValueMax = (SQLSMALLINT) fValueMax;
-  arglist->sLen.s.addr = (address64_t) sLen;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->sLen.s.addr = (ulong) sLen;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindFileToColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -582,11 +594,11 @@ SQLRETURN ILE_SQLBindFileToParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLIN
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->ipar = (SQLSMALLINT) ipar;
   arglist->iType = (SQLSMALLINT) iType;
-  arglist->fName.s.addr = (address64_t) fName;
-  arglist->fNameLen.s.addr = (address64_t) fNameLen;
-  arglist->fOptions.s.addr = (address64_t) fOptions;
+  arglist->fName.s.addr = (ulong) fName;
+  arglist->fNameLen.s.addr = (ulong) fNameLen;
+  arglist->fOptions.s.addr = (ulong) fOptions;
   arglist->fValueMax = (SQLSMALLINT) fValueMax;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindFileToParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -619,8 +631,8 @@ SQLRETURN ILE_SQLBindParam( SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iT
   arglist->pType = (SQLSMALLINT) pType;
   arglist->pLen = (SQLINTEGER) pLen;
   arglist->pScale = (SQLSMALLINT) pScale;
-  arglist->pData.s.addr = (address64_t) pData;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->pData.s.addr = (ulong) pData;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -654,9 +666,9 @@ SQLRETURN ILE_SQLBindParameter( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   arglist->fSQLType = (SQLSMALLINT) fSQLType;
   arglist->pLen = (SQLINTEGER) pLen;
   arglist->pScale = (SQLSMALLINT) pScale;
-  arglist->pData.s.addr = (address64_t) pData;
+  arglist->pData.s.addr = (ulong) pData;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLBindParameterIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -740,10 +752,10 @@ SQLRETURN ILE_SQLColAttribute( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->fDescType = (SQLSMALLINT) fDescType;
-  arglist->rgbDesc.s.addr = (address64_t) rgbDesc;
+  arglist->rgbDesc.s.addr = (ulong) rgbDesc;
   arglist->cbDescMax = (SQLSMALLINT) cbDescMax;
-  arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
-  arglist->pfDesc.s.addr = (address64_t) pfDesc;
+  arglist->pcbDesc.s.addr = (ulong) pcbDesc;
+  arglist->pfDesc.s.addr = (ulong) pfDesc;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributeIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -773,10 +785,10 @@ SQLRETURN ILE_SQLColAttributeW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->fDescType = (SQLSMALLINT) fDescType;
-  arglist->rgbDesc.s.addr = (address64_t) rgbDesc;
+  arglist->rgbDesc.s.addr = (ulong) rgbDesc;
   arglist->cbDescMax = (SQLSMALLINT) cbDescMax;
-  arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
-  arglist->pfDesc.s.addr = (address64_t) pfDesc;
+  arglist->pcbDesc.s.addr = (ulong) pcbDesc;
+  arglist->pfDesc.s.addr = (ulong) pfDesc;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributeWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -806,10 +818,10 @@ SQLRETURN ILE_SQLColAttributes( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT 
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->fDescType = (SQLSMALLINT) fDescType;
-  arglist->rgbDesc.s.addr = (address64_t) rgbDesc;
+  arglist->rgbDesc.s.addr = (ulong) rgbDesc;
   arglist->cbDescMax = (SQLINTEGER) cbDescMax;
-  arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
-  arglist->pfDesc.s.addr = (address64_t) pfDesc;
+  arglist->pcbDesc.s.addr = (ulong) pcbDesc;
+  arglist->pfDesc.s.addr = (ulong) pfDesc;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -839,10 +851,10 @@ SQLRETURN ILE_SQLColAttributesW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->fDescType = (SQLSMALLINT) fDescType;
-  arglist->rgbDesc.s.addr = (address64_t) rgbDesc;
+  arglist->rgbDesc.s.addr = (ulong) rgbDesc;
   arglist->cbDescMax = (SQLINTEGER) cbDescMax;
-  arglist->pcbDesc.s.addr = (address64_t) pcbDesc;
-  arglist->pfDesc.s.addr = (address64_t) pfDesc;
+  arglist->pcbDesc.s.addr = (ulong) pcbDesc;
+  arglist->pfDesc.s.addr = (ulong) pfDesc;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColAttributesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -870,13 +882,13 @@ SQLRETURN ILE_SQLColumnPrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, 
     SQLColumnPrivilegesLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnPrivilegesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -905,13 +917,13 @@ SQLRETURN ILE_SQLColumnPrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier
     SQLColumnPrivilegesWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnPrivilegesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -940,13 +952,13 @@ SQLRETURN ILE_SQLColumns( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLI
     SQLColumnsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -975,13 +987,13 @@ SQLRETURN ILE_SQLColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMAL
     SQLColumnsWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLColumnsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1010,11 +1022,11 @@ SQLRETURN ILE_SQLConnect( SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQ
     SQLConnectLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->szDSN.s.addr = (address64_t) szDSN;
+  arglist->szDSN.s.addr = (ulong) szDSN;
   arglist->cbDSN = (SQLSMALLINT) cbDSN;
-  arglist->szUID.s.addr = (address64_t) szUID;
+  arglist->szUID.s.addr = (ulong) szUID;
   arglist->cbUID = (SQLSMALLINT) cbUID;
-  arglist->szAuthStr.s.addr = (address64_t) szAuthStr;
+  arglist->szAuthStr.s.addr = (ulong) szAuthStr;
   arglist->cbAuthStr = (SQLSMALLINT) cbAuthStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1043,11 +1055,11 @@ SQLRETURN ILE_SQLConnectW( SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, 
     SQLConnectWLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->szDSN.s.addr = (address64_t) szDSN;
+  arglist->szDSN.s.addr = (ulong) szDSN;
   arglist->cbDSN = (SQLSMALLINT) cbDSN;
-  arglist->szUID.s.addr = (address64_t) szUID;
+  arglist->szUID.s.addr = (ulong) szUID;
   arglist->cbUID = (SQLSMALLINT) cbUID;
-  arglist->szAuthStr.s.addr = (address64_t) szAuthStr;
+  arglist->szAuthStr.s.addr = (ulong) szAuthStr;
   arglist->cbAuthStr = (SQLSMALLINT) cbAuthStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLConnectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1105,12 +1117,12 @@ SQLRETURN ILE_SQLDataSources( SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * 
   }
   arglist->henv = (SQLHENV) henv;
   arglist->fDirection = (SQLSMALLINT) fDirection;
-  arglist->szDSN.s.addr = (address64_t) szDSN;
+  arglist->szDSN.s.addr = (ulong) szDSN;
   arglist->cbDSNMax = (SQLSMALLINT) cbDSNMax;
-  arglist->pcbDSN.s.addr = (address64_t) pcbDSN;
-  arglist->szDescription.s.addr = (address64_t) szDescription;
+  arglist->pcbDSN.s.addr = (ulong) pcbDSN;
+  arglist->szDescription.s.addr = (ulong) szDescription;
   arglist->cbDescriptionMax = (SQLSMALLINT) cbDescriptionMax;
-  arglist->pcbDescription.s.addr = (address64_t) pcbDescription;
+  arglist->pcbDescription.s.addr = (ulong) pcbDescription;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDataSourcesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1139,12 +1151,12 @@ SQLRETURN ILE_SQLDataSourcesW( SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR 
   }
   arglist->henv = (SQLHENV) henv;
   arglist->fDirection = (SQLSMALLINT) fDirection;
-  arglist->szDSN.s.addr = (address64_t) szDSN;
+  arglist->szDSN.s.addr = (ulong) szDSN;
   arglist->cbDSNMax = (SQLSMALLINT) cbDSNMax;
-  arglist->pcbDSN.s.addr = (address64_t) pcbDSN;
-  arglist->szDescription.s.addr = (address64_t) szDescription;
+  arglist->pcbDSN.s.addr = (ulong) pcbDSN;
+  arglist->szDescription.s.addr = (ulong) szDescription;
   arglist->cbDescriptionMax = (SQLSMALLINT) cbDescriptionMax;
-  arglist->pcbDescription.s.addr = (address64_t) pcbDescription;
+  arglist->pcbDescription.s.addr = (ulong) pcbDescription;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDataSourcesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1173,13 +1185,13 @@ SQLRETURN ILE_SQLDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szCo
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
-  arglist->szColName.s.addr = (address64_t) szColName;
+  arglist->szColName.s.addr = (ulong) szColName;
   arglist->cbColNameMax = (SQLSMALLINT) cbColNameMax;
-  arglist->pcbColName.s.addr = (address64_t) pcbColName;
-  arglist->pfSqlType.s.addr = (address64_t) pfSqlType;
-  arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
-  arglist->pibScale.s.addr = (address64_t) pibScale;
-  arglist->pfNullable.s.addr = (address64_t) pfNullable;
+  arglist->pcbColName.s.addr = (ulong) pcbColName;
+  arglist->pfSqlType.s.addr = (ulong) pfSqlType;
+  arglist->pcbColDef.s.addr = (ulong) pcbColDef;
+  arglist->pibScale.s.addr = (ulong) pibScale;
+  arglist->pfNullable.s.addr = (ulong) pfNullable;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1208,13 +1220,13 @@ SQLRETURN ILE_SQLDescribeColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * sz
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
-  arglist->szColName.s.addr = (address64_t) szColName;
+  arglist->szColName.s.addr = (ulong) szColName;
   arglist->cbColNameMax = (SQLSMALLINT) cbColNameMax;
-  arglist->pcbColName.s.addr = (address64_t) pcbColName;
-  arglist->pfSqlType.s.addr = (address64_t) pfSqlType;
-  arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
-  arglist->pibScale.s.addr = (address64_t) pibScale;
-  arglist->pfNullable.s.addr = (address64_t) pfNullable;
+  arglist->pcbColName.s.addr = (ulong) pcbColName;
+  arglist->pfSqlType.s.addr = (ulong) pfSqlType;
+  arglist->pcbColDef.s.addr = (ulong) pcbColDef;
+  arglist->pibScale.s.addr = (ulong) pibScale;
+  arglist->pfNullable.s.addr = (ulong) pfNullable;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeColWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1243,10 +1255,10 @@ SQLRETURN ILE_SQLDescribeParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT 
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->ipar = (SQLSMALLINT) ipar;
-  arglist->pfSqlType.s.addr = (address64_t) pfSqlType;
-  arglist->pcbColDef.s.addr = (address64_t) pcbColDef;
-  arglist->pibScale.s.addr = (address64_t) pibScale;
-  arglist->pfNullable.s.addr = (address64_t) pfNullable;
+  arglist->pfSqlType.s.addr = (ulong) pfSqlType;
+  arglist->pcbColDef.s.addr = (ulong) pcbColDef;
+  arglist->pibScale.s.addr = (ulong) pibScale;
+  arglist->pfNullable.s.addr = (ulong) pfNullable;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDescribeParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1301,12 +1313,12 @@ SQLRETURN ILE_SQLDriverConnect( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szCon
     SQLDriverConnectLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->hwnd.s.addr = (address64_t) hwnd;
-  arglist->szConnStrIn.s.addr = (address64_t) szConnStrIn;
+  arglist->hwnd.s.addr = (ulong) hwnd;
+  arglist->szConnStrIn.s.addr = (ulong) szConnStrIn;
   arglist->cbConnStrin = (SQLSMALLINT) cbConnStrin;
-  arglist->szConnStrOut.s.addr = (address64_t) szConnStrOut;
+  arglist->szConnStrOut.s.addr = (ulong) szConnStrOut;
   arglist->cbConnStrOutMax = (SQLSMALLINT) cbConnStrOutMax;
-  arglist->pcbConnStrOut.s.addr = (address64_t) pcbConnStrOut;
+  arglist->pcbConnStrOut.s.addr = (ulong) pcbConnStrOut;
   arglist->fDriverCompletion = (SQLSMALLINT) fDriverCompletion;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDriverConnectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1335,12 +1347,12 @@ SQLRETURN ILE_SQLDriverConnectW( SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szC
     SQLDriverConnectWLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->hwnd.s.addr = (address64_t) hwnd;
-  arglist->szConnStrIn.s.addr = (address64_t) szConnStrIn;
+  arglist->hwnd.s.addr = (ulong) hwnd;
+  arglist->szConnStrIn.s.addr = (ulong) szConnStrIn;
   arglist->cbConnStrin = (SQLSMALLINT) cbConnStrin;
-  arglist->szConnStrOut.s.addr = (address64_t) szConnStrOut;
+  arglist->szConnStrOut.s.addr = (ulong) szConnStrOut;
   arglist->cbConnStrOutMax = (SQLSMALLINT) cbConnStrOutMax;
-  arglist->pcbConnStrOut.s.addr = (address64_t) pcbConnStrOut;
+  arglist->pcbConnStrOut.s.addr = (ulong) pcbConnStrOut;
   arglist->fDriverCompletion = (SQLSMALLINT) fDriverCompletion;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLDriverConnectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1400,11 +1412,11 @@ SQLRETURN ILE_SQLError( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR *
   arglist->henv = (SQLHENV) henv;
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlState.s.addr = (address64_t) szSqlState;
-  arglist->pfNativeError.s.addr = (address64_t) pfNativeError;
-  arglist->szErrorMsg.s.addr = (address64_t) szErrorMsg;
+  arglist->szSqlState.s.addr = (ulong) szSqlState;
+  arglist->pfNativeError.s.addr = (ulong) pfNativeError;
+  arglist->szErrorMsg.s.addr = (ulong) szErrorMsg;
   arglist->cbErrorMsgMax = (SQLSMALLINT) cbErrorMsgMax;
-  arglist->pcbErrorMsg.s.addr = (address64_t) pcbErrorMsg;
+  arglist->pcbErrorMsg.s.addr = (ulong) pcbErrorMsg;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLErrorIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1434,11 +1446,11 @@ SQLRETURN ILE_SQLErrorW( SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR
   arglist->henv = (SQLHENV) henv;
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlState.s.addr = (address64_t) szSqlState;
-  arglist->pfNativeError.s.addr = (address64_t) pfNativeError;
-  arglist->szErrorMsg.s.addr = (address64_t) szErrorMsg;
+  arglist->szSqlState.s.addr = (ulong) szSqlState;
+  arglist->pfNativeError.s.addr = (ulong) pfNativeError;
+  arglist->szErrorMsg.s.addr = (ulong) szErrorMsg;
   arglist->cbErrorMsgMax = (SQLSMALLINT) cbErrorMsgMax;
-  arglist->pcbErrorMsg.s.addr = (address64_t) pcbErrorMsg;
+  arglist->pcbErrorMsg.s.addr = (ulong) pcbErrorMsg;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLErrorWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1466,7 +1478,7 @@ SQLRETURN ILE_SQLExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cb
     SQLExecDirectLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExecDirectIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1495,7 +1507,7 @@ SQLRETURN ILE_SQLExecDirectW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  
     SQLExecDirectWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExecDirectWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1553,8 +1565,8 @@ SQLRETURN ILE_SQLExtendedFetch( SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGE
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOrient = (SQLSMALLINT) fOrient;
   arglist->fOffset = (SQLINTEGER) fOffset;
-  arglist->pcrow.s.addr = (address64_t) pcrow;
-  arglist->rgfRowStatus.s.addr = (address64_t) rgfRowStatus;
+  arglist->pcrow.s.addr = (ulong) pcrow;
+  arglist->rgfRowStatus.s.addr = (ulong) rgfRowStatus;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLExtendedFetchIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1638,17 +1650,17 @@ SQLRETURN ILE_SQLForeignKeys( SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQL
     SQLForeignKeysLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szPkTableQualifier.s.addr = (address64_t) szPkTableQualifier;
+  arglist->szPkTableQualifier.s.addr = (ulong) szPkTableQualifier;
   arglist->cbPkTableQualifier = (SQLSMALLINT) cbPkTableQualifier;
-  arglist->szPkTableOwner.s.addr = (address64_t) szPkTableOwner;
+  arglist->szPkTableOwner.s.addr = (ulong) szPkTableOwner;
   arglist->cbPkTableOwner = (SQLSMALLINT) cbPkTableOwner;
-  arglist->szPkTableName.s.addr = (address64_t) szPkTableName;
+  arglist->szPkTableName.s.addr = (ulong) szPkTableName;
   arglist->cbPkTableName = (SQLSMALLINT) cbPkTableName;
-  arglist->szFkTableQualifier.s.addr = (address64_t) szFkTableQualifier;
+  arglist->szFkTableQualifier.s.addr = (ulong) szFkTableQualifier;
   arglist->cbFkTableQualifier = (SQLSMALLINT) cbFkTableQualifier;
-  arglist->szFkTableOwner.s.addr = (address64_t) szFkTableOwner;
+  arglist->szFkTableOwner.s.addr = (ulong) szFkTableOwner;
   arglist->cbFkTableOwner = (SQLSMALLINT) cbFkTableOwner;
-  arglist->szFkTableName.s.addr = (address64_t) szFkTableName;
+  arglist->szFkTableName.s.addr = (ulong) szFkTableName;
   arglist->cbFkTableName = (SQLSMALLINT) cbFkTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLForeignKeysIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1677,17 +1689,17 @@ SQLRETURN ILE_SQLForeignKeysW( SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, S
     SQLForeignKeysWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szPkTableQualifier.s.addr = (address64_t) szPkTableQualifier;
+  arglist->szPkTableQualifier.s.addr = (ulong) szPkTableQualifier;
   arglist->cbPkTableQualifier = (SQLSMALLINT) cbPkTableQualifier;
-  arglist->szPkTableOwner.s.addr = (address64_t) szPkTableOwner;
+  arglist->szPkTableOwner.s.addr = (ulong) szPkTableOwner;
   arglist->cbPkTableOwner = (SQLSMALLINT) cbPkTableOwner;
-  arglist->szPkTableName.s.addr = (address64_t) szPkTableName;
+  arglist->szPkTableName.s.addr = (ulong) szPkTableName;
   arglist->cbPkTableName = (SQLSMALLINT) cbPkTableName;
-  arglist->szFkTableQualifier.s.addr = (address64_t) szFkTableQualifier;
+  arglist->szFkTableQualifier.s.addr = (ulong) szFkTableQualifier;
   arglist->cbFkTableQualifier = (SQLSMALLINT) cbFkTableQualifier;
-  arglist->szFkTableOwner.s.addr = (address64_t) szFkTableOwner;
+  arglist->szFkTableOwner.s.addr = (ulong) szFkTableOwner;
   arglist->cbFkTableOwner = (SQLSMALLINT) cbFkTableOwner;
-  arglist->szFkTableName.s.addr = (address64_t) szFkTableName;
+  arglist->szFkTableName.s.addr = (ulong) szFkTableName;
   arglist->cbFkTableName = (SQLSMALLINT) cbFkTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLForeignKeysWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -1828,9 +1840,9 @@ SQLRETURN ILE_SQLGetCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype,
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->itype = (SQLSMALLINT) itype;
-  arglist->tval.s.addr = (address64_t) tval;
+  arglist->tval.s.addr = (ulong) tval;
   arglist->blen = (SQLINTEGER) blen;
-  arglist->olen.s.addr = (address64_t) olen;
+  arglist->olen.s.addr = (ulong) olen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetColIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1860,9 +1872,9 @@ SQLRETURN ILE_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->itype = (SQLSMALLINT) itype;
-  arglist->tval.s.addr = (address64_t) tval;
+  arglist->tval.s.addr = (ulong) tval;
   arglist->blen = (SQLINTEGER) blen;
-  arglist->olen.s.addr = (address64_t) olen;
+  arglist->olen.s.addr = (ulong) olen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetColWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1891,9 +1903,9 @@ SQLRETURN ILE_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  ov
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->attr = (SQLINTEGER) attr;
-  arglist->oval.s.addr = (address64_t) oval;
+  arglist->oval.s.addr = (ulong) oval;
   arglist->ilen = (SQLINTEGER) ilen;
-  arglist->olen.s.addr = (address64_t) olen;
+  arglist->olen.s.addr = (ulong) olen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1922,9 +1934,9 @@ SQLRETURN ILE_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  o
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->attr = (SQLINTEGER) attr;
-  arglist->oval.s.addr = (address64_t) oval;
+  arglist->oval.s.addr = (ulong) oval;
   arglist->ilen = (SQLINTEGER) ilen;
-  arglist->olen.s.addr = (address64_t) olen;
+  arglist->olen.s.addr = (ulong) olen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1953,7 +1965,7 @@ SQLRETURN ILE_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER 
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->iopt = (SQLSMALLINT) iopt;
-  arglist->oval.s.addr = (address64_t) oval;
+  arglist->oval.s.addr = (ulong) oval;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -1982,7 +1994,7 @@ SQLRETURN ILE_SQLGetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->iopt = (SQLSMALLINT) iopt;
-  arglist->oval.s.addr = (address64_t) oval;
+  arglist->oval.s.addr = (ulong) oval;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetConnectOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2010,9 +2022,9 @@ SQLRETURN ILE_SQLGetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
     SQLGetCursorNameLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szCursor.s.addr = (address64_t) szCursor;
+  arglist->szCursor.s.addr = (ulong) szCursor;
   arglist->cbCursorMax = (SQLSMALLINT) cbCursorMax;
-  arglist->pcbCursor.s.addr = (address64_t) pcbCursor;
+  arglist->pcbCursor.s.addr = (ulong) pcbCursor;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetCursorNameIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2040,9 +2052,9 @@ SQLRETURN ILE_SQLGetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
     SQLGetCursorNameWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szCursor.s.addr = (address64_t) szCursor;
+  arglist->szCursor.s.addr = (ulong) szCursor;
   arglist->cbCursorMax = (SQLSMALLINT) cbCursorMax;
-  arglist->pcbCursor.s.addr = (address64_t) pcbCursor;
+  arglist->pcbCursor.s.addr = (ulong) pcbCursor;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetCursorNameWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2072,9 +2084,9 @@ SQLRETURN ILE_SQLGetData( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCTyp
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->icol = (SQLSMALLINT) icol;
   arglist->fCType = (SQLSMALLINT) fCType;
-  arglist->rgbValue.s.addr = (address64_t) rgbValue;
+  arglist->rgbValue.s.addr = (ulong) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2104,9 +2116,9 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fieldID = (SQLSMALLINT) fieldID;
-  arglist->fValue.s.addr = (address64_t) fValue;
+  arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
-  arglist->stLength.s.addr = (address64_t) stLength;
+  arglist->stLength.s.addr = (ulong) stLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2136,9 +2148,9 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fieldID = (SQLSMALLINT) fieldID;
-  arglist->fValue.s.addr = (address64_t) fValue;
+  arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
-  arglist->stLength.s.addr = (address64_t) stLength;
+  arglist->stLength.s.addr = (ulong) stLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2167,15 +2179,15 @@ SQLRETURN ILE_SQLGetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fna
   }
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
-  arglist->fname.s.addr = (address64_t) fname;
+  arglist->fname.s.addr = (ulong) fname;
   arglist->bufLen = (SQLSMALLINT) bufLen;
-  arglist->sLength.s.addr = (address64_t) sLength;
-  arglist->sType.s.addr = (address64_t) sType;
-  arglist->sbType.s.addr = (address64_t) sbType;
-  arglist->fLength.s.addr = (address64_t) fLength;
-  arglist->fprec.s.addr = (address64_t) fprec;
-  arglist->fscale.s.addr = (address64_t) fscale;
-  arglist->fnull.s.addr = (address64_t) fnull;
+  arglist->sLength.s.addr = (ulong) sLength;
+  arglist->sType.s.addr = (ulong) sType;
+  arglist->sbType.s.addr = (ulong) sbType;
+  arglist->fLength.s.addr = (ulong) fLength;
+  arglist->fprec.s.addr = (ulong) fprec;
+  arglist->fscale.s.addr = (ulong) fscale;
+  arglist->fnull.s.addr = (ulong) fnull;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2204,15 +2216,15 @@ SQLRETURN ILE_SQLGetDescRecW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * f
   }
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
-  arglist->fname.s.addr = (address64_t) fname;
+  arglist->fname.s.addr = (ulong) fname;
   arglist->bufLen = (SQLSMALLINT) bufLen;
-  arglist->sLength.s.addr = (address64_t) sLength;
-  arglist->sType.s.addr = (address64_t) sType;
-  arglist->sbType.s.addr = (address64_t) sbType;
-  arglist->fLength.s.addr = (address64_t) fLength;
-  arglist->fprec.s.addr = (address64_t) fprec;
-  arglist->fscale.s.addr = (address64_t) fscale;
-  arglist->fnull.s.addr = (address64_t) fnull;
+  arglist->sLength.s.addr = (ulong) sLength;
+  arglist->sType.s.addr = (ulong) sType;
+  arglist->sbType.s.addr = (ulong) sbType;
+  arglist->fLength.s.addr = (ulong) fLength;
+  arglist->fprec.s.addr = (ulong) fprec;
+  arglist->fscale.s.addr = (ulong) fscale;
+  arglist->fnull.s.addr = (ulong) fnull;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescRecWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2243,9 +2255,9 @@ SQLRETURN ILE_SQLGetDiagField( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT
   arglist->hndl = (SQLINTEGER) hndl;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->diagID = (SQLSMALLINT) diagID;
-  arglist->dValue.s.addr = (address64_t) dValue;
+  arglist->dValue.s.addr = (ulong) dValue;
   arglist->bLength = (SQLSMALLINT) bLength;
-  arglist->sLength.s.addr = (address64_t) sLength;
+  arglist->sLength.s.addr = (ulong) sLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2276,9 +2288,9 @@ SQLRETURN ILE_SQLGetDiagFieldW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLIN
   arglist->hndl = (SQLINTEGER) hndl;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->diagID = (SQLSMALLINT) diagID;
-  arglist->dValue.s.addr = (address64_t) dValue;
+  arglist->dValue.s.addr = (ulong) dValue;
   arglist->bLength = (SQLSMALLINT) bLength;
-  arglist->sLength.s.addr = (address64_t) sLength;
+  arglist->sLength.s.addr = (ulong) sLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2308,11 +2320,11 @@ SQLRETURN ILE_SQLGetDiagRec( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  
   arglist->hType = (SQLSMALLINT) hType;
   arglist->hndl = (SQLINTEGER) hndl;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
-  arglist->SQLstate.s.addr = (address64_t) SQLstate;
-  arglist->SQLcode.s.addr = (address64_t) SQLcode;
-  arglist->msgText.s.addr = (address64_t) msgText;
+  arglist->SQLstate.s.addr = (ulong) SQLstate;
+  arglist->SQLcode.s.addr = (ulong) SQLcode;
+  arglist->msgText.s.addr = (ulong) msgText;
   arglist->bLength = (SQLSMALLINT) bLength;
-  arglist->SLength.s.addr = (address64_t) SLength;
+  arglist->SLength.s.addr = (ulong) SLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2342,11 +2354,11 @@ SQLRETURN ILE_SQLGetDiagRecW( SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT 
   arglist->hType = (SQLSMALLINT) hType;
   arglist->hndl = (SQLINTEGER) hndl;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
-  arglist->SQLstate.s.addr = (address64_t) SQLstate;
-  arglist->SQLcode.s.addr = (address64_t) SQLcode;
-  arglist->msgText.s.addr = (address64_t) msgText;
+  arglist->SQLstate.s.addr = (ulong) SQLstate;
+  arglist->SQLcode.s.addr = (ulong) SQLcode;
+  arglist->msgText.s.addr = (ulong) msgText;
   arglist->bLength = (SQLSMALLINT) bLength;
-  arglist->SLength.s.addr = (address64_t) SLength;
+  arglist->SLength.s.addr = (ulong) SLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDiagRecWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2375,9 +2387,9 @@ SQLRETURN ILE_SQLGetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   }
   arglist->hEnv = (SQLHENV) hEnv;
   arglist->fAttribute = (SQLINTEGER) fAttribute;
-  arglist->pParam.s.addr = (address64_t) pParam;
+  arglist->pParam.s.addr = (ulong) pParam;
   arglist->cbParamMax = (SQLINTEGER) cbParamMax;
-  arglist->pcbParam.s.addr = (address64_t) pcbParam;
+  arglist->pcbParam.s.addr = (ulong) pcbParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetEnvAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2406,7 +2418,7 @@ SQLRETURN ILE_SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLIN
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fFunction = (SQLSMALLINT) fFunction;
-  arglist->pfExists.s.addr = (address64_t) pfExists;
+  arglist->pfExists.s.addr = (ulong) pfExists;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetFunctionsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2435,9 +2447,9 @@ SQLRETURN ILE_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgb
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fInfoType = (SQLSMALLINT) fInfoType;
-  arglist->rgbInfoValue.s.addr = (address64_t) rgbInfoValue;
+  arglist->rgbInfoValue.s.addr = (ulong) rgbInfoValue;
   arglist->cbInfoValueMax = (SQLSMALLINT) cbInfoValueMax;
-  arglist->pcbInfoValue.s.addr = (address64_t) pcbInfoValue;
+  arglist->pcbInfoValue.s.addr = (ulong) pcbInfoValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetInfoIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2466,9 +2478,9 @@ SQLRETURN ILE_SQLGetInfoW( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rg
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fInfoType = (SQLSMALLINT) fInfoType;
-  arglist->rgbInfoValue.s.addr = (address64_t) rgbInfoValue;
+  arglist->rgbInfoValue.s.addr = (ulong) rgbInfoValue;
   arglist->cbInfoValueMax = (SQLSMALLINT) cbInfoValueMax;
-  arglist->pcbInfoValue.s.addr = (address64_t) pcbInfoValue;
+  arglist->pcbInfoValue.s.addr = (ulong) pcbInfoValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetInfoWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2498,8 +2510,8 @@ SQLRETURN ILE_SQLGetLength( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  l
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->locType = (SQLSMALLINT) locType;
   arglist->locator = (SQLINTEGER) locator;
-  arglist->sLength.s.addr = (address64_t) sLength;
-  arglist->ind.s.addr = (address64_t) ind;
+  arglist->sLength.s.addr = (ulong) sLength;
+  arglist->ind.s.addr = (ulong) ind;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetLengthIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2530,11 +2542,11 @@ SQLRETURN ILE_SQLGetPosition( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER 
   arglist->locType = (SQLSMALLINT) locType;
   arglist->srceLocator = (SQLINTEGER) srceLocator;
   arglist->srchLocator = (SQLINTEGER) srchLocator;
-  arglist->srchLiteral.s.addr = (address64_t) srchLiteral;
+  arglist->srchLiteral.s.addr = (ulong) srchLiteral;
   arglist->srchLiteralLen = (SQLINTEGER) srchLiteralLen;
   arglist->fPosition = (SQLINTEGER) fPosition;
-  arglist->located.s.addr = (address64_t) located;
-  arglist->ind.s.addr = (address64_t) ind;
+  arglist->located.s.addr = (ulong) located;
+  arglist->ind.s.addr = (ulong) ind;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetPositionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2565,11 +2577,11 @@ SQLRETURN ILE_SQLGetPositionW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist->locType = (SQLSMALLINT) locType;
   arglist->srceLocator = (SQLINTEGER) srceLocator;
   arglist->srchLocator = (SQLINTEGER) srchLocator;
-  arglist->srchLiteral.s.addr = (address64_t) srchLiteral;
+  arglist->srchLiteral.s.addr = (ulong) srchLiteral;
   arglist->srchLiteralLen = (SQLINTEGER) srchLiteralLen;
   arglist->fPosition = (SQLINTEGER) fPosition;
-  arglist->located.s.addr = (address64_t) located;
-  arglist->ind.s.addr = (address64_t) ind;
+  arglist->located.s.addr = (ulong) located;
+  arglist->ind.s.addr = (ulong) ind;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetPositionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2598,9 +2610,9 @@ SQLRETURN ILE_SQLGetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pv
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fAttr = (SQLINTEGER) fAttr;
-  arglist->pvParam.s.addr = (address64_t) pvParam;
+  arglist->pvParam.s.addr = (ulong) pvParam;
   arglist->bLength = (SQLINTEGER) bLength;
-  arglist->SLength.s.addr = (address64_t) SLength;
+  arglist->SLength.s.addr = (ulong) SLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2629,9 +2641,9 @@ SQLRETURN ILE_SQLGetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fAttr = (SQLINTEGER) fAttr;
-  arglist->pvParam.s.addr = (address64_t) pvParam;
+  arglist->pvParam.s.addr = (ulong) pvParam;
   arglist->bLength = (SQLINTEGER) bLength;
-  arglist->SLength.s.addr = (address64_t) SLength;
+  arglist->SLength.s.addr = (ulong) SLength;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2660,7 +2672,7 @@ SQLRETURN ILE_SQLGetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->pvParam.s.addr = (address64_t) pvParam;
+  arglist->pvParam.s.addr = (ulong) pvParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2689,7 +2701,7 @@ SQLRETURN ILE_SQLGetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->pvParam.s.addr = (address64_t) pvParam;
+  arglist->pvParam.s.addr = (ulong) pvParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetStmtOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2722,10 +2734,10 @@ SQLRETURN ILE_SQLGetSubString( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER
   arglist->fPosition = (SQLINTEGER) fPosition;
   arglist->length = (SQLINTEGER) length;
   arglist->tType = (SQLSMALLINT) tType;
-  arglist->rgbValue.s.addr = (address64_t) rgbValue;
+  arglist->rgbValue.s.addr = (ulong) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
-  arglist->StringLength.s.addr = (address64_t) StringLength;
-  arglist->ind.s.addr = (address64_t) ind;
+  arglist->StringLength.s.addr = (ulong) StringLength;
+  arglist->ind.s.addr = (ulong) ind;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetSubStringIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2758,10 +2770,10 @@ SQLRETURN ILE_SQLGetSubStringW( SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGE
   arglist->fPosition = (SQLINTEGER) fPosition;
   arglist->length = (SQLINTEGER) length;
   arglist->tType = (SQLSMALLINT) tType;
-  arglist->rgbValue.s.addr = (address64_t) rgbValue;
+  arglist->rgbValue.s.addr = (ulong) rgbValue;
   arglist->cbValueMax = (SQLINTEGER) cbValueMax;
-  arglist->StringLength.s.addr = (address64_t) StringLength;
-  arglist->ind.s.addr = (address64_t) ind;
+  arglist->StringLength.s.addr = (ulong) StringLength;
+  arglist->ind.s.addr = (ulong) ind;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetSubStringWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2899,11 +2911,11 @@ SQLRETURN ILE_SQLNativeSql( SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbS
     SQLNativeSqlLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->szSqlStrIn.s.addr = (address64_t) szSqlStrIn;
+  arglist->szSqlStrIn.s.addr = (ulong) szSqlStrIn;
   arglist->cbSqlStrIn = (SQLINTEGER) cbSqlStrIn;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStrMax = (SQLINTEGER) cbSqlStrMax;
-  arglist->pcbSqlStr.s.addr = (address64_t) pcbSqlStr;
+  arglist->pcbSqlStr.s.addr = (ulong) pcbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNativeSqlIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2931,11 +2943,11 @@ SQLRETURN ILE_SQLNativeSqlW( SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  c
     SQLNativeSqlWLoaded = 1;
   }
   arglist->hdbc = (SQLHDBC) hdbc;
-  arglist->szSqlStrIn.s.addr = (address64_t) szSqlStrIn;
+  arglist->szSqlStrIn.s.addr = (ulong) szSqlStrIn;
   arglist->cbSqlStrIn = (SQLINTEGER) cbSqlStrIn;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStrMax = (SQLINTEGER) cbSqlStrMax;
-  arglist->pcbSqlStr.s.addr = (address64_t) pcbSqlStr;
+  arglist->pcbSqlStr.s.addr = (ulong) pcbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNativeSqlWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -2991,7 +3003,7 @@ SQLRETURN ILE_SQLNumParams( SQLHSTMT  hstmt, SQLSMALLINT * pcpar )
     SQLNumParamsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->pcpar.s.addr = (address64_t) pcpar;
+  arglist->pcpar.s.addr = (ulong) pcpar;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNumParamsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3019,7 +3031,7 @@ SQLRETURN ILE_SQLNumResultCols( SQLHSTMT  hstmt, SQLSMALLINT * pccol )
     SQLNumResultColsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->pccol.s.addr = (address64_t) pccol;
+  arglist->pccol.s.addr = (ulong) pccol;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLNumResultColsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3047,7 +3059,7 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
     SQLParamDataLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->Value.s.addr = (address64_t) Value;
+  arglist->Value.s.addr = (ulong) Value;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3076,7 +3088,7 @@ SQLRETURN ILE_SQLParamOptions( SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * p
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->crow = (SQLINTEGER) crow;
-  arglist->pirow.s.addr = (address64_t) pirow;
+  arglist->pirow.s.addr = (ulong) pirow;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamOptionsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3104,7 +3116,7 @@ SQLRETURN ILE_SQLPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSql
     SQLPrepareLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrepareIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3133,7 +3145,7 @@ SQLRETURN ILE_SQLPrepareW( SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbS
     SQLPrepareWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szSqlStr.s.addr = (address64_t) szSqlStr;
+  arglist->szSqlStr.s.addr = (ulong) szSqlStr;
   arglist->cbSqlStr = (SQLINTEGER) cbSqlStr;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrepareWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3162,11 +3174,11 @@ SQLRETURN ILE_SQLPrimaryKeys( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSM
     SQLPrimaryKeysLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrimaryKeysIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3195,11 +3207,11 @@ SQLRETURN ILE_SQLPrimaryKeysW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQL
     SQLPrimaryKeysWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPrimaryKeysWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3228,13 +3240,13 @@ SQLRETURN ILE_SQLProcedureColumns( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, S
     SQLProcedureColumnsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szProcQualifier.s.addr = (address64_t) szProcQualifier;
+  arglist->szProcQualifier.s.addr = (ulong) szProcQualifier;
   arglist->cbProcQualifier = (SQLSMALLINT) cbProcQualifier;
-  arglist->szProcOwner.s.addr = (address64_t) szProcOwner;
+  arglist->szProcOwner.s.addr = (ulong) szProcOwner;
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
-  arglist->szProcName.s.addr = (address64_t) szProcName;
+  arglist->szProcName.s.addr = (ulong) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProcedureColumnsIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3263,13 +3275,13 @@ SQLRETURN ILE_SQLProcedureColumnsW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier,
     SQLProcedureColumnsWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szProcQualifier.s.addr = (address64_t) szProcQualifier;
+  arglist->szProcQualifier.s.addr = (ulong) szProcQualifier;
   arglist->cbProcQualifier = (SQLSMALLINT) cbProcQualifier;
-  arglist->szProcOwner.s.addr = (address64_t) szProcOwner;
+  arglist->szProcOwner.s.addr = (ulong) szProcOwner;
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
-  arglist->szProcName.s.addr = (address64_t) szProcName;
+  arglist->szProcName.s.addr = (ulong) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
-  arglist->szColumnName.s.addr = (address64_t) szColumnName;
+  arglist->szColumnName.s.addr = (ulong) szColumnName;
   arglist->cbColumnName = (SQLSMALLINT) cbColumnName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProcedureColumnsWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3298,11 +3310,11 @@ SQLRETURN ILE_SQLProcedures( SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMAL
     SQLProceduresLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szProcQualifier.s.addr = (address64_t) szProcQualifier;
+  arglist->szProcQualifier.s.addr = (ulong) szProcQualifier;
   arglist->cbProcQualifier = (SQLSMALLINT) cbProcQualifier;
-  arglist->szProcOwner.s.addr = (address64_t) szProcOwner;
+  arglist->szProcOwner.s.addr = (ulong) szProcOwner;
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
-  arglist->szProcName.s.addr = (address64_t) szProcName;
+  arglist->szProcName.s.addr = (ulong) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProceduresIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3331,11 +3343,11 @@ SQLRETURN ILE_SQLProceduresW( SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSM
     SQLProceduresWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szProcQualifier.s.addr = (address64_t) szProcQualifier;
+  arglist->szProcQualifier.s.addr = (ulong) szProcQualifier;
   arglist->cbProcQualifier = (SQLSMALLINT) cbProcQualifier;
-  arglist->szProcOwner.s.addr = (address64_t) szProcOwner;
+  arglist->szProcOwner.s.addr = (ulong) szProcOwner;
   arglist->cbProcOwner = (SQLSMALLINT) cbProcOwner;
-  arglist->szProcName.s.addr = (address64_t) szProcName;
+  arglist->szProcName.s.addr = (ulong) szProcName;
   arglist->cbProcName = (SQLSMALLINT) cbProcName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLProceduresWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3364,7 +3376,7 @@ SQLRETURN ILE_SQLPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen )
     SQLPutDataLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->Data.s.addr = (address64_t) Data;
+  arglist->Data.s.addr = (ulong) Data;
   arglist->SLen = (SQLINTEGER) SLen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLPutDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3420,7 +3432,7 @@ SQLRETURN ILE_SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow )
     SQLRowCountLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->pcrow.s.addr = (address64_t) pcrow;
+  arglist->pcrow.s.addr = (ulong) pcrow;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLRowCountIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3449,7 +3461,7 @@ SQLRETURN ILE_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->attrib = (SQLINTEGER) attrib;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   arglist->inlen = (SQLINTEGER) inlen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3479,7 +3491,7 @@ SQLRETURN ILE_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER 
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->attrib = (SQLINTEGER) attrib;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   arglist->inlen = (SQLINTEGER) inlen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3509,7 +3521,7 @@ SQLRETURN ILE_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINT
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3538,7 +3550,7 @@ SQLRETURN ILE_SQLSetConnectOptionW( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOIN
   }
   arglist->hdbc = (SQLHDBC) hdbc;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetConnectOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3566,7 +3578,7 @@ SQLRETURN ILE_SQLSetCursorName( SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT
     SQLSetCursorNameLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szCursor.s.addr = (address64_t) szCursor;
+  arglist->szCursor.s.addr = (ulong) szCursor;
   arglist->cbCursor = (SQLSMALLINT) cbCursor;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetCursorNameIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3595,7 +3607,7 @@ SQLRETURN ILE_SQLSetCursorNameW( SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLI
     SQLSetCursorNameWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szCursor.s.addr = (address64_t) szCursor;
+  arglist->szCursor.s.addr = (ulong) szCursor;
   arglist->cbCursor = (SQLSMALLINT) cbCursor;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetCursorNameWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3626,7 +3638,7 @@ SQLRETURN ILE_SQLSetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fID = (SQLSMALLINT) fID;
-  arglist->Value.s.addr = (address64_t) Value;
+  arglist->Value.s.addr = (ulong) Value;
   arglist->buffLen = (SQLINTEGER) buffLen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3657,7 +3669,7 @@ SQLRETURN ILE_SQLSetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fID = (SQLSMALLINT) fID;
-  arglist->Value.s.addr = (address64_t) Value;
+  arglist->Value.s.addr = (ulong) Value;
   arglist->buffLen = (SQLINTEGER) buffLen;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3692,9 +3704,9 @@ SQLRETURN ILE_SQLSetDescRec( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->fPrec = (SQLSMALLINT) fPrec;
   arglist->fScale = (SQLSMALLINT) fScale;
-  arglist->Value.s.addr = (address64_t) Value;
-  arglist->sLength.s.addr = (address64_t) sLength;
-  arglist->indic.s.addr = (address64_t) indic;
+  arglist->Value.s.addr = (ulong) Value;
+  arglist->sLength.s.addr = (ulong) sLength;
+  arglist->indic.s.addr = (ulong) indic;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetDescRecIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3723,7 +3735,7 @@ SQLRETURN ILE_SQLSetEnvAttr( SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  
   }
   arglist->hEnv = (SQLHENV) hEnv;
   arglist->fAttribute = (SQLINTEGER) fAttribute;
-  arglist->pParam.s.addr = (address64_t) pParam;
+  arglist->pParam.s.addr = (ulong) pParam;
   arglist->cbParam = (SQLINTEGER) cbParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetEnvAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3757,8 +3769,8 @@ SQLRETURN ILE_SQLSetParam( SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCTy
   arglist->fSqlType = (SQLSMALLINT) fSqlType;
   arglist->cbColDef = (SQLINTEGER) cbColDef;
   arglist->ibScale = (SQLSMALLINT) ibScale;
-  arglist->rgbValue.s.addr = (address64_t) rgbValue;
-  arglist->pcbValue.s.addr = (address64_t) pcbValue;
+  arglist->rgbValue.s.addr = (ulong) rgbValue;
+  arglist->pcbValue.s.addr = (ulong) pcbValue;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetParamIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3787,7 +3799,7 @@ SQLRETURN ILE_SQLSetStmtAttr( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pP
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fAttr = (SQLINTEGER) fAttr;
-  arglist->pParam.s.addr = (address64_t) pParam;
+  arglist->pParam.s.addr = (ulong) pParam;
   arglist->vParam = (SQLINTEGER) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtAttrIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3817,7 +3829,7 @@ SQLRETURN ILE_SQLSetStmtAttrW( SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  p
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fAttr = (SQLINTEGER) fAttr;
-  arglist->pParam.s.addr = (address64_t) pParam;
+  arglist->pParam.s.addr = (ulong) pParam;
   arglist->vParam = (SQLINTEGER) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtAttrWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -3847,7 +3859,7 @@ SQLRETURN ILE_SQLSetStmtOption( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTE
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtOptionIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3876,7 +3888,7 @@ SQLRETURN ILE_SQLSetStmtOptionW( SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINT
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fOption = (SQLSMALLINT) fOption;
-  arglist->vParam.s.addr = (address64_t) vParam;
+  arglist->vParam.s.addr = (ulong) vParam;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLSetStmtOptionWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
@@ -3905,11 +3917,11 @@ SQLRETURN ILE_SQLSpecialColumns( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fColType = (SQLSMALLINT) fColType;
-  arglist->szTableQual.s.addr = (address64_t) szTableQual;
+  arglist->szTableQual.s.addr = (ulong) szTableQual;
   arglist->cbTableQual = (SQLSMALLINT) cbTableQual;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fScope = (SQLSMALLINT) fScope;
   arglist->fNullable = (SQLSMALLINT) fNullable;
@@ -3941,11 +3953,11 @@ SQLRETURN ILE_SQLSpecialColumnsW( SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCH
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->fColType = (SQLSMALLINT) fColType;
-  arglist->szTableQual.s.addr = (address64_t) szTableQual;
+  arglist->szTableQual.s.addr = (ulong) szTableQual;
   arglist->cbTableQual = (SQLSMALLINT) cbTableQual;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fScope = (SQLSMALLINT) fScope;
   arglist->fNullable = (SQLSMALLINT) fNullable;
@@ -4006,11 +4018,11 @@ SQLRETURN ILE_SQLStatistics( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMA
     SQLStatisticsLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fUnique = (SQLSMALLINT) fUnique;
   arglist->fres = (SQLSMALLINT) fres;
@@ -4041,11 +4053,11 @@ SQLRETURN ILE_SQLStatisticsW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLS
     SQLStatisticsWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   arglist->fUnique = (SQLSMALLINT) fUnique;
   arglist->fres = (SQLSMALLINT) fres;
@@ -4076,11 +4088,11 @@ SQLRETURN ILE_SQLTablePrivileges( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, S
     SQLTablePrivilegesLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablePrivilegesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -4109,11 +4121,11 @@ SQLRETURN ILE_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier,
     SQLTablePrivilegesWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablePrivilegesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -4142,13 +4154,13 @@ SQLRETURN ILE_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLIN
     SQLTablesLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szTableType.s.addr = (address64_t) szTableType;
+  arglist->szTableType.s.addr = (ulong) szTableType;
   arglist->cbTableType = (SQLSMALLINT) cbTableType;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablesIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
@@ -4177,13 +4189,13 @@ SQLRETURN ILE_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALL
     SQLTablesWLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->szTableQualifier.s.addr = (address64_t) szTableQualifier;
+  arglist->szTableQualifier.s.addr = (ulong) szTableQualifier;
   arglist->cbTableQualifier = (SQLSMALLINT) cbTableQualifier;
-  arglist->szTableOwner.s.addr = (address64_t) szTableOwner;
+  arglist->szTableOwner.s.addr = (ulong) szTableOwner;
   arglist->cbTableOwner = (SQLSMALLINT) cbTableOwner;
-  arglist->szTableName.s.addr = (address64_t) szTableName;
+  arglist->szTableName.s.addr = (ulong) szTableName;
   arglist->cbTableName = (SQLSMALLINT) cbTableName;
-  arglist->szTableType.s.addr = (address64_t) szTableType;
+  arglist->szTableType.s.addr = (ulong) szTableType;
   arglist->cbTableType = (SQLSMALLINT) cbTableType;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLTablesWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {

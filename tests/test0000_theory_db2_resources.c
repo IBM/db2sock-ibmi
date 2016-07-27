@@ -56,8 +56,6 @@ int main(int argc, char * argv[]) {
       actual_hstmt = hstmt[i][j];
     }
   }
-  lang_out_jobs(uid);
-  lang_expect_count_jobs(expect, uid);
   lang_expect_count("last hstmt number", expect_hstmt, actual_hstmt);
   for (i=0;i<expect; i++) {
     for (j=0;j<expect; j++) {

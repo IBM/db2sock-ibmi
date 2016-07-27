@@ -459,7 +459,7 @@ SQLRETURN run_main(
  SQLINTEGER inlen,
  SQLCHAR * outrun,
  SQLINTEGER outlen,
- int rf)
+ SQLINTEGER rf)
 {
   int argc = 0, rc = 0;
   char * run_input = (char *) NULL;

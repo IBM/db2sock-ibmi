@@ -247,10 +247,47 @@ run 32-bit or 64-bit
 
 ##Note:
 
-Only compiled with xlc using -qldbl128 -qalign=natural. 
+When using xlc, use options -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
-if curious, see /usr/include/as400_types.h, type ILEpointer -- quadword align compiler issues.
-BTW -- i have no idea if gcc can be made to provide proper alignment (tbd).
+See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
+
+In switching to gcc, you have to edit PASE header.
+```
+/usr/include/as400_types.h:
+/*
+ * Quadword (aligned) area for a tagged ILE pointer
+ */
+typedef union _ILEpointer {
+#if !(defined(_AIX) || defined(KERNEL))
+#pragma pack(1,16,_ILEpointer)	/* Force sCC quadword alignment */
+#endif
+/* CAUTION: Some compilers only provide 64-bits for long double */
+#if defined( __GNUC__ )
+    long double	align __attribute__((aligned(16)));
+#else
+    long double;	/* Force xlc quadword alignment (with -qldbl128 -qalign=natural) */
+#endif
+#ifndef _AIX
+    void		*openPtr; /* MI open pointer (tagged quadword) */
+#endif
+    struct {
+	char		filler[16-sizeof(uint64)];
+	address64_t	addr;	/* (PASE) memory address */
+    } s;
+} ILEpointer;
+
+gcc bug cast to unsigned long long not work (bad sign extend), 
+therefore we also need cast ulong to match size of pointer 32/64 
+   arglist->ohnd.s.addr = (ulong) ohnd; /* silly gcc compiler */
+
+
+extra stuff i use ...
+
+export PATH=/opt/freeware/bin:$PATH
+export LIBPATH=.:/opt/freeware/lib:/usr/lib
+scp -r . adc@ut28p63:/QOpenSys/monoroot/home/monoroot/libdb400
+
+```
 
 #License
 BSD

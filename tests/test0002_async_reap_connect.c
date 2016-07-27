@@ -55,8 +55,7 @@ int main(int argc, char * argv[]) {
     tid, myptr->sqlrc, myptr->henv, myptr->db, myptr->uid, *(myptr->ohnd), myptr->options, myptr->callback);
   lang_check_sqlrc(SQL_HANDLE_DBC, *(myptr->ohnd), myptr->sqlrc, 1, &sqlcode);
   free(myptr);
-  lang_out_jobs(uid);
-  lang_expect_count_jobs(expect, uid);
+  lang_expect_greater("tid valid",expect,tid);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;

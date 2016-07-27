@@ -20,7 +20,7 @@ int lang_strlen_utf16(unsigned int * src) {
 
 void lang_expect_count(char * msg, int expect, int actual) 
 {
-  if (expect > actual) {
+  if (expect != actual) {
     printf("ERROR: %s) expect=%d actual=%d\n", msg, expect, actual);
     exit(-1);
   } else {
@@ -28,59 +28,16 @@ void lang_expect_count(char * msg, int expect, int actual)
   }
 }
 
-
-/*
- * count process data
- */
-void lang_expect_count_jobs(int expect, char * uid) 
+void lang_expect_greater(char * msg, int expect, int actual) 
 {
-  int actual = 0;
-  FILE *fp = (FILE *) NULL;
-  int status = 0;
-  char cmd[4096];
-  char big[4096];
-  char buf[1024];
-
-  memset(cmd,0,sizeof(cmd));
-  memset(buf,0,sizeof(buf));
-  memset(big,0,sizeof(big));
-  strcat(cmd,"system wrkactjob | grep -i QSQSRVR | grep -i -c ");
-  strcat(cmd,uid);
-  fp = popen(cmd,"r");
-  while (fgets(buf, sizeof(buf), fp) != NULL) {
-    strcat(big,buf);
-    memset(buf,0,sizeof(buf));
-  }
-  status = pclose(fp);
-  actual = atoi(big);
-  if (expect > actual) {
-    printf("ERROR: %s) expect=%d actual=%d\n", uid, expect, actual);
+  if (expect >= actual) {
+    printf("ERROR: %s) expect=%d actual=%d\n", msg, expect, actual);
     exit(-1);
   } else {
-    printf("SUCCESS: %s) expect=%d actual=%d\n", uid, expect, actual);
+    printf("SUCCESS: %s) expect=%d actual=%d\n", msg, expect, actual);
   }
 }
 
-void lang_out_jobs(char * uid) 
-{
-  FILE *fp = (FILE *) NULL;
-  int status = 0;
-  char cmd[4096];
-  char buf[1024];
-  int actual = 0;
-
-  memset(cmd,0,sizeof(cmd));
-  memset(buf,0,sizeof(buf));
-  strcat(cmd,"system wrkactjob | grep -i QSQSRVR | grep -i ");
-  strcat(cmd,uid);
-  fp = popen(cmd,"r");
-  while (fgets(buf, sizeof(buf), fp) != NULL) {
-    actual++;
-    printf("%5d) %s", actual, buf);
-    memset(buf,0,sizeof(buf));
-  }
-  status = pclose(fp);
-}
 
 /*
  * hType - SQL_HANDLE_ENV|DBC|STMT|DESC

@@ -175,8 +175,6 @@ int main(int argc, char * argv[]) {
   pwd = getenv(SQL_PWD400);
   /* async environment db2 */
   main_environ();
-  lang_out_jobs(uid);
-  lang_expect_count_jobs(expect, uid);
   sqlrc = SQLDisconnect(hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return 1;

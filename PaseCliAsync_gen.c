@@ -7874,7 +7874,7 @@ SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
-SQLRETURN SQLOverrideCCSID400( SQLINTEGER  newCCSID )
+int SQLOverrideCCSID400(int newCCSID)
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   sqlrc = custom_SQLOverrideCCSID400( newCCSID );

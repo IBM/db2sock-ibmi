@@ -54,7 +54,6 @@ void init_unlock() {
   pthread_mutex_unlock(&threadMutexLock);
 }
 
-
 /*
  * conversion (not threadsafe)
  */
@@ -76,8 +75,8 @@ int custom_iconv_open(int myccsid, int utfccsid) {
   }
   for (i=0;i<PASECLIMAXCCSID;i++) {
     if (!IBMiCCSID[i].cssid_Ascii) {
-      IBMiCCSID[i].charset_Ascii = ccsidtocs(myccsid);
-      IBMiCCSID[i].charset_Utf = ccsidtocs(utfccsid);
+      IBMiCCSID[i].charset_Ascii = (char *) ccsidtocs(myccsid);
+      IBMiCCSID[i].charset_Utf = (char *) ccsidtocs(utfccsid);
       IBMiCCSID[i].AsciiToUtf = iconv_open(IBMiCCSID[i].charset_Utf, IBMiCCSID[i].charset_Ascii);
       IBMiCCSID[i].UtfToAscii = iconv_open(IBMiCCSID[i].charset_Ascii, IBMiCCSID[i].charset_Utf);
       pthread_mutexattr_init(&IBMiCCSID[i].threadMutexAttr);
