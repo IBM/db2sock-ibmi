@@ -85,6 +85,7 @@ optional (git already completed) ...
 gcc compiles ...
 > ./make_libdb400.sh
 ```
+Note: The gcc compiles will not run unless you take action in notes for PASE /usr/include/as400_types.h.
 
 I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
 ```
