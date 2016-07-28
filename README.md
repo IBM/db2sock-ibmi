@@ -218,6 +218,7 @@ run 32-bit or 64-bit
 
 ##Note:
 All make files have been converted to gcc compiles. 
+
 In switching to gcc, you have to edit PASE header.
 
 ```
@@ -243,10 +244,10 @@ typedef union _ILEpointer {
 	address64_t	addr;	/* (PASE) memory address */
     } s;
 } ILEpointer;
-
+```
 
 gcc options in Makefile ...
-
+```
 ### gmake
 ### gmake TGT64=64
 ### gcc options
@@ -262,9 +263,10 @@ gcc code tip unsigned long long ...
 gcc bug cast to unsigned long long not work (bad sign extend), 
 therefore we also need cast ulong to match size of pointer 32/64 
    arglist->ohnd.s.addr = (ulong) ohnd; /* silly gcc compiler */
-
+```
 
 gcc debug tip ...
+```
 dbx can produce 'internal error' on gcc objects.
 I use the following technique to keep the mess out.
 bash-4.3$ cd test
@@ -274,18 +276,18 @@ bash-4.3$ export SQL_PWD400=MYPWD
 bash-4.3$ dbx  -I. -I.. test0003_async_callback_connect_32 2>&1 | grep -v 'internal error'
 (press enter)
 (dbx)
-
+```
 
 xlc no longer supported ...
-
+```
 When using xlc, use options -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
-
+```
 
 
 extra stuff i use ...
-
+```
 export PATH=/opt/freeware/bin:$PATH
 export LIBPATH=.:/opt/freeware/lib:/usr/lib
 scp -r . adc@ut28p63:/QOpenSys/monoroot/home/monoroot/libdb400
