@@ -39,7 +39,7 @@ db2json/README.md - experimental json db2 server (expect many changes)
 
 #Run
 Place new libdb400.a in some directory (mytest). 
-Do not replace PASE /usr/lib/lidb400.a (someday).
+Do not replace PASE /usr/lib/libdb400.a (someday).
 ```
 $ export PATH=/mytest:$PATH
 $ export LIBPATH=.:/mytest/lib:/usr/lib
