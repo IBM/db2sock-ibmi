@@ -34,7 +34,7 @@ Run all ...
 ```
 
 # note
-Your LIBPATH should not be set /opt/freeware first (below).
+Your LIBPATH should NOT be set /opt/freeware first (below).
 However, when compiling i often set /opt/freeware first.
 So i usually use two ssh sessions (one compile, one test).
 
@@ -42,6 +42,10 @@ Makefiles removed /opt/freeware binaries (see Makefile).
 At runtime (test time), we want only PASE binaries and new libdb400.a.
 
 ```
+bash-4.3$ cd tests
+
+== bad libpath runtime ===
+
 bash-4.3$ echo $LIBPATH
 .:/opt/freeware/lib:/usr/lib
 
@@ -53,6 +57,33 @@ Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
 Could not load module st0003_async_callback_connect_64.
         Dependent module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o) could not be loaded.
 Could not load module .
+
+== good LIBPATH set ===
+
+bash-4.3$ export LIBPATH=.:/QOpenSys/usr/lib:/opt/freeware
+bash-4.3$ test0003_async_callback_connect_64              
+SQL400ConnectAsync (thread 258): connect running
+SQL400ConnectAsync (thread 1): hi there from main thread
+SUCCESS: tid valid) expect=1 actual=258
+SQL400ConnectCallback (thread 258): hi there from callback thread
+SQL400ConnectCallback (thread 258): complete: sqlrc=0, henv=1, db= uid= pwd=xxxx *ohnd=2 options=1800015a0 callback=180001248
+SQL400ConnectCallback (thread 258): leaving
+SUCCESS: operation complete) expect=1 actual=1
+
+== good PASE default ==
+
+bash-4.3$ unset LIBPATH
+bash-4.3$ echo $LIBPATH
+
+bash-4.3$ test0003_async_callback_connect_64
+SQL400ConnectAsync (thread 258): connect running
+SQL400ConnectAsync (thread 1): hi there from main thread
+SUCCESS: tid valid) expect=1 actual=258
+SQL400ConnectCallback (thread 258): hi there from callback thread
+SQL400ConnectCallback (thread 258): complete: sqlrc=0, henv=1, db= uid= pwd=xxxx *ohnd=2 options=1800015a0 callback=180001248
+SQL400ConnectCallback (thread 258): leaving
+SUCCESS: operation complete) expect=1 actual=1
+
 
 ```
 
