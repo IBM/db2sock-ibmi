@@ -54,9 +54,20 @@ Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
         Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
 ```
 
+#Contributors
+- Tony Cairns, IBM
+- Aaron Bartell, Krengel Technology, Inc.
+
+#Follow Along
+We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
+
+#License
+MIT
+
+
 #------ DRIVER BUILDER SECTION -------
 
-#CCSID
+##CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 ```
@@ -177,14 +188,7 @@ SQL400FetchArrayFreeJoin
 ... many more ...
 ```
 
-#Contributors
-- Tony Cairns, IBM
-- Aaron Bartell, Krengel Technology, Inc.
-
-#Follow Along
-We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
-
-# build
+## build
 All make files have been converted to gcc compiles.
 ```
 optional (git) ...
@@ -239,7 +243,7 @@ run 32-bit or 64-bit
 > testnnnn_64
 ```
 
-#Note:
+##Note:
 All make files have been converted to gcc compiles. 
 
 In switching to gcc, you have to edit PASE header.
@@ -308,5 +312,3 @@ Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
 ```
 
-#License
-MIT
