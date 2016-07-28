@@ -16,6 +16,10 @@ Run time, libdb400.a should fit seamless under any existing scripting language d
 That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
 You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
 
+At this time, this additional libdb400.a driver is designed to augment current PASE
+libdb400.a. Therefore both must be on the machine. However, eventually
+this libdb400.a driver may replace PASE version entirely.
+
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
@@ -66,6 +70,11 @@ MIT
 
 
 #------ DRIVER BUILDER SECTION -------
+For driver builders of scripting extensions (php ibm_db2, ruby ibm_db, etc.).
+The idea with this 'super driver' is many tasks repeated over and over in each
+language driver could be moved into the lowest CLI driver (libdb400.a).
+Also adding features to each language, such as asynchronous calls, CLI tracing, etc,
+will be much easier.
 
 ## build
 All make files have been converted to gcc compiles.
