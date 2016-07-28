@@ -85,7 +85,8 @@ optional (git already completed) ...
 gcc compiles ...
 > ./make_libdb400.sh
 ```
-Note: The gcc compiles will not run unless you take action in notes for PASE /usr/include/as400_types.h.
+Note: The gcc compiles will not run unless you take force gcc align quadword 
+action in notes for PASE /usr/include/as400_types.h.
 
 I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
 ```
@@ -249,7 +250,8 @@ SQL400FetchArrayFreeJoin
 ##Note:
 All make files have been converted to gcc compiles. 
 
-In switching to gcc, you have to edit PASE header.
+In switching to gcc, you have to edit PASE header to force gcc align quadword.
+If you miss this edit header step, all will compile, but NOTHING will run.
 
 ```
 /usr/include/as400_types.h:
