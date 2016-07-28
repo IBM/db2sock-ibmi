@@ -16,25 +16,22 @@ Run time, libdb400.a should fit seamless under any existing scripting language d
 That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
 You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
 
-Compile time, if you wish to exploit new features use the new header file PaseCliAsync.h.
-After compiling with new features, you are runtime dependent on new libdb400.a.
-Therefore, you will need to ship a copy of this shared library with your product.
-If you do not wish to exploit new features, continue compiling with ILE sqlcli.h.
-
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. Wildly imagined, if custom interfaces test well, one could
-imagine gutting all languages extension to bare minimum script language interaction, leaving all
-the real DB2 work to this driver (aka, new SQL400Connection(W) with attributes). For example, flight of
-fancy, one could imagine, PHP mysql extension talking directly to this driver, wherein, any old 
-PHP+mysql application would be instant DB2 (no port). Ok, no promise, but, you get the idea.
+web based db2, json based db2, etc. Ok, no promise, but, you get the idea.
 
 Author two cents, when stable, start using this driver, 
 you will grow function by leaps with very little effort.
 
+#Source sub-directories
+Sub-directories README.md files.
+```
+tests/README.md - running c tests (CLI normal, async, reap)
+db2json/README.md - experimental json db2 server (expect many changes)
+```
 
 #CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
@@ -56,7 +53,7 @@ SQLOverrideCCSID400(pase_ccsid)
 (*) Calling old libdb400.a less desirable, so may change over time.
 
 
-##Usage:
+##Usage
 
 In general, use CLI APIs, which, enable correct locking for async and non-async db2 operations.
 However, feel free to use new direct call ILE DB2 APIs (ILE_SQLxxx). 
@@ -156,43 +153,6 @@ SQL400FetchArrayFreeJoin
 
 ... many more ...
 ```
-
-## JSON based web socket
-```
-assumes basic authorization (httpd.conf)
-
-<Directory />       
-   AuthType Basic
-   AuthName "IBMi OS User Profile"
-   Require valid-user
-   PasswdFile %%SYSTEM%%
-   Order Deny,Allow 
-   Deny From all     
-</Directory>
-ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
-<Directory /QSYS.LIB/DB2JSON.LIB/>
-  AllowOverride None
-  order allow,deny
-  allow from all
-  SetHandler cgi-script
-  Options +ExecCGI
-  CGIConvMode BINARY
-</Directory>
-
-set test authorization (shell)
-> export SQL_HOST400=lp0364d
-> export SQL_DB400=*LOCAL
-> export SQL_UID400=MYUID
-> export SQL_PWD400=MYPWD
-
-== node test db2 json 
-> node nodejsrest.js
-
-== curl test db2 json
-> ./curltest.sh
-> ./curltestnull.sh
-```
-
 
 #Contributors
 - Tony Cairns, IBM
