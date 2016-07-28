@@ -54,7 +54,7 @@ Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
         Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
 ```
 
-
+#------ DRIVER BUILDER SECTION -------
 
 #CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
@@ -239,7 +239,7 @@ run 32-bit or 64-bit
 > testnnnn_64
 ```
 
-##Note:
+#Note:
 All make files have been converted to gcc compiles. 
 
 In switching to gcc, you have to edit PASE header.
