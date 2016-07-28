@@ -92,7 +92,6 @@ SQLOverrideCCSID400(pase_ccsid)
 In general, use CLI APIs, which, enable correct locking for async and non-async db2 operations.
 However, feel free to use new direct call ILE DB2 APIs (ILE_SQLxxx). 
 ```
-example:
 === CLI APIs UTF-8 or APIWs UTF-16  ===
 === choose async and/or normal wait === 
 SQLRETURN SQLExecDirect(..);
@@ -191,7 +190,7 @@ SQL400FetchArrayFreeJoin
 ## build
 All make files have been converted to gcc compiles.
 ```
-optional (git) ...
+optional (git already completed) ...
 > python gen.py
 
 gcc compiles ...
