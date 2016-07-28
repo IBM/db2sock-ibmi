@@ -7,7 +7,7 @@ c tests.
 # compile
 
 ```
-optional (git) ...
+optional (git already completed) ...
 $ cd db2sock/tests
 $ python genmake.py
 
