@@ -67,7 +67,62 @@ MIT
 
 #------ DRIVER BUILDER SECTION -------
 
-##CCSID
+## build
+All make files have been converted to gcc compiles.
+```
+optional (git already completed) ...
+> python gen.py
+
+gcc compiles ...
+> ./make_libdb400.sh
+```
+
+I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
+```
+> pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
+```
+
+
+Alternative pre-compiled Yips binary
+
+* http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver 
+* (test only, not production)
+
+
+##gen.py creates: 
+- PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
+- PaseCliAsync_gen.c     -- asynchronous driver APIs
+- PaseCliILE_gen.c       -- direct ILE call APIs (exported)
+- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
+- libdb400.exp           -- all CLI export APIs
+
+##human coding:
+- PaseCliCustom.c        -- 'big function' APIs (experimental)
+- PaseCliInit.c          -- db2 resource table manager (read)
+- PaseCliInit.h          -- db2 resource table header
+- PaseCliJson.h          -- db2 json parse interface (experimental)
+- PaseCliJson.c          -- db2 json parse interface (experimental)
+- PaseCliRun.h           -- db2 json/xml graph run interface (experimental)
+- PaseCliRun.c           -- db2 json/xml graph run interface (experimental)
+
+##examples
+```
+build
+> cd tests
+> python genmake.py
+> ./xlcmakeall
+
+optional set user profile
+> export SQL_DB400="*LOCAL"
+> export SQL_UID400="UID"
+> export SQL_PWD400="PWD"
+
+run 32-bit or 64-bit
+> testnnnn_32
+> testnnnn_64
+```
+
+##set CCSID first
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
 ```
@@ -87,7 +142,7 @@ SQLOverrideCCSID400(pase_ccsid)
 (*) Calling old libdb400.a less desirable, so may change over time.
 
 
-##Usage
+##Usage CLI APIs
 
 In general, use CLI APIs, which, enable correct locking for async and non-async db2 operations.
 However, feel free to use new direct call ILE DB2 APIs (ILE_SQLxxx). 
@@ -114,12 +169,6 @@ SQLRETURN ILE_SQLExecDirect(..);
 SQLRETURN ILE_SQLExecDirectW(..);
 
 ```
-SQLExecDirect is only an example,
-see libdb400.exp for all exported APIs.
-
-(*) PASE libdb400.a does not support wide CLI APIs.
-Therefore, this libdb400.a simply calls ILE.
-
 
 ## Advanced features
 Experimental advanced features, large, complex operations in one async call.
@@ -185,61 +234,6 @@ SQL400FetchArrayFreeAsync
 SQL400FetchArrayFreeJoin
 
 ... many more ...
-```
-
-## build
-All make files have been converted to gcc compiles.
-```
-optional (git already completed) ...
-> python gen.py
-
-gcc compiles ...
-> ./make_libdb400.sh
-```
-
-I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
-```
-> pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
-```
-
-
-Alternative pre-compiled Yips binary
-
-* http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver 
-* (test only, not production)
-
-
-##gen.py creates: 
-- PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
-- PaseCliAsync_gen.c     -- asynchronous driver APIs
-- PaseCliILE_gen.c       -- direct ILE call APIs (exported)
-- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
-- libdb400.exp           -- all CLI export APIs
-
-##human coding:
-- PaseCliCustom.c        -- 'big function' APIs (experimental)
-- PaseCliInit.c          -- db2 resource table manager (read)
-- PaseCliInit.h          -- db2 resource table header
-- PaseCliJson.h          -- db2 json parse interface (experimental)
-- PaseCliJson.c          -- db2 json parse interface (experimental)
-- PaseCliRun.h           -- db2 json/xml graph run interface (experimental)
-- PaseCliRun.c           -- db2 json/xml graph run interface (experimental)
-
-##examples
-```
-build
-> cd tests
-> python genmake.py
-> ./xlcmakeall
-
-optional set user profile
-> export SQL_DB400="*LOCAL"
-> export SQL_UID400="UID"
-> export SQL_PWD400="PWD"
-
-run 32-bit or 64-bit
-> testnnnn_32
-> testnnnn_64
 ```
 
 ##Note:
