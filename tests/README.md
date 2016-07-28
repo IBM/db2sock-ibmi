@@ -33,6 +33,49 @@ Run all ...
 
 ```
 
+#debug
+dbx can produce 'internal error' on gcc objects.
+I use the following technique to keep the mess out.
+```
+bash-4.3$ cd test
+
+--> run program ...
+bash-4.3$ export SQL_DB400=*LOCAL
+bash-4.3$ export SQL_UID400=MYID
+bash-4.3$ export SQL_PWD400=MYPWD
+bash-4.3$ dbx  -I. -I.. test0003_async_callback_connect_32 2>&1 | grep -v 'internal error'
+(press enter)
+(dbx)
+
+--> attach (eample test using lang_wait_init)...
+
+bash-4.3$ export SQL_DEBUG400=Y
+bash-4.3$ test0003_async_callback_connect_32&
+[1] 8216
+bash-4.3$ --DEBUG MODE--
+Long sleep, attach pid 8216
+--DEBUG MODE--
+
+bash-4.3$ dbx -I. -I.. -a 8216 2>&1 | grep -v 'internal error'                  
+Waiting to attach to process 8216 ...
+Successfully attached to /home/monoroot/libdb400/tests/./test0003_async_callback_connect_32.
+Type 'help' for help.
+
+stopped in _p_nsleep at 0xd1c0bdf0 ($t1)
+0xd1c0bdf0 (_p_nsleep+0x10) 80410014         lwz   r2,0x14(r1)
+
+(dbx) 
+where
+(dbx) _p_nsleep(??, ??) at 0xd1c0bdf0
+raise.nsleep(??, ??) at 0xd16bd144
+sleep(??) at 0xd17b76e8
+lang_wait_done(loop = 1, secs = 1), line 79 in "LangCommon.c"
+lang_wait_init(), line 41 in "LangCommon.c"
+main(argc = 1, argv = 0x2ff22cc8), line 57 in "test0003_async_callback_connect.c"
+
+```
+
+
 # note
 Your LIBPATH should NOT be set /opt/freeware first (below).
 However, when compiling i often set /opt/freeware first.
