@@ -33,6 +33,29 @@ tests/README.md - running c tests (CLI normal, async, reap)
 db2json/README.md - experimental json db2 server (expect many changes)
 ```
 
+#Run
+Place new libdb400.a in some directory (mytest). 
+Do not replace PASE /usr/lib/lidb400.a (someday).
+```
+$ export PATH=/mytest:$PATH
+$ export LIBPATH=.:/mytest/lib:/usr/lib
+$ run-my-scripts-or-whatever
+```
+
+This project gcc compiles are NOT using gcc runtime, aka,
+not using perzl.org runtime elements, therefore 
+do not put /opt/freeware front of LIBPATH (bad /opt/freeware).
+```
+bash-4.3$ echo $LIBPATH
+.:/opt/freeware/lib:/usr/lib
+bash-4.3$ test0003_async_callback_connect_64
+Could not load program test0003_async_callback_connect_64:
+Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
+        Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
+```
+
+
+
 #CCSID
 You should call SQLOverrideCCSID400(ccsid), before any other SQL activity (see tests).
 Environment setting SQLOverrideCCSID400 defines how this libdb400.a operates.
@@ -283,15 +306,6 @@ xlc no longer supported ...
 When using xlc, use options -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
-```
-
-
-extra stuff i use ...
-```
-export PATH=/opt/freeware/bin:$PATH
-export LIBPATH=.:/opt/freeware/lib:/usr/lib
-scp -r . adc@ut28p63:/QOpenSys/monoroot/home/monoroot/libdb400
-
 ```
 
 #License

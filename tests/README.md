@@ -91,7 +91,6 @@ bash-4.3$ cd tests
 
 bash-4.3$ echo $LIBPATH
 .:/opt/freeware/lib:/usr/lib
-
 bash-4.3$ test0003_async_callback_connect_64
 Could not load program test0003_async_callback_connect_64:
 Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
