@@ -45,6 +45,7 @@ char qry0_utf8[1024];
  */
 /* callback sends SQL400Json2Struct (PaseCliAsync.h) */
 void SQLJsonCallback(SQL400Json2Struct* myptr) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
   pthread_t ptid = pthread_self();
   pthread_t tid = 0;
   printf("SQLJsonCallback (thread %d): starting\n",ptid);
@@ -52,6 +53,7 @@ void SQLJsonCallback(SQL400Json2Struct* myptr) {
     ptid, myptr->sqlrc, myptr->hdbc, myptr->injson, myptr->inlen, myptr->outjson, myptr->outlen, myptr->callback);
   lang_check_sqlrc(SQL_HANDLE_DBC, myptr->hdbc, myptr->sqlrc, 1, &sqlcode);
   free(myptr);
+  sqlrc = lang_wait_complete();
   printf("SQLJsonCallback (thread %d): leaving\n",ptid);
 }
 
@@ -86,7 +88,6 @@ void SQL400ConnectCallback(SQL400ConnectStruct* myptr) {
   /* connect done, next query ...*/
   main_json(*(myptr->ohnd));
   free(myptr);
-  sqlrc = lang_wait_complete();
   printf("SQL400ConnectCallback (thread %d): leaving\n",ptid);
 }
 void main_connect(SQLHANDLE henv) {
