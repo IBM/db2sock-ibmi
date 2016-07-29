@@ -34,6 +34,10 @@ Run all ...
 ```
 
 #debug
+gdb is gcc environment debugger.
+
+
+However, if you wish to use dbx, 
 dbx can produce 'internal error' on gcc objects.
 I use the following technique to keep the mess out.
 ```
