@@ -138,6 +138,26 @@ stopped in SQL400Json at line 9866 in file "../PaseCliAsync_gen.c" ($t1)
  9866     sqlrc = custom_SQL400Json( injson, inlen, outjson, outlen );
 q
 
+=====
+example attach running process
+=====
+
+bash-4.3$ test1004_async_callback_query_json_32 &
+[1] 13629
+bash-4.3$ --DEBUG MODE--
+Long sleep, attach pid 13629
+--DEBUG MODE--
+
+bash-4.3$ pdbx '-a 13629'
+Waiting to attach to process 13629 ...
+Successfully attached to /home/monoroot/db2sock/tests/./test1004_async_callback_query_json_32.
+Type 'help' for help.
+reading symbolic information ...warning: test1004_async_callback_query_json.c is newer than /home/monoroot/db2sock/tests/./test1004_async_callback_query_json_32
+warning: LangCommon.c is newer than ./liblang400.a
+
+stopped in _p_nsleep at 0xd1c0bdf0 ($t1)
+0xd1c0bdf0 (_p_nsleep+0x10) 80410014         lwz   r2,0x14(r1)
+
 
 ```
 
