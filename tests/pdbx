@@ -1,0 +1,17 @@
+#!/opt/freeware/bin/python
+# syntax: pdbx test
+import sys, os, time
+import subprocess
+proc = subprocess.Popen(['dbx','-d 100','-I .','-I ..',sys.argv[1]], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+while True:
+  nextline = proc.stdout.readline()
+  if nextline == '' and proc.poll() is not None:
+    break
+  if 'internal error' in nextline:
+    continue
+  if 'dbx)' in nextline:
+    newer = nextline.split('dbx) ');
+    nextline = newer[1]
+  sys.stdout.write(nextline)
+  sys.stdout.flush()
+  time.sleep(0.05)
