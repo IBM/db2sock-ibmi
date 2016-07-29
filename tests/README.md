@@ -83,7 +83,63 @@ main(argc = 1, argv = 0x2ff22cc8), line 57 in "test0003_async_callback_connect.c
 
 ```
 
+#debug gcc (my way)
 
+Here is my python wrap for dbx.
+```
+====
+pdbx -- python wrap dbx (less noise)
+====
+bash-4.3$ cp pdbx /QOpenSys/usr/bin/.
+
+bash-4.3$ cat /QOpenSys/usr/bin/pdbx 
+#!/opt/freeware/bin/python
+# syntax: pdbx test
+import sys, os, time
+import subprocess
+proc = subprocess.Popen(['dbx','-d 100','-I .','-I ..',sys.argv[1]], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+while True:
+  nextline = proc.stdout.readline()
+  if nextline == '' and proc.poll() is not None:
+    break
+  if 'internal error' in nextline:
+    continue
+  if 'dbx)' in nextline:
+    newer = nextline.split('dbx) ');
+    nextline = newer[1]
+  sys.stdout.write(nextline)
+  sys.stdout.flush()
+  time.sleep(0.05)
+
+
+=====
+example
+=====
+bash-4.3$ pdbx test1001_normal_query_json_32
+Type 'help' for help.
+reading symbolic information ...warning: test1001_normal_query_json.c is newer than test1001_normal_query_json_32
+warning: LangCommon.c is newer than ./liblang400.a
+
+list 36
+   36     sqlrc = SQL400Json(injson, inlen, outjson, outlen);
+stop at 36
+[1] stop at "test1001_normal_query_json.c":36
+cont
+[1] stopped in main at line 36 in file "test1001_normal_query_json.c" ($t1)
+   36     sqlrc = SQL400Json(injson, inlen, outjson, outlen);
+s
+stopped in SQL400Json at line 9863 in file "../PaseCliAsync_gen.c" ($t1)
+ 9863   {
+s
+stopped in SQL400Json at line 9864 in file "../PaseCliAsync_gen.c" ($t1)
+ 9864     SQLRETURN sqlrc = SQL_SUCCESS;
+s
+stopped in SQL400Json at line 9866 in file "../PaseCliAsync_gen.c" ($t1)
+ 9866     sqlrc = custom_SQL400Json( injson, inlen, outjson, outlen );
+q
+
+
+```
 
 # note
 Your LIBPATH should NOT be set /opt/freeware first (below).
