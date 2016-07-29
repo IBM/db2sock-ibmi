@@ -83,55 +83,6 @@ main(argc = 1, argv = 0x2ff22cc8), line 57 in "test0003_async_callback_connect.c
 
 ```
 
-However, my dbx is python wrap.
-```
-====
-pdbx (python dbx script)
-====
-bash-4.3$ cp pdbx /QOpenSys/usr/bin/.
-
-bash-4.3$ cat pdbx
-#!/opt/freeware/bin/python
-# syntax: pdbx test
-import sys, os
-import subprocess
-proc = subprocess.Popen(['dbx','-d 100','-I .','-I ..',sys.argv[1]], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-while True:
-  nextline = proc.stdout.readline()
-  if nextline == '' and proc.poll() is not None:
-    break
-  if 'internal error' in nextline:
-    continue
-  if 'dbx)' in nextline:
-    newer = nextline.split('dbx) ');
-    nextline = newer[1]
-  sys.stdout.write(nextline)
-  sys.stdout.flush()
-
-=======
-example
-=======
-bash-4.3$ pdbx test1001_normal_query_json_32           
-Type 'help' for help.
-reading symbolic information ...warning: test1001_normal_query_json.c is newer than test1001_normal_query_json_32
-warning: LangCommon.c is newer than ./liblang400.a
-
-stop at 36
-[1] stop at "test1001_normal_query_json.c":36
-cont
-[1] stopped in main at line 36 in file "test1001_normal_query_json.c" ($t1)
-   36     sqlrc = SQL400Json(injson, inlen, outjson, outlen);
-s
-stopped in SQL400Json at line 9863 in file "../PaseCliAsync_gen.c" ($t1)
- 9863   {
-where
-SQL400Json(injson = " {  "sql": {    "prepare": "select * from qiws.qcustcdt where LSTNAM like ?",    "execute": {"parm":"J%"},    "fetch": "*"  } } ", inlen = 128, outjson = "", outlen = 4096), line 9863 in "PaseCliAsync_gen.c"
-main(argc = 1, argv = 0x2ff22ce0), line 36 in "test1001_normal_query_json.c"
-
-
-```
-
-
 
 
 # note
