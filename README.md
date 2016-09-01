@@ -5,7 +5,7 @@ When this warning disappears, APIs will be considered stable.
 
 #db2sock
 
-Welcome to the db2sock project. Goal is PASE DB2 CLI asynchronous API driver (libdb400.a).
+Welcome to db2sock project. Goal is PASE DB2 CLI asynchronous API driver and more (libdb400.a).
 
 A vast number of features have been added to new libdb400.a, async CLI, ILE direct CLI APIs, 
 Unicode CLI "Unix" API (UTF-8), Unicode CLI "wide" APIs (UTF-16), and more.
