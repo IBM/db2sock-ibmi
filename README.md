@@ -21,6 +21,9 @@ Starting with 1.0.1-sg8 libdb400.a driver (this driver) may replace PASE libdb40
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 
+# NOTE
+We broke JSON / web interface for now to work on redesign.
+
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
 web based db2, json based db2, etc. Ok, no promise, but, you get the idea.
@@ -102,7 +105,7 @@ Alternative pre-compiled Yips binary
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c     -- asynchronous driver APIs
 - PaseCliILE_gen.c       -- direct ILE call APIs (exported)
-- PaseCliLibDB400_gen.c  -- PASE override (obsolete soon)
+- PaseCliLibDB400_gen.c  -- PASE direct calls to ILE (exported)
 - libdb400.exp           -- all CLI export APIs
 
 ##human coding:
