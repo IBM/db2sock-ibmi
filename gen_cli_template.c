@@ -350,6 +350,8 @@ SQLRETURN SQLGetData(SQLHSTMT hstmt,
  SQLPOINTER rgbValue, 
  SQLINTEGER cbValueMax, 
  SQLINTEGER * pcbValue); 
+
+# parm name 'fieldID' and 'fValue' hard coded in gen.py
  
 SQLRETURN SQLGetDescField(SQLHDESC hdesc, 
  SQLSMALLINT rcdNum, 
@@ -545,7 +547,9 @@ SQLRETURN SQLNumParams(SQLHSTMT hstmt,
  
 SQLRETURN SQLNumResultCols(SQLHSTMT hstmt, 
  SQLSMALLINT * pccol); 
- 
+
+# parm name 'Value' hard coded in gen.py
+
 SQLRETURN SQLParamData(SQLHSTMT hstmt, 
  SQLPOINTER * Value); 
  

@@ -2102,6 +2102,10 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   SQLGetDescFieldIleCallStruct * arglist = (SQLGetDescFieldIleCallStruct *) NULL;
   char buffer[ sizeof(SQLGetDescFieldIleCallStruct) + 16 ];
   static arg_type_t SQLGetDescFieldIleSigStruct[] = { ARG_INT32, ARG_INT16, ARG_INT16, ARG_MEMPTR, ARG_INT32, ARG_MEMPTR, ARG_END };
+  /* special returns a pointer (ILE pointer) */
+  char returnAddr[ sizeof(ILEpointer) + 16 ];
+  ILEpointer *returnAddrPtr = (ILEpointer *)ROUND_QUAD(returnAddr);
+  memset(returnAddr,0,sizeof(returnAddr));
   arglist = (SQLGetDescFieldIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescFieldBuf);
   memset(buffer,0,sizeof(buffer));
@@ -2116,12 +2120,27 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fieldID = (SQLSMALLINT) fieldID;
-  arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (ulong) stLength;
+  /* special returns a pointer (ILE pointer) */
+  if (fValue != NULL &&
+       ((fieldID == SQL_DESC_DATA_PTR)   ||
+        (fieldID == SQL_DESC_LENGTH_PTR) ||
+        (fieldID == SQL_DESC_INDICATOR_PTR)))
+  {
+    arglist->fValue.s.addr = (ulong)returnAddrPtr;
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* special returns a pointer (ILE pointer) */
+  if (fValue != NULL &&
+       ((fieldID == SQL_DESC_DATA_PTR)   ||
+        (fieldID == SQL_DESC_LENGTH_PTR) ||
+        (fieldID == SQL_DESC_INDICATOR_PTR)))
+  {
+    *((void **)fValue) = _CVTSPP(returnAddrPtr);
   }
   return arglist->base.result.s_int32.r_int32;
 }
@@ -2134,6 +2153,10 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   SQLGetDescFieldWIleCallStruct * arglist = (SQLGetDescFieldWIleCallStruct *) NULL;
   char buffer[ sizeof(SQLGetDescFieldWIleCallStruct) + 16 ];
   static arg_type_t SQLGetDescFieldWIleSigStruct[] = { ARG_INT32, ARG_INT16, ARG_INT16, ARG_MEMPTR, ARG_INT32, ARG_MEMPTR, ARG_END };
+  /* special returns a pointer (ILE pointer) */
+  char returnAddr[ sizeof(ILEpointer) + 16 ];
+  ILEpointer *returnAddrPtr = (ILEpointer *)ROUND_QUAD(returnAddr);
+  memset(returnAddr,0,sizeof(returnAddr));
   arglist = (SQLGetDescFieldWIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLGetDescFieldWBuf);
   memset(buffer,0,sizeof(buffer));
@@ -2148,12 +2171,27 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->hdesc = (SQLHDESC) hdesc;
   arglist->rcdNum = (SQLSMALLINT) rcdNum;
   arglist->fieldID = (SQLSMALLINT) fieldID;
-  arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (ulong) stLength;
+  /* special returns a pointer (ILE pointer) */
+  if (fValue != NULL &&
+       ((fieldID == SQL_DESC_DATA_PTR)   ||
+        (fieldID == SQL_DESC_LENGTH_PTR) ||
+        (fieldID == SQL_DESC_INDICATOR_PTR)))
+  {
+    arglist->fValue.s.addr = (ulong)returnAddrPtr;
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* special returns a pointer (ILE pointer) */
+  if (fValue != NULL &&
+       ((fieldID == SQL_DESC_DATA_PTR)   ||
+        (fieldID == SQL_DESC_LENGTH_PTR) ||
+        (fieldID == SQL_DESC_INDICATOR_PTR)))
+  {
+    *((void **)fValue) = _CVTSPP(returnAddrPtr);
   }
   return arglist->base.result.s_int32.r_int32;
 }
@@ -3047,6 +3085,10 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
   SQLParamDataIleCallStruct * arglist = (SQLParamDataIleCallStruct *) NULL;
   char buffer[ sizeof(SQLParamDataIleCallStruct) + 16 ];
   static arg_type_t SQLParamDataIleSigStruct[] = { ARG_INT32, ARG_MEMPTR, ARG_END };
+  /* special returns a pointer (ILE pointer) */
+  char returnAddr[ sizeof(ILEpointer) + 16 ];
+  ILEpointer *returnAddrPtr = (ILEpointer *)ROUND_QUAD(returnAddr);
+  memset(returnAddr,0,sizeof(returnAddr));
   arglist = (SQLParamDataIleCallStruct *)ROUND_QUAD(buffer);
   ileSymPtr = (char *)ROUND_QUAD(&SQLParamDataBuf);
   memset(buffer,0,sizeof(buffer));
@@ -3059,10 +3101,19 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
     SQLParamDataLoaded = 1;
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
-  arglist->Value.s.addr = (ulong) Value;
+  /* special returns a pointer (ILE pointer) */
+  if (Value != NULL) {
+    arglist->Value.s.addr = (ulong)returnAddrPtr;
+  } else {
+    arglist->Value.s.addr = (ulong) Value;
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* special returns a pointer (ILE pointer) */
+  if (arglist->base.result.s_int32.r_int32 == SQL_NEED_DATA) {
+    *Value = _CVTSPP(returnAddrPtr);
   }
   return arglist->base.result.s_int32.r_int32;
 }

@@ -16,9 +16,7 @@ Run time, libdb400.a should fit seamless under any existing scripting language d
 That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
 You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
 
-At this time, this additional libdb400.a driver is designed to augment current PASE
-libdb400.a. Therefore both must be on the machine. However, eventually
-this libdb400.a driver may replace PASE version entirely.
+Starting with 1.0.1-sg8 libdb400.a driver (this driver) may replace PASE libdb400.a version entirely.
 
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
@@ -104,7 +102,7 @@ Alternative pre-compiled Yips binary
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c     -- asynchronous driver APIs
 - PaseCliILE_gen.c       -- direct ILE call APIs (exported)
-- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
+- PaseCliLibDB400_gen.c  -- PASE override (obsolete soon)
 - libdb400.exp           -- all CLI export APIs
 
 ##human coding:
@@ -145,12 +143,12 @@ SQLOverrideCCSID400(1208)
 SQLOverrideCCSID400(1200)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 
-=== PASE ccsid, original mode (call original libdb400.a) ===
+=== PASE ccsid, original mode ===
 SQLOverrideCCSID400(0) -- job ccsid, best guess
 SQLOverrideCCSID400(pase_ccsid)
--->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2 (*)
+-->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2 (*)
 ```
-(*) Calling old libdb400.a less desirable, so may change over time.
+(*) Removed old PASE libdb400.a version 1.0.1-sg8
 
 
 ##Usage CLI APIs
@@ -302,5 +300,11 @@ xlc no longer supported ...
 When using xlc, use options -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
+```
+
+
+Note to myself (where is my chroot).
+```
+scp -r * adc@ut28p63:/QOpenSys/zend7/home/zend7/db2sock
 ```
 

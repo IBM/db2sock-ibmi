@@ -381,6 +381,7 @@ for line in f:
   ILE_struct_sigs = ""
   ILE_struct_types = "ILEarglist_base base;"
   ILE_copyin_args = ""
+  ILE_SQLParam_CVTSPP = ""
   for arg in args:
     idx += 1
     if idx == len(args):
@@ -469,10 +470,16 @@ for line in f:
     # ILE call signature
     ILE_struct_sigs += ' ' + sigile + comma
     # ILE copyin params
-    if sigile == 'ARG_MEMPTR':
-      ILE_copyin_args += '  arglist->' + argname + '.s.addr = (ulong) ' + argname + ";" + "\n"
+    if ('SQLParamData' in call_name and 'Value' in argname) or ('SQLGetDescField' in call_name and 'fValue' in argname):
+      if sigile == 'ARG_MEMPTR':
+        ILE_SQLParam_CVTSPP = argname
+      else:
+        ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
     else:
-      ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
+      if sigile == 'ARG_MEMPTR':
+        ILE_copyin_args += '  arglist->' + argname + '.s.addr = (ulong) ' + argname + ";" + "\n"
+      else:
+        ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
 
     # each SQL async struct
     # typedef struct SQLPrimaryKeysStruct { SQLRETURN sqlrc; SQLHSTMT hstmt;  ...
@@ -504,31 +511,25 @@ for line in f:
     # ===============================================
     # libdb400 call
     # ===============================================
-    # declare dlsym call each SQL function
-    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
-    PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
-    PaseCliLibDB400_c_symbol += 'SQLINTEGER libdb400_' + call_name + '_flag' + ';' + "\n"
-    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + '_symbol)(' + normal_call_types + ' );' + "\n"
-    # main
-    if c400_not_wide:
-      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-      PaseCliLibDB400_c_main += '  void *dlhandle = NULL;' + "\n"
-      PaseCliLibDB400_c_main += '  if (!libdb400_'+ call_name + '_flag' + ') {' +  "\n"
-      PaseCliLibDB400_c_main += '    dlhandle = init_cli_dlsym();' + "\n"
-      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_symbol = dlsym(dlhandle, "'+ call_name +'");' + "\n"
-      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_flag = 1;' +  "\n"
-      PaseCliLibDB400_c_main += '  }' + "\n"
-      PaseCliLibDB400_c_main += "  sqlrc = libdb400_" + call_name + '_symbol(' + normal_db400_args + ' );' + "\n"
-      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-      PaseCliLibDB400_c_main += '}' + "\n"
-    else:
-      PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
-      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-      PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-      PaseCliLibDB400_c_main += '}' + "\n"
+    if not c400_CCSID:
+      # declare dlsym call each SQL function
+      # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
+      PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
+      # main
+      if c400_not_wide:
+        PaseCliLibDB400_c_main += '/* PASE libdb400.a experiment, call ILE directly */' + "\n"
+        PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+        PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+        PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+        PaseCliLibDB400_c_main += '}' + "\n"
+      else:
+        PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
+        PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+        PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+        PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+        PaseCliLibDB400_c_main += '}' + "\n"
 
     # SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID )
     if c400_CCSID:
@@ -681,6 +682,11 @@ for line in f:
     PaseCliILE_c_main += '  ' + struct_ile_name + ' * arglist = (' + struct_ile_name + ' *) NULL;' + "\n"
     PaseCliILE_c_main += '  char buffer[ sizeof(' + struct_ile_name + ') + 16 ];' + "\n"
     PaseCliILE_c_main += '  static arg_type_t ' + struct_ile_sig + '[] = {' + ILE_struct_sigs + ', ARG_END };'  + "\n";
+    if 'SQLParamData' in call_name or 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' + "\n"
+      PaseCliILE_c_main += '  char returnAddr[ sizeof(ILEpointer) + 16 ];' + "\n"
+      PaseCliILE_c_main += '  ILEpointer *returnAddrPtr = (ILEpointer *)ROUND_QUAD(returnAddr);' + "\n"
+      PaseCliILE_c_main += '  memset(returnAddr,0,sizeof(returnAddr));' + "\n"
     PaseCliILE_c_main += '  arglist = (' + struct_ile_name + ' *)ROUND_QUAD(buffer);' + "\n"
     PaseCliILE_c_main += '  ileSymPtr = (char *)ROUND_QUAD(&' + struct_ile_buf + ');' +  "\n"
     PaseCliILE_c_main += '  memset(buffer,0,sizeof(buffer));' +  "\n"
@@ -693,10 +699,40 @@ for line in f:
     PaseCliILE_c_main += '    ' + struct_ile_flag + ' = 1;' +  "\n"
     PaseCliILE_c_main += '  }' + "\n"
     PaseCliILE_c_main += ILE_copyin_args
+    if 'SQLParamData' in call_name:
+      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
+      PaseCliILE_c_main += '  if (Value != NULL) {' +  "\n"
+      PaseCliILE_c_main += '    arglist->Value.s.addr = (ulong)returnAddrPtr;' +  "\n"
+      PaseCliILE_c_main += '  } else {' +  "\n"
+      PaseCliILE_c_main += '    arglist->Value.s.addr = (ulong) Value;' +  "\n"
+      PaseCliILE_c_main += '  }' +  "\n"
+    elif 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
+      PaseCliILE_c_main += '  if (fValue != NULL &&' +  "\n"
+      PaseCliILE_c_main += '       ((fieldID == SQL_DESC_DATA_PTR)   ||' +  "\n"
+      PaseCliILE_c_main += '        (fieldID == SQL_DESC_LENGTH_PTR) ||' +  "\n"
+      PaseCliILE_c_main += '        (fieldID == SQL_DESC_INDICATOR_PTR)))' +  "\n"
+      PaseCliILE_c_main += '  {' +  "\n"
+      PaseCliILE_c_main += '    arglist->fValue.s.addr = (ulong)returnAddrPtr;' +  "\n"
+      PaseCliILE_c_main += '  }' +  "\n"
     PaseCliILE_c_main += '  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, ' + struct_ile_sig + ', RESULT_INT32);' +  "\n"
     PaseCliILE_c_main += '  if (rc != ILECALL_NOERROR) {' + "\n"
     PaseCliILE_c_main += '    return SQL_ERROR;' + "\n"
     PaseCliILE_c_main += '  }' + "\n"
+    if 'SQLParamData' in call_name:
+      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
+      PaseCliILE_c_main += '  if (arglist->base.result.s_int32.r_int32 == SQL_NEED_DATA) {' +  "\n"
+      PaseCliILE_c_main += '    *Value = _CVTSPP(returnAddrPtr);' +  "\n"
+      PaseCliILE_c_main += '  }' +  "\n"
+    elif 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
+      PaseCliILE_c_main += '  if (fValue != NULL &&' +  "\n"
+      PaseCliILE_c_main += '       ((fieldID == SQL_DESC_DATA_PTR)   ||' +  "\n"
+      PaseCliILE_c_main += '        (fieldID == SQL_DESC_LENGTH_PTR) ||' +  "\n"
+      PaseCliILE_c_main += '        (fieldID == SQL_DESC_INDICATOR_PTR)))' +  "\n"
+      PaseCliILE_c_main += '  {' +  "\n"
+      PaseCliILE_c_main += '    *((void **)fValue) = _CVTSPP(returnAddrPtr);' +  "\n"
+      PaseCliILE_c_main += '  }' +  "\n"
     PaseCliILE_c_main += '  return arglist->base.result.s_int32.r_int32;' + "\n"
     PaseCliILE_c_main += '}' + "\n"
 
@@ -903,8 +939,6 @@ with open("PaseCliILE_gen.c", "w") as text_file:
 file_PaseCliLibDB400_c = ""
 file_PaseCliLibDB400_c += file_pase_incl
 file_PaseCliLibDB400_c += file_local_incl
-file_PaseCliLibDB400_c += "" + "\n"
-file_PaseCliLibDB400_c += PaseCliLibDB400_c_symbol
 file_PaseCliLibDB400_c += "" + "\n"
 file_PaseCliLibDB400_c += PaseCliLibDB400_c_main
 file_PaseCliLibDB400_c += "" + "\n"
@@ -1131,7 +1165,7 @@ file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliILE_h_proto
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '/* ===================================================' + "\n"
-file_PaseCliAsync_h += ' * LIBDB400.A CLI interfaces (PASE old CLI driver)' + "\n"
+file_PaseCliAsync_h += ' * CLI interfaces (PASE old CLI driver)' + "\n"
 file_PaseCliAsync_h += ' * ===================================================' + "\n"
 file_PaseCliAsync_h += ' */' + "\n"
 file_PaseCliAsync_h += "" + "\n"

@@ -12,12 +12,6 @@
 #include <as400_protos.h>
 #include "PaseCliLic.h"
 
-#ifdef __64BIT__
-#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
-#else
-#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
-#endif
-
 #define DB2CLISRVPGM "QSYS/QSQCLI"
 
 #define PASECLIMAXRESOURCE 33000
@@ -44,7 +38,6 @@ typedef struct PaseConvResource {
 } PaseConvResource;
 
 /* load */
-void * init_cli_dlsym();
 int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
 

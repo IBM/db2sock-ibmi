@@ -130,28 +130,6 @@ void custom_iconv_close(int myccsid, int utfccsid) {
   init_unlock();
 }
 
-/* 
- * dlopen handle of PASE libdb400.a
- * Note: dlhandle is checked twice,
- * second under global lock,
- * to avoid race conditions
- * multiple threads starting.
- */
-void * init_cli_dlsym() {
-  char *dlservice = PASECLIDRIVER;
-  if (dlhandle  == NULL) {
-    init_lock();
-    if (dlhandle  == NULL) {
-      dlhandle = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
-      if (dlhandle == NULL)  {
-        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
-        exit(-1);
-      }
-    }
-    init_unlock();
-  }
-  return dlhandle;
-}
 /* activate db2 srvpgm */
 int init_cli_srvpgm() {
   int actMark = 0;

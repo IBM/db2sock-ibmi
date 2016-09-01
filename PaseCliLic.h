@@ -41,6 +41,6 @@
 */
 
 
-#define	DB2_CLI_VERSION "1.0.1 - sg7"
+#define	DB2_CLI_VERSION "1.0.1 - sg8"
 
 #endif /* _PASECLIINIT_H */
