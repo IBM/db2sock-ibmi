@@ -202,66 +202,7 @@ SQLRETURN ILE_SQLExecDirectW(..);
 Experimental advanced features, large, complex operations in one async call.
 
 ```
-Convert:
-SQL400ToUtf8
-SQL400ToUtf8Async
-SQL400ToUtf8Join
-SQL400FromUtf8
-SQL400FromUtf8Async
-SQL400FromUtf8Join
-SQL400ToUtf16
-SQL400ToUtf16Async
-SQL400ToUtf16Join
-SQL400FromUtf16
-SQL400FromUtf16Async
-SQL400FromUtf16Join
-
-Connect:
-SQL400Connect
-SQL400ConnectAsync
-SQL400ConnectJoin
-SQL400ConnectW
-SQL400ConnectWAsync
-SQL400ConnectWJoin
-SQL400pConnect
-SQL400pConnectAsync
-SQL400pConnectJoin
-SQL400pConnectW
-SQL400pConnectWAsync
-SQL400pConnectWJoin
-SQL400Close
-SQL400CloseAsync
-SQL400CloseJoin
-SQL400pClose
-SQL400pCloseAsync
-SQL400pCloseJoin
-
-Command:
-SQL400Cmd
-SQL400CmdAsync
-SQL400CmdJoin
-SQL400ChgLibl
-SQL400ChgLiblAsync
-SQL400ChgLiblJoin
-SQL400ChgCurLib
-SQL400ChgCurLibAsync
-SQL400ChgCurLibJoin
-
-Fetch:
-SQL400Fetch
-SQL400FetchAsync
-SQL400FetchJoin
-SQL400FetchArray
-SQL400FetchArrayAsync
-SQL400FetchArrayJoin
-SQL400FetchArrayW
-SQL400FetchArrayWAsync
-SQL400FetchArrayWJoin
-SQL400FetchArrayFree
-SQL400FetchArrayFreeAsync
-SQL400FetchArrayFreeJoin
-
-... many more ...
+TBD - re-work 400 custom APIs in progress
 ```
 
 ##Note:
