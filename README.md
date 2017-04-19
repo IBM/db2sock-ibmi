@@ -30,13 +30,6 @@ web based db2, json based db2, etc. Ok, no promise, but, you get the idea.
 Author two cents, when stable, start using this driver, 
 you will grow function by leaps with very little effort.
 
-#Source sub-directories
-Sub-directories README.md files.
-```
-tests/README.md - running c tests (CLI normal, async, reap)
-db2json/README.md - experimental json db2 server (expect many changes)
-```
-
 #Run
 Place new libdb400.a in some directory (mytest). 
 Do not replace PASE /usr/lib/libdb400.a (someday).
@@ -139,10 +132,6 @@ Alternative pre-compiled Yips binary
 - PaseCliCustom.c        -- 'big function' APIs (experimental)
 - PaseCliInit.c          -- db2 resource table manager (read)
 - PaseCliInit.h          -- db2 resource table header
-- PaseCliJson.h          -- db2 json parse interface (experimental)
-- PaseCliJson.c          -- db2 json parse interface (experimental)
-- PaseCliRun.h           -- db2 json/xml graph run interface (experimental)
-- PaseCliRun.c           -- db2 json/xml graph run interface (experimental)
 
 ##examples
 ```

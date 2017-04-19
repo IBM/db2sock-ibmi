@@ -684,10 +684,7 @@ for line in f:
   # all other CLI APIs 
   else:
     # normal cli function
-    if call_name == "SQL400Json":
-      PaseCliAsync_c_main += "  /* json handles SQLOverrideCCSID400 */" + "\n"
-    else:
-      PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
     if call_name == "SQLDisconnect":
       PaseCliAsync_c_main += SQLDisconnect_check_persistent("hdbc","return SQL_ERROR;", "/* return now */")
     if argtype1st == "SQLHENV":
@@ -882,10 +879,7 @@ for line in f:
   PaseCliAsync_c_main += 'void * ' + call_name + 'Thread (void *ptr)' + "\n"
   PaseCliAsync_c_main += "{" + "\n"
   PaseCliAsync_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-  if call_name == "SQL400Json":
-    PaseCliAsync_c_main += "  /* json handles SQLOverrideCCSID400 */" + "\n"
-  else:
-    PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  PaseCliAsync_c_main += "  int myccsid = init_CCSID400(0);" + "\n"
   PaseCliAsync_c_main += '  ' + struct_name + ' * myptr = (' + struct_name + ' *) ptr;' + "\n"
   if call_name == "SQLDisconnect":
     PaseCliAsync_c_main += SQLDisconnect_check_persistent("myptr->hdbc","pthread_exit((void *)myptr);","myptr->sqlrc = SQL_ERROR;")

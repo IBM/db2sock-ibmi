@@ -6400,414 +6400,7 @@ void dump_SQL400Stmt2Hdbc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * ohnd )
     dev_dump();
   }
 }
-void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
-  if (dev_go(sqlrc,"sql400toutf8")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400ToUtf8");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
-    printf_hexdump(mykey,inparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
-    printf_hexdump(mykey,outparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
-  if (dev_go(sqlrc,"sql400fromutf8")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400FromUtf8");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
-    printf_hexdump(mykey,inparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
-    printf_hexdump(mykey,outparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
-  if (dev_go(sqlrc,"sql400toutf16")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400ToUtf16");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
-    printf_hexdump(mykey,inparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
-    printf_hexdump(mykey,outparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
-  if (dev_go(sqlrc,"sql400fromutf16")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400FromUtf16");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
-    printf_hexdump(mykey,inparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
-    printf_hexdump(mykey,outparm,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddAttr(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options ) {
-  if (dev_go(sqlrc,"sql400addattr")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddAttr");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","scope",scope,scope);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","attrib",attrib,attrib);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","vParam",vParam,vParam);
-    printf_hexdump(mykey,vParam,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","onerr",onerr,onerr);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","flag",flag,flag);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400SetAttr(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options ) {
-  if (dev_go(sqlrc,"sql400setattr")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400SetAttr");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","scope",scope,scope);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHANDLE","hndl",hndl,hndl);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","flag",flag,flag);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400SetAttrW(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options ) {
-  if (dev_go(sqlrc,"sql400setattrw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400SetAttrW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","scope",scope,scope);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHANDLE","hndl",hndl,hndl);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","flag",flag,flag);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Environment(SQLRETURN sqlrc,  SQLINTEGER * ohnd, SQLPOINTER  options ) {
-  if (dev_go(sqlrc,"sql400environment")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400Environment");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
-    printf_hexdump(mykey,ohnd,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Connect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+void dump_SQL400Connect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
   if (dev_go(sqlrc,"sql400connect")) {
     char mykey[256];
     printf_key(mykey,"SQL400Connect");
@@ -6843,7 +6436,6 @@ void dump_SQL400Connect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR *
     else {
       printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
     }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
     printf_hexdump(mykey,db,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
@@ -6852,8 +6444,11 @@ void dump_SQL400Connect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR *
     printf_hexdump(mykey,pwd,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
     printf_hexdump(mykey,ohnd,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tend +++success+++\n",mykey);
     } else {
@@ -6862,7 +6457,7 @@ void dump_SQL400Connect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR *
     dev_dump();
   }
 }
-void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
   if (dev_go(sqlrc,"sql400connectw")) {
     char mykey[256];
     printf_key(mykey,"SQL400ConnectW");
@@ -6898,7 +6493,6 @@ void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHA
     else {
       printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
     }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLWCHAR*","db",db,db);
     printf_hexdump(mykey,db,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLWCHAR*","uid",uid,uid);
@@ -6907,8 +6501,11 @@ void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHA
     printf_hexdump(mykey,pwd,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
     printf_hexdump(mykey,ohnd,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tend +++success+++\n",mykey);
     } else {
@@ -6917,7 +6514,7 @@ void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHA
     dev_dump();
   }
 }
-void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
   if (dev_go(sqlrc,"sql400pconnect")) {
     char mykey[256];
     printf_key(mykey,"SQL400pConnect");
@@ -6953,7 +6550,6 @@ void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR 
     else {
       printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
     }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
     printf_hexdump(mykey,db,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
@@ -6964,8 +6560,11 @@ void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR 
     printf_hexdump(mykey,qual,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
     printf_hexdump(mykey,ohnd,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tend +++success+++\n",mykey);
     } else {
@@ -6974,7 +6573,7 @@ void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR 
     dev_dump();
   }
 }
-void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options ) {
+void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
   if (dev_go(sqlrc,"sql400pconnectw")) {
     char mykey[256];
     printf_key(mykey,"SQL400pConnectW");
@@ -7010,7 +6609,6 @@ void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCH
     else {
       printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
     }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLWCHAR*","db",db,db);
     printf_hexdump(mykey,db,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLWCHAR*","uid",uid,uid);
@@ -7021,8 +6619,247 @@ void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCH
     printf_hexdump(mykey,qual,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
     printf_hexdump(mykey,ohnd,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","options",options,options);
-    printf_hexdump(mykey,options,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400ConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
+  if (dev_go(sqlrc,"sql400connectutf8")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400ConnectUtf8");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","accsid",accsid,accsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
+    printf_hexdump(mykey,db,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
+    printf_hexdump(mykey,uid,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","pwd",pwd,pwd);
+    printf_hexdump(mykey,pwd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
+    printf_hexdump(mykey,ohnd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400pConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
+  if (dev_go(sqlrc,"sql400pconnectutf8")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400pConnectUtf8");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","accsid",accsid,accsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
+    printf_hexdump(mykey,db,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
+    printf_hexdump(mykey,uid,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","pwd",pwd,pwd);
+    printf_hexdump(mykey,pwd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","qual",qual,qual);
+    printf_hexdump(mykey,qual,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
+    printf_hexdump(mykey,ohnd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400ConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
+  if (dev_go(sqlrc,"sql400connectutf16")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400ConnectUtf16");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","accsid",accsid,accsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
+    printf_hexdump(mykey,db,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
+    printf_hexdump(mykey,uid,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","pwd",pwd,pwd);
+    printf_hexdump(mykey,pwd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
+    printf_hexdump(mykey,ohnd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400pConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
+  if (dev_go(sqlrc,"sql400pconnectutf16")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400pConnectUtf16");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","accsid",accsid,accsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","db",db,db);
+    printf_hexdump(mykey,db,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","uid",uid,uid);
+    printf_hexdump(mykey,uid,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","pwd",pwd,pwd);
+    printf_hexdump(mykey,pwd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","qual",qual,qual);
+    printf_hexdump(mykey,qual,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","ohnd",ohnd,ohnd);
+    printf_hexdump(mykey,ohnd,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","acommit",acommit,acommit);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","alibl",alibl,alibl);
+    printf_hexdump(mykey,alibl,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","acurlib",acurlib,acurlib);
+    printf_hexdump(mykey,acurlib,80);
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tend +++success+++\n",mykey);
     } else {
@@ -7262,1238 +7099,10 @@ void dump_SQL400ChgCurLib(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * curlib ) {
     dev_dump();
   }
 }
-void dump_SQL400AddDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs ) {
-  if (dev_go(sqlrc,"sql400adddesc")) {
+void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
+  if (dev_go(sqlrc,"sql400toutf8")) {
     char mykey[256];
-    printf_key(mykey,"SQL400AddDesc");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","icol",icol,icol);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","flag",flag,flag);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs ) {
-  if (dev_go(sqlrc,"sql400adddescw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddDescW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","icol",icol,icol);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","flag",flag,flag);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCParmDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts ) {
-  if (dev_go(sqlrc,"sql400addcparmdesc")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCParmDesc");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","pccol",pccol,pccol);
-    printf_hexdump(mykey,pccol,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_opts",out_opts,out_opts);
-    printf_hexdump(mykey,out_opts,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCParmDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts ) {
-  if (dev_go(sqlrc,"sql400addcparmdescw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCParmDescW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","pccol",pccol,pccol);
-    printf_hexdump(mykey,pccol,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_opts",out_opts,out_opts);
-    printf_hexdump(mykey,out_opts,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCResultDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts ) {
-  if (dev_go(sqlrc,"sql400addcresultdesc")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCResultDesc");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","pccol",pccol,pccol);
-    printf_hexdump(mykey,pccol,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_opts",out_opts,out_opts);
-    printf_hexdump(mykey,out_opts,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCResultDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts ) {
-  if (dev_go(sqlrc,"sql400addcresultdescw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCResultDescW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","pccol",pccol,pccol);
-    printf_hexdump(mykey,pccol,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_opts",out_opts,out_opts);
-    printf_hexdump(mykey,out_opts,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVar(SQLRETURN sqlrc,  SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms ) {
-  if (dev_go(sqlrc,"sql400addcvar")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVar");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","icol",icol,icol);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","inOutType",inOutType,inOutType);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","pfSqlCType",pfSqlCType,pfSqlCType);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","pfSqlCValue",pfSqlCValue,pfSqlCValue);
-    printf_hexdump(mykey,pfSqlCValue,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","indPtr",indPtr,indPtr);
-    printf_hexdump(mykey,indPtr,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","parms",parms,parms);
-    printf_hexdump(mykey,parms,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarRowAsChar(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarrowaschar")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarRowAsChar");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","cparms",cparms,cparms);
-    printf_hexdump(mykey,cparms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarRowAsCharW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarrowascharw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarRowAsCharW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","cparms",cparms,cparms);
-    printf_hexdump(mykey,cparms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarRowAsDefault(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarrowasdefault")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarRowAsDefault");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","cparms",cparms,cparms);
-    printf_hexdump(mykey,cparms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarRowAsDefaultW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarrowasdefaultw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarRowAsDefaultW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","cparms",cparms,cparms);
-    printf_hexdump(mykey,cparms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarMultipleRowsAsChar(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarmultiplerowsaschar")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarMultipleRowsAsChar");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarMultipleRowsAsCharW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarmultiplerowsascharw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarMultipleRowsAsCharW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarMultipleRowsAsDefault(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarmultiplerowsasdefault")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarMultipleRowsAsDefault");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarMultipleRowsAsDefaultW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarmultiplerowsasdefaultw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarMultipleRowsAsDefaultW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrcols",nbrcols,nbrcols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarParms(SQLRETURN sqlrc,  SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarparms")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarParms");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrparms",nbrparms,nbrparms);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","in_parms",in_parms,in_parms);
-    printf_hexdump(mykey,in_parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","in_parms_len",in_parms_len,in_parms_len);
-    printf_hexdump(mykey,in_parms_len,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","in_parms_ctype",in_parms_ctype,in_parms_ctype);
-    printf_hexdump(mykey,in_parms_ctype,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_parms",out_parms,out_parms);
-    printf_hexdump(mykey,out_parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400AddCVarParmsW(SQLRETURN sqlrc,  SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400addcvarparmsw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400AddCVarParmsW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbrparms",nbrparms,nbrparms);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","descs",descs,descs);
-    printf_hexdump(mykey,descs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","in_parms",in_parms,in_parms);
-    printf_hexdump(mykey,in_parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","in_parms_len",in_parms_len,in_parms_len);
-    printf_hexdump(mykey,in_parms_len,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT*","in_parms_ctype",in_parms_ctype,in_parms_ctype);
-    printf_hexdump(mykey,in_parms_ctype,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_parms",out_parms,out_parms);
-    printf_hexdump(mykey,out_parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400ParmsFree(SQLRETURN sqlrc,  SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs ) {
-  if (dev_go(sqlrc,"sql400parmsfree")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400ParmsFree");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","nbr_parms",nbr_parms,nbr_parms);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","parms",parms,parms);
-    printf_hexdump(mykey,parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","decs",decs,decs);
-    printf_hexdump(mykey,decs,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Execute(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms ) {
-  if (dev_go(sqlrc,"sql400execute")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400Execute");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","parms",parms,parms);
-    printf_hexdump(mykey,parms,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","desc_parms",desc_parms,desc_parms);
-    printf_hexdump(mykey,desc_parms,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Fetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols ) {
-  if (dev_go(sqlrc,"sql400fetch")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400Fetch");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","start_row",start_row,start_row);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","cols",cols,cols);
-    printf_hexdump(mykey,cols,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","desc_cols",desc_cols,desc_cols);
-    printf_hexdump(mykey,desc_cols,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400FetchArray(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400fetcharray")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400FetchArray");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","start_row",start_row,start_row);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","cnt_rows",cnt_rows,cnt_rows);
-    printf_hexdump(mykey,cnt_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","more_rows",more_rows,more_rows);
-    printf_hexdump(mykey,more_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","cnt_cols",cnt_cols,cnt_cols);
-    printf_hexdump(mykey,cnt_cols,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_decs",out_decs,out_decs);
-    printf_hexdump(mykey,out_decs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","all_char",all_char,all_char);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400FetchArrayW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor ) {
-  if (dev_go(sqlrc,"sql400fetcharrayw")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400FetchArrayW");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","start_row",start_row,start_row);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","max_rows",max_rows,max_rows);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","cnt_rows",cnt_rows,cnt_rows);
-    printf_hexdump(mykey,cnt_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","more_rows",more_rows,more_rows);
-    printf_hexdump(mykey,more_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER*","cnt_cols",cnt_cols,cnt_cols);
-    printf_hexdump(mykey,cnt_cols,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_rows",out_rows,out_rows);
-    printf_hexdump(mykey,out_rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","out_decs",out_decs,out_decs);
-    printf_hexdump(mykey,out_decs,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","all_char",all_char,all_char);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","expand_factor",expand_factor,expand_factor);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400FetchArrayFree(SQLRETURN sqlrc,  SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs ) {
-  if (dev_go(sqlrc,"sql400fetcharrayfree")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400FetchArrayFree");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cnt_cols",cnt_cols,cnt_cols);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","rows",rows,rows);
-    printf_hexdump(mykey,rows,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","decs",decs,decs);
-    printf_hexdump(mykey,decs,80);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Json(SQLRETURN sqlrc,  SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen ) {
-  if (dev_go(sqlrc,"sql400json")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400Json");
-    printf_clear();
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tbeg +++success+++\n",mykey);
-        printf_stack(mykey);
-    } else {
-      printf_format("%s.tbeg ---error---\n", mykey);
-        printf_stack(mykey);
-    }
-    if (sqlrc == SQL_SUCCESS) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
-    }
-    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
-    }
-    else if (sqlrc == SQL_NO_DATA_FOUND) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
-    }
-    else if (sqlrc == SQL_NEED_DATA) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
-    }
-    else if (sqlrc == SQL_ERROR) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
-    }
-    else if (sqlrc == SQL_INVALID_HANDLE) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
-    }
-    else if (sqlrc == SQL_STILL_EXECUTING) {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
-    }
-    else {
-      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
-    }
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","injson",injson,injson);
-    printf_hexdump(mykey,injson,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","outjson",outjson,outjson);
-    printf_hexdump(mykey,outjson,80);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
-    if (sqlrc > SQL_ERROR) {
-      printf_format("%s.tend +++success+++\n",mykey);
-    } else {
-      printf_format("%s.tend ---error---\n", mykey);
-    }
-    dev_dump();
-  }
-}
-void dump_SQL400Json2(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen ) {
-  if (dev_go(sqlrc,"sql400json2")) {
-    char mykey[256];
-    printf_key(mykey,"SQL400Json2");
+    printf_key(mykey,"SQL400ToUtf8");
     printf_clear();
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tbeg +++success+++\n",mykey);
@@ -8527,12 +7136,169 @@ void dump_SQL400Json2(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTE
       printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
     }
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","injson",injson,injson);
-    printf_hexdump(mykey,injson,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
-    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","outjson",outjson,outjson);
-    printf_hexdump(mykey,outjson,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400fromutf8")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400FromUtf8");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
+  if (dev_go(sqlrc,"sql400toutf16")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400ToUtf16");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tend +++success+++\n",mykey);
+    } else {
+      printf_format("%s.tend ---error---\n", mykey);
+    }
+    dev_dump();
+  }
+}
+void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400fromutf16")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400FromUtf16");
+    printf_clear();
+    if (sqlrc > SQL_ERROR) {
+      printf_format("%s.tbeg +++success+++\n",mykey);
+        printf_stack(mykey);
+    } else {
+      printf_format("%s.tbeg ---error---\n", mykey);
+        printf_stack(mykey);
+    }
+    if (sqlrc == SQL_SUCCESS) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    }
+    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    }
+    else if (sqlrc == SQL_NO_DATA_FOUND) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    }
+    else if (sqlrc == SQL_NEED_DATA) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    }
+    else if (sqlrc == SQL_ERROR) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    }
+    else if (sqlrc == SQL_INVALID_HANDLE) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    }
+    else if (sqlrc == SQL_STILL_EXECUTING) {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    }
+    else {
+      printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    }
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
     if (sqlrc > SQL_ERROR) {
       printf_format("%s.tend +++success+++\n",mykey);
     } else {

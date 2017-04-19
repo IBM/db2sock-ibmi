@@ -164,48 +164,23 @@ typedef struct SQL400DescStruct {
 /* composite calls to CLI also async  */
 
 SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
-SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-SQLRETURN SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN SQL400SetAttrW( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN SQL400Connect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400ConnectW( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400pConnectW( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400ConnectUtf8( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400pConnectUtf8( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400ConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN SQL400pConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 SQLRETURN SQL400Close( SQLHDBC  hdbc );
 SQLRETURN SQL400pClose( SQLHDBC  hdbc );
 SQLRETURN SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );
-SQLRETURN SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-SQLRETURN SQL400AddDescW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-SQLRETURN SQL400AddCParmDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN SQL400AddCParmDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN SQL400AddCResultDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN SQL400AddCResultDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms );
-SQLRETURN SQL400AddCVarRowAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarRowAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarRowAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarRowAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarMultipleRowsAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarMultipleRowsAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarMultipleRowsAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarMultipleRowsAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarParms( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400AddCVarParmsW( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-SQLRETURN SQL400ParmsFree( SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs );
-SQLRETURN SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
-SQLRETURN SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
-SQLRETURN SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-SQLRETURN SQL400FetchArrayW( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-SQLRETURN SQL400FetchArrayFree( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs );
-SQLRETURN SQL400Json( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
-SQLRETURN SQL400Json2( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+SQLRETURN SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+SQLRETURN SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+SQLRETURN SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+SQLRETURN SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 
 /* ===================================================
  * NORMAL CLI interfaces
@@ -462,48 +437,23 @@ typedef struct SQLTablesStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLCHAR * szT
 typedef struct SQLTablesWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLWCHAR * szTableQualifier; SQLSMALLINT  cbTableQualifier; SQLWCHAR * szTableOwner; SQLSMALLINT  cbTableOwner; SQLWCHAR * szTableName; SQLSMALLINT  cbTableName; SQLWCHAR * szTableType; SQLSMALLINT  cbTableType; void * callback; } SQLTablesWStruct;
 typedef struct SQLTransactStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLHDBC  hdbc; SQLSMALLINT  fType; void * callback; } SQLTransactStruct;
 typedef struct SQL400Stmt2HdbcStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER * ohnd; void * callback; } SQL400Stmt2HdbcStruct;
-typedef struct SQL400ToUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400ToUtf8Struct;
-typedef struct SQL400FromUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400FromUtf8Struct;
-typedef struct SQL400ToUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400ToUtf16Struct;
-typedef struct SQL400FromUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400FromUtf16Struct;
-typedef struct SQL400AddAttrStruct { SQLRETURN sqlrc; SQLINTEGER  scope; SQLINTEGER  attrib; SQLPOINTER  vParam; SQLINTEGER  inlen; SQLINTEGER  onerr; SQLINTEGER  flag; SQLPOINTER  options; void * callback; } SQL400AddAttrStruct;
-typedef struct SQL400SetAttrStruct { SQLRETURN sqlrc; SQLINTEGER  scope; SQLHANDLE  hndl; SQLINTEGER  flag; SQLPOINTER  options; void * callback; } SQL400SetAttrStruct;
-typedef struct SQL400SetAttrWStruct { SQLRETURN sqlrc; SQLINTEGER  scope; SQLHANDLE  hndl; SQLINTEGER  flag; SQLPOINTER  options; void * callback; } SQL400SetAttrWStruct;
-typedef struct SQL400EnvironmentStruct { SQLRETURN sqlrc; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400EnvironmentStruct;
-typedef struct SQL400ConnectStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400ConnectStruct;
-typedef struct SQL400ConnectWStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400ConnectWStruct;
-typedef struct SQL400pConnectStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectStruct;
-typedef struct SQL400pConnectWStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLPOINTER  options; void * callback; } SQL400pConnectWStruct;
+typedef struct SQL400ConnectStruct { SQLRETURN sqlrc; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectStruct;
+typedef struct SQL400ConnectWStruct { SQLRETURN sqlrc; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectWStruct;
+typedef struct SQL400pConnectStruct { SQLRETURN sqlrc; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400pConnectStruct;
+typedef struct SQL400pConnectWStruct { SQLRETURN sqlrc; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400pConnectWStruct;
+typedef struct SQL400ConnectUtf8Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectUtf8Struct;
+typedef struct SQL400pConnectUtf8Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400pConnectUtf8Struct;
+typedef struct SQL400ConnectUtf16Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectUtf16Struct;
+typedef struct SQL400pConnectUtf16Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400pConnectUtf16Struct;
 typedef struct SQL400CloseStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; void * callback; } SQL400CloseStruct;
 typedef struct SQL400pCloseStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; void * callback; } SQL400pCloseStruct;
 typedef struct SQL400CmdStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * cmd; void * callback; } SQL400CmdStruct;
 typedef struct SQL400ChgLiblStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * libl; void * callback; } SQL400ChgLiblStruct;
 typedef struct SQL400ChgCurLibStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * curlib; void * callback; } SQL400ChgCurLibStruct;
-typedef struct SQL400AddDescStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLSMALLINT  flag; SQLPOINTER  descs; void * callback; } SQL400AddDescStruct;
-typedef struct SQL400AddDescWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLSMALLINT  flag; SQLPOINTER  descs; void * callback; } SQL400AddDescWStruct;
-typedef struct SQL400AddCParmDescStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT * pccol; SQLPOINTER * out_opts; void * callback; } SQL400AddCParmDescStruct;
-typedef struct SQL400AddCParmDescWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT * pccol; SQLPOINTER * out_opts; void * callback; } SQL400AddCParmDescWStruct;
-typedef struct SQL400AddCResultDescStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT * pccol; SQLPOINTER * out_opts; void * callback; } SQL400AddCResultDescStruct;
-typedef struct SQL400AddCResultDescWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT * pccol; SQLPOINTER * out_opts; void * callback; } SQL400AddCResultDescWStruct;
-typedef struct SQL400AddCVarStruct { SQLRETURN sqlrc; SQLSMALLINT  icol; SQLSMALLINT  inOutType; SQLSMALLINT  pfSqlCType; SQLPOINTER  pfSqlCValue; SQLINTEGER * indPtr; SQLPOINTER  parms; void * callback; } SQL400AddCVarStruct;
-typedef struct SQL400AddCVarRowAsCharStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLPOINTER  cparms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarRowAsCharStruct;
-typedef struct SQL400AddCVarRowAsCharWStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLPOINTER  cparms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarRowAsCharWStruct;
-typedef struct SQL400AddCVarRowAsDefaultStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLPOINTER  cparms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarRowAsDefaultStruct;
-typedef struct SQL400AddCVarRowAsDefaultWStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLPOINTER  cparms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarRowAsDefaultWStruct;
-typedef struct SQL400AddCVarMultipleRowsAsCharStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLINTEGER  max_rows; SQLPOINTER * out_rows; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarMultipleRowsAsCharStruct;
-typedef struct SQL400AddCVarMultipleRowsAsCharWStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLINTEGER  max_rows; SQLPOINTER * out_rows; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarMultipleRowsAsCharWStruct;
-typedef struct SQL400AddCVarMultipleRowsAsDefaultStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLINTEGER  max_rows; SQLPOINTER * out_rows; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarMultipleRowsAsDefaultStruct;
-typedef struct SQL400AddCVarMultipleRowsAsDefaultWStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrcols; SQLPOINTER  descs; SQLINTEGER  max_rows; SQLPOINTER * out_rows; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarMultipleRowsAsDefaultWStruct;
-typedef struct SQL400AddCVarParmsStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrparms; SQLPOINTER  descs; SQLPOINTER * in_parms; SQLINTEGER * in_parms_len; SQLSMALLINT * in_parms_ctype; SQLPOINTER * out_parms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarParmsStruct;
-typedef struct SQL400AddCVarParmsWStruct { SQLRETURN sqlrc; SQLSMALLINT  nbrparms; SQLPOINTER  descs; SQLPOINTER * in_parms; SQLINTEGER * in_parms_len; SQLSMALLINT * in_parms_ctype; SQLPOINTER * out_parms; SQLINTEGER  expand_factor; void * callback; } SQL400AddCVarParmsWStruct;
-typedef struct SQL400ParmsFreeStruct { SQLRETURN sqlrc; SQLSMALLINT  nbr_parms; SQLPOINTER  parms; SQLPOINTER  decs; void * callback; } SQL400ParmsFreeStruct;
-typedef struct SQL400ExecuteStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLPOINTER  parms; SQLPOINTER  desc_parms; void * callback; } SQL400ExecuteStruct;
-typedef struct SQL400FetchStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLPOINTER  cols; SQLPOINTER  desc_cols; void * callback; } SQL400FetchStruct;
-typedef struct SQL400FetchArrayStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLINTEGER  max_rows; SQLINTEGER * cnt_rows; SQLINTEGER * more_rows; SQLINTEGER * cnt_cols; SQLPOINTER * out_rows; SQLPOINTER * out_decs; SQLINTEGER  all_char; SQLINTEGER  expand_factor; void * callback; } SQL400FetchArrayStruct;
-typedef struct SQL400FetchArrayWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER  start_row; SQLINTEGER  max_rows; SQLINTEGER * cnt_rows; SQLINTEGER * more_rows; SQLINTEGER * cnt_cols; SQLPOINTER * out_rows; SQLPOINTER * out_decs; SQLINTEGER  all_char; SQLINTEGER  expand_factor; void * callback; } SQL400FetchArrayWStruct;
-typedef struct SQL400FetchArrayFreeStruct { SQLRETURN sqlrc; SQLINTEGER  cnt_cols; SQLPOINTER  rows; SQLPOINTER  decs; void * callback; } SQL400FetchArrayFreeStruct;
-typedef struct SQL400JsonStruct { SQLRETURN sqlrc; SQLCHAR * injson; SQLINTEGER  inlen; SQLCHAR * outjson; SQLINTEGER  outlen; void * callback; } SQL400JsonStruct;
-typedef struct SQL400Json2Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * injson; SQLINTEGER  inlen; SQLCHAR * outjson; SQLINTEGER  outlen; void * callback; } SQL400Json2Struct;
+typedef struct SQL400ToUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400ToUtf8Struct;
+typedef struct SQL400FromUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400FromUtf8Struct;
+typedef struct SQL400ToUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400ToUtf16Struct;
+typedef struct SQL400FromUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400FromUtf16Struct;
 
 
 /* join async thread                    */
@@ -745,22 +695,6 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag);
 SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400Stmt2HdbcCallback(SQL400Stmt2HdbcStruct* ); */
 SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400ToUtf8Callback(SQL400ToUtf8Struct* ); */
-SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FromUtf8Callback(SQL400FromUtf8Struct* ); */
-SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag);
-/* void SQL400ToUtf16Callback(SQL400ToUtf16Struct* ); */
-SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FromUtf16Callback(SQL400FromUtf16Struct* ); */
-SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddAttrCallback(SQL400AddAttrStruct* ); */
-SQL400AddAttrStruct * SQL400AddAttrJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400SetAttrCallback(SQL400SetAttrStruct* ); */
-SQL400SetAttrStruct * SQL400SetAttrJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400SetAttrWCallback(SQL400SetAttrWStruct* ); */
-SQL400SetAttrWStruct * SQL400SetAttrWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400EnvironmentCallback(SQL400EnvironmentStruct* ); */
-SQL400EnvironmentStruct * SQL400EnvironmentJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400ConnectCallback(SQL400ConnectStruct* ); */
 SQL400ConnectStruct * SQL400ConnectJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400ConnectWCallback(SQL400ConnectWStruct* ); */
@@ -769,6 +703,14 @@ SQL400ConnectWStruct * SQL400ConnectWJoin (pthread_t tid, SQLINTEGER flag);
 SQL400pConnectStruct * SQL400pConnectJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400pConnectWCallback(SQL400pConnectWStruct* ); */
 SQL400pConnectWStruct * SQL400pConnectWJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400ConnectUtf8Callback(SQL400ConnectUtf8Struct* ); */
+SQL400ConnectUtf8Struct * SQL400ConnectUtf8Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400pConnectUtf8Callback(SQL400pConnectUtf8Struct* ); */
+SQL400pConnectUtf8Struct * SQL400pConnectUtf8Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400ConnectUtf16Callback(SQL400ConnectUtf16Struct* ); */
+SQL400ConnectUtf16Struct * SQL400ConnectUtf16Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400pConnectUtf16Callback(SQL400pConnectUtf16Struct* ); */
+SQL400pConnectUtf16Struct * SQL400pConnectUtf16Join (pthread_t tid, SQLINTEGER flag);
 /* void SQL400CloseCallback(SQL400CloseStruct* ); */
 SQL400CloseStruct * SQL400CloseJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400pCloseCallback(SQL400pCloseStruct* ); */
@@ -779,56 +721,14 @@ SQL400CmdStruct * SQL400CmdJoin (pthread_t tid, SQLINTEGER flag);
 SQL400ChgLiblStruct * SQL400ChgLiblJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400ChgCurLibCallback(SQL400ChgCurLibStruct* ); */
 SQL400ChgCurLibStruct * SQL400ChgCurLibJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddDescCallback(SQL400AddDescStruct* ); */
-SQL400AddDescStruct * SQL400AddDescJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddDescWCallback(SQL400AddDescWStruct* ); */
-SQL400AddDescWStruct * SQL400AddDescWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCParmDescCallback(SQL400AddCParmDescStruct* ); */
-SQL400AddCParmDescStruct * SQL400AddCParmDescJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCParmDescWCallback(SQL400AddCParmDescWStruct* ); */
-SQL400AddCParmDescWStruct * SQL400AddCParmDescWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCResultDescCallback(SQL400AddCResultDescStruct* ); */
-SQL400AddCResultDescStruct * SQL400AddCResultDescJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCResultDescWCallback(SQL400AddCResultDescWStruct* ); */
-SQL400AddCResultDescWStruct * SQL400AddCResultDescWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarCallback(SQL400AddCVarStruct* ); */
-SQL400AddCVarStruct * SQL400AddCVarJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarRowAsCharCallback(SQL400AddCVarRowAsCharStruct* ); */
-SQL400AddCVarRowAsCharStruct * SQL400AddCVarRowAsCharJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarRowAsCharWCallback(SQL400AddCVarRowAsCharWStruct* ); */
-SQL400AddCVarRowAsCharWStruct * SQL400AddCVarRowAsCharWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarRowAsDefaultCallback(SQL400AddCVarRowAsDefaultStruct* ); */
-SQL400AddCVarRowAsDefaultStruct * SQL400AddCVarRowAsDefaultJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarRowAsDefaultWCallback(SQL400AddCVarRowAsDefaultWStruct* ); */
-SQL400AddCVarRowAsDefaultWStruct * SQL400AddCVarRowAsDefaultWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarMultipleRowsAsCharCallback(SQL400AddCVarMultipleRowsAsCharStruct* ); */
-SQL400AddCVarMultipleRowsAsCharStruct * SQL400AddCVarMultipleRowsAsCharJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarMultipleRowsAsCharWCallback(SQL400AddCVarMultipleRowsAsCharWStruct* ); */
-SQL400AddCVarMultipleRowsAsCharWStruct * SQL400AddCVarMultipleRowsAsCharWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarMultipleRowsAsDefaultCallback(SQL400AddCVarMultipleRowsAsDefaultStruct* ); */
-SQL400AddCVarMultipleRowsAsDefaultStruct * SQL400AddCVarMultipleRowsAsDefaultJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarMultipleRowsAsDefaultWCallback(SQL400AddCVarMultipleRowsAsDefaultWStruct* ); */
-SQL400AddCVarMultipleRowsAsDefaultWStruct * SQL400AddCVarMultipleRowsAsDefaultWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarParmsCallback(SQL400AddCVarParmsStruct* ); */
-SQL400AddCVarParmsStruct * SQL400AddCVarParmsJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400AddCVarParmsWCallback(SQL400AddCVarParmsWStruct* ); */
-SQL400AddCVarParmsWStruct * SQL400AddCVarParmsWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400ParmsFreeCallback(SQL400ParmsFreeStruct* ); */
-SQL400ParmsFreeStruct * SQL400ParmsFreeJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400ExecuteCallback(SQL400ExecuteStruct* ); */
-SQL400ExecuteStruct * SQL400ExecuteJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FetchCallback(SQL400FetchStruct* ); */
-SQL400FetchStruct * SQL400FetchJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FetchArrayCallback(SQL400FetchArrayStruct* ); */
-SQL400FetchArrayStruct * SQL400FetchArrayJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FetchArrayWCallback(SQL400FetchArrayWStruct* ); */
-SQL400FetchArrayWStruct * SQL400FetchArrayWJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400FetchArrayFreeCallback(SQL400FetchArrayFreeStruct* ); */
-SQL400FetchArrayFreeStruct * SQL400FetchArrayFreeJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400JsonCallback(SQL400JsonStruct* ); */
-SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag);
-/* void SQL400Json2Callback(SQL400Json2Struct* ); */
-SQL400Json2Struct * SQL400Json2Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400ToUtf8Callback(SQL400ToUtf8Struct* ); */
+SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400FromUtf8Callback(SQL400FromUtf8Struct* ); */
+SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400ToUtf16Callback(SQL400ToUtf16Struct* ); */
+SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400FromUtf16Callback(SQL400FromUtf16Struct* ); */
+SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag);
 
 
 /* start an async call to DB2 CLI */
@@ -951,48 +851,23 @@ pthread_t SQLTablesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALL
 pthread_t SQLTablesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType, void * callback );
 pthread_t SQLTransactAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType, void * callback );
 pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * callback );
-pthread_t SQL400ToUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
-pthread_t SQL400FromUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
-pthread_t SQL400ToUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
-pthread_t SQL400FromUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
-pthread_t SQL400AddAttrAsync ( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options, void * callback );
-pthread_t SQL400SetAttrAsync ( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options, void * callback );
-pthread_t SQL400SetAttrWAsync ( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options, void * callback );
-pthread_t SQL400EnvironmentAsync ( SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400ConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400ConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400pConnectAsync ( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
-pthread_t SQL400pConnectWAsync ( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options, void * callback );
+pthread_t SQL400ConnectAsync ( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400ConnectWAsync ( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400pConnectAsync ( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400pConnectWAsync ( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400ConnectUtf8Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400pConnectUtf8Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400ConnectUtf16Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
+pthread_t SQL400pConnectUtf16Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
 pthread_t SQL400CloseAsync ( SQLHDBC  hdbc, void * callback );
 pthread_t SQL400pCloseAsync ( SQLHDBC  hdbc, void * callback );
 pthread_t SQL400CmdAsync ( SQLHDBC  hdbc, SQLCHAR * cmd, void * callback );
 pthread_t SQL400ChgLiblAsync ( SQLHDBC  hdbc, SQLCHAR * libl, void * callback );
 pthread_t SQL400ChgCurLibAsync ( SQLHDBC  hdbc, SQLCHAR * curlib, void * callback );
-pthread_t SQL400AddDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs, void * callback );
-pthread_t SQL400AddDescWAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs, void * callback );
-pthread_t SQL400AddCParmDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback );
-pthread_t SQL400AddCParmDescWAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback );
-pthread_t SQL400AddCResultDescAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback );
-pthread_t SQL400AddCResultDescWAsync ( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts, void * callback );
-pthread_t SQL400AddCVarAsync ( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms, void * callback );
-pthread_t SQL400AddCVarRowAsCharAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarRowAsCharWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarRowAsDefaultAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarRowAsDefaultWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarMultipleRowsAsCharAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarMultipleRowsAsCharWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarMultipleRowsAsDefaultAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarMultipleRowsAsDefaultWAsync ( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarParmsAsync ( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400AddCVarParmsWAsync ( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400ParmsFreeAsync ( SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs, void * callback );
-pthread_t SQL400ExecuteAsync ( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms, void * callback );
-pthread_t SQL400FetchAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols, void * callback );
-pthread_t SQL400FetchArrayAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400FetchArrayWAsync ( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor, void * callback );
-pthread_t SQL400FetchArrayFreeAsync ( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs, void * callback );
-pthread_t SQL400JsonAsync ( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback );
-pthread_t SQL400Json2Async ( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback );
+pthread_t SQL400ToUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
+pthread_t SQL400FromUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
+pthread_t SQL400ToUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
+pthread_t SQL400FromUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
 
 /* ===================================================
  * ILE CLI interfaces
@@ -1380,48 +1255,23 @@ void dump_SQLTablesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualif
 void dump_SQLTransact(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
 void dump_SQLOverrideCCSID400(SQLRETURN sqlrc,  SQLINTEGER  newCCSID );
 void dump_SQL400Stmt2Hdbc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * ohnd );
-void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-void dump_SQL400AddAttr(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options );
-void dump_SQL400SetAttr(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-void dump_SQL400SetAttrW(SQLRETURN sqlrc,  SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-void dump_SQL400Environment(SQLRETURN sqlrc,  SQLINTEGER * ohnd, SQLPOINTER  options );
-void dump_SQL400Connect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
-void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
+void dump_SQL400Connect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400ConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400pConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400ConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+void dump_SQL400pConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 void dump_SQL400Close(SQLRETURN sqlrc,  SQLHDBC  hdbc );
 void dump_SQL400pClose(SQLRETURN sqlrc,  SQLHDBC  hdbc );
 void dump_SQL400Cmd(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * cmd );
 void dump_SQL400ChgLibl(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * libl );
 void dump_SQL400ChgCurLib(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * curlib );
-void dump_SQL400AddDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-void dump_SQL400AddDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-void dump_SQL400AddCParmDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-void dump_SQL400AddCParmDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-void dump_SQL400AddCResultDesc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-void dump_SQL400AddCResultDescW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-void dump_SQL400AddCVar(SQLRETURN sqlrc,  SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms );
-void dump_SQL400AddCVarRowAsChar(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarRowAsCharW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarRowAsDefault(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarRowAsDefaultW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarMultipleRowsAsChar(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarMultipleRowsAsCharW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarMultipleRowsAsDefault(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarMultipleRowsAsDefaultW(SQLRETURN sqlrc,  SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarParms(SQLRETURN sqlrc,  SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-void dump_SQL400AddCVarParmsW(SQLRETURN sqlrc,  SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-void dump_SQL400ParmsFree(SQLRETURN sqlrc,  SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs );
-void dump_SQL400Execute(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
-void dump_SQL400Fetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
-void dump_SQL400FetchArray(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-void dump_SQL400FetchArrayW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-void dump_SQL400FetchArrayFree(SQLRETURN sqlrc,  SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs );
-void dump_SQL400Json(SQLRETURN sqlrc,  SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
-void dump_SQL400Json2(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 
 /* ===================================================
  * INTERNAL USE
@@ -1430,48 +1280,23 @@ void dump_SQL400Json2(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTE
 
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID );
 SQLRETURN custom_SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
-SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-SQLRETURN custom_SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-SQLRETURN custom_SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
-SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
-SQLRETURN custom_SQL400AddAttr( SQLINTEGER  scope, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen, SQLINTEGER  onerr, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN custom_SQL400SetAttr( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN custom_SQL400SetAttrW( SQLINTEGER  scope, SQLHANDLE  hndl, SQLINTEGER  flag, SQLPOINTER  options );
-SQLRETURN custom_SQL400Environment( SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400Connect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400ConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400pConnect( SQLHENV  henv, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
-SQLRETURN custom_SQL400pConnectW( SQLHENV  henv, SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLPOINTER  options );
+SQLRETURN custom_SQL400Connect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400ConnectW( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400pConnectW( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400ConnectUtf8( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400pConnectUtf8( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400ConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+SQLRETURN custom_SQL400pConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 SQLRETURN custom_SQL400Close( SQLHDBC  hdbc );
 SQLRETURN custom_SQL400pClose( SQLHDBC  hdbc );
 SQLRETURN custom_SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN custom_SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN custom_SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );
-SQLRETURN custom_SQL400AddDesc( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-SQLRETURN custom_SQL400AddDescW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  flag, SQLPOINTER  descs );
-SQLRETURN custom_SQL400AddCParmDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN custom_SQL400AddCParmDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN custom_SQL400AddCResultDesc( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN custom_SQL400AddCResultDescW( SQLHSTMT  hstmt, SQLSMALLINT * pccol, SQLPOINTER * out_opts );
-SQLRETURN custom_SQL400AddCVar( SQLSMALLINT  icol, SQLSMALLINT  inOutType, SQLSMALLINT  pfSqlCType, SQLPOINTER  pfSqlCValue, SQLINTEGER * indPtr, SQLPOINTER  parms );
-SQLRETURN custom_SQL400AddCVarRowAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarRowAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarRowAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarRowAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLPOINTER  cparms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarMultipleRowsAsChar( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarMultipleRowsAsCharW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarMultipleRowsAsDefault( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarMultipleRowsAsDefaultW( SQLSMALLINT  nbrcols, SQLPOINTER  descs, SQLINTEGER  max_rows, SQLPOINTER * out_rows, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarParms( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400AddCVarParmsW( SQLSMALLINT  nbrparms, SQLPOINTER  descs, SQLPOINTER * in_parms, SQLINTEGER * in_parms_len, SQLSMALLINT * in_parms_ctype, SQLPOINTER * out_parms, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400ParmsFree( SQLSMALLINT  nbr_parms, SQLPOINTER  parms, SQLPOINTER  decs );
-SQLRETURN custom_SQL400Execute( SQLHSTMT  hstmt, SQLPOINTER  parms, SQLPOINTER  desc_parms );
-SQLRETURN custom_SQL400Fetch( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLPOINTER  cols, SQLPOINTER  desc_cols );
-SQLRETURN custom_SQL400FetchArray( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400FetchArrayW( SQLHSTMT  hstmt, SQLINTEGER  start_row, SQLINTEGER  max_rows, SQLINTEGER * cnt_rows, SQLINTEGER * more_rows, SQLINTEGER * cnt_cols, SQLPOINTER * out_rows, SQLPOINTER * out_decs, SQLINTEGER  all_char, SQLINTEGER  expand_factor );
-SQLRETURN custom_SQL400FetchArrayFree( SQLINTEGER  cnt_cols, SQLPOINTER  rows, SQLPOINTER  decs );
-SQLRETURN custom_SQL400Json( SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
-SQLRETURN custom_SQL400Json2( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+SQLRETURN custom_SQL400FromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+SQLRETURN custom_SQL400ToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
+SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 
 
 #endif /* _PASECLIASYNC_H */
