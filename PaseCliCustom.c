@@ -311,12 +311,8 @@ SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID ) {
       sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
       break;
     default:
-      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
-      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
-/*
       libdb400_SQLOverrideCCSID400( newCCSID );
       sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
-*/
       break;
     }
   }

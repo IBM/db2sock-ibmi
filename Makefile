@@ -10,13 +10,14 @@
 CC          = gcc
 # CCFLAGS32   = -v verbose
 CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
-CCFLAGS64   = $(CCFLAGS32) -maix64
+CCFLAGS64   = $(CCFLAGS32) -maix64 -DTGT64
 AR          = ar
 AROPT       = -X32_64
 INCLUDEPATH = -isystem /QOpenSys/usr/include -I.
 
 ###  shared lib
-LIBOBJS      = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCliInit.o PaseCliCustom.o PaseCliJson.o PaseCliRun.o
+LIBOBJS      = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCliInit.o PaseCliCustom.o PaseCliJson.o PaseCliRun.o \
+               PaseCliDev.o PaseCliDevConsole.o PaseCliDevFile.o PaseCliPrintf.o PaseCliDump_gen.o
 LIBEXPS      = -Wl,-bE:libdb400.exp
 SHRLIB32     = libdb400.a
 SHROBJ32     = shr.o

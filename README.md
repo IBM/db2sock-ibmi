@@ -16,13 +16,12 @@ Run time, libdb400.a should fit seamless under any existing scripting language d
 That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
 You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
 
-Starting with 1.0.1-sg8 libdb400.a driver (this driver) may replace PASE libdb400.a version entirely.
+At this time, this additional libdb400.a driver is designed to augment current PASE
+libdb400.a. Therefore both must be on the machine. However, eventually
+this libdb400.a driver may replace PASE version entirely.
 
 This project originated because of a need to create async DB2 requests for Node.js on IBM i, 
 but it isn't just for Node.js and can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
-
-# NOTE
-We broke JSON / web interface for now to work on redesign.
 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
@@ -69,6 +68,34 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 #License
 MIT
 
+#------ DRIVER CLI TRACE -------
+The driver will trace CLI calls with env var TRACE (latest only).
+```
+export TRACE=on (file)
+export TRACE=off
+export TRACE=ws (console)
+```
+
+```
+bash-4.3$ export TRACE=on
+bash-4.3$ ls /tmp
+bash-4.3$ ./test0054_async_callback_query_fetch_array_64                    
+main_environ (thread 1): starting
+main_environ (thread 1): leaving
+SQL400EnvironmentCallback (thread 258): starting
+SQL400EnvironmentCallback (thread 258): complete: sqlrc=0, *ohnd=1 options=180001538 callback=180000d38
+main_connect (thread 258): starting
+:
+bash-4.3$ ls /tmp/
+libdb400_trace_129505
+bash-4.3$ cat /tmp/libdb400_trace_129505 
+SQLAllocHandle.129505.1492615392.1.tbeg +++success+++
+SQLAllocHandle.129505.1492615392.1.walk printf_stack (ffffffffffff7a0)
+SQLAllocHandle.129505.1492615392.1.walk dump_SQLAllocHandle (fffff950 10001a04e4298 a5f1bb7c 9001000a5f1bb7c)
+SQLAllocHandle.129505.1492615392.1.walk SQLAllocHandle (104b8e0ddf00d a045a9a0 9001000a5f1bb7c)
+SQLAllocHandle.129505.1492615392.1.walk custom_SQLOverrideCCSID400 (4b8a0449ab0)
+:
+```
 
 #------ DRIVER BUILDER SECTION -------
 For driver builders of scripting extensions (php ibm_db2, ruby ibm_db, etc.).
@@ -105,7 +132,7 @@ Alternative pre-compiled Yips binary
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c     -- asynchronous driver APIs
 - PaseCliILE_gen.c       -- direct ILE call APIs (exported)
-- PaseCliLibDB400_gen.c  -- PASE direct calls to ILE (exported)
+- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
 - libdb400.exp           -- all CLI export APIs
 
 ##human coding:
@@ -146,12 +173,12 @@ SQLOverrideCCSID400(1208)
 SQLOverrideCCSID400(1200)
 -->SQLExecDirectW(Async)-->ILE_SQLExecDirectW-->DB2
 
-=== PASE ccsid, original mode ===
+=== PASE ccsid, original mode (call original libdb400.a) ===
 SQLOverrideCCSID400(0) -- job ccsid, best guess
 SQLOverrideCCSID400(pase_ccsid)
--->SQLExecDirect(Async)-->ILE_SQLExecDirect-->DB2 (*)
+-->SQLExecDirect(Async)-->PASE libdb400.a(SQLExecDirect)-->DB2 (*)
 ```
-(*) Removed old PASE libdb400.a version 1.0.1-sg8
+(*) Calling old libdb400.a less desirable, so may change over time.
 
 
 ##Usage CLI APIs
@@ -303,11 +330,5 @@ xlc no longer supported ...
 When using xlc, use options -qldbl128 -qalign=natural. 
 Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
-```
-
-
-Note to myself (where is my chroot).
-```
-scp -r * adc@ut28p63:/QOpenSys/zend7/home/zend7/db2sock
 ```
 

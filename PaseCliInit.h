@@ -12,6 +12,12 @@
 #include <as400_protos.h>
 #include "PaseCliLic.h"
 
+#ifdef __64BIT__
+#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
+#else
+#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
+#endif
+
 #define DB2CLISRVPGM "QSYS/QSQCLI"
 
 #define PASECLIMAXRESOURCE 33000
@@ -37,7 +43,23 @@ typedef struct PaseConvResource {
   pthread_mutexattr_t threadMutexAttr;
 } PaseConvResource;
 
+
+/* trace CLI env var
+ * export TRACE=on (file)
+ * export TRACE=off
+ * export TRACE=ws (console)
+ */
+#define DB2CLITRACE "TRACE"
+#define DB2CLITRACE_OFF 0
+#define DB2CLITRACE_ON 1
+#define DB2CLITRACE_FILE 1
+#define DB2CLITRACE_WS 2
+
+/* trace on? */
+int init_cli_trace();
+
 /* load */
+void * init_cli_dlsym();
 int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
 

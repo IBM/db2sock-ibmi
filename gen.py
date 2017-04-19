@@ -81,6 +81,10 @@ def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
   c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+  c_main += "  }" + "\n"
   return c_main
 
 # SQLRETURN SQLAllocConnect ( SQLHENV  henv, SQLHDBC * phdbc );
@@ -99,6 +103,10 @@ def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phdbc, *phdbc);" + "\n"
   c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+  c_main += "  }" + "\n"
   return c_main
 
 # SQLRETURN SQLAllocStmt ( SQLHDBC  hdbc, SQLHSTMT * phstmt );
@@ -116,6 +124,10 @@ def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phstmt, hdbc);" + "\n"
+  c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
   c_main += "  }" + "\n"
   return c_main
 
@@ -150,6 +162,10 @@ def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db4
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+  c_main += "  }" + "\n"
   return c_main
 
 # SQLRETURN SQLFreeEnv ( SQLHENV  henv );
@@ -164,6 +180,10 @@ def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_a
   c_main += '  default:' + "\n"
   c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
   c_main += "  }" + "\n"
   return c_main
 
@@ -188,6 +208,10 @@ def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db4
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_dtor(hdbc);" + "\n"
   c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+  c_main += "  }" + "\n"
   return c_main
 
 # SQLRETURN SQLFreeStmt ( SQLHSTMT  hstmt, SQLSMALLINT  fOption );
@@ -205,6 +229,10 @@ def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_dtor(hstmt);" + "\n"
+  c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
   c_main += "  }" + "\n"
   return c_main
 
@@ -240,6 +268,10 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += "      init_table_dtor(hndl);" + "\n"
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
+  c_main += "  }" + "\n"
+  # dump trace
+  c_main += "  if (init_cli_trace()) {" + "\n"
+  c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
   c_main += "  }" + "\n"
   return c_main
 
@@ -306,6 +338,8 @@ PaseCliILE_c_symbol = ""
 PaseCliCustom_h_proto = ""
 PaseCliILE_h_struct = ""
 PaseCliILE_c_main = ""
+PaseCliDump_h_proto = ""
+PaseCliDump_c_main = ""
 for line in f:
 
   # start of SQL function ..
@@ -381,7 +415,8 @@ for line in f:
   ILE_struct_sigs = ""
   ILE_struct_types = "ILEarglist_base base;"
   ILE_copyin_args = ""
-  ILE_SQLParam_CVTSPP = ""
+  dump_args = ""
+  dump_sigs = ""
   for arg in args:
     idx += 1
     if idx == len(args):
@@ -464,22 +499,20 @@ for line in f:
     # SQLRETURN (*libdb400_SQLPrimaryKeys)(SQLHSTMT,SQLCHAR*,SQLSMALLINT, ...
     #                                      ------------------------------
     normal_call_types += ' ' + argsig + comma
+    # Dump args and sigs
+    #
+    dump_args += ' ' + argname
+    dump_sigs += ' ' + argsig
 
     # ILE call structure
     ILE_struct_types += ' ' + ilefull + semi
     # ILE call signature
     ILE_struct_sigs += ' ' + sigile + comma
     # ILE copyin params
-    if ('SQLParamData' in call_name and 'Value' in argname) or ('SQLGetDescField' in call_name and 'fValue' in argname):
-      if sigile == 'ARG_MEMPTR':
-        ILE_SQLParam_CVTSPP = argname
-      else:
-        ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
+    if sigile == 'ARG_MEMPTR':
+      ILE_copyin_args += '  arglist->' + argname + '.s.addr = (ulong) ' + argname + ";" + "\n"
     else:
-      if sigile == 'ARG_MEMPTR':
-        ILE_copyin_args += '  arglist->' + argname + '.s.addr = (ulong) ' + argname + ";" + "\n"
-      else:
-        ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
+      ILE_copyin_args += '  arglist->' + argname + ' = (' + argsig + ') ' + argname + ";" + "\n"
 
     # each SQL async struct
     # typedef struct SQLPrimaryKeysStruct { SQLRETURN sqlrc; SQLHSTMT hstmt;  ...
@@ -498,6 +531,71 @@ for line in f:
     async_copyin_args += '  myptr->' + argname + " = " + argname + ";" + "\n"
 
 
+
+  # ===============================================
+  # standard dumping function
+  # ===============================================
+  PaseCliDump_h_proto  += "void dump_" + call_name + '(SQLRETURN sqlrc, ' + normal_call_args + ' );' + "\n"
+  PaseCliDump_c_main += "void dump_" + call_name + '(SQLRETURN sqlrc, ' + normal_call_args + ' ) {' + "\n"
+  PaseCliDump_c_main += '  if (dev_go(sqlrc,"'+call_name.lower()+'")) {' + "\n"
+  PaseCliDump_c_main += '    char mykey[256];' + "\n"
+  PaseCliDump_c_main += '    printf_key(mykey,"' + call_name + '");' + "\n"
+  PaseCliDump_c_main += '    printf_clear();' + "\n"
+  PaseCliDump_c_main += '    if (sqlrc > SQL_ERROR) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.tbeg +++success+++\\n",mykey);' + "\n"
+  # PaseCliDump_c_main += '      if (ini_get_trace_stack() > 1) {' + "\n"
+  PaseCliDump_c_main += '        printf_stack(mykey);' + "\n"
+  # PaseCliDump_c_main += '      }' + "\n" 
+  PaseCliDump_c_main += '    } else {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.tbeg ---error---\\n", mykey);' + "\n"
+  # PaseCliDump_c_main += '      if (ini_get_trace_stack() > 0) {' + "\n"
+  PaseCliDump_c_main += '        printf_stack(mykey);' + "\n"
+  # PaseCliDump_c_main += '      }' + "\n" 
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    if (sqlrc == SQL_SUCCESS) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_NO_DATA_FOUND) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_NEED_DATA) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_ERROR) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_INVALID_HANDLE) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else if (sqlrc == SQL_STILL_EXECUTING) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    else {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");' + "\n"
+  PaseCliDump_c_main += '    }' + "\n"
+  args = dump_args.split()
+  sigs = dump_sigs.split()
+  i = 0
+  for arg in args:
+    sig = sigs[i]
+    PaseCliDump_c_main += '    printf_format("%s.parm %s %s 0x%p (%d)\\n",mykey,"'+sig+'","'+arg+'",'+arg+','+arg+');' + "\n"
+    if '*' in sig or 'SQLPOINTER' in sig:
+      PaseCliDump_c_main += '    printf_hexdump(mykey,'+arg+',80);' + "\n"
+    i += 1
+  PaseCliDump_c_main += '    if (sqlrc > SQL_ERROR) {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.tend +++success+++\\n",mykey);' + "\n"
+  PaseCliDump_c_main += '    } else {' + "\n" 
+  PaseCliDump_c_main += '      printf_format("%s.tend ---error---\\n", mykey);' + "\n"
+  PaseCliDump_c_main += '    }' + "\n" 
+  PaseCliDump_c_main += '    dev_dump();'  + "\n"
+  PaseCliDump_c_main += '  }' + "\n" 
+  PaseCliDump_c_main += '}' + "\n" 
+
+
+
   # ===============================================
   # non-async SQL interfaces with lock added
   # ===============================================
@@ -511,25 +609,31 @@ for line in f:
     # ===============================================
     # libdb400 call
     # ===============================================
-    if not c400_CCSID:
-      # declare dlsym call each SQL function
-      # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
-      PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
-      # main
-      if c400_not_wide:
-        PaseCliLibDB400_c_main += '/* PASE libdb400.a experiment, call ILE directly */' + "\n"
-        PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-        PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-        PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-        PaseCliLibDB400_c_main += '}' + "\n"
-      else:
-        PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
-        PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-        PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-        PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-        PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-        PaseCliLibDB400_c_main += '}' + "\n"
+    # declare dlsym call each SQL function
+    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
+    PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
+    PaseCliLibDB400_c_symbol += 'SQLINTEGER libdb400_' + call_name + '_flag' + ';' + "\n"
+    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + '_symbol)(' + normal_call_types + ' );' + "\n"
+    # main
+    if c400_not_wide:
+      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+      PaseCliLibDB400_c_main += '  void *dlhandle = NULL;' + "\n"
+      PaseCliLibDB400_c_main += '  if (!libdb400_'+ call_name + '_flag' + ') {' +  "\n"
+      PaseCliLibDB400_c_main += '    dlhandle = init_cli_dlsym();' + "\n"
+      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_symbol = dlsym(dlhandle, "'+ call_name +'");' + "\n"
+      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_flag = 1;' +  "\n"
+      PaseCliLibDB400_c_main += '  }' + "\n"
+      PaseCliLibDB400_c_main += "  sqlrc = libdb400_" + call_name + '_symbol(' + normal_db400_args + ' );' + "\n"
+      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+      PaseCliLibDB400_c_main += '}' + "\n"
+    else:
+      PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
+      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+      PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+      PaseCliLibDB400_c_main += '}' + "\n"
 
     # SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID )
     if c400_CCSID:
@@ -628,6 +732,10 @@ for line in f:
         PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
         PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
+      # dump trace
+      PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+      PaseCliAsync_c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+      PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 1);" + "\n"
     elif argtype1st == "SQLHDESC":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 1);" + "\n"
@@ -643,6 +751,10 @@ for line in f:
         PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
         PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
+      # dump trace
+      PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+      PaseCliAsync_c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+      PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 1);" + "\n"
     else:
       if ile_or_custom_call == "custom_":
@@ -657,6 +769,10 @@ for line in f:
         PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
         PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
+      # dump trace
+      PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+      PaseCliAsync_c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+      PaseCliAsync_c_main += "  }" + "\n"
   # common code
   PaseCliAsync_c_main += "  return sqlrc;" + "\n"
   PaseCliAsync_c_main += "}" + "\n"
@@ -682,11 +798,6 @@ for line in f:
     PaseCliILE_c_main += '  ' + struct_ile_name + ' * arglist = (' + struct_ile_name + ' *) NULL;' + "\n"
     PaseCliILE_c_main += '  char buffer[ sizeof(' + struct_ile_name + ') + 16 ];' + "\n"
     PaseCliILE_c_main += '  static arg_type_t ' + struct_ile_sig + '[] = {' + ILE_struct_sigs + ', ARG_END };'  + "\n";
-    if 'SQLParamData' in call_name or 'SQLGetDescField' in call_name:
-      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' + "\n"
-      PaseCliILE_c_main += '  char returnAddr[ sizeof(ILEpointer) + 16 ];' + "\n"
-      PaseCliILE_c_main += '  ILEpointer *returnAddrPtr = (ILEpointer *)ROUND_QUAD(returnAddr);' + "\n"
-      PaseCliILE_c_main += '  memset(returnAddr,0,sizeof(returnAddr));' + "\n"
     PaseCliILE_c_main += '  arglist = (' + struct_ile_name + ' *)ROUND_QUAD(buffer);' + "\n"
     PaseCliILE_c_main += '  ileSymPtr = (char *)ROUND_QUAD(&' + struct_ile_buf + ');' +  "\n"
     PaseCliILE_c_main += '  memset(buffer,0,sizeof(buffer));' +  "\n"
@@ -699,40 +810,10 @@ for line in f:
     PaseCliILE_c_main += '    ' + struct_ile_flag + ' = 1;' +  "\n"
     PaseCliILE_c_main += '  }' + "\n"
     PaseCliILE_c_main += ILE_copyin_args
-    if 'SQLParamData' in call_name:
-      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
-      PaseCliILE_c_main += '  if (Value != NULL) {' +  "\n"
-      PaseCliILE_c_main += '    arglist->Value.s.addr = (ulong)returnAddrPtr;' +  "\n"
-      PaseCliILE_c_main += '  } else {' +  "\n"
-      PaseCliILE_c_main += '    arglist->Value.s.addr = (ulong) Value;' +  "\n"
-      PaseCliILE_c_main += '  }' +  "\n"
-    elif 'SQLGetDescField' in call_name:
-      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
-      PaseCliILE_c_main += '  if (fValue != NULL &&' +  "\n"
-      PaseCliILE_c_main += '       ((fieldID == SQL_DESC_DATA_PTR)   ||' +  "\n"
-      PaseCliILE_c_main += '        (fieldID == SQL_DESC_LENGTH_PTR) ||' +  "\n"
-      PaseCliILE_c_main += '        (fieldID == SQL_DESC_INDICATOR_PTR)))' +  "\n"
-      PaseCliILE_c_main += '  {' +  "\n"
-      PaseCliILE_c_main += '    arglist->fValue.s.addr = (ulong)returnAddrPtr;' +  "\n"
-      PaseCliILE_c_main += '  }' +  "\n"
     PaseCliILE_c_main += '  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, ' + struct_ile_sig + ', RESULT_INT32);' +  "\n"
     PaseCliILE_c_main += '  if (rc != ILECALL_NOERROR) {' + "\n"
     PaseCliILE_c_main += '    return SQL_ERROR;' + "\n"
     PaseCliILE_c_main += '  }' + "\n"
-    if 'SQLParamData' in call_name:
-      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
-      PaseCliILE_c_main += '  if (arglist->base.result.s_int32.r_int32 == SQL_NEED_DATA) {' +  "\n"
-      PaseCliILE_c_main += '    *Value = _CVTSPP(returnAddrPtr);' +  "\n"
-      PaseCliILE_c_main += '  }' +  "\n"
-    elif 'SQLGetDescField' in call_name:
-      PaseCliILE_c_main += '  /* special returns a pointer (ILE pointer) */' +  "\n"
-      PaseCliILE_c_main += '  if (fValue != NULL &&' +  "\n"
-      PaseCliILE_c_main += '       ((fieldID == SQL_DESC_DATA_PTR)   ||' +  "\n"
-      PaseCliILE_c_main += '        (fieldID == SQL_DESC_LENGTH_PTR) ||' +  "\n"
-      PaseCliILE_c_main += '        (fieldID == SQL_DESC_INDICATOR_PTR)))' +  "\n"
-      PaseCliILE_c_main += '  {' +  "\n"
-      PaseCliILE_c_main += '    *((void **)fValue) = _CVTSPP(returnAddrPtr);' +  "\n"
-      PaseCliILE_c_main += '  }' +  "\n"
     PaseCliILE_c_main += '  return arglist->base.result.s_int32.r_int32;' + "\n"
     PaseCliILE_c_main += '}' + "\n"
 
@@ -829,6 +910,10 @@ for line in f:
     PaseCliAsync_c_main += "    myptr->sqlrc = libdb400_" + call_name + '(' + async_db400_args + ' );' + "\n"
     PaseCliAsync_c_main += "    break;" + "\n"
     PaseCliAsync_c_main += "  }" + "\n"
+  # dump trace
+  PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+  PaseCliAsync_c_main += "    dump_" + call_name + '(myptr->sqlrc, ' + async_db400_args + ' );' + "\n"
+  PaseCliAsync_c_main += "  }" + "\n"
   if argtype1st == "SQLHENV":
     PaseCliAsync_c_main += "  /* not lock */" + "\n"
   elif argtype1st == "SQLHDBC":
@@ -940,6 +1025,8 @@ file_PaseCliLibDB400_c = ""
 file_PaseCliLibDB400_c += file_pase_incl
 file_PaseCliLibDB400_c += file_local_incl
 file_PaseCliLibDB400_c += "" + "\n"
+file_PaseCliLibDB400_c += PaseCliLibDB400_c_symbol
+file_PaseCliLibDB400_c += "" + "\n"
 file_PaseCliLibDB400_c += PaseCliLibDB400_c_main
 file_PaseCliLibDB400_c += "" + "\n"
 with open("PaseCliLibDB400_gen.c", "w") as text_file:
@@ -954,6 +1041,18 @@ file_PaseCliAsync_c += "" + "\n"
 file_PaseCliAsync_c += PaseCliAsync_c_main
 with open("PaseCliAsync_gen.c", "w") as text_file:
     text_file.write(file_PaseCliAsync_c)
+
+# write PaseCliDump_gen.c
+file_PaseCliDump_c = ""
+file_PaseCliDump_c += file_pase_incl
+file_PaseCliDump_c += file_local_incl
+file_PaseCliDump_c += '#include "PaseCliDev.h"' + "\n"
+file_PaseCliDump_c += '#include "PaseCliPrintf.h"' + "\n"
+file_PaseCliDump_c += "" + "\n"
+file_PaseCliDump_c += "" + "\n"
+file_PaseCliDump_c += PaseCliDump_c_main
+with open("PaseCliDump_gen.c", "w") as text_file:
+    text_file.write(file_PaseCliDump_c)
 
 # write PaseCliAsync.h
 file_PaseCliAsync_h = ""
@@ -1165,11 +1264,18 @@ file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliILE_h_proto
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '/* ===================================================' + "\n"
-file_PaseCliAsync_h += ' * CLI interfaces (PASE old CLI driver)' + "\n"
+file_PaseCliAsync_h += ' * LIBDB400.A CLI interfaces (PASE old CLI driver)' + "\n"
 file_PaseCliAsync_h += ' * ===================================================' + "\n"
 file_PaseCliAsync_h += ' */' + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliLibDB400_h_proto
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += '/* ===================================================' + "\n"
+file_PaseCliAsync_h += ' * trace dump' + "\n"
+file_PaseCliAsync_h += ' * ===================================================' + "\n"
+file_PaseCliAsync_h += ' */' + "\n"
+file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += PaseCliDump_h_proto
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '/* ===================================================' + "\n"
 file_PaseCliAsync_h += ' * INTERNAL USE' + "\n"

@@ -40,6 +40,11 @@ int db2_cli_srvpgm_mark;
  */
 int db2_pase_ccsid;
 
+/*
+ * pase cli trace
+ */
+char * db2_cli_trace;
+
 
 /* global table lock
  * This lock is 'lock once'.
@@ -130,6 +135,28 @@ void custom_iconv_close(int myccsid, int utfccsid) {
   init_unlock();
 }
 
+/* 
+ * dlopen handle of PASE libdb400.a
+ * Note: dlhandle is checked twice,
+ * second under global lock,
+ * to avoid race conditions
+ * multiple threads starting.
+ */
+void * init_cli_dlsym() {
+  char *dlservice = PASECLIDRIVER;
+  if (dlhandle  == NULL) {
+    init_lock();
+    if (dlhandle  == NULL) {
+      dlhandle = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
+      if (dlhandle == NULL)  {
+        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
+        exit(-1);
+      }
+    }
+    init_unlock();
+  }
+  return dlhandle;
+}
 /* activate db2 srvpgm */
 int init_cli_srvpgm() {
   int actMark = 0;
@@ -160,10 +187,29 @@ int init_CCSID400( int newCCSID ) {
       }
       db2_pase_ccsid = paseMark;
     }
+    // trace
+    db2_cli_trace = getenv(DB2CLITRACE);
     init_unlock();
   }
   return db2_pase_ccsid;
 }
+
+int init_cli_trace() {
+  if (db2_cli_trace) {
+    if (db2_cli_trace[0] == 'o' && db2_cli_trace[1] == 'f') {
+      return DB2CLITRACE_OFF;
+    }
+    if (db2_cli_trace[0] == 'o' && db2_cli_trace[1] == 'n') {
+      return DB2CLITRACE_FILE;
+    }
+    if (db2_cli_trace[0] == 'w' || db2_cli_trace[0] == 'c') {
+      return DB2CLITRACE_WS;
+    }
+    return DB2CLITRACE_FILE;
+  }
+  return DB2CLITRACE_OFF;
+}
+
 
 
 /* caller hold resource level lock
