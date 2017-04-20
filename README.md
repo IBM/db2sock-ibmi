@@ -67,7 +67,8 @@ The driver will trace CLI calls with env var TRACE (latest only).
 export TRACE=on (file)
 export TRACE=off
 export TRACE=ws (console)
-export TRACE=stop (file + coredump)
+export TRACE=stop (file + stop coredump)
+export TRACE=dbx (file + stop in dbx)
 ```
 
 Example: Trace to file

@@ -44,6 +44,8 @@ int db2_pase_ccsid;
  * pase cli trace
  */
 char * db2_cli_trace;
+char * db2_cli_dbx;
+char * db2_cli_dbx_array[128];
 
 
 /* global table lock
@@ -176,7 +178,10 @@ int init_cli_srvpgm() {
 }
 
 int init_CCSID400( int newCCSID ) {
+  int i = 0;
+  int j = 0;
   int paseMark = 0;
+  char * lastGood = NULL;
   if (!db2_pase_ccsid) {
     init_lock();
     if (!db2_pase_ccsid) {
@@ -189,6 +194,32 @@ int init_CCSID400( int newCCSID ) {
     }
     // trace
     db2_cli_trace = getenv(DB2CLITRACE);
+    db2_cli_dbx = getenv(DB2CLIDBX);
+    db2_cli_dbx_array[0] = NULL;
+    for (i=0,j=0;db2_cli_dbx[i]; i++) {
+      switch (db2_cli_dbx[i]) {
+      case ':':
+        db2_cli_dbx[i] = 0x00;
+        db2_cli_dbx_array[j] = lastGood;
+        j++;
+        db2_cli_dbx_array[j] = NULL;
+        lastGood = NULL;
+        break;
+      case ' ':
+        break;
+      default:
+        if (lastGood == NULL) {
+          lastGood = (char *)&db2_cli_dbx[i];
+        }
+        break;
+      }
+    }
+    if (lastGood != NULL) {
+      db2_cli_dbx_array[j] = lastGood;
+      j++;
+      db2_cli_dbx_array[j] = NULL;
+      lastGood = NULL;
+    }
     init_unlock();
   }
   return db2_pase_ccsid;
@@ -208,11 +239,17 @@ int init_cli_trace() {
     if (db2_cli_trace[0] == 's' && db2_cli_trace[1] == 't') {
       return DB2CLITRACE_FILE_STOP;
     }
+    if (db2_cli_trace[0] == 'd' && db2_cli_trace[1] == 'b') {
+      return DB2CLITRACE_FILE_DBX;
+    }
     return DB2CLITRACE_FILE;
   }
   return DB2CLITRACE_OFF;
 }
 
+char ** init_cli_dbx() {
+  return (char **)&db2_cli_dbx_array;
+}
 
 
 /* caller hold resource level lock

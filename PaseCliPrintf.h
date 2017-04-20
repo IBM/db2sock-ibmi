@@ -1,6 +1,8 @@
 #ifndef _PASECLIPRINTF_H
 #define _PASECLIPRINTF_H
 
+#include <sqlcli1.h>
+
 #define PRINTF_BUFFER_MAX 8192
 #define PRINTF_HEXDUMP_MAX 80
 #define PRINTF_SCAN_MAX 1024
@@ -24,6 +26,11 @@ extern void printf_script( char * pmsg );
 extern void printf_script_include( char * pmsg );
 extern void printf_script_exclude( char * pmsg );
 extern void printf_script_clear();
+
+/* sql print formating  */
+extern void printf_force_SIGQUIT(char *mykey);
+extern void printf_sqlrc_status(char *mykey, SQLRETURN sqlrc);
+extern void printf_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg);
 
 /* special buffer printf not using internal buffer */
 extern void sprintf_format(char *buff, const char * format, ...);

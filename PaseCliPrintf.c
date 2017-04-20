@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <sqlcli1.h>
+#include "PaseCliInit.h"
 #include "PaseCliPrintf.h"
 #include "PaseCliDevFile.h"
 
@@ -100,6 +101,108 @@ Address pase_GPR1() {
   return stk;
 }
 #endif
+
+void printf_force_SIGQUIT(char *mykey) {
+  int i = 0; 
+  int stop = 0; 
+  char dbxexe[1024];
+  char dbxnest[32];
+  char dbxattach[32];
+  char ** dbxsrc;
+  char dbxdirs[32][1024];
+  char * arg[128];
+  pid_t a = 0;
+  pid_t p = 0;
+  stop = init_cli_trace(); 
+  switch (stop) { 
+  case DB2CLITRACE_FILE_DBX:
+    printf_format("%s.stop ---force dbx---\n", mykey);
+    dev_dump();
+    a = getpid();
+    memset(dbxexe,0,sizeof(dbxexe));
+    memset(dbxnest,0,sizeof(dbxnest));
+    memset(dbxattach,0,sizeof(dbxattach));
+    sprintf(dbxexe,"/QOpenSys/usr/bin/dbx");
+    sprintf(dbxnest,"-d 100");
+    sprintf(dbxattach,"-a %d", a);
+    dbxsrc = (char **) init_cli_dbx();
+    p = fork();
+    if (p == 0) {
+      arg[0] = (char *)&dbxexe;
+      arg[1] = (char *)&dbxnest;
+      arg[2] = (char *)&dbxattach;
+      printf("0 %s\n",(char *)arg[0]);
+      printf("1 %s\n",(char *)arg[1]);
+      printf("2 %s\n",(char *)arg[2]);
+      for (i=3;dbxsrc[i-3];i++) {
+        sprintf(dbxdirs[i],"-I %s",dbxsrc[i-3]);
+        arg[i] = (char *)&dbxdirs[i];
+        printf("%d %s\n", i, (char *)arg[i]);
+      }
+      arg[i] = (char *)NULL;
+      execv(arg[0], arg);
+    } else { 
+      sleep(20); 
+    } 
+    break;
+  case DB2CLITRACE_FILE_STOP: 
+    printf_format("%s.stop ---force coredump---\n", mykey);
+    dev_dump();
+    raise (SIGQUIT); 
+    break;
+  default: 
+    break;
+  } 
+}
+
+
+void printf_sqlrc_status(char *mykey, SQLRETURN sqlrc) { 
+  switch(sqlrc) { 
+  case SQL_SUCCESS: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");
+    break;
+  case SQL_SUCCESS_WITH_INFO: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");
+    break;
+  case SQL_NO_DATA_FOUND: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");
+    break;
+  case SQL_NEED_DATA: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");
+    break;
+  case SQL_ERROR: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");
+    break;
+  case SQL_INVALID_HANDLE: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");
+    break;
+  case SQL_STILL_EXECUTING: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");
+    break;
+  default: 
+    printf_format("%s.retn %s %s 0x%p (%d) %s\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");
+    break;
+  }
+}
+
+
+void printf_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg) { 
+  if (sqlrc > SQL_ERROR) { 
+    if (beg) { 
+      printf_format("%s.tbeg +++success+++\n",mykey);
+    } else { 
+      printf_format("%s.tend +++success+++\n",mykey);
+    } 
+  } else { 
+    if (beg) { 
+      printf_format("%s.tbeg ---error---\n", mykey);
+    } else { 
+      printf_format("%s.tend ---error---\n", mykey);
+      printf_force_SIGQUIT(mykey); 
+    } 
+  } 
+}
+
 
 void printf_key(char *mykey, char *text) {
   struct timeval mytv;

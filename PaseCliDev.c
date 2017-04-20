@@ -15,6 +15,7 @@ void dev_dump() {
   switch(init_cli_trace()) {
     case DB2CLITRACE_FILE:
     case DB2CLITRACE_FILE_STOP:
+    case DB2CLITRACE_FILE_DBX:
       dev_file_dump();
       break;
     default:

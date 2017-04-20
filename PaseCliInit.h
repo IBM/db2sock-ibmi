@@ -48,7 +48,9 @@ typedef struct PaseConvResource {
  * export TRACE=on (file)
  * export TRACE=off
  * export TRACE=ws (console)
- * export TRACE=stop (file + coredump)
+ * export TRACE=stop (file + stop coredump)
+ * export TRACE=dbx (file + stop in dbx)
+ * export DBXSRC="/home/srcdir1:/home/srcdir1:... "
  */
 #define DB2CLITRACE "TRACE"
 #define DB2CLITRACE_OFF 0
@@ -56,9 +58,12 @@ typedef struct PaseConvResource {
 #define DB2CLITRACE_FILE 1
 #define DB2CLITRACE_WS 2
 #define DB2CLITRACE_FILE_STOP 3
+#define DB2CLITRACE_FILE_DBX 4
+#define DB2CLIDBX "DBXSRC"
 
 /* trace on? */
 int init_cli_trace();
+char ** init_cli_dbx();
 
 /* load */
 void * init_cli_dlsym();
