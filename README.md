@@ -63,19 +63,27 @@ MIT
 
 #------ DRIVER CLI TRACE -------
 The driver will trace CLI calls with env var TRACE (latest only).
+TRACE supports a very high speed stack walk of function calls.
+Recommend service and support people use TRACE for any new PASE language DB2 issue (much easier).
 ```
+== file options /tmp/libdb400_trace_(pid) ==
 export TRACE=on (file)
 export TRACE=off
+
+== output terminal ==
 export TRACE=ws (console)
+
+== trace file with coredump, read with dbx -W ==
 export TRACE=stop (file + stop coredump)
-== dbx 'live' stop kinda works (*) ==
+
+== trace file with dbx 'live' stop kinda works (*expert*) ==
 export TRACE=dbx (file + stop in dbx)
 export DBXSRC="/home/srcdir1:/home/srcdir1:... "
 (*) dbx 'live' stop
--- recommend using 'stop' coredump (works less odd stuff)
+-- recommend using 'stop' coredump (works with less odd dbx stuff)
 -- 32bit run execute complete leaves dbx job stuck, quit ok (ps -ef, kill -9 pid)
 -- 64 bit hopeless (use 'stop' coredump option)
--- dbx -W libdbx special flag DBX_SILENT=y -- see Yips site
+-- (dbx -W libdbx special flag DBX_SILENT=y -- see Yips site)
 ```
 
 Example: Trace to file
