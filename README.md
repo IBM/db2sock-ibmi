@@ -68,7 +68,14 @@ export TRACE=on (file)
 export TRACE=off
 export TRACE=ws (console)
 export TRACE=stop (file + stop coredump)
+== dbx 'live' stop kinda works (*) ==
 export TRACE=dbx (file + stop in dbx)
+export DBXSRC="/home/srcdir1:/home/srcdir1:... "
+(*) dbx 'live' stop
+-- recommend using 'stop' coredump (works less odd stuff)
+-- 32bit run execute complete leaves dbx job stuck, quit ok (ps -ef, kill -9 pid)
+-- 64 bit hopeless (use 'stop' coredump option)
+-- dbx -W libdbx special flag DBX_SILENT=y -- see Yips site
 ```
 
 Example: Trace to file
