@@ -205,6 +205,9 @@ int init_cli_trace() {
     if (db2_cli_trace[0] == 'w' || db2_cli_trace[0] == 'c') {
       return DB2CLITRACE_WS;
     }
+    if (db2_cli_trace[0] == 's' && db2_cli_trace[1] == 't') {
+      return DB2CLITRACE_FILE_STOP;
+    }
     return DB2CLITRACE_FILE;
   }
   return DB2CLITRACE_OFF;

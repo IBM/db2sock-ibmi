@@ -927,4 +927,31 @@ SQLRETURN SQL400FromUtf16(SQLHDBC hdbc,
  SQLINTEGER outlen,
  SQLINTEGER outccsid)
 
+SQLRETURN SQL400IgnoreNullToUtf8(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid)
+
+SQLRETURN SQL400IgnoreNullFromUtf8(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER outccsid)
+
+SQLRETURN SQL400IgnoreNullToUtf16(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid)
+
+SQLRETURN SQL400IgnoreNullFromUtf16(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER outccsid)
 

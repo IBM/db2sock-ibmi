@@ -30,21 +30,7 @@ int main(int argc, char * argv[]) {
   pwd = getenv(SQL_PWD400);
   /* environment db2 */
   sqlrc = SQLOverrideCCSID400( 1208 );
-  /* connection(s) db2 */
-  for (i=0;i<expect; i++) {
-    sqlrc = SQL400ConnectUtf8(myccsid, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, &hdbc[i], SQL_TXN_NO_COMMIT, libl, curlib);
-    for (j=0;j<expect; j++) {
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc[i], &hstmt[i][j]);
-      actual_hstmt = hstmt[i][j];
-    }
-  }
-  /* free connection(s) db2 */
-  for (i=0;i<expect; i++) {
-    for (j=0;j<expect; j++) {
-      sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt[i][j]);
-    }
-    sqlrc = SQLDisconnect(hdbc[i]);
-    sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc[i]);
-  }
+  /* force error */
+  sqlrc = SQLSetConnectAttr((SQLHDBC)0, SQL_ATTR_DEFAULT_LIB, (SQLPOINTER)NULL, 0);
   return sqlrc;
 }

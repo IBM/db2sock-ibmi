@@ -48,12 +48,14 @@ typedef struct PaseConvResource {
  * export TRACE=on (file)
  * export TRACE=off
  * export TRACE=ws (console)
+ * export TRACE=stop (file + coredump)
  */
 #define DB2CLITRACE "TRACE"
 #define DB2CLITRACE_OFF 0
 #define DB2CLITRACE_ON 1
 #define DB2CLITRACE_FILE 1
 #define DB2CLITRACE_WS 2
+#define DB2CLITRACE_FILE_STOP 3
 
 /* trace on? */
 int init_cli_trace();

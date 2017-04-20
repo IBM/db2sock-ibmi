@@ -67,8 +67,10 @@ The driver will trace CLI calls with env var TRACE (latest only).
 export TRACE=on (file)
 export TRACE=off
 export TRACE=ws (console)
+export TRACE=stop (file + coredump)
 ```
 
+Example: Trace to file
 ```
 bash-4.3$ export TRACE=on
 bash-4.3$ ls /tmp
@@ -88,6 +90,44 @@ SQLAllocHandle.129505.1492615392.1.walk dump_SQLAllocHandle (fffff950 10001a04e4
 SQLAllocHandle.129505.1492615392.1.walk SQLAllocHandle (104b8e0ddf00d a045a9a0 9001000a5f1bb7c)
 SQLAllocHandle.129505.1492615392.1.walk custom_SQLOverrideCCSID400 (4b8a0449ab0)
 :
+```
+
+Example: Trace to file, coredump when CLI sqlrc = SQL_ERROR
+(use dbx -W with libdbx special flag DBX_SILENT=y -- see Yips site) 
+```
+bash-4.3$ export DBX_SILENT=y
+bash-4.3$ export TRACE=stop             
+bash-4.3$ ./test0001_theory_db2_error_32
+Quit (core dumped)
+
+bash-4.3$ tail /tmp/libdb400_trace_166187
+SQLSetConnectAttr.166187.1492708424.1.walk dump_SQLSetConnectAttr (fffffffe 0 2713 0 0)
+SQLSetConnectAttr.166187.1492708424.1.walk SQLSetConnectAttr (0 2713 0 0)
+SQLSetConnectAttr.166187.1492708424.1.walk main (1 2ff22d1c)
+SQLSetConnectAttr.166187.1492708424.1.retn SQLRETURN sqlrc 0xfffffffe (-2) SQL_INVALID_HANDLE (SQL_ERROR)
+SQLSetConnectAttr.166187.1492708424.1.parm SQLHDBC hdbc 0x0 (0)
+SQLSetConnectAttr.166187.1492708424.1.parm SQLINTEGER attrib 0x2713 (10003)
+SQLSetConnectAttr.166187.1492708424.1.parm SQLPOINTER vParam 0x0 (0)
+SQLSetConnectAttr.166187.1492708424.1.parm SQLINTEGER inlen 0x0 (0)
+SQLSetConnectAttr.166187.1492708424.1.tend ---error---
+SQLSetConnectAttr.166187.1492708424.1.stop ---force coredump---
+
+bash-4.3$ dbx -W                        
+Type 'help' for help.
+[using memory image in core]
+reading symbolic information ...
+Quit in pthread_kill at 0xd6bf67fc ($t1)
+0xd6bf67fc (pthread_kill+0x9c) 48000805          bl   0xd6bf7000 (thread_kill)    
+(dbx) where
+pthread_kill(??, ??) at 0xd6bf67fc
+_p_raise(??) at 0xd6bf5c68
+dump_force_SIGQUIT(mykey = "SQLSetConnectAttr.166187.1492708424.1"), line 19 in "PaseCliDump_gen.c"
+dump_sqlrc_head_foot(mykey = "SQLSetConnectAttr.166187.1492708424.1", sqlrc = -2, beg = 0), line 62 in "PaseCliDump_gen.c"
+dump_SQLSetConnectAttr(sqlrc = -2, hdbc = 0, attrib = 10003, vParam = (nil), inlen = 0), line 1985 in "PaseCliDump_gen.c"
+SQLSetConnectAttr(hdbc = 0, attrib = 10003, vParam = (nil), inlen = 0), line 6766 in "PaseCliAsync_gen.c"
+main(argc = 1, argv = 0x2ff22d1c), line 34 in "test0001_theory_db2_error.c"
+(dbx) 
+
 ```
 
 #------ DRIVER BUILDER SECTION -------

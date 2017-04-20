@@ -642,5 +642,17 @@ SQL400ToUtf16Join
 SQL400FromUtf16
 SQL400FromUtf16Async
 SQL400FromUtf16Join
+SQL400IgnoreNullToUtf8
+SQL400IgnoreNullToUtf8Async
+SQL400IgnoreNullToUtf8Join
+SQL400IgnoreNullFromUtf8
+SQL400IgnoreNullFromUtf8Async
+SQL400IgnoreNullFromUtf8Join
+SQL400IgnoreNullToUtf16
+SQL400IgnoreNullToUtf16Async
+SQL400IgnoreNullToUtf16Join
+SQL400IgnoreNullFromUtf16
+SQL400IgnoreNullFromUtf16Async
+SQL400IgnoreNullFromUtf16Join
 
 

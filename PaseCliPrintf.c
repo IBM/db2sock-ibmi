@@ -10,8 +10,7 @@
 
 
 /* Thread specific data key */
-pthread_key_t threadDataKey = NULL;
-pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
+pthread_key_t printDataKey = NULL;
 
 #define uint16 unsigned short
 #define uint32 unsigned int
@@ -85,7 +84,7 @@ static char * printf_exclude_data[PRINTF_SCAN_MAX];
 Address pase_GPR1();
 #pragma mc_func pase_GPR1 { "38610000" }
 #else
-void fool_GCC(Address stk) {
+void check_GCC(Address stk) {
   if (stk == 0) {
      printf_format("---bad stack---\n---%p---\n",stk);
   }
@@ -93,11 +92,11 @@ void fool_GCC(Address stk) {
 Address pase_GPR1() {
   Address stk = 42;
 #ifdef TGT64
-  asm volatile ("addi 9,1,0\t\n" : "=r"(stk));
+  asm volatile ("addi 9,1,0\t\n": "=r"(stk));
 #else
-  asm volatile ("addi 9,1,0\t\n" : "=r"(stk));
+  asm volatile ("addi 9,1,0\t\n": "=r"(stk));
 #endif
-  fool_GCC(stk);
+  check_GCC(stk);
   return stk;
 }
 #endif
@@ -117,10 +116,10 @@ void printf_key(char *mykey, char *text) {
 
 void * printf_buff() {
   void *dataPtr;
-  if ((dataPtr=(void *)pthread_getspecific(threadDataKey))==NULL)
+  if ((dataPtr=(void *)pthread_getspecific(printDataKey))==NULL)
   {
     dataPtr = malloc(PRINTF_BUFFER_MAX);
-    (void)pthread_setspecific(threadDataKey, (const void *)dataPtr);
+    (void)pthread_setspecific(printDataKey, (const void *)dataPtr);
   }
   return dataPtr;
 }

@@ -65,6 +65,44 @@ SQLRETURN custom_SQL400FromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER 
   return sqlrc;
 }
 
+SQLRETURN custom_SQL400IgnoreNullToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, inccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+SQLRETURN custom_SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400ToUtf8( hdbc, inparm, inlen, outparm, outlen, outccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+SQLRETURN custom_SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, inccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400ToUtf16( hdbc, inparm, inlen, outparm, outlen, outccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+
+
 /*
  * resource table
  */
@@ -352,9 +390,9 @@ SQLRETURN custom_SQL400ConnectUtf8( SQLINTEGER myccsid, SQLCHAR * db, SQLCHAR * 
   SQLCHAR db_utf8[11];
   SQLCHAR uid_utf8[11];
   SQLCHAR pwd_utf8[11];
-  sqlrc = SQL400ToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv,  (SQLPOINTER) db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf8, (SQLINTEGER)  sizeof(db_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf8, (SQLINTEGER) sizeof(uid_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf8, (SQLINTEGER) sizeof(pwd_utf8), myccsid);
   sqlrc = custom_SQL400ConnectBoth( db_utf8, uid_utf8, pwd_utf8, NULL, ohnd, acommit, alibl, acurlib, 0, 0);
   return sqlrc;
 }
@@ -365,10 +403,10 @@ SQLRETURN custom_SQL400pConnectUtf8( SQLINTEGER myccsid, SQLCHAR * db, SQLCHAR *
   SQLCHAR uid_utf8[11];
   SQLCHAR pwd_utf8[11];
   SQLCHAR qual_utf8[11];
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER)   db, (SQLINTEGER)   strlen(db), (SQLPOINTER)   &db_utf8, (SQLINTEGER)   sizeof(db_utf8), myccsid);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER)  uid, (SQLINTEGER)  strlen(uid), (SQLPOINTER)  &uid_utf8, (SQLINTEGER)  sizeof(uid_utf8), myccsid);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER)  pwd, (SQLINTEGER)  strlen(pwd), (SQLPOINTER)  &pwd_utf8, (SQLINTEGER)  sizeof(pwd_utf8), myccsid);
-  sqlrc = SQL400ToUtf8(henv, (SQLPOINTER) qual, (SQLINTEGER) strlen(qual), (SQLPOINTER) &qual_utf8, (SQLINTEGER) sizeof(qual_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER)   db, (SQLINTEGER)   strlen(db), (SQLPOINTER)   &db_utf8, (SQLINTEGER)   sizeof(db_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER)  uid, (SQLINTEGER)  strlen(uid), (SQLPOINTER)  &uid_utf8, (SQLINTEGER)  sizeof(uid_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER)  pwd, (SQLINTEGER)  strlen(pwd), (SQLPOINTER)  &pwd_utf8, (SQLINTEGER)  sizeof(pwd_utf8), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf8(henv, (SQLPOINTER) qual, (SQLINTEGER) strlen(qual), (SQLPOINTER) &qual_utf8, (SQLINTEGER) sizeof(qual_utf8), myccsid);
   sqlrc = custom_SQL400ConnectBoth( db_utf8, uid_utf8, pwd_utf8, qual_utf8, ohnd, acommit, alibl, acurlib, 0, 1);
   return sqlrc;
 }
@@ -379,9 +417,9 @@ SQLRETURN custom_SQL400ConnectUtf16( SQLINTEGER myccsid, SQLCHAR * db, SQLCHAR *
   SQLCHAR db_utf16[22];
   SQLCHAR uid_utf16[22];
   SQLCHAR pwd_utf16[22];
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER)  db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf16, (SQLINTEGER)  sizeof(db_utf16), myccsid);
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf16, (SQLINTEGER) sizeof(uid_utf16), myccsid);
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf16, (SQLINTEGER) sizeof(pwd_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER)  db, (SQLINTEGER)  strlen(db), (SQLPOINTER)  &db_utf16, (SQLINTEGER)  sizeof(db_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER) uid, (SQLINTEGER) strlen(uid), (SQLPOINTER) &uid_utf16, (SQLINTEGER) sizeof(uid_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER) pwd, (SQLINTEGER) strlen(pwd), (SQLPOINTER) &pwd_utf16, (SQLINTEGER) sizeof(pwd_utf16), myccsid);
   sqlrc = custom_SQL400ConnectBoth( db_utf16, uid_utf16, pwd_utf16, NULL, ohnd, acommit, alibl, acurlib, 0, 0);
   return sqlrc;
 }
@@ -392,10 +430,10 @@ SQLRETURN custom_SQL400pConnectUtf16( SQLINTEGER myccsid, SQLCHAR * db, SQLCHAR 
   SQLCHAR uid_utf16[22];
   SQLCHAR pwd_utf16[22];
   SQLCHAR qual_utf16[22];
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER)   db, (SQLINTEGER)   strlen(db), (SQLPOINTER)   &db_utf16, (SQLINTEGER)   sizeof(db_utf16), myccsid);
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER)  uid, (SQLINTEGER)  strlen(uid), (SQLPOINTER)  &uid_utf16, (SQLINTEGER)  sizeof(uid_utf16), myccsid);
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER)  pwd, (SQLINTEGER)  strlen(pwd), (SQLPOINTER)  &pwd_utf16, (SQLINTEGER)  sizeof(pwd_utf16), myccsid);
-  sqlrc = SQL400ToUtf16(henv, (SQLPOINTER) qual, (SQLINTEGER) strlen(qual), (SQLPOINTER) &qual_utf16, (SQLINTEGER)  sizeof(qual_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER)   db, (SQLINTEGER)   strlen(db), (SQLPOINTER)   &db_utf16, (SQLINTEGER)   sizeof(db_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER)  uid, (SQLINTEGER)  strlen(uid), (SQLPOINTER)  &uid_utf16, (SQLINTEGER)  sizeof(uid_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER)  pwd, (SQLINTEGER)  strlen(pwd), (SQLPOINTER)  &pwd_utf16, (SQLINTEGER)  sizeof(pwd_utf16), myccsid);
+  sqlrc = custom_SQL400IgnoreNullToUtf16(henv, (SQLPOINTER) qual, (SQLINTEGER) strlen(qual), (SQLPOINTER) &qual_utf16, (SQLINTEGER)  sizeof(qual_utf16), myccsid);
   sqlrc = custom_SQL400ConnectBoth( db_utf16, uid_utf16, pwd_utf16, qual_utf16, ohnd, acommit, alibl, acurlib, 0, 1);
   return sqlrc;
 }

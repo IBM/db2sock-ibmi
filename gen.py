@@ -286,6 +286,72 @@ def SQLDisconnect_check_persistent(hdbc_code, return_code, set_code):
   c_main += "  }" + "\n"
   return c_main
 
+
+# void dump_sqlrc_status(char *mykey, SQLRETURN sqlrc)
+def dump_sqlrc_status():
+  c_main  = 'void dump_sqlrc_status(char *mykey, SQLRETURN sqlrc) {' + "\n" 
+  c_main += '  switch(sqlrc) {' + "\n" 
+  c_main += '  case SQL_SUCCESS:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_SUCCESS_WITH_INFO:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_NO_DATA_FOUND:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_NEED_DATA:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_ERROR:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_INVALID_HANDLE:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  case SQL_STILL_EXECUTING:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  default:' + "\n" 
+  c_main += '    printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");' + "\n"
+  c_main += '    break;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+# void dump_force_SIGQUIT(char *mykey)
+def dump_force_SIGQUIT():
+  c_main  = 'void dump_force_SIGQUIT(char *mykey) {' + "\n" 
+  c_main += '  int stop = init_cli_trace();' + "\n" 
+  c_main += '  if (stop == DB2CLITRACE_FILE_STOP) {' + "\n" 
+  c_main += '    printf_format("%s.stop ---force coredump---\\n", mykey);' + "\n"
+  c_main += '    dev_dump();' + "\n"
+  c_main += '    raise (SIGQUIT);' + "\n" 
+  c_main += '  }' + "\n" 
+  c_main += '}' + "\n"
+  return c_main
+
+# void dump_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg)
+def dump_sqlrc_head_foot():
+  c_main  = 'void dump_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg) {' + "\n" 
+  c_main += '  if (sqlrc > SQL_ERROR) {' + "\n" 
+  c_main += '    if (beg) {' + "\n" 
+  c_main += '      printf_format("%s.tbeg +++success+++\\n",mykey);' + "\n"
+  c_main += '    } else {' + "\n" 
+  c_main += '      printf_format("%s.tend +++success+++\\n",mykey);' + "\n"
+  c_main += '    }' + "\n" 
+  c_main += '  } else {' + "\n" 
+  c_main += '    if (beg) {' + "\n" 
+  c_main += '      printf_format("%s.tbeg ---error---\\n", mykey);' + "\n"
+  c_main += '    } else {' + "\n" 
+  c_main += '      printf_format("%s.tend ---error---\\n", mykey);' + "\n"
+  c_main += '      dump_force_SIGQUIT(mykey);' + "\n" 
+  c_main += '    }' + "\n" 
+  c_main += '  }' + "\n" 
+  c_main += '}' + "\n"
+  return c_main
+
+
 # ===============================================
 # pre-process CLI gen_cli_template.c
 # (future ... if wide interface or not)
@@ -340,6 +406,9 @@ PaseCliILE_h_struct = ""
 PaseCliILE_c_main = ""
 PaseCliDump_h_proto = ""
 PaseCliDump_c_main = ""
+PaseCliDump_c_main += dump_force_SIGQUIT()
+PaseCliDump_c_main += dump_sqlrc_status()
+PaseCliDump_c_main += dump_sqlrc_head_foot()
 for line in f:
 
   # start of SQL function ..
@@ -541,41 +610,9 @@ for line in f:
   PaseCliDump_c_main += '    char mykey[256];' + "\n"
   PaseCliDump_c_main += '    printf_key(mykey,"' + call_name + '");' + "\n"
   PaseCliDump_c_main += '    printf_clear();' + "\n"
-  PaseCliDump_c_main += '    if (sqlrc > SQL_ERROR) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.tbeg +++success+++\\n",mykey);' + "\n"
-  # PaseCliDump_c_main += '      if (ini_get_trace_stack() > 1) {' + "\n"
-  PaseCliDump_c_main += '        printf_stack(mykey);' + "\n"
-  # PaseCliDump_c_main += '      }' + "\n" 
-  PaseCliDump_c_main += '    } else {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.tbeg ---error---\\n", mykey);' + "\n"
-  # PaseCliDump_c_main += '      if (ini_get_trace_stack() > 0) {' + "\n"
-  PaseCliDump_c_main += '        printf_stack(mykey);' + "\n"
-  # PaseCliDump_c_main += '      }' + "\n" 
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    if (sqlrc == SQL_SUCCESS) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_SUCCESS_WITH_INFO) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_SUCCESS_WITH_INFO");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_NO_DATA_FOUND) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NO_DATA_FOUND");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_NEED_DATA) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_NEED_DATA");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_ERROR) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_ERROR");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_INVALID_HANDLE) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_INVALID_HANDLE (SQL_ERROR)");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else if (sqlrc == SQL_STILL_EXECUTING) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_STILL_EXECUTING (SQL_ERROR)");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
-  PaseCliDump_c_main += '    else {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.retn %s %s 0x%p (%d) %s\\n",mykey,"SQLRETURN","sqlrc",sqlrc,sqlrc,"SQL_RC_UKNOWN (SQL_ERROR)");' + "\n"
-  PaseCliDump_c_main += '    }' + "\n"
+  PaseCliDump_c_main += '    dump_sqlrc_head_foot((char *)&mykey, sqlrc, 1);' + "\n"
+  PaseCliDump_c_main += '    printf_stack(mykey);' + "\n"
+  PaseCliDump_c_main += '    dump_sqlrc_status((char *)&mykey, sqlrc);' + "\n"
   args = dump_args.split()
   sigs = dump_sigs.split()
   i = 0
@@ -585,11 +622,7 @@ for line in f:
     if '*' in sig or 'SQLPOINTER' in sig:
       PaseCliDump_c_main += '    printf_hexdump(mykey,'+arg+',80);' + "\n"
     i += 1
-  PaseCliDump_c_main += '    if (sqlrc > SQL_ERROR) {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.tend +++success+++\\n",mykey);' + "\n"
-  PaseCliDump_c_main += '    } else {' + "\n" 
-  PaseCliDump_c_main += '      printf_format("%s.tend ---error---\\n", mykey);' + "\n"
-  PaseCliDump_c_main += '    }' + "\n" 
+  PaseCliDump_c_main += '    dump_sqlrc_head_foot((char *)&mykey, sqlrc, 0);' + "\n"
   PaseCliDump_c_main += '    dev_dump();'  + "\n"
   PaseCliDump_c_main += '  }' + "\n" 
   PaseCliDump_c_main += '}' + "\n" 
@@ -700,6 +733,10 @@ for line in f:
         PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
         PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
+      # dump trace
+      PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+      PaseCliAsync_c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+      PaseCliAsync_c_main += "  }" + "\n"
     elif argtype1st == "SQLHDBC":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 0);" + "\n"
       if ile_or_custom_call == "custom_":
@@ -714,6 +751,10 @@ for line in f:
         PaseCliAsync_c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
         PaseCliAsync_c_main += "    break;" + "\n"
         PaseCliAsync_c_main += "  }" + "\n"
+      # dump trace
+      PaseCliAsync_c_main += "  if (init_cli_trace()) {" + "\n"
+      PaseCliAsync_c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
+      PaseCliAsync_c_main += "  }" + "\n"
       PaseCliAsync_c_main += "  init_table_unlock(" + argname1st + ", 0);" + "\n"
     elif argtype1st == "SQLHSTMT":
       PaseCliAsync_c_main += "  init_table_lock(" + argname1st + ", 1);" + "\n"
