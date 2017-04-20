@@ -546,15 +546,31 @@ for line in f:
   PaseCliDump_c_main += '    printf_sqlrc_status((char *)&mykey, sqlrc);' + "\n"
   args = dump_args.split()
   sigs = dump_sigs.split()
+  dump_handle = ''
+  dump_type = ''
   i = 0
   for arg in args:
     sig = sigs[i]
     PaseCliDump_c_main += '    printf_format("%s.parm %s %s 0x%p (%d)\\n",mykey,"'+sig+'","'+arg+'",'+arg+','+arg+');' + "\n"
     if '*' in sig or 'SQLPOINTER' in sig:
       PaseCliDump_c_main += '    printf_hexdump(mykey,'+arg+',80);' + "\n"
+    elif 'SQLHDBC' in sig:
+      dump_handle = arg
+      dump_type = 'SQL_HANDLE_DBC'
+    elif 'SQLHSTMT' in sig:
+      dump_handle = arg
+      dump_type = 'SQL_HANDLE_STMT'
+    elif 'SQLHDESC' in sig:
+      dump_handle = arg
+      dump_type = 'SQL_HANDLE_DESC'
     i += 1
   PaseCliDump_c_main += '    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);' + "\n"
   PaseCliDump_c_main += '    dev_dump();'  + "\n"
+  PaseCliDump_c_main += '    if (sqlrc < SQL_SUCCESS) {' + "\n" 
+  if 'SQL' in dump_type:
+    PaseCliDump_c_main += '      printf_sql_diag('+dump_type +','+dump_handle+');' + "\n" 
+  PaseCliDump_c_main += '      printf_force_SIGQUIT((char *)&mykey);' + "\n"
+  PaseCliDump_c_main += '    }' + "\n" 
   PaseCliDump_c_main += '  }' + "\n" 
   PaseCliDump_c_main += '}' + "\n" 
 

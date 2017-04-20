@@ -31,16 +31,4 @@ int dev_go(int sqlrc, char * name) {
 }
 
 
-int dev_sql_error(short int hType, int hndl) {
-  SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
-  SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
-  SQLINTEGER sqlcode = 0;
-  SQLSMALLINT length = 0;
-  SQLCHAR *p = NULL;
-  SQLSMALLINT recno = 1;
-  memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
-  memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
-  SQLGetDiagRec(hType, hndl, recno, sqlstate, &sqlcode, msg, SQL_MAX_MESSAGE_LENGTH + 1, &length);
-}
-
 

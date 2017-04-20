@@ -198,9 +198,22 @@ void printf_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg) {
       printf_format("%s.tbeg ---error---\n", mykey);
     } else { 
       printf_format("%s.tend ---error---\n", mykey);
-      printf_force_SIGQUIT(mykey); 
     } 
   } 
+}
+
+
+int printf_sql_diag(short int hType, int hndl) {
+  SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
+  SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
+  SQLINTEGER sqlcode = 0;
+  SQLSMALLINT length = 0;
+  SQLCHAR *p = NULL;
+  SQLSMALLINT recno = 1;
+  SQLINTEGER rc = 0;
+  memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
+  memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
+  rc = SQLGetDiagRec(hType, hndl, recno, sqlstate, &sqlcode, msg, SQL_MAX_MESSAGE_LENGTH + 1, &length);
 }
 
 

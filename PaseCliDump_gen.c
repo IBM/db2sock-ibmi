@@ -24,6 +24,9 @@ void dump_SQLAllocConnect(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC * phdbc ) {
     printf_hexdump(mykey,phdbc,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLAllocEnv(SQLRETURN sqlrc,  SQLHENV * phenv ) {
@@ -38,6 +41,9 @@ void dump_SQLAllocEnv(SQLRETURN sqlrc,  SQLHENV * phenv ) {
     printf_hexdump(mykey,phenv,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLAllocHandle(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohnd ) {
@@ -54,6 +60,9 @@ void dump_SQLAllocHandle(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLINTEGER  ihnd,
     printf_hexdump(mykey,ohnd,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLAllocStmt(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLHSTMT * phstmt ) {
@@ -69,6 +78,10 @@ void dump_SQLAllocStmt(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLHSTMT * phstmt ) {
     printf_hexdump(mykey,phstmt,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLBindCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue ) {
@@ -89,6 +102,10 @@ void dump_SQLBindCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSM
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLBindFileToCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * sLen, SQLINTEGER * pcbValue ) {
@@ -114,6 +131,10 @@ void dump_SQLBindFileToCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol,
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLBindFileToParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  iType, SQLCHAR * fName, SQLSMALLINT * fNameLen, SQLINTEGER * fOptions, SQLSMALLINT  fValueMax, SQLINTEGER * pcbValue ) {
@@ -138,6 +159,10 @@ void dump_SQLBindFileToParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipa
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLBindParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQLSMALLINT  iType, SQLSMALLINT  pType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER * pcbValue ) {
@@ -160,6 +185,10 @@ void dump_SQLBindParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  iparm, SQ
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLBindParameter(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fParamType, SQLSMALLINT  fCType, SQLSMALLINT  fSQLType, SQLINTEGER  pLen, SQLSMALLINT  pScale, SQLPOINTER  pData, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue ) {
@@ -184,6 +213,10 @@ void dump_SQLBindParameter(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar,
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLCancel(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -197,6 +230,10 @@ void dump_SQLCancel(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLCloseCursor(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -210,6 +247,10 @@ void dump_SQLCloseCursor(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColAttribute(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc ) {
@@ -232,6 +273,10 @@ void dump_SQLColAttribute(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, 
     printf_hexdump(mykey,pfDesc,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColAttributeW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLPOINTER  rgbDesc, SQLSMALLINT  cbDescMax, SQLSMALLINT * pcbDesc, SQLPOINTER  pfDesc ) {
@@ -254,6 +299,10 @@ void dump_SQLColAttributeW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol,
     printf_hexdump(mykey,pfDesc,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColAttributes(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc ) {
@@ -276,6 +325,10 @@ void dump_SQLColAttributes(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol,
     printf_hexdump(mykey,pfDesc,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColAttributesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fDescType, SQLWCHAR * rgbDesc, SQLINTEGER  cbDescMax, SQLINTEGER * pcbDesc, SQLINTEGER * pfDesc ) {
@@ -298,6 +351,10 @@ void dump_SQLColAttributesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol
     printf_hexdump(mykey,pfDesc,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColumnPrivileges(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -323,6 +380,10 @@ void dump_SQLColumnPrivileges(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTab
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColumnPrivilegesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -348,6 +409,10 @@ void dump_SQLColumnPrivilegesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szT
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -373,6 +438,10 @@ void dump_SQLColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifi
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -398,6 +467,10 @@ void dump_SQLColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQuali
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLINT  cbDSN, SQLCHAR * szUID, SQLSMALLINT  cbUID, SQLCHAR * szAuthStr, SQLSMALLINT  cbAuthStr ) {
@@ -420,6 +493,10 @@ void dump_SQLConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * szDSN, SQLSMALLI
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbAuthStr",cbAuthStr,cbAuthStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLConnectW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMALLINT  cbDSN, SQLWCHAR * szUID, SQLSMALLINT  cbUID, SQLWCHAR * szAuthStr, SQLSMALLINT  cbAuthStr ) {
@@ -442,6 +519,10 @@ void dump_SQLConnectW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLWCHAR * szDSN, SQLSMAL
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbAuthStr",cbAuthStr,cbAuthStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLCopyDesc(SQLRETURN sqlrc,  SQLHDESC  sDesc, SQLHDESC  tDesc ) {
@@ -456,6 +537,10 @@ void dump_SQLCopyDesc(SQLRETURN sqlrc,  SQLHDESC  sDesc, SQLHDESC  tDesc ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDESC","tDesc",tDesc,tDesc);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,tDesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDataSources(SQLRETURN sqlrc,  SQLHENV  henv, SQLSMALLINT  fDirection, SQLCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription ) {
@@ -480,6 +565,9 @@ void dump_SQLDataSources(SQLRETURN sqlrc,  SQLHENV  henv, SQLSMALLINT  fDirectio
     printf_hexdump(mykey,pcbDescription,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDataSourcesW(SQLRETURN sqlrc,  SQLHENV  henv, SQLSMALLINT  fDirection, SQLWCHAR * szDSN, SQLSMALLINT  cbDSNMax, SQLSMALLINT * pcbDSN, SQLWCHAR * szDescription, SQLSMALLINT  cbDescriptionMax, SQLSMALLINT * pcbDescription ) {
@@ -504,6 +592,9 @@ void dump_SQLDataSourcesW(SQLRETURN sqlrc,  SQLHENV  henv, SQLSMALLINT  fDirecti
     printf_hexdump(mykey,pcbDescription,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDescribeCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
@@ -531,6 +622,10 @@ void dump_SQLDescribeCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, S
     printf_hexdump(mykey,pfNullable,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDescribeColW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLWCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
@@ -558,6 +653,10 @@ void dump_SQLDescribeColW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, 
     printf_hexdump(mykey,pfNullable,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDescribeParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable ) {
@@ -580,6 +679,10 @@ void dump_SQLDescribeParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar,
     printf_hexdump(mykey,pfNullable,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDisconnect(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
@@ -593,6 +696,10 @@ void dump_SQLDisconnect(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDriverConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion ) {
@@ -617,6 +724,10 @@ void dump_SQLDriverConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  hwnd, SQ
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fDriverCompletion",fDriverCompletion,fDriverCompletion);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLDriverConnectW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  hwnd, SQLWCHAR * szConnStrIn, SQLSMALLINT  cbConnStrin, SQLWCHAR * szConnStrOut, SQLSMALLINT  cbConnStrOutMax, SQLSMALLINT * pcbConnStrOut, SQLSMALLINT  fDriverCompletion ) {
@@ -641,6 +752,10 @@ void dump_SQLDriverConnectW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  hwnd, S
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fDriverCompletion",fDriverCompletion,fDriverCompletion);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLEndTran(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLHENV  henv, SQLSMALLINT  ctype ) {
@@ -656,6 +771,9 @@ void dump_SQLEndTran(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLHENV  henv, SQLSMA
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","ctype",ctype,ctype);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLError(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg ) {
@@ -680,6 +798,10 @@ void dump_SQLError(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hst
     printf_hexdump(mykey,pcbErrorMsg,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLErrorW(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hstmt, SQLWCHAR * szSqlState, SQLINTEGER * pfNativeError, SQLWCHAR * szErrorMsg, SQLSMALLINT  cbErrorMsgMax, SQLSMALLINT * pcbErrorMsg ) {
@@ -704,6 +826,10 @@ void dump_SQLErrorW(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLHSTMT  hs
     printf_hexdump(mykey,pcbErrorMsg,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLExecDirect(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
@@ -720,6 +846,10 @@ void dump_SQLExecDirect(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, S
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cbSqlStr",cbSqlStr,cbSqlStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLExecDirectW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
@@ -736,6 +866,10 @@ void dump_SQLExecDirectW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szSqlStr,
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cbSqlStr",cbSqlStr,cbSqlStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLExecute(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -749,6 +883,10 @@ void dump_SQLExecute(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLExtendedFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset, SQLINTEGER * pcrow, SQLSMALLINT * rgfRowStatus ) {
@@ -768,6 +906,10 @@ void dump_SQLExtendedFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOrie
     printf_hexdump(mykey,rgfRowStatus,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -781,6 +923,10 @@ void dump_SQLFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFetchScroll(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOrient, SQLINTEGER  fOffset ) {
@@ -796,6 +942,10 @@ void dump_SQLFetchScroll(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOrient
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","fOffset",fOffset,fOffset);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLForeignKeys(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLCHAR * szFkTableName, SQLSMALLINT  cbFkTableName ) {
@@ -827,6 +977,10 @@ void dump_SQLForeignKeys(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szPkTableQ
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbFkTableName",cbFkTableName,cbFkTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLForeignKeysW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szPkTableQualifier, SQLSMALLINT  cbPkTableQualifier, SQLWCHAR * szPkTableOwner, SQLSMALLINT  cbPkTableOwner, SQLWCHAR * szPkTableName, SQLSMALLINT  cbPkTableName, SQLWCHAR * szFkTableQualifier, SQLSMALLINT  cbFkTableQualifier, SQLWCHAR * szFkTableOwner, SQLSMALLINT  cbFkTableOwner, SQLWCHAR * szFkTableName, SQLSMALLINT  cbFkTableName ) {
@@ -858,6 +1012,10 @@ void dump_SQLForeignKeysW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szPkTabl
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbFkTableName",cbFkTableName,cbFkTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFreeConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
@@ -871,6 +1029,10 @@ void dump_SQLFreeConnect(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFreeEnv(SQLRETURN sqlrc,  SQLHENV  henv ) {
@@ -884,6 +1046,9 @@ void dump_SQLFreeEnv(SQLRETURN sqlrc,  SQLHENV  henv ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFreeStmt(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption ) {
@@ -898,6 +1063,10 @@ void dump_SQLFreeStmt(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption ) 
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fOption",fOption,fOption);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLFreeHandle(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLINTEGER  hndl ) {
@@ -912,6 +1081,9 @@ void dump_SQLFreeHandle(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLINTEGER  hndl )
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","hndl",hndl,hndl);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen ) {
@@ -932,6 +1104,10 @@ void dump_SQLGetCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMA
     printf_hexdump(mykey,olen,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetColW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  itype, SQLPOINTER  tval, SQLINTEGER  blen, SQLINTEGER * olen ) {
@@ -952,6 +1128,10 @@ void dump_SQLGetColW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSM
     printf_hexdump(mykey,olen,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetConnectAttr(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen ) {
@@ -971,6 +1151,10 @@ void dump_SQLGetConnectAttr(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attr, S
     printf_hexdump(mykey,olen,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetConnectAttrW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen ) {
@@ -990,6 +1174,10 @@ void dump_SQLGetConnectAttrW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attr, 
     printf_hexdump(mykey,olen,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetConnectOption(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval ) {
@@ -1006,6 +1194,10 @@ void dump_SQLGetConnectOption(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  iopt
     printf_hexdump(mykey,oval,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetConnectOptionW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval ) {
@@ -1022,6 +1214,10 @@ void dump_SQLGetConnectOptionW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  iop
     printf_hexdump(mykey,oval,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetCursorName(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor ) {
@@ -1040,6 +1236,10 @@ void dump_SQLGetCursorName(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szCursor
     printf_hexdump(mykey,pcbCursor,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetCursorNameW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursorMax, SQLSMALLINT * pcbCursor ) {
@@ -1058,6 +1258,10 @@ void dump_SQLGetCursorNameW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szCurs
     printf_hexdump(mykey,pcbCursor,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  fCType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue ) {
@@ -1078,6 +1282,10 @@ void dump_SQLGetData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSM
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDescField(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength ) {
@@ -1098,6 +1306,10 @@ void dump_SQLGetDescField(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum
     printf_hexdump(mykey,stLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDescFieldW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength ) {
@@ -1118,6 +1330,10 @@ void dump_SQLGetDescFieldW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNu
     printf_hexdump(mykey,stLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDescRec(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull ) {
@@ -1149,6 +1365,10 @@ void dump_SQLGetDescRec(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, 
     printf_hexdump(mykey,fnull,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDescRecW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLWCHAR * fname, SQLSMALLINT  bufLen, SQLSMALLINT * sLength, SQLSMALLINT * sType, SQLSMALLINT * sbType, SQLINTEGER * fLength, SQLSMALLINT * fprec, SQLSMALLINT * fscale, SQLSMALLINT * fnull ) {
@@ -1180,6 +1400,10 @@ void dump_SQLGetDescRecW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum,
     printf_hexdump(mykey,fnull,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDiagField(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength ) {
@@ -1201,6 +1425,9 @@ void dump_SQLGetDiagField(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl
     printf_hexdump(mykey,sLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDiagFieldW(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLSMALLINT  diagID, SQLPOINTER  dValue, SQLSMALLINT  bLength, SQLSMALLINT * sLength ) {
@@ -1222,6 +1449,9 @@ void dump_SQLGetDiagFieldW(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hnd
     printf_hexdump(mykey,sLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDiagRec(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLCHAR * SQLstate, SQLINTEGER * SQLcode, SQLCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength ) {
@@ -1246,6 +1476,9 @@ void dump_SQLGetDiagRec(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl, 
     printf_hexdump(mykey,SLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetDiagRecW(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl, SQLSMALLINT  rcdNum, SQLWCHAR * SQLstate, SQLINTEGER * SQLcode, SQLWCHAR * msgText, SQLSMALLINT  bLength, SQLSMALLINT * SLength ) {
@@ -1270,6 +1503,9 @@ void dump_SQLGetDiagRecW(SQLRETURN sqlrc,  SQLSMALLINT  hType, SQLINTEGER  hndl,
     printf_hexdump(mykey,SLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetEnvAttr(SQLRETURN sqlrc,  SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParamMax, SQLINTEGER * pcbParam ) {
@@ -1289,6 +1525,9 @@ void dump_SQLGetEnvAttr(SQLRETURN sqlrc,  SQLHENV  hEnv, SQLINTEGER  fAttribute,
     printf_hexdump(mykey,pcbParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetFunctions(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSMALLINT * pfExists ) {
@@ -1305,6 +1544,10 @@ void dump_SQLGetFunctions(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fFunctio
     printf_hexdump(mykey,pfExists,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetInfo(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue ) {
@@ -1324,6 +1567,10 @@ void dump_SQLGetInfo(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQ
     printf_hexdump(mykey,pcbInfoValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetInfoW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue ) {
@@ -1343,6 +1590,10 @@ void dump_SQLGetInfoW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fInfoType, S
     printf_hexdump(mykey,pcbInfoValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetLength(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  locator, SQLINTEGER * sLength, SQLINTEGER * ind ) {
@@ -1362,6 +1613,10 @@ void dump_SQLGetLength(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, 
     printf_hexdump(mykey,ind,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetPosition(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind ) {
@@ -1386,6 +1641,10 @@ void dump_SQLGetPosition(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType
     printf_hexdump(mykey,ind,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetPositionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  srchLocator, SQLWCHAR * srchLiteral, SQLINTEGER  srchLiteralLen, SQLINTEGER  fPosition, SQLINTEGER * located, SQLINTEGER * ind ) {
@@ -1410,6 +1669,10 @@ void dump_SQLGetPositionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locTyp
     printf_hexdump(mykey,ind,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetStmtAttr(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength ) {
@@ -1429,6 +1692,10 @@ void dump_SQLGetStmtAttr(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, S
     printf_hexdump(mykey,SLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetStmtAttrW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pvParam, SQLINTEGER  bLength, SQLINTEGER * SLength ) {
@@ -1448,6 +1715,10 @@ void dump_SQLGetStmtAttrW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, 
     printf_hexdump(mykey,SLength,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetStmtOption(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam ) {
@@ -1464,6 +1735,10 @@ void dump_SQLGetStmtOption(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOpti
     printf_hexdump(mykey,pvParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetStmtOptionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  pvParam ) {
@@ -1480,6 +1755,10 @@ void dump_SQLGetStmtOptionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOpt
     printf_hexdump(mykey,pvParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetSubString(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind ) {
@@ -1505,6 +1784,10 @@ void dump_SQLGetSubString(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locTyp
     printf_hexdump(mykey,ind,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetSubStringW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locType, SQLINTEGER  srceLocator, SQLINTEGER  fPosition, SQLINTEGER  length, SQLSMALLINT  tType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * StringLength, SQLINTEGER * ind ) {
@@ -1530,6 +1813,10 @@ void dump_SQLGetSubStringW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  locTy
     printf_hexdump(mykey,ind,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetTypeInfo(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fSqlType ) {
@@ -1544,6 +1831,10 @@ void dump_SQLGetTypeInfo(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fSqlTyp
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fSqlType",fSqlType,fSqlType);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLGetTypeInfoW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fSqlType ) {
@@ -1558,6 +1849,10 @@ void dump_SQLGetTypeInfoW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fSqlTy
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fSqlType",fSqlType,fSqlType);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLLanguages(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -1571,6 +1866,10 @@ void dump_SQLLanguages(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLMoreResults(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
@@ -1584,6 +1883,10 @@ void dump_SQLMoreResults(SQLRETURN sqlrc,  SQLHSTMT  hstmt ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLNativeSql(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr ) {
@@ -1605,6 +1908,10 @@ void dump_SQLNativeSql(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * szSqlStrIn, SQ
     printf_hexdump(mykey,pcbSqlStr,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLNativeSqlW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, SQLINTEGER  cbSqlStrIn, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStrMax, SQLINTEGER * pcbSqlStr ) {
@@ -1626,6 +1933,10 @@ void dump_SQLNativeSqlW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLWCHAR * szSqlStrIn, 
     printf_hexdump(mykey,pcbSqlStr,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLNextResult(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLHSTMT  hstmt2 ) {
@@ -1640,6 +1951,10 @@ void dump_SQLNextResult(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLHSTMT  hstmt2 ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt2",hstmt2,hstmt2);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt2);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLNumParams(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pcpar ) {
@@ -1655,6 +1970,10 @@ void dump_SQLNumParams(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pcpar ) 
     printf_hexdump(mykey,pcpar,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLNumResultCols(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pccol ) {
@@ -1670,6 +1989,10 @@ void dump_SQLNumResultCols(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT * pcco
     printf_hexdump(mykey,pccol,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLParamData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER * Value ) {
@@ -1685,6 +2008,10 @@ void dump_SQLParamData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER * Value ) {
     printf_hexdump(mykey,Value,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLParamOptions(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  crow, SQLINTEGER * pirow ) {
@@ -1701,6 +2028,10 @@ void dump_SQLParamOptions(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  crow, S
     printf_hexdump(mykey,pirow,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLPrepare(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
@@ -1717,6 +2048,10 @@ void dump_SQLPrepare(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLI
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cbSqlStr",cbSqlStr,cbSqlStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLPrepareW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQLINTEGER  cbSqlStr ) {
@@ -1733,6 +2068,10 @@ void dump_SQLPrepareW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szSqlStr, SQ
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cbSqlStr",cbSqlStr,cbSqlStr);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLPrimaryKeys(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -1755,6 +2094,10 @@ void dump_SQLPrimaryKeys(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQua
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableName",cbTableName,cbTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLPrimaryKeysW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -1777,6 +2120,10 @@ void dump_SQLPrimaryKeysW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQ
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableName",cbTableName,cbTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLProcedureColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName, SQLCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -1802,6 +2149,10 @@ void dump_SQLProcedureColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szPro
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLProcedureColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName, SQLWCHAR * szColumnName, SQLSMALLINT  cbColumnName ) {
@@ -1827,6 +2178,10 @@ void dump_SQLProcedureColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szP
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbColumnName",cbColumnName,cbColumnName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLProcedures(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLCHAR * szProcName, SQLSMALLINT  cbProcName ) {
@@ -1849,6 +2204,10 @@ void dump_SQLProcedures(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szProcQuali
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbProcName",cbProcName,cbProcName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLProceduresW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szProcQualifier, SQLSMALLINT  cbProcQualifier, SQLWCHAR * szProcOwner, SQLSMALLINT  cbProcOwner, SQLWCHAR * szProcName, SQLSMALLINT  cbProcName ) {
@@ -1871,6 +2230,10 @@ void dump_SQLProceduresW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szProcQua
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbProcName",cbProcName,cbProcName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLPutData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen ) {
@@ -1887,6 +2250,10 @@ void dump_SQLPutData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINT
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","SLen",SLen,SLen);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLReleaseEnv(SQLRETURN sqlrc,  SQLHENV  henv ) {
@@ -1900,6 +2267,9 @@ void dump_SQLReleaseEnv(SQLRETURN sqlrc,  SQLHENV  henv ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHENV","henv",henv,henv);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLRowCount(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * pcrow ) {
@@ -1915,6 +2285,10 @@ void dump_SQLRowCount(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * pcrow ) {
     printf_hexdump(mykey,pcrow,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetConnectAttr(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) {
@@ -1932,6 +2306,10 @@ void dump_SQLSetConnectAttr(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attrib,
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetConnectAttrW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) {
@@ -1949,6 +2327,10 @@ void dump_SQLSetConnectAttrW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLINTEGER  attrib
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetConnectOption(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -1965,6 +2347,10 @@ void dump_SQLSetConnectOption(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fOpt
     printf_hexdump(mykey,vParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetConnectOptionW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -1981,6 +2367,10 @@ void dump_SQLSetConnectOptionW(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLSMALLINT  fOp
     printf_hexdump(mykey,vParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetCursorName(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szCursor, SQLSMALLINT  cbCursor ) {
@@ -1997,6 +2387,10 @@ void dump_SQLSetCursorName(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szCursor
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbCursor",cbCursor,cbCursor);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetCursorNameW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szCursor, SQLSMALLINT  cbCursor ) {
@@ -2013,6 +2407,10 @@ void dump_SQLSetCursorNameW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szCurs
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbCursor",cbCursor,cbCursor);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetDescField(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen ) {
@@ -2031,6 +2429,10 @@ void dump_SQLSetDescField(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","buffLen",buffLen,buffLen);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetDescFieldW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fID, SQLPOINTER  Value, SQLINTEGER  buffLen ) {
@@ -2049,6 +2451,10 @@ void dump_SQLSetDescFieldW(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNu
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","buffLen",buffLen,buffLen);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetDescRec(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  Type, SQLSMALLINT  subType, SQLINTEGER  fLength, SQLSMALLINT  fPrec, SQLSMALLINT  fScale, SQLPOINTER  Value, SQLINTEGER * sLength, SQLINTEGER * indic ) {
@@ -2074,6 +2480,10 @@ void dump_SQLSetDescRec(SQLRETURN sqlrc,  SQLHDESC  hdesc, SQLSMALLINT  rcdNum, 
     printf_hexdump(mykey,indic,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DESC,hdesc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetEnvAttr(SQLRETURN sqlrc,  SQLHENV  hEnv, SQLINTEGER  fAttribute, SQLPOINTER  pParam, SQLINTEGER  cbParam ) {
@@ -2091,6 +2501,9 @@ void dump_SQLSetEnvAttr(SQLRETURN sqlrc,  SQLHENV  hEnv, SQLINTEGER  fAttribute,
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","cbParam",cbParam,cbParam);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLSMALLINT  fCType, SQLSMALLINT  fSqlType, SQLINTEGER  cbColDef, SQLSMALLINT  ibScale, SQLPOINTER  rgbValue, SQLINTEGER * pcbValue ) {
@@ -2113,6 +2526,10 @@ void dump_SQLSetParam(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  ipar, SQLS
     printf_hexdump(mykey,pcbValue,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetStmtAttr(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) {
@@ -2130,6 +2547,10 @@ void dump_SQLSetStmtAttr(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, S
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","vParam",vParam,vParam);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetStmtAttrW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, SQLPOINTER  pParam, SQLINTEGER  vParam ) {
@@ -2147,6 +2568,10 @@ void dump_SQLSetStmtAttrW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER  fAttr, 
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","vParam",vParam,vParam);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetStmtOption(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -2163,6 +2588,10 @@ void dump_SQLSetStmtOption(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOpti
     printf_hexdump(mykey,vParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSetStmtOptionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
@@ -2179,6 +2608,10 @@ void dump_SQLSetStmtOptionW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fOpt
     printf_hexdump(mykey,vParam,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSpecialColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable ) {
@@ -2204,6 +2637,10 @@ void dump_SQLSpecialColumns(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fCol
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fNullable",fNullable,fNullable);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLSpecialColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fColType, SQLWCHAR * szTableQual, SQLSMALLINT  cbTableQual, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fScope, SQLSMALLINT  fNullable ) {
@@ -2229,6 +2666,10 @@ void dump_SQLSpecialColumnsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  fCo
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fNullable",fNullable,fNullable);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLStartTran(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLHENV  henv, SQLINTEGER  mode, SQLINTEGER  clevel ) {
@@ -2245,6 +2686,9 @@ void dump_SQLStartTran(SQLRETURN sqlrc,  SQLSMALLINT  htype, SQLHENV  henv, SQLI
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","clevel",clevel,clevel);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLStatistics(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres ) {
@@ -2269,6 +2713,10 @@ void dump_SQLStatistics(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQual
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fres",fres,fres);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLStatisticsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLSMALLINT  fUnique, SQLSMALLINT  fres ) {
@@ -2293,6 +2741,10 @@ void dump_SQLStatisticsW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQu
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fres",fres,fres);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLTablePrivileges(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -2315,6 +2767,10 @@ void dump_SQLTablePrivileges(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTabl
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableName",cbTableName,cbTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLTablePrivilegesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName ) {
@@ -2337,6 +2793,10 @@ void dump_SQLTablePrivilegesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTa
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableName",cbTableName,cbTableName);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLTables(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType ) {
@@ -2362,6 +2822,10 @@ void dump_SQLTables(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifie
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableType",cbTableType,cbTableType);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLTablesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType ) {
@@ -2387,6 +2851,10 @@ void dump_SQLTablesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualif
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","cbTableType",cbTableType,cbTableType);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLTransact(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType ) {
@@ -2402,6 +2870,10 @@ void dump_SQLTransact(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLIN
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLSMALLINT","fType",fType,fType);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQLOverrideCCSID400(SQLRETURN sqlrc,  SQLINTEGER  newCCSID ) {
@@ -2415,6 +2887,9 @@ void dump_SQLOverrideCCSID400(SQLRETURN sqlrc,  SQLINTEGER  newCCSID ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","newCCSID",newCCSID,newCCSID);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400Stmt2Hdbc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * ohnd ) {
@@ -2430,6 +2905,10 @@ void dump_SQL400Stmt2Hdbc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * ohnd )
     printf_hexdump(mykey,ohnd,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400Connect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2455,6 +2934,9 @@ void dump_SQL400Connect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR *
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2480,6 +2962,9 @@ void dump_SQL400ConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCH
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2507,6 +2992,9 @@ void dump_SQL400pConnect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR 
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2534,6 +3022,9 @@ void dump_SQL400pConnectW(SQLRETURN sqlrc,  SQLWCHAR * db, SQLWCHAR * uid, SQLWC
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2560,6 +3051,9 @@ void dump_SQL400ConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, 
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400pConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2588,6 +3082,9 @@ void dump_SQL400pConnectUtf8(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db,
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2614,6 +3111,9 @@ void dump_SQL400ConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db,
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400pConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib ) {
@@ -2642,6 +3142,9 @@ void dump_SQL400pConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db
     printf_hexdump(mykey,acurlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400Close(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
@@ -2655,6 +3158,10 @@ void dump_SQL400Close(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400pClose(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
@@ -2668,6 +3175,10 @@ void dump_SQL400pClose(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400Cmd(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * cmd ) {
@@ -2683,6 +3194,10 @@ void dump_SQL400Cmd(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * cmd ) {
     printf_hexdump(mykey,cmd,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ChgLibl(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * libl ) {
@@ -2698,6 +3213,10 @@ void dump_SQL400ChgLibl(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * libl ) {
     printf_hexdump(mykey,libl,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ChgCurLib(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * curlib ) {
@@ -2713,6 +3232,10 @@ void dump_SQL400ChgCurLib(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * curlib ) {
     printf_hexdump(mykey,curlib,80);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
@@ -2733,6 +3256,10 @@ void dump_SQL400ToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLI
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
@@ -2753,6 +3280,10 @@ void dump_SQL400FromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQ
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
@@ -2773,6 +3304,10 @@ void dump_SQL400ToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQL
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
@@ -2793,6 +3328,10 @@ void dump_SQL400FromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, S
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400IgnoreNullToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
@@ -2813,6 +3352,10 @@ void dump_SQL400IgnoreNullToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  in
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400IgnoreNullFromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
@@ -2833,6 +3376,10 @@ void dump_SQL400IgnoreNullFromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400IgnoreNullToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
@@ -2853,6 +3400,10 @@ void dump_SQL400IgnoreNullToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  i
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
 void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid ) {
@@ -2873,5 +3424,9 @@ void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER 
     printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
   }
 }
