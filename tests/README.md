@@ -7,29 +7,30 @@ c tests.
 # compile
 
 ```
-optional (git already completed) ...
+(genmake.py already completed) ...
 $ cd db2sock/tests
 $ python genmake.py
-
-gcc compile ...
-$ cd db2sock/tests
 $ ./make_tests.sh
 ```
 
 # run
 ```
+(optional missing env will work many cases)
 > export SQL_HOST400=myibmi
 > export SQL_DB400=*LOCAL
 > export SQL_UID400=MYUID
 > export SQL_PWD400=MYPWD
-
-
-One at a time ...
-> test0004_async_callback_query_32
-> test0004_async_callback_query_64
+> export TRACE=stop
+-- or --
+> export TRACE=on
 
 Run all ...
 > python run.py
+
+
+One at a time ...
+> test0000_do_thing_32
+> test0000_do_thing_64
 
 ```
 
