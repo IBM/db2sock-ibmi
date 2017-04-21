@@ -2,6 +2,19 @@
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
+Progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
+```
+libdb400-1.0.1-sg9.zip - experimental test version pre-compiled libdb400.a (2017–04–21) 
+- removed many APIs SQL400 — rework in progress
+- removed json — rework in progress
+- added any CCSID (used under php ok)
+- added env var TRACE=on/off option (see git progect) 
+```
+Summary: 
+Appears two steps back, one step forward. True. 
+We need to redesign APIs to fit design goals (below).
+Much easier to arrive when we know where to go design. 
+
 
 #db2sock
 
