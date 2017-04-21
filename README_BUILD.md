@@ -30,8 +30,7 @@ I am using a chroot with following packages from [ibmichroot](https://bitbucket.
 ```
 > pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
 ```
-I needed a new gmake, you can find these on 
-[Yips Open Source](http://yips.idevcloud.com/wiki/index.php/PASE/OpenSourceBinaries)
+I needed a new gmake, you can find these on [yips Open Source](http://yips.idevcloud.com/wiki/index.php/PASE/OpenSourceBinaries)
 ```
 Binary fixes (GCC OPS):
     Attach:gmake-4.2.zip — newer version
