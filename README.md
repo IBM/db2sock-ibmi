@@ -8,7 +8,7 @@ libdb400-1.0.1-sg9.zip - experimental test version pre-compiled libdb400.a (2017
 - removed many APIs SQL400 — rework in progress
 - removed json — rework in progress
 - added any CCSID (used under php ok)
-- added env var TRACE=on/off option (see git progect) 
+- added env var TRACE=on/off option 
 ```
 Summary: 
 Appears two steps back, one step forward. True. 
