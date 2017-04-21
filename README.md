@@ -41,9 +41,20 @@ The async API interfaces should handle both 'callback' (nodejs), and, poll/reap 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
 web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent
-versions that support all the APIs, async, wide, json, socket, etc. Perhaps json interface completely
-http REST request configured as PASE fastcgi or ILE cgi. Imagination run wild, db2 socket interface 
-'map' other socket based database requests into db2 (example: mysql client <port 3306> db2 server).  
+versions that support all the APIs, async, wide, json, socket, etc. 
+
+Perhaps json interface completely
+http REST request configured as PASE fastcgi or ILE cgi. 
+```
+php, node, ruby, python <-Apache/ngix-> db2 libdb400 JSON server
+```  
+
+Imagination run wild, db2 socket interface 
+'map' other socket based database requests into db2.
+```
+php, node, ruby, python mysql/maria client <-port 3306-> db2 libdb400 socket server
+```
+ 
 Ok, no promise, but, you get the idea. Author two cents, when stable, start using this driver, 
 you will grow function by leaps with very little effort.
 
