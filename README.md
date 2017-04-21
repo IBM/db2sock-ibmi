@@ -25,11 +25,10 @@ but it isn't just for Node.js and can instead be applied to all PASE langs (PHP,
 
 #design goals (the list)
 - No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
-- Consistent driver - eventually replace all other language drivers with consistent APIs (factor common code all lang drivers)
 - Service driver - provide good PASE side TRACE capabilities for service
 - Traditional APIs - provide all current libdb400.a CLI APIs
 - Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs
-- Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all lang drivers)
+- Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all PASE lang drivers)
 - Async APIs - high performing async CLI APIs for all new PASE languages (including Aggregate API interfaces). 
 - JSON APIs - enable json only calls (JSON Aggregate API interface). Allows future REST DB2 called by any language on/off IBM i
 - Socket APIs - enable socket based for ideas like 'private' connections (private db2 serving)
@@ -37,7 +36,9 @@ but it isn't just for Node.js and can instead be applied to all PASE langs (PHP,
 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. Ok, no promise, but, you get the idea. Author two cents, when stable, start using this driver, 
+web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent
+versions that support all the APIs, async, wide, json, socket, etc.
+Ok, no promise, but, you get the idea. Author two cents, when stable, start using this driver, 
 you will grow function by leaps with very little effort.
 
 #Run
