@@ -26,6 +26,11 @@ performance with node db2a having NOTHING to do with this new project (see futur
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
 is APIs for any language.
 
+##Basic 'async' poll/reap vs. callback (not actual)
+At times simple example is best. These are not actual APIs, 
+but demonstrate idea 'async' in languages that may not have
+callback.
+
 'async' poll/reap example (not actual):
 ```
 // request did NOT halt did NOT halt PHP
@@ -44,7 +49,7 @@ foreach ($result as $row) {
 }
 ```
 
-'callback' callback example (not actual):
+'async' callback example (not actual):
 ```
 // request did NOT halt node
 db2_async_query_fetch('select * from lib/file', function(result) {
