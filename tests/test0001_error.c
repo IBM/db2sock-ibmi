@@ -7,24 +7,14 @@
 #include "test.h"
 #include "PaseCliAsync.h"
 
-char *db  = NULL;
-char *uid = NULL;
-char *pwd = NULL;
-char *libl  = NULL;
-char *curlib = NULL;
-char *trace  = NULL;
-SQLHANDLE henv; /* always 1, only one env on IBM i db2 */
-SQLHANDLE hdbc[10];
-SQLHANDLE hstmt[10][10];
-SQLINTEGER sqlcode;
-SQLINTEGER myccsid = 819;
-
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0, j = 0;
-  int expect = 10;
-  int expect_hstmt = 1 + expect * expect + expect;
-  int actual_hstmt = 0;
+  char *db  = NULL;
+  char *uid = NULL;
+  char *pwd = NULL;
+  char *libl  = NULL;
+  char *curlib = NULL;
+  char *trace  = NULL;
   /* profile db2 */
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
@@ -37,7 +27,13 @@ int main(int argc, char * argv[]) {
   if (trace[0] == 's' && trace[1] == 't') {
     printf("coredump expected -- should not see final message success (trace=%s)\n",trace);
   }
+  /* invalid handle number '0' */
   sqlrc = SQLSetConnectAttr((SQLHDBC)0, SQL_ATTR_DEFAULT_LIB, (SQLPOINTER)NULL, 0);
-  printf("success (trace=%s)\n",trace);
+  if (sqlrc < SQL_SUCCESS) {
+    printf("final expected sqlrc %d\n",sqlrc);
+    printf("success (trace=%s)\n",trace);
+  } else {
+    printf("fail: sqlrc %d SQL_SUCCESS \n",sqlrc);
+  }
   return sqlrc;
 }
