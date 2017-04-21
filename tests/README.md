@@ -20,7 +20,9 @@ $ ./make_tests.sh
 > export SQL_DB400=*LOCAL
 > export SQL_UID400=MYUID
 > export SQL_PWD400=MYPWD
-> export TRACE=stop
+
+Tests expect TRACE ...
+> export TRACE=stop (coredumps expected where test stated)
 -- or --
 > export TRACE=on
 
