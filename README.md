@@ -51,14 +51,14 @@ db2_async_query_fetch('select * from lib/file', function(result) {
   for (var i = 0; i < result.length; i++) {
     var row = result[i];
     for (var j = 0; j < rows.length; j++) {
-      var col = rows[i];
+      var col = rows[j];
       console.log("data: " + col.key + "," + col.value);
     }
   }
 }
 // do something else with node
 check_laundry('wife', function(clean) {
-  if (!clean) send_laundry('wife');
+  if (!clean) { send_laundry('wife'); }
 }
 ```
 
