@@ -137,10 +137,10 @@ We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) secti
 MIT
 
 #Service (export TRACE=on/off)
-Driver service information moved to README_TRACE.md
+Driver service information moved to README_TRACE.md [see source](https://bitbucket.org/litmis/db2sock/src)
 
 #Build
-Build information has been moved to README_BUILD.md
+Build information has been moved to README_BUILD.md [see source](https://bitbucket.org/litmis/db2sock/src)
 
 #ChangeLog
 Progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
