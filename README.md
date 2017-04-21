@@ -169,6 +169,15 @@ I am using a chroot with following packages from [ibmichroot](https://bitbucket.
 ```
 > pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
 ```
+I needed a new gmake (and m4), you can find these on yips.
+(http://yips.idevcloud.com/wiki/index.php/PASE/OpenSourceBinaries)
+```
+Binary fixes (GCC OPS):
+    Attach:gmake-4.2.zip — newer version
+    Attach:m4-1.4.17.zip — newer version
+        copy to directory /opt/freeware/bin 
+```
+
 
 
 Alternative pre-compiled Yips binary
