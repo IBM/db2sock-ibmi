@@ -15,28 +15,18 @@ AROPT              = -X32_64
 INCLUDEPATH        = -isystem /QOpenSys/usr/include -I. -I..
 LIBDEPALL          = -L. -ldb400 -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread
 
-###  shared lib
-LIBOBJS            = LangCommon.o
-LIBEXPS            = -shared -Wl,-bE:liblang400.exp
-LIBSHR32           = liblang400.a
-LIBOBJ32           = shr.o
-LIBDEPS32          = $(LIBDEPALL) -Wl,-brtl -Wl,-bnoquiet
-LIBSHR64           = liblang400_64.a
-LIBOBJ64           = shr_64.o
-LIBDEPS64          = $(LIBDEPS32) -Wl,-brtl -Wl,-bnoquiet -maix64
-
 ### TEST0000
-TEST0000PGM32      = test0000_theory_db2_resources_32
-TEST0000LIBOBJS32  = test0000_theory_db2_resources.o
+TEST0000PGM32      = test0000_resource_array_32
+TEST0000LIBOBJS32  = test0000_resource_array.o
 TEST0000LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0000PGM64      = test0000_theory_db2_resources_64
+TEST0000PGM64      = test0000_resource_array_64
 TEST0000LIBOBJS64  = $(TEST0000LIBOBJS32)
 TEST0000LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
 ### TEST0001
-TEST0001PGM32      = test0001_theory_db2_error_32
-TEST0001LIBOBJS32  = test0001_theory_db2_error.o
+TEST0001PGM32      = test0001_error_32
+TEST0001LIBOBJS32  = test0001_error.o
 TEST0001LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0001PGM64      = test0001_theory_db2_error_64
+TEST0001PGM64      = test0001_error_64
 TEST0001LIBOBJS64  = $(TEST0001LIBOBJS32)
 TEST0001LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
 
@@ -75,18 +65,12 @@ all: cpy $(SHRLIB) $(TEST0000PGM) $(TEST0001PGM)
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
 
-### -- Build the shared lib(s).
-$(SHROBJ): $(LIBOBJS)
-	$(CC) $(CCFLAGS) $(LIBOBJS) $(LIBEXPS) $(LIBDEPS) -o$(SHROBJ)
-$(SHRLIB): $(SHROBJ)
-	$(AR) $(AROPT) ruv $(SHRLIB) $(SHROBJ)
-
-### -- test0000_theory_db2_resources_32/64
+### -- test0000_resource_array_32/64
 $(TEST0000PGM32): $(TEST0000LIBOBJS)
 	$(CC) $(CCFLAGS) $(TEST0000LIBOBJS) $(TEST0000LIBDEPS) -o $(TEST0000PGM32)
 $(TEST0000PGM64): $(TEST0000LIBOBJS)
 	$(CC) $(CCFLAGS) $(TEST0000LIBOBJS) $(TEST0000LIBDEPS) -o $(TEST0000PGM64)
-### -- test0001_theory_db2_error_32/64
+### -- test0001_error_32/64
 $(TEST0001PGM32): $(TEST0001LIBOBJS)
 	$(CC) $(CCFLAGS) $(TEST0001LIBOBJS) $(TEST0001LIBDEPS) -o $(TEST0001PGM32)
 $(TEST0001PGM64): $(TEST0001LIBOBJS)

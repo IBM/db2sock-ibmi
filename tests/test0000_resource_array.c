@@ -12,6 +12,7 @@ char *uid = NULL;
 char *pwd = NULL;
 char *libl  = NULL;
 char *curlib = NULL;
+char *trace  = NULL;
 SQLHANDLE henv; /* always 1, only one env on IBM i db2 */
 SQLHANDLE hdbc[10];
 SQLHANDLE hstmt[10][10];
@@ -28,6 +29,8 @@ int main(int argc, char * argv[]) {
   db  = getenv(SQL_DB400);
   uid = getenv(SQL_UID400);
   pwd = getenv(SQL_PWD400);
+  trace = getenv(SQL_TRACE);
+  printf("run (trace=%s)\n",trace);
   /* environment db2 */
   sqlrc = SQLOverrideCCSID400( 1208 );
   /* connection(s) db2 */
@@ -46,5 +49,6 @@ int main(int argc, char * argv[]) {
     sqlrc = SQLDisconnect(hdbc[i]);
     sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc[i]);
   }
+  printf("success (trace=%s)\n",trace);
   return sqlrc;
 }
