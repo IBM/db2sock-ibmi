@@ -88,7 +88,10 @@ versions that support all the APIs, async, wide, json, socket, etc.
 Perhaps json interface completely
 http REST request configured as PASE fastcgi or ILE cgi. 
 ```
-php, node, ruby, python <-Apache/ngix-> db2 libdb400 JSON server
+php, node, ruby, python <-json-Apache/ngix-> db2 libdb400 JSON server
+Note: 
+- Enables DB2 kerberos automatically, because Apache provides (free).
+- Enables any version of EIM style DB2 profile switch, again because Apache provides (free).
 ```  
 
 Imagination run wild, db2 socket interface 
