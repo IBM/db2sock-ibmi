@@ -20,7 +20,7 @@ At this time, this additional libdb400.a driver is designed to augment current P
 libdb400.a. Therefore both must be on the machine. However, eventually
 this libdb400.a driver may replace PASE version entirely.
 
-NOTE: The current async DB2 requests for Node.js on IBM i do NOT use this driver, so current issues or
+NOTE: The current async DB2 interfaces for Node.js on IBM i do NOT use this driver, so current issues or
 performance with node db2a having NOTHING to do with this new project (see future). We should be clear,
 'async' APIs are NOT just for Node.js, but can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
