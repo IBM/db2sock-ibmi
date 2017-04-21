@@ -39,12 +39,11 @@ The async API interfaces should handle both 'callback' (nodejs), and, poll/reap 
 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. 
-
-Perhaps replace existing PASE language 'drivers' with consistent
+web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent
 versions that support all the APIs, async, wide, json, socket, etc. 
 
-Basic 'async' poll/reap vs. callback (not actual)
+## DB2 async (future)
+Basic 'async' poll/reap vs. callback (not actual):
 At times simple example is best. These are not actual APIs, 
 but demonstrate idea 'async' in languages that may not have
 callback.
@@ -84,7 +83,7 @@ check_laundry('wife', function(clean) {
   if (!clean) { send_laundry('wife'); }
 }
 ```
-
+## DB2 REST kerberos/EIM (future)
 Perhaps json interface completely
 http REST request configured as PASE fastcgi or ILE cgi. 
 ```
@@ -94,14 +93,17 @@ Note:
 - Enables any version of EIM style DB2 profile switch, again because Apache provides (free).
 ```  
 
+## DB2 map other databases (future)
 Imagination run wild, db2 socket interface 
 'map' other socket based database requests into db2.
 ```
 php, node, ruby, python mysql/maria client <-port 3306-> db2 libdb400 socket server
 ```
- 
-Ok, no promise, but, you get the idea. Author two cents, when stable, start using this driver, 
-you will grow function by leaps with very little effort.
+
+## Disclaimer
+Ok, no promise, but, you get the idea. A basic design change is needed to PASE libdb400.a to enable a better future.
+We would like to do this publicly so ALL may clearly understand libdb400.a technology, and, possibly contribute.
+Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
 #Run
 Place new libdb400.a in some directory (mytest). 
