@@ -10,6 +10,11 @@ Also adding features to each language, such as asynchronous calls, CLI tracing, 
 will be much easier.
 
 ## build
+Need to copy ILE CLI headers to PASE.
+```
+> ./cpysqlincludes.sh 
+```
+
 All make files have been converted to gcc compiles.
 ```
 optional (git already completed) ...
