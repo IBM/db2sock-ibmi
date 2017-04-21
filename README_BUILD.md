@@ -38,8 +38,7 @@ Binary fixes (GCC OPS):
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c     -- asynchronous driver APIs
 - PaseCliILE_gen.c       -- direct ILE call APIs (exported)
-- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
-- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms
+- PaseCliLibDB400_gen.c  -- PASE libdb400.a override dlsyms (replace someday)
 - PaseCliDump_gen.c      -- TRACE each CLI API with full stack walk (cool)
 - libdb400.exp           -- all CLI export APIs
 
