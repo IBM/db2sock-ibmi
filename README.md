@@ -26,7 +26,26 @@ performance with node db2a having NOTHING to do with this new project (see futur
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
 is APIs for any language.
 
-##Basic 'async' poll/reap vs. callback (not actual)
+#design goals (the list)
+- No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
+- Service driver - provide good PASE side TRACE capabilities for service
+- Traditional APIs - provide all current libdb400.a CLI APIs
+- Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs
+- Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all PASE lang drivers)
+- Async APIs - high performing async CLI APIs for all new PASE languages (including Aggregate API interfaces). 
+The async API interfaces should handle both 'callback' (nodejs), and, poll/reap (php).
+- JSON APIs - enable json only calls (JSON Aggregate API interface). Allows future REST DB2 called by any language on/off IBM i
+- Socket APIs - enable socket based for ideas like 'private' connections (private db2 serving)
+- Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
+
+#Future
+Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
+web based db2, json based db2, etc. 
+
+Perhaps replace existing PASE language 'drivers' with consistent
+versions that support all the APIs, async, wide, json, socket, etc. 
+
+Basic 'async' poll/reap vs. callback (not actual)
 At times simple example is best. These are not actual APIs, 
 but demonstrate idea 'async' in languages that may not have
 callback.
@@ -66,24 +85,6 @@ check_laundry('wife', function(clean) {
   if (!clean) { send_laundry('wife'); }
 }
 ```
-
-
-#design goals (the list)
-- No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
-- Service driver - provide good PASE side TRACE capabilities for service
-- Traditional APIs - provide all current libdb400.a CLI APIs
-- Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs
-- Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all PASE lang drivers)
-- Async APIs - high performing async CLI APIs for all new PASE languages (including Aggregate API interfaces). 
-The async API interfaces should handle both 'callback' (nodejs), and, poll/reap (php).
-- JSON APIs - enable json only calls (JSON Aggregate API interface). Allows future REST DB2 called by any language on/off IBM i
-- Socket APIs - enable socket based for ideas like 'private' connections (private db2 serving)
-- Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
-
-#Future
-Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
-web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent
-versions that support all the APIs, async, wide, json, socket, etc. 
 
 Perhaps json interface completely
 http REST request configured as PASE fastcgi or ILE cgi. 
