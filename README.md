@@ -26,6 +26,43 @@ performance with node db2a having NOTHING to do with this new project (see futur
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
 is APIs for any language.
 
+'async' poll/reap example (not actual):
+```
+// request did NOT halt did NOT halt PHP
+$poll = db2_async_query_fetch('select * from lib/file');
+// check $result did NOT halt PHP
+while(!($result = db2_result_poll($poll))) {
+  // do something else with php
+  $clean = check_laundry('wife');
+  if (!$clean) send_laundry('wife');
+}
+// query result available now
+foreach ($result as $row) {
+  foreach ($row as $key => $value) {
+    print("data: $key,$value");
+  }
+}
+```
+
+'callback' callback example (not actual):
+```
+// request did NOT halt node
+db2_async_query_fetch('select * from lib/file', function(result) {
+  for (var i = 0; i < result.length; i++) {
+    var row = result[i];
+    for (var j = 0; j < rows.length; j++) {
+      var col = rows[i];
+      console.log("data: " + col.key + "," + col.value);
+    }
+  }
+}
+// do something else with node
+check_laundry('wife', function(clean) {
+  if (!clean) send_laundry('wife');
+}
+```
+
+
 #design goals (the list)
 - No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
 - Service driver - provide good PASE side TRACE capabilities for service
