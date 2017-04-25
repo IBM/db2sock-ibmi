@@ -23,19 +23,19 @@ void SQL400ConnectUtf16Callback(SQL400ConnectUtf16Struct* cb) {
   int j = 0;
   int hdbc_idx = 0;
   pthread_t ptid = pthread_self();
-  printf("SQL400ConnectUtf16Callback (thread %d) hdbc = %d sqlrc = %d\n", ptid, *cb->ohnd, cb->sqlrc);
   if (cb->sqlrc == SQL_SUCCESS) {
     pthread_mutex_lock(&testMutexLock);
     hdbc_count++;
     hdbc_idx = hdbc_count;
     hdbc[hdbc_idx] = *cb->ohnd;
     pthread_mutex_unlock(&testMutexLock);
+    printf("SQL400ConnectUtf16Callback (thread %d) hdbc = %d sqlrc = %d\n", ptid, hdbc[hdbc_idx], cb->sqlrc);
     for (j=0;j<LOOP; j++) {
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, *cb->ohnd, &hstmt[hdbc_idx][j]);
+      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, hdbc[hdbc_idx], &hstmt[hdbc_idx][j]);
       if (sqlrc < SQL_SUCCESS || hstmt[hdbc_idx][j] < 2) {
-        printf("fail: SQL400ConnectUtf16Callback (thread %d) hdbc=%d hstmt=%d sqlrc=%d\n", ptid,*cb->ohnd, hstmt[hdbc_idx][j], cb->sqlrc);
+        printf("fail: SQL400ConnectUtf16Callback (thread %d) hdbc=%d hstmt=%d sqlrc=%d\n", ptid, hdbc[hdbc_idx], hstmt[hdbc_idx][j], cb->sqlrc);
       } else {
-        printf("ok: SQL400ConnectUtf16Callback (thread %d) hdbc=%d hstmt=%d sqlrc=%d\n", ptid,*cb->ohnd, hstmt[hdbc_idx][j], cb->sqlrc);
+        printf("ok: SQL400ConnectUtf16Callback (thread %d) hdbc=%d hstmt=%d sqlrc=%d\n", ptid, hdbc[hdbc_idx], hstmt[hdbc_idx][j], cb->sqlrc);
       }
     }
   } else {
@@ -43,7 +43,7 @@ void SQL400ConnectUtf16Callback(SQL400ConnectUtf16Struct* cb) {
   }
 }
 /* SQL400 aggregate API -- convert db, uid, pwd to UTF8, set-up env, sys naming, server mode, etc. */
-pthread_t db2_async_connect(int myccsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * handle, int iso, SQLCHAR * libl, SQLCHAR * curlib) {
+pthread_t db2_async_connect(int myccsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLHANDLE *handle, int iso, SQLCHAR * libl, SQLCHAR * curlib) {
   return SQL400ConnectUtf16Async(myccsid, db, uid, pwd, handle, iso, libl, curlib, SQL400ConnectUtf16Callback);
 }
 
@@ -56,11 +56,12 @@ int main(int argc, char * argv[]) {
   char *libl  = NULL;
   char *curlib = NULL;
   char *trace  = NULL;
-  pthread_t tid[LOOP];
   int expect_hdbc = 0;
   int actual_hdbc = 0;
   int expect_hstmt = 0;
   int actual_hstmt = 0;
+  pthread_t tid[LOOP];
+  SQLHANDLE handle[LOOP];
 
   /* profile db2 */
   db  = getenv(SQL_DB400);
@@ -72,8 +73,8 @@ int main(int argc, char * argv[]) {
   sqlrc = SQLOverrideCCSID400( 1200 );
   /* connection(s) db2 */
   for (i=0;i<LOOP; i++) {
-    printf("main submit async connect for array hdbc[%d]\n",i);
-    tid[i] = db2_async_connect(819, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, &hdbc[i], SQL_TXN_NO_COMMIT, libl, curlib);
+    printf("main submit async connect for array handle[%d]\n",i);
+    tid[i] = db2_async_connect(819, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, &handle[i], SQL_TXN_NO_COMMIT, libl, curlib);
   }
   /* wait threads finish (false hold to avoid end) */
   for (i=0;i<LOOP; i++) {
