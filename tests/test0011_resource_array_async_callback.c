@@ -18,6 +18,19 @@ SQLHANDLE hdbc[LOOP];
 SQLHANDLE hstmt[LOOP][LOOP];
 
 
+/* (PaseCliAsync.h)
+   void SQL400ConnectUtf16Callback(SQL400ConnectUtf16Struct* );
+   typedef struct SQL400ConnectUtf16Struct { SQLRETURN sqlrc; 
+     SQLINTEGER  accsid; 
+     SQLCHAR * db; 
+     SQLCHAR * uid; 
+     SQLCHAR * pwd; 
+     SQLINTEGER * ohnd; 
+     SQLINTEGER  acommit; 
+     SQLCHAR * alibl; 
+     SQLCHAR * acurlib; 
+     void * callback; } SQL400ConnectUtf16Struct;
+*/
 void SQL400ConnectUtf16Callback(SQL400ConnectUtf16Struct* cb) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int j = 0;
