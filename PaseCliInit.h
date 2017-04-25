@@ -91,5 +91,9 @@ void * custom_alloc_zero(int sz);
 /* conversion */
 int custom_iconv(int isInput, char *fromBuffer, char *toBuffer, size_t sourceLen, size_t bufSize, int myccsid, int utfccsid);
 
+/* rare use allocators only */
+void init_lock();
+void init_unlock();
+
 #endif /* _PASECLIINIT_H */
 

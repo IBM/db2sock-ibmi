@@ -65,10 +65,12 @@ def parse_method( line ):
 # special processing CLI interfaces (unique gen)
 # ===============================================
 
+
 # SQLRETURN SQLAllocEnv ( SQLHENV * phenv );
 def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -81,6 +83,7 @@ def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -91,6 +94,7 @@ def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_
 def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -103,6 +107,7 @@ def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phdbc, *phdbc);" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -113,6 +118,7 @@ def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db
 def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -125,6 +131,7 @@ def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phstmt, hdbc);" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -135,6 +142,7 @@ def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400
 def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -162,6 +170,7 @@ def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db4
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -172,6 +181,7 @@ def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db4
 def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -181,6 +191,7 @@ def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_a
   c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -196,6 +207,7 @@ def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db4
   c_main += "  if (active) {" + "\n"
   c_main += "    return SQL_ERROR;" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -208,6 +220,7 @@ def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db4
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_dtor(hdbc);" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -218,6 +231,7 @@ def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db4
 def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_args):
   c_main = ""
   c_main += "  int myccsid = init_CCSID400(0);" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -230,6 +244,7 @@ def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_dtor(hstmt);" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"
@@ -251,6 +266,7 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += '  default:' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_lock();" + "\n"
   c_main += "  switch(myccsid) {" + "\n"
   c_main += '  case 1208: /* UTF-8 */' + "\n"
   c_main += '  case 1200: /* UTF-16 */' + "\n"
@@ -269,6 +285,7 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
+  c_main += "  init_unlock();" + "\n"
   # dump trace
   c_main += "  if (init_cli_trace()) {" + "\n"
   c_main += "    dump_" + call_name + '(sqlrc, ' + normal_db400_args + ' );' + "\n"

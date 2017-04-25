@@ -20,8 +20,10 @@ PaseCliResource IBMiTable[PASECLIMAXRESOURCE];
 
 /* global data lock (IBM i resources) */
 pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
-static pthread_mutex_t threadMutexLock = PTHREAD_MUTEX_INITIALIZER;
-
+static pthread_mutex_t threadMutexLockLock = PTHREAD_MUTEX_INITIALIZER;
+static int threadMutexLockFlag;
+static pthread_mutex_t threadMutexLock;
+pthread_mutexattr_t threadMutexAttr;
 /*
  * conversion
  */
@@ -49,11 +51,19 @@ char * db2_cli_dbx_array[128];
 
 
 /* global table lock
- * This lock is 'lock once'.
- * That is, not PTHREAD_MUTEX_RECURSIVE,
- * therefore do not call twice, will hang.
  */
 void init_lock() {
+  /* flag race condition */
+  if (!threadMutexLockFlag) {
+    pthread_mutex_lock(&threadMutexLockLock);
+    if (!threadMutexLockFlag) {
+      pthread_mutexattr_init(&threadMutexAttr);
+      pthread_mutexattr_settype(&threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
+      pthread_mutex_init(&threadMutexLock, &threadMutexAttr);
+      threadMutexLockFlag = 1;
+    }
+    pthread_mutex_unlock(&threadMutexLockLock);
+  }
   pthread_mutex_lock(&threadMutexLock);
 }
 
@@ -262,7 +272,7 @@ char ** init_cli_dbx() {
  * (see init_table_lock to understand hstmt to hdbc map locks)
  */
 void init_table_ctor(int hstmt, int hdbc) {
-  init_lock();
+  // init_lock(); - lock in Alloc routine
   if (!IBMiTable[hstmt].hstmt) {
     pthread_mutexattr_init(&IBMiTable[hstmt].threadMutexAttr);
     pthread_mutexattr_settype(&IBMiTable[hstmt].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
@@ -272,23 +282,17 @@ void init_table_ctor(int hstmt, int hdbc) {
   IBMiTable[hstmt].hstmt = hstmt;
   IBMiTable[hstmt].hdbc = hdbc;
   IBMiTable[hstmt].hKey = NULL;
-  init_unlock();
+  // init_unlock(); - lock in Alloc routine
 }
+/* DB2 free not thread safe
+ */
 void init_table_dtor(int hstmt) {
-  /* do nothing, 
-   * statement handles are unique
-   * we only want init mutex ctor
-   * once done, we have lock scope
-   * either statment or connection
-   */
+  // init_lock(); - lock in Free routine
   if (IBMiTable[hstmt].hKey) {
-    init_lock();
-    if (IBMiTable[hstmt].hKey) {
-      free(IBMiTable[hstmt].hKey);
-    }
-    IBMiTable[hstmt].hKey = (char *) NULL;
-    init_unlock();
+    free(IBMiTable[hstmt].hKey);
   }
+  IBMiTable[hstmt].hKey = (char *) NULL;
+  // init_unlock(); - lock in Free routine
 }
 void * init_table_addr(int hstmt) {
   return (void *) &IBMiTable[hstmt];

@@ -55,8 +55,8 @@ $poll = db2_async_query_fetch('select * from lib/file');
 // check $result did NOT halt PHP
 while(!($result = db2_result_poll($poll))) {
   // do something else with php
-  $clean = check_laundry('wife');
-  if (!$clean) send_laundry('wife');
+  $clean = check_laundry('home');
+  if (!$clean) send_laundry('home');
 }
 // query result available now
 foreach ($result as $row) {
@@ -79,8 +79,8 @@ db2_async_query_fetch('select * from lib/file', function(result) {
   }
 }
 // do something else with node
-check_laundry('wife', function(clean) {
-  if (!clean) { send_laundry('wife'); }
+check_laundry('home', function(clean) {
+  if (!clean) { send_laundry('home'); }
 }
 ```
 ## DB2 REST kerberos/EIM (future)

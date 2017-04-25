@@ -13,6 +13,7 @@ SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -25,6 +26,7 @@ SQLRETURN SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phdbc, *phdbc);
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLAllocConnect(sqlrc,  henv, phdbc );
   }
@@ -34,6 +36,7 @@ SQLRETURN SQLAllocEnv( SQLHENV * phenv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -46,6 +49,7 @@ SQLRETURN SQLAllocEnv( SQLHENV * phenv )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phenv, *phenv);
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLAllocEnv(sqlrc,  phenv );
   }
@@ -55,6 +59,7 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -82,6 +87,7 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
     }
     break;
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLAllocHandle(sqlrc,  htype, ihnd, ohnd );
   }
@@ -91,6 +97,7 @@ SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -103,6 +110,7 @@ SQLRETURN SQLAllocStmt( SQLHDBC  hdbc, SQLHSTMT * phstmt )
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phstmt, hdbc);
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLAllocStmt(sqlrc,  hdbc, phstmt );
   }
@@ -2872,6 +2880,7 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
   if (active) {
     return SQL_ERROR;
   }
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -2884,6 +2893,7 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hdbc);
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeConnect(sqlrc,  hdbc );
   }
@@ -2893,6 +2903,7 @@ SQLRETURN SQLFreeEnv( SQLHENV  henv )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -2902,6 +2913,7 @@ SQLRETURN SQLFreeEnv( SQLHENV  henv )
     sqlrc = libdb400_SQLFreeEnv( henv );
     break;
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeEnv(sqlrc,  henv );
   }
@@ -2911,6 +2923,7 @@ SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int myccsid = init_CCSID400(0);
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -2923,6 +2936,7 @@ SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
   if (sqlrc == SQL_SUCCESS) {
     init_table_dtor(hstmt);
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeStmt(sqlrc,  hstmt, fOption );
   }
@@ -2943,6 +2957,7 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
   default:
     break;
   }
+  init_lock();
   switch(myccsid) {
   case 1208: /* UTF-8 */
   case 1200: /* UTF-16 */
@@ -2961,6 +2976,7 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
     }
     break;
   }
+  init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeHandle(sqlrc,  htype, hndl );
   }
