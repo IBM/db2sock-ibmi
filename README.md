@@ -25,6 +25,15 @@ performance with node db2a having NOTHING to do with this new project (see futur
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
 is APIs for any language.
 
+#Source
+Source links have topical README.md.
+```
+db2sock               - build source libdb400.a
+db2sock/tests         - PASE tests for libdb400.a
+db2sock/db2json       - RPG CGI json interface to libdb400.a
+db2sock/db2json/tests - tests for RPG CGI json interface
+```
+
 #design goals (the list)
 - No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
 - Service driver - provide good PASE side TRACE capabilities for service
