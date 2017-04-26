@@ -49,6 +49,9 @@ int main(int argc, char * argv[]) {
   memset(outjson2,0,sizeof(outjson2));
   sqlrc = SQL400Json(hdbc, injson2, inlen2, outjson2, outlen2);
   printf("buffer:\n%s\n",outjson2);
+  /* clean up */
+  sqlrc = SQLDisconnect((SQLHDBC)hdbc);
+  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   /* output */
   printf("success (trace=%s)\n",trace);
   return sqlrc;
