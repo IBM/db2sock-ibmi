@@ -33,7 +33,8 @@ is APIs for any language.
 - Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all PASE lang drivers)
 - Async APIs - high performing async CLI APIs for all new PASE languages (including Aggregate API interfaces). 
 The async API interfaces should handle both 'callback' (nodejs), and, poll/reap (php).
-- JSON APIs - enable json only calls (JSON Aggregate API interface). Allows future REST DB2 called by any language on/off IBM i
+- JSON APIs - enable json only calls (JSON Aggregate API interface). 
+Allows REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache)
 - Socket APIs - enable socket based for ideas like 'private' connections (private db2 serving)
 - Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
 
