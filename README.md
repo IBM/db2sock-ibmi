@@ -87,6 +87,7 @@ check_laundry('home', function(clean) {
 ## DB2 REST kerberos/EIM (future)
 Perhaps json interface completely
 http REST request configured as PASE fastcgi or ILE cgi. 
+(see source db2json)
 ```
 php, node, ruby, python <-json-Apache/ngix-> db2 libdb400 JSON server
 Note: 
@@ -146,6 +147,10 @@ Build information has been moved to README_BUILD.md [see source](https://bitbuck
 #ChangeLog
 Progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
 ```
+libdb400-1.0.1-sg10.zip - experimental test version pre-compiled libdb400.a (2017–04–26)
+- added db2json - RPG CGI Apache configuration to libdb400.a with json in/out protocol (see db2json/tests example REST ‘Basic Auth’ IBM i Apache)
+- misc fixes for async (see db2sock/tests callback and join) 
+
 libdb400-1.0.1-sg9.zip - experimental test version pre-compiled libdb400.a (2017–04–21) 
 - removed many APIs SQL400 — rework in progress
 - removed json — rework in progress
