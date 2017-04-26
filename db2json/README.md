@@ -14,7 +14,8 @@ $ ./makedb2json.sh
 # configure
 
 ```
-assumes basic authorization (httpd.conf)
+test assumes basic authorization (httpd.conf)
+also work for SSL, kerberos, %%client%%, EIM, etc.
 
 <Directory />       
    AuthType Basic
@@ -35,7 +36,23 @@ ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
 </Directory>
 
 
-Note: Must use CGIConvMode BINARY for directory.
+Note: 
+- Must use CGIConvMode BINARY for directory.
+- db2json.rpgle (CGI) hard coded to my test chroot directory for libdb400.a
+       // test chroot (test)
+       DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/zend7+
+       /QOpenSys/usr/lib/');
+       // actual lib (production)
+       // DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/usr/lib/');
+```
+
+# binary
+[YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver)
+```
+  if you want to experiment with CGI (above), 
+  create/copy new libdb400.a test directory
+  /QOpenSys/zend7/QOpenSys/usr/lib/libdb400.a
+  
 ```
 
 # run
