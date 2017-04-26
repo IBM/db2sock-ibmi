@@ -8,20 +8,6 @@
 #include "test.h"
 #include "PaseCliAsync.h"
 
-pthread_once_t threadInitObject = PTHREAD_ONCE_INIT;
-static pthread_mutex_t testMutexLock = PTHREAD_MUTEX_INITIALIZER;
-
-#define LOOP 10
-
-int hdbc_count = -1;
-SQLHANDLE hdbc[LOOP];
-SQLHANDLE hstmt[LOOP][LOOP];
-
-/* SQL400 aggregate API -- convert db, uid, pwd to UTF8, set-up env, sys naming, server mode, etc. */
-pthread_t db2_async_connect(int myccsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLHANDLE *handle, int iso, SQLCHAR * libl, SQLCHAR * curlib) {
-  return SQL400ConnectUtf16Async(myccsid, db, uid, pwd, handle, iso, libl, curlib, NULL);
-}
-
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0, j = 0;
