@@ -955,3 +955,11 @@ SQLRETURN SQL400IgnoreNullFromUtf16(SQLHDBC hdbc,
  SQLINTEGER outlen,
  SQLINTEGER outccsid)
 
+# custom json 
+
+SQLRETURN SQL400Json(SQLHDBC hdbc,
+ SQLCHAR * injson,
+ SQLINTEGER inlen, 
+ SQLCHAR * outjson,
+ SQLINTEGER outlen)
+

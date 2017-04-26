@@ -3430,3 +3430,26 @@ void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER 
     }
   }
 }
+void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen ) {
+  if (dev_go(sqlrc,"sql400json")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400Json");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","injson",injson,injson);
+    printf_hexdump(mykey,injson,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLCHAR*","outjson",outjson,outjson);
+    printf_hexdump(mykey,outjson,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}

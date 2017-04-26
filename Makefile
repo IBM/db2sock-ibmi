@@ -17,7 +17,8 @@ INCLUDEPATH = -isystem /QOpenSys/usr/include -I.
 
 ###  shared lib
 LIBOBJS      = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCliInit.o PaseCliCustom.o \
-               PaseCliDev.o PaseCliDevConsole.o PaseCliDevFile.o PaseCliPrintf.o PaseCliDump_gen.o
+               PaseCliDev.o PaseCliDevConsole.o PaseCliDevFile.o PaseCliPrintf.o PaseCliDump_gen.o \
+               PaseCliJson.o
 LIBEXPS      = -Wl,-bE:libdb400.exp
 SHRLIB32     = libdb400.a
 SHROBJ32     = shr.o

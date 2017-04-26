@@ -9830,3 +9830,60 @@ SQL400IgnoreNullFromUtf16Struct * SQL400IgnoreNullFromUtf16Join (pthread_t tid, 
   }
   return myptr;
 }
+SQLRETURN SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400Json( hdbc, injson, inlen, outjson, outlen );
+  if (init_cli_trace()) {
+    dump_SQL400Json(sqlrc,  hdbc, injson, inlen, outjson, outlen );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400JsonThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400Json( myptr->hdbc, myptr->injson, myptr->inlen, myptr->outjson, myptr->outlen );
+  if (init_cli_trace()) {
+    dump_SQL400Json(myptr->sqlrc,  myptr->hdbc, myptr->injson, myptr->inlen, myptr->outjson, myptr->outlen );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400JsonCallback(SQL400JsonStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400JsonStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400JsonAsync ( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) malloc(sizeof(SQL400JsonStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->injson = injson;
+  myptr->inlen = inlen;
+  myptr->outjson = outjson;
+  myptr->outlen = outlen;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400JsonThread, (void *)myptr);
+  return tid;
+}
+SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400JsonStruct * myptr = (SQL400JsonStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400JsonStruct *) NULL;
+  }
+  return myptr;
+}
