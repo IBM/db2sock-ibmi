@@ -459,20 +459,36 @@ SQLRETURN custom_SQL400RollBackBoth(SQLHDBC hdbc) {
   return sqlrc;
 }
 
+SQLRETURN custom_SQL400CloseAllStmts(SQLHDBC hdbc) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLHSTMT hstmt = 0;
+  /* free all statements */
+  while (hstmt = init_table_find_stmt(hdbc)) {
+    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+  return SQL_SUCCESS;
+}
+
 SQLRETURN custom_SQL400Close(SQLHDBC hdbc) {
   int active = init_table_hash_active(hdbc, 0);
   /* always rollback (dtor language safe call) */
   SQLRETURN sqlrc = custom_SQL400RollBackBoth(hdbc);
+  /* free all statements */
+  sqlrc = custom_SQL400CloseAllStmts(hdbc);
   /* persistent connect only close with SQL400pClose */
   if (active) {
-    return SQL_ERROR;
+    return SQL_SUCCESS_WITH_INFO;
   }
+  /* free connection */
   return custom_SQL400CloseBoth(hdbc);
 }
 
 SQLRETURN custom_SQL400pClose(SQLHDBC hdbc) {
   /* always rollback (dtor language safe call) */
   SQLRETURN sqlrc = custom_SQL400RollBackBoth(hdbc);
+  /* free all statements */
+  sqlrc = custom_SQL400CloseAllStmts(hdbc);
+  /* free connection */
   return custom_SQL400CloseBoth(hdbc);
 }
 

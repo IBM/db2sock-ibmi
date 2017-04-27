@@ -621,6 +621,9 @@ SQL400CloseJoin
 SQL400pClose
 SQL400pCloseAsync
 SQL400pCloseJoin
+SQL400CloseAllStmts
+SQL400CloseAllStmtsAsync
+SQL400CloseAllStmtsJoin
 SQL400Cmd
 SQL400CmdAsync
 SQL400CmdJoin

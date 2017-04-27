@@ -23,9 +23,10 @@
 
 #define SQL400_MAX_KEY 65000
 #define SQL400_KEY_CONN 1
-#define SQL400_KEY_QUERY 2
-#define SQL400_KEY_PARM 3
-#define SQL400_KEY_FETCH 4
+#define SQL400_KEY_PCONN 2
+#define SQL400_KEY_QUERY 10
+#define SQL400_KEY_PARM 20
+#define SQL400_KEY_FETCH 30
 #define SQL400_MAX_ARGS 32
 #define SQL400_MAX_COLS 1024
 
@@ -48,7 +49,6 @@
 #define SQL400_OUT_JSON_BUFF 22
 #define SQL400_OUT_SPACE_BUFF 23
 
-
 void * custom_json_new(int size) {
   void * buffer = malloc(size + 1);
   memset(buffer,0,size + 1);
@@ -58,6 +58,118 @@ void custom_json_free(char *buffer) {
   if (buffer) {
     free(buffer);
   }
+}
+
+char * custom_json_parse_value(char * c, int idx, char **v, int *a) {
+  int i = 0;
+  char * f = c;
+  char * g = c;
+  char * w = c;
+  char * x = c;
+  for (i=0; c[i]; i++) {
+    switch(c[i]) {
+    /* "query":"select ..."
+     *         x
+     */
+    case '"':
+      i++;
+      w = &c[i];
+      a[idx] = 0;
+      for (; c[i]; i++) {
+        x = &c[i];
+        switch(c[i]) {
+        /* "query":"select ..."
+         *                    x
+         */
+        case '"':
+          c[i]=0x00;
+          v[idx] = w;
+          i++;
+          return &c[i];
+          break;
+        }
+      }
+      break;
+    /* "parm":[1,2,"bob"]
+     *        x
+     */
+    case '[':
+      i++;
+      w = &c[i];
+      a[idx] = 1;
+      for (; c[i]; i++) {
+        x = &c[i];
+        switch(c[i]) {
+        /* "parm":[1,2,"bob"]
+         *                  x
+         */
+        case ']':
+          c[i]=0x00;
+          v[idx] = w;
+          i++;
+          return &c[i];
+          break;
+        }
+      }
+      break;
+    default:
+      break;
+    }
+  }
+  return NULL;
+}
+
+
+int custom_json_parse_array_values(char *c, char **v) {
+  int i = 0;
+  int idx = 0;
+  char * f = c;
+  char * g = c;
+  /* "parm":[1,2,"bob"]
+   *         x
+   */
+  for (i=0; c[i]; i++) {
+    switch(c[i]) {
+    /* "parm":[1,2,"bob"]
+     *             x
+     */
+    case '"':
+      i++;
+      f = &c[i];
+      for (; c[i]; i++) {
+        g = &c[i];
+        /* "parm":[1,2,"bob"]
+         *                 x
+         */
+        if (c[i] == '"') {
+          c[i]=0x00;
+          v[idx] = f;
+          idx++;
+          break;
+        }
+      }
+      break;
+    case ' ':
+      break;
+    default:
+      /* "parm":[1,2,"bob"]
+       *         x
+       */
+      if (c[i]>='0' && c[i]<='9') {
+        f = &c[i];
+        for (i++; ;i++) {
+          if (c[i] >= '0' && c[i] <= '9') {
+            continue;
+          }
+          c[i]=0x00;
+          v[idx] = f;
+          idx++;
+          break;
+        }
+      }
+    }
+  }
+  return idx;
 }
 
 void custom_output_printf(char *out_caller, const char * format, ...) {
@@ -300,31 +412,56 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   /* process */
   for (i=0;key[i];i++) {
     switch (key[i]) {
+    /* SQLRETURN SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, 
+     *   SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
+     */
+    case SQL400_KEY_PCONN:
+      if (arr[i]) {
+        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        switch (nbr_arv) {
+        case 4:
+          sqlrc = SQL400pConnect( arv[0], arv[1], arv[2], arv[3], &hdbc, attr_isolation, NULL, NULL );
+          break;
+        case 3:
+          sqlrc = SQL400pConnect( NULL, arv[0], arv[1], arv[2], &hdbc, attr_isolation, NULL, NULL );
+          break;
+        case 1:
+          sqlrc = SQL400pConnect( NULL, NULL, NULL, arv[0], &hdbc, attr_isolation, NULL, NULL );
+        default:
+          sqlrc = SQL400pConnect( NULL, NULL, NULL, "ALL", &hdbc, attr_isolation, NULL, NULL );
+          break;
+        }
+      }
+      /* do not close (pool connection) */
+      if (hdbc) {
+        hdbc_external = 1;
+      }
+      break;
     case SQL400_KEY_CONN:
       if (arr[i]) {
         nbr_arv = custom_json_parse_array_values(val[i], arv);
         switch (nbr_arv) {
         case 3:
-          sqlrc = custom_SQL400Connect( val[0], val[1], val[2], &hdbc, attr_isolation, NULL, NULL );
+          sqlrc = SQL400Connect( arv[0], arv[1], arv[2], &hdbc, attr_isolation, NULL, NULL );
           break;
         case 2:
-          sqlrc = custom_SQL400Connect( NULL, val[1], val[2], &hdbc, attr_isolation, NULL, NULL );
+          sqlrc = SQL400Connect( NULL, arv[0], arv[1], &hdbc, attr_isolation, NULL, NULL );
           break;
         default:
-          sqlrc = custom_SQL400Connect( NULL, NULL, NULL, &hdbc, attr_isolation, NULL, NULL );
+          sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, attr_isolation, NULL, NULL );
           break;
         }
       }
       break;
     case SQL400_KEY_QUERY:
       if (!hdbc) {
-        sqlrc = custom_SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
+        sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
       }
       /* statement */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
       /* prepare */
       sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLCHAR*)val[i], (SQLINTEGER)SQL_NTS);
-      /* execute */
+      /* no parm? execute */
       if (key[i+1] != SQL400_KEY_PARM) {
         sqlrc = SQLExecute((SQLHSTMT)hstmt);
       }
@@ -347,9 +484,13 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       }
       /* execute */
       sqlrc = SQLExecute((SQLHSTMT)hstmt);
-      /* internal handle */
+      /* no fetch? close */
       if (key[i+1] != SQL400_KEY_FETCH) {
         sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        /* hdbc external (caller?) or pool (pConnect) */
+        if (!hdbc_external) {
+          sqlrc = SQL400Close(hdbc);
+        }
       }
       break;
     case SQL400_KEY_FETCH:
@@ -432,134 +573,22 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           }
         }
       }
-      /* internal handle */
+      /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      /* hdbc external (caller?) */
-      if (!hdbc_external && hdbc) {
-        sqlrc = SQLDisconnect((SQLHDBC)hdbc);
-        sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+      /* hdbc external (caller?) or pool (pConnect) */
+      if (!hdbc_external) {
+        sqlrc = SQL400Close(hdbc);
       }
       break;
     }
-  }
-}
-
-char * custom_json_parse_value(char * c, int idx, char **v, int *a) {
-  int i = 0;
-  char * f = c;
-  char * g = c;
-  char * w = c;
-  char * x = c;
-  for (i=0; c[i]; i++) {
-    switch(c[i]) {
-    /* "query":"select ..."
-     *         x
-     */
-    case '"':
-      i++;
-      w = &c[i];
-      a[idx] = 0;
-      for (; c[i]; i++) {
-        x = &c[i];
-        switch(c[i]) {
-        /* "query":"select ..."
-         *                    x
-         */
-        case '"':
-          c[i]=0x00;
-          v[idx] = w;
-          i++;
-          return &c[i];
-          break;
-        }
-      }
-      break;
-    /* "parm":[1,2,"bob"]
-     *        x
-     */
-    case '[':
-      i++;
-      w = &c[i];
-      a[idx] = 1;
-      for (; c[i]; i++) {
-        x = &c[i];
-        switch(c[i]) {
-        /* "parm":[1,2,"bob"]
-         *                  x
-         */
-        case ']':
-          c[i]=0x00;
-          v[idx] = w;
-          i++;
-          return &c[i];
-          break;
-        }
-      }
-      break;
-    default:
-      break;
-    }
-  }
-  return NULL;
-}
-
-
-int custom_json_parse_array_values(char *c, char **v) {
-  int i = 0;
-  int idx = 0;
-  char * f = c;
-  char * g = c;
-  /* "parm":[1,2,"bob"]
-   *         x
-   */
-  for (i=0; c[i]; i++) {
-    switch(c[i]) {
-    /* "parm":[1,2,"bob"]
-     *             x
-     */
-    case '"':
-      i++;
-      f = &c[i];
-      for (; c[i]; i++) {
-        g = &c[i];
-        /* "parm":[1,2,"bob"]
-         *                 x
-         */
-        if (c[i] == '"') {
-          c[i]=0x00;
-          v[idx] = f;
-          idx++;
-          break;
-        }
-      }
-      break;
-    case ' ':
-      break;
-    default:
-      /* "parm":[1,2,"bob"]
-       *         x
-       */
-      if (c[i]>='0' && c[i]<='9') {
-        f = &c[i];
-        for (i++; ;i++) {
-          if (c[i] >= '0' && c[i] <= '9') {
-            continue;
-          }
-          c[i]=0x00;
-          v[idx] = f;
-          idx++;
-          break;
-        }
-      }
-    }
-  }
-  return idx;
+  } // end for
 }
 
 /* json
  * {"query":"select * from bobdata","fetch":"*ALL"}
  * {"query":"call proc(?,?,?)","parm":[1,2,"bob"]}
  * {"connect":["*LOCAL","UID","PWD"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
+ * {"pconnect":["id"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
  */
 SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
  SQLCHAR * injson,
@@ -577,14 +606,17 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   char * val[SQL400_MAX_KEY];
   int arr[SQL400_MAX_KEY];
   int key[SQL400_MAX_KEY];
+  char * pconn_key = "\"pconnect\":";
   char * conn_key = "\"connect\":";
   char * query_key = "\"query\":";
   char * parm_key = "\"parm\":";
   char * fetch_key = "\"fetch\":";
+  int pconn_look = 1;
   int conn_look = 1;
   int query_look = 1;
   int parm_look = 1;
   int fetch_look = 1;
+  int pconn_len = strlen(pconn_key);
   int conn_len = strlen(conn_key);
   int query_len = strlen(query_key);
   int parm_len = strlen(parm_key);
@@ -608,6 +640,7 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     key[i+1] = 0;
     for (j=0, c = f; f && c[j]; j++) {
       /* "connect":["*LOCAL","UID","PWD"]
+       * "pconnect":["*LOCAL","UID","PWD","id"]
        * "query":"select * ..."
        * "parm":[1,2,"bob"]
        * "fetch":"*ALL"
@@ -629,6 +662,21 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
             break;
           } else {
             conn_look = 0;
+          }
+        }
+        /* "pconnect":["*LOCAL","UID","PWD","id"]
+         * x
+         */
+        if (pconn_look) {
+          f = strstr(g,pconn_key);
+          if (f) {
+            f[0] = ' ';
+            key[i] = SQL400_KEY_PCONN;
+            f += pconn_len;
+            f = custom_json_parse_value(f,i,val,arr);
+            break;
+          } else {
+            pconn_look = 0;
           }
         }
         /* "query":"select * ..."

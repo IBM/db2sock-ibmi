@@ -174,6 +174,7 @@ SQLRETURN SQL400ConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, S
 SQLRETURN SQL400pConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 SQLRETURN SQL400Close( SQLHDBC  hdbc );
 SQLRETURN SQL400pClose( SQLHDBC  hdbc );
+SQLRETURN SQL400CloseAllStmts( SQLHDBC  hdbc );
 SQLRETURN SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );
@@ -452,6 +453,7 @@ typedef struct SQL400ConnectUtf16Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; S
 typedef struct SQL400pConnectUtf16Struct { SQLRETURN sqlrc; SQLINTEGER  accsid; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLCHAR * qual; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400pConnectUtf16Struct;
 typedef struct SQL400CloseStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; void * callback; } SQL400CloseStruct;
 typedef struct SQL400pCloseStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; void * callback; } SQL400pCloseStruct;
+typedef struct SQL400CloseAllStmtsStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; void * callback; } SQL400CloseAllStmtsStruct;
 typedef struct SQL400CmdStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * cmd; void * callback; } SQL400CmdStruct;
 typedef struct SQL400ChgLiblStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * libl; void * callback; } SQL400ChgLiblStruct;
 typedef struct SQL400ChgCurLibStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * curlib; void * callback; } SQL400ChgCurLibStruct;
@@ -725,6 +727,8 @@ SQL400pConnectUtf16Struct * SQL400pConnectUtf16Join (pthread_t tid, SQLINTEGER f
 SQL400CloseStruct * SQL400CloseJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400pCloseCallback(SQL400pCloseStruct* ); */
 SQL400pCloseStruct * SQL400pCloseJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400CloseAllStmtsCallback(SQL400CloseAllStmtsStruct* ); */
+SQL400CloseAllStmtsStruct * SQL400CloseAllStmtsJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400CmdCallback(SQL400CmdStruct* ); */
 SQL400CmdStruct * SQL400CmdJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400ChgLiblCallback(SQL400ChgLiblStruct* ); */
@@ -881,6 +885,7 @@ pthread_t SQL400ConnectUtf16Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * 
 pthread_t SQL400pConnectUtf16Async ( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
 pthread_t SQL400CloseAsync ( SQLHDBC  hdbc, void * callback );
 pthread_t SQL400pCloseAsync ( SQLHDBC  hdbc, void * callback );
+pthread_t SQL400CloseAllStmtsAsync ( SQLHDBC  hdbc, void * callback );
 pthread_t SQL400CmdAsync ( SQLHDBC  hdbc, SQLCHAR * cmd, void * callback );
 pthread_t SQL400ChgLiblAsync ( SQLHDBC  hdbc, SQLCHAR * libl, void * callback );
 pthread_t SQL400ChgCurLibAsync ( SQLHDBC  hdbc, SQLCHAR * curlib, void * callback );
@@ -1290,6 +1295,7 @@ void dump_SQL400ConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db,
 void dump_SQL400pConnectUtf16(SQLRETURN sqlrc,  SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 void dump_SQL400Close(SQLRETURN sqlrc,  SQLHDBC  hdbc );
 void dump_SQL400pClose(SQLRETURN sqlrc,  SQLHDBC  hdbc );
+void dump_SQL400CloseAllStmts(SQLRETURN sqlrc,  SQLHDBC  hdbc );
 void dump_SQL400Cmd(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * cmd );
 void dump_SQL400ChgLibl(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * libl );
 void dump_SQL400ChgCurLib(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * curlib );
@@ -1320,6 +1326,7 @@ SQLRETURN custom_SQL400ConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR *
 SQLRETURN custom_SQL400pConnectUtf16( SQLINTEGER  accsid, SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 SQLRETURN custom_SQL400Close( SQLHDBC  hdbc );
 SQLRETURN custom_SQL400pClose( SQLHDBC  hdbc );
+SQLRETURN custom_SQL400CloseAllStmts( SQLHDBC  hdbc );
 SQLRETURN custom_SQL400Cmd( SQLHDBC  hdbc, SQLCHAR * cmd );
 SQLRETURN custom_SQL400ChgLibl( SQLHDBC  hdbc, SQLCHAR * libl );
 SQLRETURN custom_SQL400ChgCurLib( SQLHDBC  hdbc, SQLCHAR * curlib );

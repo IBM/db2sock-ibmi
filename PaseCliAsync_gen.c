@@ -2890,9 +2890,7 @@ SQLRETURN SQLFreeConnect( SQLHDBC  hdbc )
     sqlrc = libdb400_SQLFreeConnect( hdbc );
     break;
   }
-  if (sqlrc == SQL_SUCCESS) {
-    init_table_dtor(hdbc);
-  }
+  init_table_dtor(hdbc);
   init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeConnect(sqlrc,  hdbc );
@@ -2933,9 +2931,7 @@ SQLRETURN SQLFreeStmt( SQLHSTMT  hstmt, SQLSMALLINT  fOption )
     sqlrc = libdb400_SQLFreeStmt( hstmt, fOption );
     break;
   }
-  if (sqlrc == SQL_SUCCESS) {
-    init_table_dtor(hstmt);
-  }
+  init_table_dtor(hstmt);
   init_unlock();
   if (init_cli_trace()) {
     dump_SQLFreeStmt(sqlrc,  hstmt, fOption );
@@ -2971,9 +2967,7 @@ SQLRETURN SQLFreeHandle( SQLSMALLINT  htype, SQLINTEGER  hndl )
   case SQL_HANDLE_ENV:
     break;
   default:
-    if (sqlrc == SQL_SUCCESS) {
-      init_table_dtor(hndl);
-    }
+    init_table_dtor(hndl);
     break;
   }
   init_unlock();
@@ -9201,6 +9195,59 @@ SQL400pCloseStruct * SQL400pCloseJoin (pthread_t tid, SQLINTEGER flag)
     pthread_join(tid,(void**)&myptr);
   } else {
     return (SQL400pCloseStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400CloseAllStmts( SQLHDBC  hdbc )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hdbc, 0);
+  sqlrc = custom_SQL400CloseAllStmts( hdbc );
+  if (init_cli_trace()) {
+    dump_SQL400CloseAllStmts(sqlrc,  hdbc );
+  }
+  init_table_unlock(hdbc, 0);
+  return sqlrc;
+}
+void * SQL400CloseAllStmtsThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400CloseAllStmtsStruct * myptr = (SQL400CloseAllStmtsStruct *) ptr;
+  init_table_lock(myptr->hdbc, 0);
+  myptr->sqlrc = custom_SQL400CloseAllStmts( myptr->hdbc );
+  if (init_cli_trace()) {
+    dump_SQL400CloseAllStmts(myptr->sqlrc,  myptr->hdbc );
+  }
+  init_table_unlock(myptr->hdbc, 0);
+  /* void SQL400CloseAllStmtsCallback(SQL400CloseAllStmtsStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400CloseAllStmtsStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400CloseAllStmtsAsync ( SQLHDBC  hdbc, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400CloseAllStmtsStruct * myptr = (SQL400CloseAllStmtsStruct *) malloc(sizeof(SQL400CloseAllStmtsStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hdbc = hdbc;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400CloseAllStmtsThread, (void *)myptr);
+  return tid;
+}
+SQL400CloseAllStmtsStruct * SQL400CloseAllStmtsJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400CloseAllStmtsStruct * myptr = (SQL400CloseAllStmtsStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hdbc, 0);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400CloseAllStmtsStruct *) NULL;
   }
   return myptr;
 }

@@ -71,18 +71,29 @@ int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
 
 /* hdbc/hstmt scope locking */
-void init_table_ctor(int hstmt, int hdbc);
-void init_table_dtor(int hstmt);
-void init_table_lock(int hstmt,int flag);
-void init_table_unlock(int hstmt,int flag);
-int init_table_in_progress(int hstmt,int flag);
+void init_table_ctor(int handle, int hdbc);
+void init_table_dtor(int handle);
+void init_table_lock(int handle,int flag);
+void init_table_unlock(int handle,int flag);
+int init_table_in_progress(int handle,int flag);
+/*
+ * find any hstmt associated with this hdbc
+ * (connection lock assumed client)
+ */
+int init_table_find_stmt(int hdbc);
+/*
+ * find hdbc associated with this hstmt
+ * (connection lock assumed client)
+ */
+int init_table_stmt_2_conn(int hstmt);
+
 
 /* persistent connection */
-void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag);
+void init_table_add_hash(int handle, char * db, char * uid, char * pwd, char * qual, int flag);
 int init_table_hash_2_conn(char * db, char * uid, char * pwd, char * qual);
-void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag);
+void init_table_add_hash_W(int handle, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag);
 int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual);
-int init_table_hash_active(int hstmt, int flag);
+int init_table_hash_active(int handle, int flag);
 
 /* utilities */
 int custom_strlen_utf16(unsigned int * src);

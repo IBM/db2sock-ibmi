@@ -271,31 +271,65 @@ char ** init_cli_dbx() {
  * Remember to unlock same number times locked to avoid hangs.
  * (see init_table_lock to understand hstmt to hdbc map locks)
  */
-void init_table_ctor(int hstmt, int hdbc) {
+void init_table_ctor(int handle, int hdbc) {
   // init_lock(); - lock in Alloc routine
-  if (!IBMiTable[hstmt].hstmt) {
-    pthread_mutexattr_init(&IBMiTable[hstmt].threadMutexAttr);
-    pthread_mutexattr_settype(&IBMiTable[hstmt].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
-    pthread_mutex_init(&IBMiTable[hstmt].threadMutexLock, &IBMiTable[hstmt].threadMutexAttr);
-    IBMiTable[hstmt].in_progress = 0;
+  if (!IBMiTable[handle].hstmt) {
+    pthread_mutexattr_init(&IBMiTable[handle].threadMutexAttr);
+    pthread_mutexattr_settype(&IBMiTable[handle].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&IBMiTable[handle].threadMutexLock, &IBMiTable[handle].threadMutexAttr);
+    IBMiTable[handle].in_progress = 0;
   }
-  IBMiTable[hstmt].hstmt = hstmt;
-  IBMiTable[hstmt].hdbc = hdbc;
-  IBMiTable[hstmt].hKey = NULL;
+  IBMiTable[handle].hstmt = handle;
+  IBMiTable[handle].hdbc = hdbc;
+  IBMiTable[handle].hKey = NULL;
   // init_unlock(); - lock in Alloc routine
 }
 /* DB2 free not thread safe
  */
-void init_table_dtor(int hstmt) {
+void init_table_dtor(int handle) {
+  int i = 0;
   // init_lock(); - lock in Free routine
-  if (IBMiTable[hstmt].hKey) {
-    free(IBMiTable[hstmt].hKey);
+  if (IBMiTable[handle].hKey) {
+    free(IBMiTable[handle].hKey);
   }
-  IBMiTable[hstmt].hKey = (char *) NULL;
+  IBMiTable[handle].hKey = (char *) NULL;
+  IBMiTable[handle].hstmt = 0;
+  // connection
+  if (IBMiTable[handle].hdbc == 0) {
+    // clear statements this hdbc (re-use)
+    for (i=0;i<PASECLIMAXRESOURCE;i++) {
+      if (IBMiTable[i].hdbc == handle) {
+        init_table_dtor(IBMiTable[i].hstmt);
+      }
+    }
+  } else {
+    IBMiTable[handle].hdbc = 0;
+  }
   // init_unlock(); - lock in Free routine
 }
-void * init_table_addr(int hstmt) {
-  return (void *) &IBMiTable[hstmt];
+void * init_table_addr(int handle) {
+  return (void *) &IBMiTable[handle];
+}
+/*
+ * find any hstmt associated with this hdbc
+ * (connection lock assumed client)
+ */
+int init_table_find_stmt(int hdbc) {
+  int i = 0;
+  // any statements this hdbc
+  for (i=0;i<PASECLIMAXRESOURCE;i++) {
+    if (IBMiTable[i].hdbc == hdbc && IBMiTable[i].hstmt > 0) {
+      return IBMiTable[i].hstmt;
+    }
+  }
+  return 0;
+}
+/*
+ * find hdbc associated with this hstmt
+ * (connection lock assumed client)
+ */
+int init_table_stmt_2_conn(int hstmt) {
+  return IBMiTable[hstmt].hdbc;
 }
 /* hdbc and/or hstmt scope locks
  * flag = 0 -- lock hdbc (or hstmt, if we ever dare)
@@ -315,25 +349,25 @@ void * init_table_addr(int hstmt) {
  * requesting on a single connection at the same time. 
  * However, flag=0, at hstmt level is possible with lock (gulp).
  */
-void init_table_lock(int hstmt, int flag) {
+void init_table_lock(int handle, int flag) {
   if (flag) {
-    pthread_mutex_lock(&IBMiTable[IBMiTable[hstmt].hdbc].threadMutexLock);
-    IBMiTable[IBMiTable[hstmt].hdbc].in_progress += 1;
+    pthread_mutex_lock(&IBMiTable[IBMiTable[handle].hdbc].threadMutexLock);
+    IBMiTable[IBMiTable[handle].hdbc].in_progress += 1;
   } else {
-    pthread_mutex_lock(&IBMiTable[hstmt].threadMutexLock);
-    IBMiTable[hstmt].in_progress += 1;
+    pthread_mutex_lock(&IBMiTable[handle].threadMutexLock);
+    IBMiTable[handle].in_progress += 1;
   }
 }
-void init_table_unlock(int hstmt,int flag) {
+void init_table_unlock(int handle,int flag) {
   if (flag) {
-    pthread_mutex_unlock(&IBMiTable[IBMiTable[hstmt].hdbc].threadMutexLock);
-    if (IBMiTable[hstmt].in_progress > 0) {
-      IBMiTable[IBMiTable[hstmt].hdbc].in_progress -= 1;
+    pthread_mutex_unlock(&IBMiTable[IBMiTable[handle].hdbc].threadMutexLock);
+    if (IBMiTable[handle].in_progress > 0) {
+      IBMiTable[IBMiTable[handle].hdbc].in_progress -= 1;
     }
   } else {
-    pthread_mutex_unlock(&IBMiTable[hstmt].threadMutexLock);
-    if (IBMiTable[hstmt].in_progress > 0) {
-      IBMiTable[hstmt].in_progress -= 1;
+    pthread_mutex_unlock(&IBMiTable[handle].threadMutexLock);
+    if (IBMiTable[handle].in_progress > 0) {
+      IBMiTable[handle].in_progress -= 1;
     }
   }
 }
@@ -343,26 +377,19 @@ void init_table_unlock(int hstmt,int flag) {
  * This is dicey, but false yes/no is
  * likely ok, when used as 'join'.
  */
-int init_table_in_progress(int hstmt,int flag) {
+int init_table_in_progress(int handle,int flag) {
   if (flag) {
-    if (IBMiTable[IBMiTable[hstmt].hdbc].in_progress > 0) {
+    if (IBMiTable[IBMiTable[handle].hdbc].in_progress > 0) {
       return 1;
     }
   } else {
-    if (IBMiTable[hstmt].in_progress > 0) {
+    if (IBMiTable[handle].in_progress > 0) {
       return 1;
     }
   }
   return 0;
 }
-/* No lock.
- * Used free resources.
- * This is dicey, but false yes/no is
- * likely ok, when used as 'free'.
- */
-int init_table_stmt_2_conn(int hstmt) {
-  return IBMiTable[hstmt].hdbc;
-}
+
 
 /*
  * persistent connection
@@ -416,7 +443,7 @@ char * init_hkey_both( char * db, char * uid, char * pwd, char * qual, short isw
   return hKey;
 }
 
-void init_table_add_hash_both(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag, short iswide) {
+void init_table_add_hash_both(int handle, char * db, char * uid, char * pwd, char * qual, int flag, short iswide) {
   char * hKey = (char *) NULL;
   switch (iswide) {
   case 1:
@@ -428,17 +455,17 @@ void init_table_add_hash_both(int hstmt, char * db, char * uid, char * pwd, char
   }
   init_lock();
   if (flag) {
-    IBMiTable[IBMiTable[hstmt].hdbc].hKey = hKey;
+    IBMiTable[IBMiTable[handle].hdbc].hKey = hKey;
   } else {
-    IBMiTable[hstmt].hKey = hKey;
+    IBMiTable[handle].hKey = hKey;
   }
   init_unlock();
 }
-void init_table_add_hash(int hstmt, char * db, char * uid, char * pwd, char * qual, int flag) {
-  init_table_add_hash_both(hstmt, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 0);
+void init_table_add_hash(int handle, char * db, char * uid, char * pwd, char * qual, int flag) {
+  init_table_add_hash_both(handle, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 0);
 }
-void init_table_add_hash_W(int hstmt, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag) {
-  init_table_add_hash_both(hstmt, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 1);
+void init_table_add_hash_W(int handle, unsigned int * db, unsigned int * uid, unsigned int * pwd, unsigned int * qual, int flag) {
+  init_table_add_hash_both(handle, (char *)db, (char *)uid, (char *)pwd, (char *)qual, flag, 1);
 }
 
 int init_table_hash_2_conn_both(char * db, char * uid, char * pwd, char * qual, short iswide) {
@@ -484,18 +511,18 @@ int init_table_hash_2_conn_W(unsigned int * db, unsigned int * uid, unsigned int
   return init_table_hash_2_conn_both( (char *) db, (char *) uid, (char *) pwd, (char *) qual, 1 );
 }
 
-int init_table_hash_active(int hstmt, int flag) {
+int init_table_hash_active(int handle, int flag) {
   int active = 0;
   init_lock();
-  if (IBMiTable[hstmt].hKey) {
+  if (IBMiTable[handle].hKey) {
     active = 1;
   }
   if (flag) {
-    if (IBMiTable[IBMiTable[hstmt].hdbc].hKey){
+    if (IBMiTable[IBMiTable[handle].hdbc].hKey){
       active = 1;
     }
   } else {
-    if (IBMiTable[hstmt].hKey){
+    if (IBMiTable[handle].hKey){
       active = 1;
     }
   }

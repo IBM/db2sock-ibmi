@@ -3181,6 +3181,23 @@ void dump_SQL400pClose(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
     }
   }
 }
+void dump_SQL400CloseAllStmts(SQLRETURN sqlrc,  SQLHDBC  hdbc ) {
+  if (dev_go(sqlrc,"sql400closeallstmts")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400CloseAllStmts");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
 void dump_SQL400Cmd(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * cmd ) {
   if (dev_go(sqlrc,"sql400cmd")) {
     char mykey[256];

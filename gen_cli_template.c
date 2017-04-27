@@ -886,6 +886,8 @@ SQLRETURN SQL400Close(SQLHDBC hdbc)
 
 SQLRETURN SQL400pClose(SQLHDBC hdbc)
 
+SQLRETURN SQL400CloseAllStmts(SQLHDBC hdbc)
+
 # custom utilitites 
 
 SQLRETURN SQL400Cmd(SQLHDBC hdbc,
