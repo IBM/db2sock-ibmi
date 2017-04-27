@@ -234,13 +234,11 @@ thanks very much).
 A good thing! This will work fine without performance impact, because only APIs 'used' will be 'resolved' on first touch API. 
 To wit, consider 98% of PASE applications are running as demons (php, node, ruby, etc.), and, use task repeatable CLI APIs 
 (aka, connect, prepare/execute or query, fetch, related APIs), wherein, technically, repeatable tasks will 
-'dynamic resolve' to ILE/PASE API 'first touch API' and re-use forever subsequent calls to API (once and done). 
-Metaphorically (conspiracy buffs), 'dynamic resolve' relative time first touch is a millisecond 
-sneeze in a cosmic PASE language daemon job life of millions of milliseconds (not significantly measurable).   
+'dynamic resolve' to ILE/PASE API 'first touch API' and re-use forever subsequent calls to API (once and done).  
 
 **Open Source libdb400.a driver** does not mean poor quality. In fact, experts (me) are working on the new driver. 
 This project is open because we want complete transparency on how your PASE new scripting language DB2 driver works. 
-No more mystery, just look at the source (and help). When available for production (notice removed top project), 
+No more mystery, look at the source (and help). When available for production (notice removed top project), 
 we will try to be very careful not to damage anything currently running. However, new people can have new ideas, 
 so the new exotic 'non-architecture' APIs like 'Async' or 'SQL400' may change over time. 
 Also, any new driver may introduce some behavior issues. If you have a recommendation, problem, so on, 
