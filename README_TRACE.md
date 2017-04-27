@@ -2,7 +2,7 @@
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
-#------ DRIVER CLI TRACE -------
+#DRIVER CLI TRACE
 The driver will trace CLI calls with env var TRACE (latest only).
 TRACE supports a very high speed stack walk of function calls.
 Recommend service and support people use TRACE for any new PASE language DB2 issue (much easier).
@@ -86,7 +86,4 @@ main(argc = 1, argv = 0x2ff22d1c), line 34 in "test0001_theory_db2_error.c"
 (dbx) 
 
 ```
-
-#------ DRIVER BUILDER SECTION -------
-Build information has been moved to README_BUILD.md
 

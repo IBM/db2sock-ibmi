@@ -166,17 +166,6 @@ Ok, no promise, but, you get the idea. A basic design change is needed to PASE l
 We would like to do this publicly so ALL may clearly understand libdb400.a technology, and, possibly contribute.
 Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
-#Contributors
-- Tony Cairns, IBM
-- Aaron Bartell, Krengel Technology, Inc.
-- You can help test new libdb400.a driver to make sure there are no surprises (volunteers welcome).
-
-#Follow Along
-We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
-
-#License
-MIT
-
 #Service (export TRACE=on/off)
 Driver service trace information [Source -> README_TRACE.md](https://bitbucket.org/litmis/db2sock/src)
 
@@ -188,4 +177,16 @@ Clarification to avoid conspiracy theory [Source -> README_NOTES.md](https://bit
 
 #ChangeLog
 See progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
+
+#Contributors
+- Tony Cairns, IBM
+- Aaron Bartell, Krengel Technology, Inc.
+- You can help test new libdb400.a driver to make sure there are no surprises (volunteers welcome).
+
+#Follow Along
+We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
+
+#License
+MIT
+
 

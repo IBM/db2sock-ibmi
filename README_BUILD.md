@@ -2,7 +2,7 @@
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
-#------ DRIVER BUILDER SECTION -------
+#DRIVER BUILDER SECTION
 For driver builders of scripting extensions (php ibm_db2, ruby ibm_db, etc.).
 The idea with this 'super driver' is many tasks repeated over and over in each
 language driver could be moved into the lowest CLI driver (libdb400.a).

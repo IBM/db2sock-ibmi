@@ -3,7 +3,7 @@ This project is under construction. APIs are changing daily, therefore, you shou
 When this warning disappears, APIs will be considered stable.
 
 
-###Notes
+#Notes
 Clarification to avoid conspiracy theory.
 
 To be clear, **new libdb400.a synchronous driver CLI APIs are the same (today APIs).**
