@@ -176,7 +176,6 @@ Current technical theory is all UTF-8/16 DB2 CLI APIs should work without old PA
 In unlikely event UTF-8/16 fast path proves untrue (not work), 
 some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
 * All asynchronous APIs with suffix 'Async/Thread' are new. Also, all aggregate APIs with prefix 'SQL400' are new (mutiple call task APIs).  
-* You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
 * **Current node.js issues are old driver.** The current async DB2 interfaces for Node.js on 
 IBM i do NOT use this new driver. Specifically, any current issues or performance problems with 
 node db2a having NOTHING to do with this new project (see future). 
@@ -188,6 +187,7 @@ is APIs for any language (see sample following).
 #Contributors
 - Tony Cairns, IBM
 - Aaron Bartell, Krengel Technology, Inc.
+- You can help test new libdb400.a driver to make sure there are no surprises (volunteers welcome).
 
 #Follow Along
 We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
