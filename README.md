@@ -190,7 +190,7 @@ See progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php
 
 
 ###Notes
-Clarification to avoid conspiracy.
+Clarification to avoid conspiracy theory.
 
 To be clear, **new libdb400.a synchronous driver CLI APIs are the same (today APIs).**
 That is, new libdb400.a under most PASE languages will run exactly same code path. In fact, at present new libdb400.a 
@@ -228,7 +228,15 @@ However, as normal, any given client may have many QSQSRVR jobs executing at the
 connection mutex is required to avoid language driver builders going crazy adding ton of exception code 
 (aka, language driver builders going crazy means ... run this API, then this API, but not this API, 
 or that API, bingo, threaded DB2 API works. Whew, no thanks! Easy new libdb400.a uses a simple mutex at connection, 
-thanks very much). 
+thanks very much).
+
+**On demand dynamic symbol resolution** is used for both up calls to ILE DB2 and old calls to PASE libdb400.a. 
+A good thing! This will work fine without performance impact, because only APIs 'used' will be 'resolved' on first touch API. 
+To wit, consider 98% of PASE applications are running as demons (php, node, ruby, etc.), and, use task repeatable CLI APIs 
+(aka, connect, prepare/execute or query, fetch, related APIs), wherein, technically, repeatable tasks will 
+'dynamic resolve' to ILE/PASE API 'fist touch API' and re-use forever subsequent calls API. Metaphorically (conspiracy buffs),  
+'dynamic resolve' relative time first touch is a millisecond sneeze in a cosmic PASE language daemon job life of 
+millions of milliseconds (not significantly measurable).   
 
 **Open Source libdb400.a driver** does not mean poor quality. In fact, experts (me) are working on the new driver. 
 This project is open because we want complete transparency on how your PASE new scripting language DB2 driver works. 
