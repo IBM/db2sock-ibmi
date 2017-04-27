@@ -70,6 +70,8 @@ both libdb400.a drivers on machine (my machine)
 == no change (PASE original) ===
 /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
 
+Note: PASE PTFs may revert back to original old driver (re-do).
+
 ===
 problems (change back to original)?
 ===
