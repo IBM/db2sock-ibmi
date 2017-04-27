@@ -29,9 +29,10 @@ alternate short path directly call ILE API database (no PASE iconv).
 Current technical theory is all UTF-8/16 DB2 CLI APIs should work without old PASE libdb400.a iconv 'assistance'.
 In unlikely event UTF-8/16 fast path proves untrue (not work), 
 some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
-You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
 
 All asynchronous APIs with suffix 'Async/Thread' are new. Also, all aggregate APIs with prefix 'SQL400' are new (mutiple call task APIs).  
+
+You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
 
 ###NOTE
 Current node.js issues are old driver. The current async DB2 interfaces for Node.js on 
@@ -50,6 +51,10 @@ db2sock/tests         - PASE tests for libdb400.a
 db2sock/db2json       - RPG CGI json interface to libdb400.a
 db2sock/db2json/tests - tests for RPG CGI json interface
 ```
+
+#pre-compiled test vesion new libdb400.a
+* [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver)
+* (see Run topic for configuration)
 
 #design goals (the list)
 - No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
