@@ -221,14 +221,15 @@ The basic calls through CLI are trivial (as intended), therefore very well suite
 Due simple CLI interfaces we can add extended calls like 'Async' with high level of confidence in quality. 
 Basically, have a thought, day later have a new API.
 
-Experts. **The driver has mutex locking at the connection level for most CLI APIs.** 
-This means only one operation will be running against a given QSQSRVR job at a time. 
-However, as normal, any given client may have many QSQSRVR jobs executing at the same relative time using different connection 
-(same profile, many profiles). Ignoring politics, DB2 is not completely thread safe, therefore libdb400.a 
-connection mutex is required to avoid language driver builders going crazy adding ton of exception code 
-(aka, language driver builders going crazy means ... run this API, then this API, but not this API, 
-or that API, bingo, threaded DB2 API works. Whew, no thanks! Easy new libdb400.a uses a simple mutex at connection, 
-thanks very much).
+**The driver has thread mutex locking at the connection level for most CLI APIs.** 
+DB2 is not completely thread safe. Simply stated, client PASE language side, do not share DB2 resources 
+across threads (connections/statements). To this end, new libdb400.a driver uses a connection/thread-mutex. 
+This means only one operation/statement will be running against a given QSQSRVR job at a time. Also, 
+any single connection will not be used across multiple threads at the same time 
+(mutex at connection level). However, any given client may have many threads each with a connection, 
+running many QSQSRVR jobs executing same relative time profile indifferent.
+(If you have difficulty understanding threads and mutexes, ignore, mutex will only confuse you. 
+New libdb400.a just works fast enough 'async'.).
 
 **On demand dynamic symbol resolution** is used for both up calls to ILE DB2 and old calls to PASE libdb400.a. 
 A good thing! This will work fine without performance impact, because only APIs 'used' will be 'resolved' on first touch API. 
