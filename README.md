@@ -156,13 +156,18 @@ both libdb400.a drivers on machine (my machine)
 /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
 
 ===
-problems (change back)?
+problems (change back to original)?
 ===
 > cd /QOpenSys/usr/lib
 > ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
-Vote: Assumes PASE as shipped.
+
+Note: 'Change back' (above), assumes symbolic /usr/lib PASE as shipped. Please verify.
 bash-4.3$ ls -l /usr/lib
 lrwxrwxrwx    1 qsys     0                34 Dec 22 2015  /usr/lib -> /QOpenSys/usr/lib
+bash-4.3$ ls -l /QOpenSys/usr/lib/libdb400.a
+lrwxrwxrwx    1 qsys     0                90 Dec 22 2015  /QOpenSys/usr/lib/libdb400.a -> ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a
+bash-4.3$ ls -l /usr/lib/libdb400.a
+lrwxrwxrwx    1 qsys     0                90 Dec 22 2015  /usr/lib/libdb400.a -> ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a
 ```
 
 This project gcc compiles are NOT using gcc runtime, aka,
