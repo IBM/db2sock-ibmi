@@ -158,7 +158,7 @@ both libdb400.a drivers on machine
 problems (change back)?
 ===
 > cd /QOpenSys/usr/lib
-> ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a
+> ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
 Vote: Assumes PASE as shipped.
 bash-4.3$ ls -l /usr/lib
 lrwxrwxrwx    1 qsys     0                34 Dec 22 2015  /usr/lib -> /QOpenSys/usr/lib
