@@ -63,7 +63,7 @@ db2sock/db2json/tests - tests for RPG CGI json interface
 - (**available**) Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs 
 - (**partial**) Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options 
 - (**partial**) Async APIs - high performing async CLI APIs for all new PASE languages, 'callback' (nodejs), and, poll/reap (php).
-- (**partial**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache). (**partial available**)
+- (**partial**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache).
 - (**none**) Socket APIs - enable socket based for ideas like 'private' connections
 - (**none**) Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
 
