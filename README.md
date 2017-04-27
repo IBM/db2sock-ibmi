@@ -228,6 +228,14 @@ However, as normal, any given client may have many QSQSRVR jobs executing at the
 connection mutex is required to avoid language driver builders going crazy adding ton of exception code 
 (aka, language driver builders going crazy means ... run this API, then this API, but not this API, 
 or that API, bingo, threaded DB2 API works. Whew, no thanks! Easy new libdb400.a uses a simple mutex at connection, 
-thanks very much).  
+thanks very much). 
+
+**Open Source libdb400.a driver** does not mean poor quality. In fact, experts (me) are working on the new driver. 
+This project is open because we want complete transparency on how your PASE new scripting language DB2 driver works. 
+No more mystery, just look at the source (and help). When available for production (notice removed top project), 
+we will try to be very careful not to damage anything currently running. However, new people can have new ideas, 
+so the new exotic 'non-architecture' APIs like 'Async' or 'SQL400' may change over time. 
+Also, any new driver may introduce some behavior issues. If you have a recommendation, problem, so on, 
+please feel free to use issues on git project (click 'Issues' left panel).
 
 
