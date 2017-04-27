@@ -127,12 +127,12 @@ Imagination run wild, db2 socket interface
 php, node, ruby, python mysql/maria client <-port 3306-> db2 libdb400 socket server
 ```
 
-## Disclaimer
+## Disclaimer future
 Ok, no promise, but, you get the idea. A basic design change is needed to PASE libdb400.a to enable a better future.
 We would like to do this publicly so ALL may clearly understand libdb400.a technology, and, possibly contribute.
 Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
-#Run
+#Run (w/LIBPATH)
 Place new libdb400.a in some directory (mytest). 
 Do not replace PASE libdb400.a (someday).
 ```
@@ -141,10 +141,12 @@ $ export LIBPATH=.:/mytest/lib:/usr/lib
 $ run-my-scripts-or-whatever
 ```
 
-Possible 'no LIBPATH' configuration (my machine and chroots).
+#Run (w/o LIBPATH)
+Possible 'no LIBPATH' configuration (my machine and chroots). 
+This enables every PASE language on the machine to start using the new driver.
 ```
 ===
-both libdb400.a drivers on machine
+both libdb400.a drivers on machine (my machine)
 ===
 > cp libdb400.a /QOpenSys/usr/lib/libdb400.a
 /QOpenSys/usr/lib/libdb400.a                          (new driver)
@@ -152,7 +154,6 @@ both libdb400.a drivers on machine
 /usr/lib/libdb400.a -> /QOpenSys/usr/lib/libdb400.a   (new driver symbolic link)
 == no change (PASE original) ===
 /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
-
 
 ===
 problems (change back)?
