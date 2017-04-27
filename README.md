@@ -234,7 +234,7 @@ thanks very much).
 A good thing! This will work fine without performance impact, because only APIs 'used' will be 'resolved' on first touch API. 
 To wit, consider 98% of PASE applications are running as demons (php, node, ruby, etc.), and, use task repeatable CLI APIs 
 (aka, connect, prepare/execute or query, fetch, related APIs), wherein, technically, repeatable tasks will 
-'dynamic resolve' to ILE/PASE API 'fist touch API' and re-use forever subsequent calls API. 
+'dynamic resolve' to ILE/PASE API 'first touch API' and re-use forever subsequent calls to API (once and done). 
 Metaphorically (conspiracy buffs), 'dynamic resolve' relative time first touch is a millisecond 
 sneeze in a cosmic PASE language daemon job life of millions of milliseconds (not significantly measurable).   
 
