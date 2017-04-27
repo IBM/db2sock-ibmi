@@ -57,17 +57,15 @@ db2sock/db2json/tests - tests for RPG CGI json interface
 * (see Run topic for configuration)
 
 #design goals (the list)
-- No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
-- Service driver - provide good PASE side TRACE capabilities for service
-- Traditional APIs - provide all current libdb400.a CLI APIs
-- Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs
-- Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options (factor common code all PASE lang drivers)
-- Async APIs - high performing async CLI APIs for all new PASE languages (including Aggregate API interfaces). 
-The async API interfaces should handle both 'callback' (nodejs), and, poll/reap (php).
-- JSON APIs - enable json only calls (JSON Aggregate API interface). 
-Allows REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache)
-- Socket APIs - enable socket based for ideas like 'private' connections (private db2 serving)
-- Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
+- (**available**) No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
+- (**available**) Service driver - provide good PASE side TRACE capabilities for service 
+- (**available**) Traditional APIs - provide all current libdb400.a CLI APIs 
+- (**available**) Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs 
+- (**partial**) Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options 
+- (**partial**) Async APIs - high performing async CLI APIs for all new PASE languages, 'callback' (nodejs), and, poll/reap (php).
+- (**partial**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache). (**partial available**)
+- (**none**) Socket APIs - enable socket based for ideas like 'private' connections
+- (**none**) Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
 
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
@@ -208,23 +206,7 @@ Driver service information moved to README_TRACE.md [see source](https://bitbuck
 Build information has been moved to README_BUILD.md [see source](https://bitbucket.org/litmis/db2sock/src)
 
 #ChangeLog
-Progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
-```
-libdb400-1.0.1-sg10.zip - experimental test version pre-compiled libdb400.a (2017–04–26)
-- added db2json - RPG CGI Apache configuration to libdb400.a with json in/out protocol 
-  (see db2json/tests example REST ‘Basic Auth’ IBM i Apache)
-- misc fixes for async (see db2sock/tests callback and join) 
-
-libdb400-1.0.1-sg9.zip - experimental test version pre-compiled libdb400.a (2017–04–21) 
-- removed many APIs SQL400 — rework in progress
-- removed json — rework in progress
-- added any CCSID (used under php ok)
-- added env var TRACE=on/off option 
-```
-Summary: 
-Appears two steps back, one step forward. True. 
-We need to redesign APIs to fit design goals (above).
-Much easier to arrive when we know where to go. 
+See progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
 
 
 
