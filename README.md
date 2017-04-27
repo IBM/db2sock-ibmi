@@ -17,14 +17,7 @@ You do NOT have to recompile your language extension, simply set PASE LIBPATH fo
 
 At this time, this additional libdb400.a driver is designed to augment current PASE
 libdb400.a. Therefore both must be on the machine. However, eventually
-this libdb400.a driver may replace PASE version entirely.
-
-Possible configuration (my machine and chroots).
-```
-/QOpenSys/usr/lib/libdb400.a                          (new driver)
-/usr/lib/libdb400.a -> /QOpenSys/usr/lib/libdb400.a   (new driver symbolic link)
-/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
-```
+this libdb400.a driver may replace PASE version entirely. Possible configuration new/old libdb400.a (see Run below).
 
 ###Fine print
 Clarification to avoid conspiracy. To be clear, new libdb400.a synchronous driver CLI APIs are the same (today APIs).
@@ -33,7 +26,7 @@ will run 'original APIs' by calling old driver (/QOpenSys/QIBM/ProdData/OS400/PA
 
 Current technical theory is all UTF-8/16 DB2 CLI APIs should work without old PASE libdb400.a iconv 'assistance'.
 Specifically 'new' changes to old driver, original UTF-8 (1208) and new UTF-16 (1200 - wide) APIs take 
-alternate short path directly call ILE API database (no PASE iconv).In unlikely event UTF-8/16 fast path proves untrue (not work), 
+alternate short path directly call ILE API database (no PASE iconv). In unlikely event UTF-8/16 fast path proves untrue (not work), 
 some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
 You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
 
@@ -141,11 +134,34 @@ Author two cents, when stable, start using this driver, you will grow function b
 
 #Run
 Place new libdb400.a in some directory (mytest). 
-Do not replace PASE /usr/lib/libdb400.a (someday).
+Do not replace PASE libdb400.a (someday).
 ```
 $ export PATH=/mytest:$PATH
 $ export LIBPATH=.:/mytest/lib:/usr/lib
 $ run-my-scripts-or-whatever
+```
+
+Possible 'no LIBPATH' configuration (my machine and chroots).
+```
+===
+both libdb400.a drivers on machine
+===
+> cp libdb400.a /QOpenSys/usr/lib/libdb400.a
+/QOpenSys/usr/lib/libdb400.a                          (new driver)
+> ln -sf /QOpenSys/usr/lib/libdb400.a /usr/lib/libdb400.a
+/usr/lib/libdb400.a -> /QOpenSys/usr/lib/libdb400.a   (new driver symbolic link)
+== no change (PASE original) ===
+/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
+
+
+===
+problems (change back)?
+===
+> cd /QOpenSys/usr/lib
+> ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a
+Vote: Assumes PASE as shipped.
+bash-4.3$ ls -l /usr/lib
+lrwxrwxrwx    1 qsys     0                34 Dec 22 2015  /usr/lib -> /QOpenSys/usr/lib
 ```
 
 This project gcc compiles are NOT using gcc runtime, aka,
