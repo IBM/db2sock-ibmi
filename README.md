@@ -8,16 +8,14 @@ Welcome to db2sock project. Goal is PASE DB2 CLI asynchronous API driver and mor
 
 A vast number of features have been added to new libdb400.a, async CLI, ILE direct CLI APIs, 
 Unicode CLI "Unix" API (UTF-8), Unicode CLI "wide" APIs (UTF-16), and more.
-These additions should make language extension writing easier.
-CCSID topic describes new libdb400.a mode settings via SQLOverrideCCSID400(ccsid).
+These additions should make DB2 language extension writing easier.
 
 Run time, libdb400.a should fit seamless under any existing scripting language db2 extension. 
-That is to say, exports everything old PASE libdb400.a, while providing advanced functions.
-You do NOT have to recompile your language extension, simply set PASE LIBPATH for new libdb400.a.
-
-At this time, this additional libdb400.a driver is designed to augment current PASE
-libdb400.a. Therefore both must be on the machine. However, eventually
-this libdb400.a driver may replace PASE version entirely. Possible configuration new/old libdb400.a (see Run below).
+That is to say, new libdb400.a exports everything old PASE libdb400.a, same synchronous CLI APIs,
+but providing new advanced functions (above). At this time, new libdb400.a driver is designed to 
+augment current PASE libdb400.a, therefore both must be on the machine. However, eventually new 
+libdb400.a driver may replace PASE version entirely.  You do NOT have to recompile your language extension, 
+simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb400.a (see Run below)
 
 
 #Source
