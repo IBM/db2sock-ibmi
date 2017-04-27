@@ -166,7 +166,7 @@ Ok, no promise, but, you get the idea. A basic design change is needed to PASE l
 We would like to do this publicly so ALL may clearly understand libdb400.a technology, and, possibly contribute.
 Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
-###Fine print
+###Notes
 * Clarification to avoid conspiracy. To be clear, new libdb400.a synchronous driver CLI APIs are the same (today APIs).
 That is, new libdb400.a under most PASE languages will run exactly same code path. In fact, at present new libdb400.a 
 will run 'original APIs' by calling old driver (/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a).
@@ -177,9 +177,7 @@ In unlikely event UTF-8/16 fast path proves untrue (not work),
 some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
 * All asynchronous APIs with suffix 'Async/Thread' are new. Also, all aggregate APIs with prefix 'SQL400' are new (mutiple call task APIs).  
 * You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
-
-###Note
-* Current node.js issues are old driver. The current async DB2 interfaces for Node.js on 
+* **Current node.js issues are old driver.** The current async DB2 interfaces for Node.js on 
 IBM i do NOT use this new driver. Specifically, any current issues or performance problems with 
 node db2a having NOTHING to do with this new project (see future). 
 * To be clear, 'async' APIs are NOT just for Node.js, but can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
