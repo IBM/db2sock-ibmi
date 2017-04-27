@@ -19,11 +19,34 @@ At this time, this additional libdb400.a driver is designed to augment current P
 libdb400.a. Therefore both must be on the machine. However, eventually
 this libdb400.a driver may replace PASE version entirely.
 
-NOTE: The current async DB2 interfaces for Node.js on IBM i do NOT use this driver, so current issues or
-performance with node db2a having NOTHING to do with this new project (see future). We should be clear,
-'async' APIs are NOT just for Node.js, but can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
+Possible configuration (my machine and chroots).
+```
+/QOpenSys/usr/lib/libdb400.a                          (new driver)
+/usr/lib/libdb400.a -> /QOpenSys/usr/lib/libdb400.a   (new driver symbolic link)
+/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a     (orignal PASE driver - do not alter)
+```
+
+###Fine print
+Clarification to avoid conspiracy. To be clear, new libdb400.a synchronous driver CLI APIs are the same (today APIs).
+That is, new libdb400.a under most PASE languages will run exactly same code path. In fact, at present new libdb400.a 
+will run 'original APIs'by calling old driver (/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a).
+Current technical theory is all UTF-8/16 DB2 CLI APIs should work without PASE iconv 'assistance'.
+
+Specifically 'new' changes to old driver, original UTF-8 (1208) and new UTF-16 (1200 - wide) APIs take 
+alternate short path directly to call ILE API database.In unlikely event UTF-8/16 fast path proves untrue (not work), 
+some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
+You can help test new libdb400.a driver going along to make sure there are no surprises (volunteers welcome).
+
+All asynchronous APIs with suffix 'Async/Thread' are new. Also, all aggregate APIs with prefix 'SQL400' are new (mutiple call task APIs).  
+
+###NOTE
+Current node.js issues are old driver. The current async DB2 interfaces for Node.js on 
+IBM i do NOT use this new driver. Specifically, any current issues or performance problems with 
+node db2a having NOTHING to do with this new project (see future). 
+
+To be clear, 'async' APIs are NOT just for Node.js, but can instead be applied to all PASE langs (PHP, Ruby, Python, etc).
 Some languages will use the 'async' pool (reap), others use async 'callback' (nodejs). The goal
-is APIs for any language.
+is APIs for any language (see sample following).
 
 #Source
 Source links have topical README.md.
