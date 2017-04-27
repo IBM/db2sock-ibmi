@@ -263,7 +263,7 @@ char ** init_cli_dbx() {
 
 
 /* caller hold resource level lock
- * init_table_ctor(hdbc,0)     -- opening a hdbc (connection)
+ * init_table_ctor(hdbc,hdbc)     -- opening a hdbc (connection)
  * init_table_ctor(hstmt,hdbc) -- map a stmt to a hdbc (connection)
  * These lock are resource level 'lock multiple', any thread.
  * That is, PTHREAD_MUTEX_RECURSIVE, therefore, same thread, 
@@ -287,24 +287,21 @@ void init_table_ctor(int handle, int hdbc) {
 /* DB2 free not thread safe
  */
 void init_table_dtor(int handle) {
-  int i = 0;
+  int hstmt = 0;
   // init_lock(); - lock in Free routine
   if (IBMiTable[handle].hKey) {
     free(IBMiTable[handle].hKey);
   }
   IBMiTable[handle].hKey = (char *) NULL;
-  IBMiTable[handle].hstmt = 0;
   // connection
-  if (IBMiTable[handle].hdbc == 0) {
+  if (IBMiTable[handle].hdbc == IBMiTable[handle].hstmt) {
     // clear statements this hdbc (re-use)
-    for (i=0;i<PASECLIMAXRESOURCE;i++) {
-      if (IBMiTable[i].hdbc == handle) {
-        init_table_dtor(IBMiTable[i].hstmt);
-      }
+    while (hstmt = init_table_find_stmt(IBMiTable[handle].hdbc)) {
+      init_table_dtor(hstmt);
     }
-  } else {
-    IBMiTable[handle].hdbc = 0;
   }
+  IBMiTable[handle].hdbc = 0;
+  IBMiTable[handle].hstmt = 0;
   // init_unlock(); - lock in Free routine
 }
 void * init_table_addr(int handle) {
@@ -318,7 +315,10 @@ int init_table_find_stmt(int hdbc) {
   int i = 0;
   // any statements this hdbc
   for (i=0;i<PASECLIMAXRESOURCE;i++) {
-    if (IBMiTable[i].hdbc == hdbc && IBMiTable[i].hstmt > 0) {
+    if (IBMiTable[i].hstmt > 0
+    && IBMiTable[i].hdbc != IBMiTable[i].hstmt
+    && IBMiTable[i].hdbc == hdbc) 
+    {
       return IBMiTable[i].hstmt;
     }
   }
