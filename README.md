@@ -203,7 +203,8 @@ Build information has been moved to README_BUILD.md [see source](https://bitbuck
 Progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
 ```
 libdb400-1.0.1-sg10.zip - experimental test version pre-compiled libdb400.a (2017–04–26)
-- added db2json - RPG CGI Apache configuration to libdb400.a with json in/out protocol (see db2json/tests example REST ‘Basic Auth’ IBM i Apache)
+- added db2json - RPG CGI Apache configuration to libdb400.a with json in/out protocol 
+  (see db2json/tests example REST ‘Basic Auth’ IBM i Apache)
 - misc fixes for async (see db2sock/tests callback and join) 
 
 libdb400-1.0.1-sg9.zip - experimental test version pre-compiled libdb400.a (2017–04–21) 
