@@ -226,8 +226,8 @@ This means only one operation will be running against a given QSQSRVR job at a t
 However, as normal, any given client may have many QSQSRVR jobs executing at the same relative time using different connection 
 (same profile, many profiles). Ignoring politics, DB2 is not completely thread safe, therefore libdb400.a 
 connection mutex is required to avoid language driver builders going crazy adding ton of exception code 
-(aka, language driver builders going crazy means ... run this API, then this, then this, but not this, 
-or that, put your left foot in, pull your left foot out, do the hokey pokey and turn yourself about 
-... threaded DB2 API works).  
+(aka, language driver builders going crazy means ... run this API, then this API, but not this API, 
+or that API, bingo, threaded DB2 API works. Whew, no thanks! Easy new libdb400.a uses a simple mutex at connection, 
+thanks very much).  
 
 
