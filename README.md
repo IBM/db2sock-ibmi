@@ -134,11 +134,14 @@ We would like to do this publicly so ALL may clearly understand libdb400.a techn
 Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
 #Run (w/LIBPATH)
-Place new libdb400.a in some directory (mytest). 
+Place new libdb400.a in some directory (mytest).
+Use LIBPATH env var to loader order first the new libdb400.a. 
 Do not replace PASE libdb400.a (someday).
 ```
-$ export PATH=/mytest:$PATH
-$ export LIBPATH=.:/mytest/lib:/usr/lib
+$ ksh (or bash)
+$ ls /mytest/libdb400.a
+libdb400.a
+$ export LIBPATH=/mytest/lib:/QOpenSys/usr/lib
 $ run-my-scripts-or-whatever
 ```
 
