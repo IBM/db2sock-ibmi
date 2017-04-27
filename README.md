@@ -195,6 +195,7 @@ Clarification to avoid conspiracy.
 To be clear, **new libdb400.a synchronous driver CLI APIs are the same (today APIs).**
 That is, new libdb400.a under most PASE languages will run exactly same code path. In fact, at present new libdb400.a 
 will run 'original APIs' by calling old driver (/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a).
+You really should be able to slip this driver under your current PASE favorite script language and keep running (i am).
 
 Specifically 'new' changes to old driver, **original UTF-8 (1208) and new UTF-16 (1200 - wide) APIs take 
 alternate short path directly call ILE API database (no PASE iconv).** 
