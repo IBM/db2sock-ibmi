@@ -21,6 +21,8 @@
  * warning is removed.
  */
 
+#define JSON400_OUT_MAX_STDOUT 1000000
+
 #define JSON400_MAX_KEY 65000
 #define JSON400_KEY_CONN 1
 #define JSON400_KEY_PCONN 2
@@ -80,23 +82,63 @@ void custom_json_free(char *buffer) {
   }
 }
 
-void custom_output_printf(char *out_caller, const char * format, ...) {
+#define JSON400_ADJUST_NDA 0
+#define JSON400_ADJUST_ADD_COMMA 1
+#define JSON400_ADJUST_ADD_SPACE 2
+#define JSON400_ADJUST_RMV_COMMA 3
+void custom_output_printf(int adjust, char *out_caller, const char * format, ...) {
   char *p = (char *) NULL; 
-
-  p = out_caller + strlen(out_caller);
+  char *q = (char *) NULL; 
+  int l = 0;
+  int w = 0;
+  l = strlen(out_caller);
+  p = out_caller + l;
+  if (l) {
+    w = l - 1;
+    q = out_caller + w;
+  } else {
+    q = p;
+  }
+  switch (adjust) {
+  case JSON400_ADJUST_ADD_COMMA:
+    if (q[0] == '{' || q[0] == '[') {
+      // do nothing
+    } else  if (q[0] != ',') {
+      p[0] = ',';
+      l++;
+      p = out_caller + l;
+    }
+    break;
+  case JSON400_ADJUST_ADD_SPACE:
+    if (q[0] != ' ') {
+      p[0] = ' ';
+      l++;
+      p = out_caller + l;
+    }
+    break;
+  case JSON400_ADJUST_RMV_COMMA:
+    if (q[0] == ',') {
+      q[0] = 0x00;
+      l--;
+      p = out_caller + l;
+    }
+    break;
+  default:
+    break;
+  }
   va_list args;
   va_start(args, format);
   vsprintf(p, format, args);
   va_end(args);
 }
 
-void custom_output_record_array_beg(int fmt, char *out_caller) {
+void custom_output_script_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    printf("{\"records\":[");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(out_caller, "{\"records\":[");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -105,6 +147,75 @@ void custom_output_record_array_beg(int fmt, char *out_caller) {
   case JSON400_OUT_COMMA_STDOUT:
     break;
   case JSON400_OUT_COMMA_BUFF:
+    break;
+  default:
+    break;
+  }
+}
+void custom_output_script_end(int fmt, char *out_caller) {
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  default:
+    break;
+  }
+}
+
+void custom_output_record_array_beg(int fmt, char *out_caller) {
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"records\":[");
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"records\":[");
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    break;
+  default:
+    break;
+  }
+}
+void custom_output_record_array_end(int fmt, char *out_caller) {
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
     break;
   default:
     break;
@@ -114,10 +225,10 @@ void custom_output_record_array_beg(int fmt, char *out_caller) {
 void custom_output_record_no_data_found(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    printf("\"SQL_NO_DATA_FOUND\"");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\"SQL_NO_DATA_FOUND\"");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(out_caller, "\"SQL_NO_DATA_FOUND\"");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\"SQL_NO_DATA_FOUND\"");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -133,21 +244,13 @@ void custom_output_record_no_data_found(int fmt, char *out_caller) {
 }
 
 
-void custom_output_record_row_beg(int fmt, int flag, char *out_caller) {
+void custom_output_record_row_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    if (flag) {
-      printf(",\n{");
-    } else {
-      printf("\n{");
-    }
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{");
     break;
   case JSON400_OUT_JSON_BUFF:
-    if (flag) {
-      custom_output_printf(out_caller, ",\n{");
-    } else {
-      custom_output_printf(out_caller, "\n{");
-    }
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -161,7 +264,7 @@ void custom_output_record_row_beg(int fmt, int flag, char *out_caller) {
     break;
   }
 }
-void custom_output_record_name_value(int fmt, int flag, char *name, char *value, int type, int fStrLen, char *out_caller) {
+void custom_output_record_name_value(int fmt, char *name, char *value, int type, int fStrLen, char *out_caller) {
   int i = 0;
   int len = 0;
   char * fmt_val_char = "\"%s\"";
@@ -213,40 +316,22 @@ void custom_output_record_name_value(int fmt, int flag, char *name, char *value,
   }
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    if (flag) {
-      printf(",");
-    }
-    printf(fmt_key_val, name, value);
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_key_val, name, value);
     break;
   case JSON400_OUT_JSON_BUFF:
-    if (flag) {
-      custom_output_printf(out_caller, ",");
-    }
-    custom_output_printf(out_caller, fmt_key_val, name, value);
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_key_val, name, value);
     break;
   case JSON400_OUT_SPACE_STDOUT:
-    if (flag) {
-      printf(" ");
-    }
-    printf(fmt_val, value);
+    custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, fmt_val, value);
     break;
   case JSON400_OUT_SPACE_BUFF:
-    if (flag) {
-      custom_output_printf(out_caller, " ");
-    }
-    custom_output_printf(out_caller, fmt_val, value);
+    custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, fmt_val, value);
     break;
   case JSON400_OUT_COMMA_STDOUT:
-    if (flag) {
-      printf(",");
-    }
-    printf(fmt_val, value);
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_val, value);
     break;
   case JSON400_OUT_COMMA_BUFF:
-    if (flag) {
-      custom_output_printf(out_caller, ",");
-    }
-    custom_output_printf(out_caller, fmt_val, value);
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_val, value);
     break;
   default:
     break;
@@ -255,46 +340,22 @@ void custom_output_record_name_value(int fmt, int flag, char *name, char *value,
 void custom_output_record_row_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    printf("}");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(out_caller, "}");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}");
     break;
   case JSON400_OUT_SPACE_STDOUT:
-    printf("\n");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
     break;
   case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(out_caller, "\n");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
     break;
   case JSON400_OUT_COMMA_STDOUT:
-    printf("\n");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
     break;
   case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(out_caller, "\n");
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_record_array_end(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    printf("\n]}\n");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(out_caller, "\n]}\n");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    printf("\n");
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    printf("\n");
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(out_caller, "\n");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
     break;
   default:
     break;
@@ -326,22 +387,22 @@ int custom_output_sql_errors(int fmt, SQLHANDLE handle, SQLSMALLINT hType, int r
       }
       switch (fmt) {
       case JSON400_OUT_JSON_STDOUT:
-        printf("{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
         break;
       case JSON400_OUT_JSON_BUFF:
-        custom_output_printf(out_caller, "{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
         break;
       case JSON400_OUT_SPACE_STDOUT:
-        printf("\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, "\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
         break;
       case JSON400_OUT_SPACE_BUFF:
-        custom_output_printf(out_caller, "\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, "\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
         break;
       case JSON400_OUT_COMMA_STDOUT:
-        printf("\"error %s, SQLCODE=%d\"\n",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\"error %s, SQLCODE=%d\"\n",msg, sqlcode);
         break;
       case JSON400_OUT_COMMA_BUFF:
-        custom_output_printf(out_caller, "\"error=%s, SQLCODE=%d\"\n",msg, sqlcode);
+        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\"error=%s, SQLCODE=%d\"\n",msg, sqlcode);
         break;
       default:
         break;
@@ -545,11 +606,11 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
             }
             break;
           }
-          custom_output_record_row_beg(fmt, recs, outjson);
+          custom_output_record_row_beg(fmt, outjson);
           recs += 1;
           for (j = 0 ; j < nResultCols; j++) {
             if (buff_value[j]) {
-              custom_output_record_name_value(fmt,j,buff_name[j],buff_value[j], buff_type[j], fStrLen[j], outjson);
+              custom_output_record_name_value(fmt, buff_name[j], buff_value[j], buff_type[j], fStrLen[j], outjson);
             }
           }
           custom_output_record_row_end(fmt, outjson);
@@ -599,6 +660,7 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   char * c = NULL;
   char * f = NULL;
   char * copyin = NULL;
+  char * stdbuf = NULL;
   int fmt = JSON400_OUT_JSON_STDOUT;
   int key[JSON400_MAX_KEY];
   char * val[JSON400_MAX_KEY];
@@ -609,6 +671,9 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     fmt = JSON400_OUT_JSON_BUFF;
   } else {
     fmt = JSON400_OUT_JSON_STDOUT;
+    stdbuf = custom_json_new(JSON400_OUT_MAX_STDOUT);
+    outjson = stdbuf;
+    outlen = JSON400_OUT_MAX_STDOUT;
   }
   /* copy in */
   copyin = custom_json_new(inlen + 1);
@@ -638,10 +703,17 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     }
   }   
   /* run */
+  custom_output_script_beg(fmt, outjson);
   sqlrc = custom_run(hdbc, outjson, outlen, fmt, key, val, arr);
+  custom_output_script_end(fmt, outjson);
   /* free copyin */
   if (copyin) {
     custom_json_free(copyin);
+  }
+  /* free stdbuf */
+  if (stdbuf) {
+    printf("%s\n",stdbuf);
+    custom_json_free(stdbuf);
   }
   return sqlrc;
 }
