@@ -54,6 +54,10 @@ Note:
   /QOpenSys/zend7/QOpenSys/usr/lib/libdb400.a
   
 ```
+Note: 
+I am using a chroot for my development therefore /QOpenSys/zend7.
+You will have to replicate if you want to play around (please).
+When project is closer to finshed the final target dir will be choosen.
 
 # run
 
@@ -65,14 +69,17 @@ set test authorization (shell)
 > export SQL_PWD400=MYPWD
 
 == php test
-php query.php 
+> cd db2json/tests
+> export PATH=/usr/local/zendphp7/bin:/usr/bin
+> export LIBPATH=/usr/local/zendphp7/bin:/usr/li
+> php query.php
 
 ```
 
 
 # json
 ```
-experimental see tests
+experimental see php tests
 ```
 
 

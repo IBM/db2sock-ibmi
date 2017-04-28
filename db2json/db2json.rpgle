@@ -359,7 +359,7 @@
          env(1) = DB2_ENV1_PATH;
          env(2) = DB2_ENV2_LIBPATH;
          env(3) = DB2_ENV3_ATTACH;
-         env(4) = DB2_ENV4_TRACE;
+         // env(4) = DB2_ENV4_TRACE;
 
          rcb = PaseStart32(pgm:arg:env:myPaseCCSID);
          if rcb = *ON;
