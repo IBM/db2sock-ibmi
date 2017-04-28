@@ -161,7 +161,7 @@ void custom_output_record_row_beg(int fmt, int flag, char *out_caller) {
     break;
   }
 }
-void custom_output_record_name_value(int fmt, int flag, char *name, char *value, int type, char *out_caller) {
+void custom_output_record_name_value(int fmt, int flag, char *name, char *value, int type, int fStrLen, char *out_caller) {
   int i = 0;
   int len = 0;
   char * fmt_val_char = "\"%s\"";
@@ -172,37 +172,44 @@ void custom_output_record_name_value(int fmt, int flag, char *name, char *value,
   char * fmt_key_val_dec = "\"%s\":%s";
   char * fmt_val = NULL;
   char * fmt_key_val = NULL;
-  switch (type) {
-  case SQL_BIGINT:
-  case SQL_DECFLOAT:
-  case SQL_SMALLINT:
-  case SQL_INTEGER:
-  case SQL_REAL:
-  case SQL_FLOAT:
-  case SQL_DOUBLE:
-  case SQL_DECIMAL:
-  case SQL_NUMERIC:
-    if (value[0] == '.') {
-      fmt_val = fmt_val_zero_dec;
-      fmt_key_val = fmt_key_val_zero_dec;
-    } else {
-      fmt_val = fmt_val_dec;
-      fmt_key_val = fmt_key_val_dec;
-    }
-    break;
-  default:
-    fmt_val = fmt_val_char;
-    fmt_key_val = fmt_key_val_char;
-    /* trim */
-    len = strlen(value);
-    for (i=len; i>0; i--) {
-      if (!value[i] || value[i] == ' ') {
-        value[i] = 0x00;
+  char * fmt_json_null = "null";
+  if (fStrLen == SQL_NULL_DATA) {
+    value = fmt_json_null;
+    fmt_val = fmt_val_dec;
+    fmt_key_val = fmt_key_val_dec;
+  } else {
+    switch (type) {
+    case SQL_BIGINT:
+    case SQL_DECFLOAT:
+    case SQL_SMALLINT:
+    case SQL_INTEGER:
+    case SQL_REAL:
+    case SQL_FLOAT:
+    case SQL_DOUBLE:
+    case SQL_DECIMAL:
+    case SQL_NUMERIC:
+      if (value[0] == '.') {
+        fmt_val = fmt_val_zero_dec;
+        fmt_key_val = fmt_key_val_zero_dec;
       } else {
-        break;
+        fmt_val = fmt_val_dec;
+        fmt_key_val = fmt_key_val_dec;
       }
+      break;
+    default:
+      fmt_val = fmt_val_char;
+      fmt_key_val = fmt_key_val_char;
+      /* trim */
+      len = strlen(value);
+      for (i=len; i>0; i--) {
+        if (!value[i] || value[i] == ' ') {
+          value[i] = 0x00;
+        } else {
+          break;
+        }
+      }
+      break;
     }
-    break;
   }
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
@@ -374,7 +381,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   SQLINTEGER lob_loc = 0;
   SQLINTEGER loc_ind = 0;
   SQLSMALLINT loc_type = 0;
-  SQLINTEGER fStrLen = SQL_NTS;
+  SQLINTEGER fStrLen[JSON400_MAX_COLS];
   SQLSMALLINT sql_data_type = 0;
   SQLUINTEGER sql_precision = 0;
   SQLSMALLINT sql_scale = 0;
@@ -483,6 +490,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           buff_name[j] = custom_json_new(size);
           buff_value[j] = NULL;
           buff_type[j] = 0;
+          fStrLen[j] = SQL_NTS;
           sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
           /* dbcs expansion */
           switch (buff_type[j]) {
@@ -498,14 +506,14 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           case SQL_XML:
             size = size * JSON400_EXPAND_CHAR;
             buff_value[j] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           case SQL_BINARY:
           case SQL_VARBINARY:
           case SQL_BLOB:
             size = size * JSON400_EXPAND_BINARY;
             buff_value[j] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           case SQL_TYPE_DATE:
           case SQL_TYPE_TIME:
@@ -523,7 +531,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           default:
             size = JSON400_EXPAND_OTHER;
             buff_value[j] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           }
         }
@@ -541,7 +549,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           recs += 1;
           for (j = 0 ; j < nResultCols; j++) {
             if (buff_value[j]) {
-              custom_output_record_name_value(fmt,j,buff_name[j],buff_value[j], buff_type[j],outjson);
+              custom_output_record_name_value(fmt,j,buff_name[j],buff_value[j], buff_type[j], fStrLen[j], outjson);
             }
           }
           custom_output_record_row_end(fmt, outjson);
