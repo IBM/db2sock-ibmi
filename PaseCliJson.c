@@ -24,11 +24,7 @@
 #define JSON400_OUT_MAX_STDOUT 1000000
 
 #define JSON400_MAX_KEY 65000
-#define JSON400_KEY_CONN 1
-#define JSON400_KEY_PCONN 2
-#define JSON400_KEY_QUERY 10
-#define JSON400_KEY_PARM 20
-#define JSON400_KEY_FETCH 30
+
 #define JSON400_MAX_ARGS 32
 #define JSON400_MAX_COLS 1024
 
@@ -51,20 +47,30 @@
 #define JSON400_OUT_JSON_BUFF 22
 #define JSON400_OUT_SPACE_BUFF 23
 
-#define JSON400_NBR_KEYS 5
+#define JSON400_MAX_CMD_BUFF 4096
+
+#define JSON400_NBR_KEYS 6
+#define JSON400_KEY_CONN 1
+#define JSON400_KEY_PCONN 2
+#define JSON400_KEY_QUERY 10
+#define JSON400_KEY_PARM 20
+#define JSON400_KEY_FETCH 30
+#define JSON400_KEY_CMD 40
 char * JSON400_KEYS[JSON400_NBR_KEYS] = {
   "\"pconnect\":",
   "\"connect\":",
   "\"query\":",
   "\"parm\":",
-  "\"fetch\":"
+  "\"fetch\":",
+  "\"cmd\":"
 };
 int JSON400_ORDS[JSON400_NBR_KEYS] = {
   JSON400_KEY_PCONN,
   JSON400_KEY_CONN,
   JSON400_KEY_QUERY,
   JSON400_KEY_PARM,
-  JSON400_KEY_FETCH
+  JSON400_KEY_FETCH,
+  JSON400_KEY_CMD
 };
 
 
@@ -447,6 +453,8 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   SQLUINTEGER sql_precision = 0;
   SQLSMALLINT sql_scale = 0;
   SQLSMALLINT sql_nullable = SQL_NO_NULLS;
+  SQLCHAR cmd_buff[JSON400_MAX_CMD_BUFF];
+  SQLINTEGER cmd_len = 0;
   /* hdbc external (caller?) */
   if (ihdbc) {
     hdbc_external = 1;
@@ -638,6 +646,32 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
         sqlrc = SQL400Close(hdbc);
       }
       break;
+    case JSON400_KEY_CMD:
+      if (!hdbc) {
+        sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
+        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+      }
+      /* statement */
+      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+      /* sql */
+      cmd_len = strlen(val[i]);
+      memset(cmd_buff,0,JSON400_MAX_CMD_BUFF);
+      sprintf(cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)",val[i],cmd_len);
+      /* prepare */
+      sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
+      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      /* execute */
+      sqlrc = SQLExecute((SQLHSTMT)hstmt);
+      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      /* close */
+      sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+      /* hdbc external (caller?) or pool (pConnect) */
+      if (!hdbc_external) {
+        sqlrc = SQL400Close(hdbc);
+      }
+      break;
+    default:
+      break;
     }
   } // end for
 }
@@ -647,6 +681,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
  * {"query":"call proc(?,?,?)","parm":[1,2,"bob"]}
  * {"connect":["*LOCAL","UID","PWD"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
  * {"pconnect":["id"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
+ * {"cmd":"ADDLIBLE LIB(DB2JSON)"}
  */
 SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
  SQLCHAR * injson,
@@ -697,7 +732,7 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
        */
       if (c[j] == '"') {
         for (k=0; !key[i] && k < JSON400_NBR_KEYS; k++) {
-          f = custom_json_parse_key_value(f, k, JSON400_KEYS, JSON400_ORDS, find_look, i, key, val, arr);
+          f = custom_json_parse_key_value(&c[j], k, JSON400_KEYS, JSON400_ORDS, find_look, i, key, val, arr);
         }
       }
     }
@@ -723,6 +758,7 @@ char * custom_json_parse_key_value(char * c, int find, char **find_key, int *fin
   char * f = NULL;
   char * w = NULL;
   char * x = NULL;
+  char * key = NULL;
   /* key will never be found 
    * -- or --
    * key already found at idx
@@ -731,12 +767,20 @@ char * custom_json_parse_key_value(char * c, int find, char **find_key, int *fin
     return c;
   }
   /* find "key": */
-  f = strstr(c,find_key[find]);
+  key = find_key[find];
+  f = strstr(c,key);
+  /* found */
   if (f) {
-    f[0] = ' ';
-    k[idx] = find_ord[find];
-    f += strlen(find_key[find]);
-    c = f;
+    /* found in start position */
+    if ((void *)f == (void *)c) {
+      f[0] = ' ';
+      k[idx] = find_ord[find];
+      f += strlen(key);
+      c = f;
+    /* found, but not start position */
+    } else {
+      return c;
+    }
   /* key will never be found */
   } else {
     find_look[find] = 0;
