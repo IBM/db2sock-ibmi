@@ -71,7 +71,7 @@ set test authorization (shell)
 == php test
 > cd db2json/tests
 > export PATH=/usr/local/zendphp7/bin:/usr/bin
-> export LIBPATH=/usr/local/zendphp7/bin:/usr/li
+> export LIBPATH=/usr/local/zendphp7/bin:/usr/lib
 > php query.php
 
 ```
