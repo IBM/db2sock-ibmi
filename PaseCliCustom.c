@@ -21,6 +21,7 @@
  */
 
 static SQLHANDLE env_hndl;
+static int env_server_mode;
 
 /*
  * utilities
@@ -259,11 +260,14 @@ SQLRETURN custom_SQL400ConnectBoth(
   if (!env_hndl) {
     sqlrc = custom_SQLOverrideCCSID400(0);
     henv = env_hndl;
-    /* henv -- always server mode */
-    attr = SQL_TRUE;
-    sqlrc = SQLSetEnvAttr((SQLHENV)henv, SQL_ATTR_SERVER_MODE, (SQLPOINTER)&attr, (SQLINTEGER) 0);
   }
   henv = env_hndl;
+  /* henv -- always server mode */
+  if (!env_server_mode) {
+    attr = SQL_TRUE;
+    sqlrc = SQLSetEnvAttr((SQLHENV)henv, SQL_ATTR_SERVER_MODE, (SQLPOINTER)&attr, (SQLINTEGER) 0);
+    env_server_mode = 1;
+  }
 
   /* length user profile */
   switch(iswide) {
@@ -339,11 +343,10 @@ SQLRETURN custom_SQL400ConnectBoth(
     }
   }
   /* hdbc - commit isolation */
-  if (acommit >= 4) attr = SQL_TXN_SERIALIZABLE;
-  else if (acommit >= 3) attr = SQL_TXN_REPEATABLE_READ;
-  else if (acommit >= 2) attr = SQL_TXN_READ_COMMITTED;
-  else if (acommit >= 1) attr = SQL_TXN_READ_UNCOMMITTED;
-  else attr = SQL_TXN_NO_COMMIT;
+  if (acommit < SQL_TXN_NOCOMMIT || acommit > SQL_TXN_SERIALIZABLE) {
+    acommit = SQL_TXN_NOCOMMIT;
+  }
+  attr = acommit;
   sqlrc = SQLSetConnectAttr((SQLHDBC)hdbc, SQL_ATTR_TXN_ISOLATION, (SQLPOINTER)&attr, 0);
   /* hdbc - system naming */
   attr = SQL_TRUE;

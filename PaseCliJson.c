@@ -110,6 +110,29 @@ void custom_output_record_array_beg(int fmt, char *out_caller) {
     break;
   }
 }
+
+void custom_output_record_no_data_found(int fmt, char *out_caller) {
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    printf("\"SQL_NO_DATA_FOUND\"");
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(out_caller, "\"SQL_NO_DATA_FOUND\"");
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    break;
+  default:
+    break;
+  }
+}
+
+
 void custom_output_record_row_beg(int fmt, int flag, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
@@ -382,6 +405,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           sqlrc = SQL400pConnect( NULL, NULL, NULL, "ALL", &hdbc, attr_isolation, NULL, NULL );
           break;
         }
+        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
       }
       /* do not close (pool connection) */
       if (hdbc) {
@@ -402,19 +426,23 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, attr_isolation, NULL, NULL );
           break;
         }
+        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
       }
       break;
     case JSON400_KEY_QUERY:
       if (!hdbc) {
         sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
+        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
       }
       /* statement */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
       /* prepare */
       sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLCHAR*)val[i], (SQLINTEGER)SQL_NTS);
+      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
       /* no parm? execute */
       if (key[i+1] != JSON400_KEY_PARM) {
         sqlrc = SQLExecute((SQLHSTMT)hstmt);
+        sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
       }
       break;
     case JSON400_KEY_PARM:
@@ -435,6 +463,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       }
       /* execute */
       sqlrc = SQLExecute((SQLHSTMT)hstmt);
+      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
       /* no fetch? close */
       if (key[i+1] != JSON400_KEY_FETCH) {
         sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -447,15 +476,16 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
     case JSON400_KEY_FETCH:
       /* result set */
       sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
+      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
       if (nResultCols > 0) {
-        for (i = 0 ; i < nResultCols; i++) {
+        for (j = 0 ; j < nResultCols; j++) {
           size = JSON400_EXPAND_COL_NAME;
-          buff_name[i] = custom_json_new(size);
-          buff_value[i] = NULL;
-          buff_type[i] = 0;
-          sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(i + 1), (SQLCHAR *)buff_name[i], size, &name_length, &buff_type[i], &size, &scale, &nullable);
+          buff_name[j] = custom_json_new(size);
+          buff_value[j] = NULL;
+          buff_type[j] = 0;
+          sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
           /* dbcs expansion */
-          switch (buff_type[i]) {
+          switch (buff_type[j]) {
           case SQL_CHAR:
           case SQL_VARCHAR:
           case SQL_CLOB:
@@ -467,15 +497,15 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           case SQL_VARGRAPHIC:
           case SQL_XML:
             size = size * JSON400_EXPAND_CHAR;
-            buff_value[i] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (i + 1), SQL_CHAR, buff_value[i], size, &fStrLen);
+            buff_value[j] = custom_json_new(size);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
             break;
           case SQL_BINARY:
           case SQL_VARBINARY:
           case SQL_BLOB:
             size = size * JSON400_EXPAND_BINARY;
-            buff_value[i] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (i + 1), SQL_CHAR, buff_value[i], size, &fStrLen);
+            buff_value[j] = custom_json_new(size);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
             break;
           case SQL_TYPE_DATE:
           case SQL_TYPE_TIME:
@@ -492,8 +522,8 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           case SQL_NUMERIC:
           default:
             size = JSON400_EXPAND_OTHER;
-            buff_value[i] = custom_json_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (i + 1), SQL_CHAR, buff_value[i], size, &fStrLen);
+            buff_value[j] = custom_json_new(size);
+            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen);
             break;
           }
         }
@@ -501,29 +531,36 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
         custom_output_record_array_beg(fmt, outjson);
         while (sqlrc == SQL_SUCCESS) {
           sqlrc = SQLFetch(hstmt);
-          if (sqlrc == SQL_NO_DATA_FOUND) {
+          if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+            if (!recs) {
+              custom_output_record_no_data_found(fmt, outjson);
+            }
             break;
           }
           custom_output_record_row_beg(fmt, recs, outjson);
           recs += 1;
-          for (i = 0 ; i < nResultCols; i++) {
-            if (buff_value[i]) {
-              custom_output_record_name_value(fmt,i,buff_name[i],buff_value[i], buff_type[i],outjson);
+          for (j = 0 ; j < nResultCols; j++) {
+            if (buff_value[j]) {
+              custom_output_record_name_value(fmt,j,buff_name[j],buff_value[j], buff_type[j],outjson);
             }
           }
           custom_output_record_row_end(fmt, outjson);
         }
         custom_output_record_array_end(fmt, outjson);
-        for (i = 0 ; i < nResultCols; i++) {
-          if (buff_value[i]) {
-            custom_json_free(buff_name[i]);
-            buff_name[i] = NULL;
+        for (j = 0 ; j < nResultCols; j++) {
+          if (buff_value[j]) {
+            custom_json_free(buff_name[j]);
+            buff_name[j] = NULL;
           }
-          if (buff_name[i]) {
-            custom_json_free(buff_name[i]);
-            buff_name[i] = NULL;
+          if (buff_name[j]) {
+            custom_json_free(buff_name[j]);
+            buff_name[j] = NULL;
           }
         }
+      } else {
+        custom_output_record_array_beg(fmt, outjson);
+        custom_output_record_no_data_found(fmt, outjson);
+        custom_output_record_array_end(fmt, outjson);
       }
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
