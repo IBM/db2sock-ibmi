@@ -138,43 +138,85 @@ void custom_output_record_row_beg(int fmt, int flag, char *out_caller) {
     break;
   }
 }
-void custom_output_record_name_value(int fmt, int flag, char *name, char *value, char *out_caller) {
+void custom_output_record_name_value(int fmt, int flag, char *name, char *value, int type, char *out_caller) {
+  int i = 0;
+  int len = 0;
+  char * fmt_val_char = "\"%s\"";
+  char * fmt_key_val_char = "\"%s\":\"%s\"";
+  char * fmt_val_zero_dec = "0%s";
+  char * fmt_key_val_zero_dec = "\"%s\":0%s";
+  char * fmt_val_dec = "%s";
+  char * fmt_key_val_dec = "\"%s\":%s";
+  char * fmt_val = NULL;
+  char * fmt_key_val = NULL;
+  switch (type) {
+  case SQL_BIGINT:
+  case SQL_DECFLOAT:
+  case SQL_SMALLINT:
+  case SQL_INTEGER:
+  case SQL_REAL:
+  case SQL_FLOAT:
+  case SQL_DOUBLE:
+  case SQL_DECIMAL:
+  case SQL_NUMERIC:
+    if (value[0] == '.') {
+      fmt_val = fmt_val_zero_dec;
+      fmt_key_val = fmt_key_val_zero_dec;
+    } else {
+      fmt_val = fmt_val_dec;
+      fmt_key_val = fmt_key_val_dec;
+    }
+    break;
+  default:
+    fmt_val = fmt_val_char;
+    fmt_key_val = fmt_key_val_char;
+    /* trim */
+    len = strlen(value);
+    for (i=len; i>0; i--) {
+      if (!value[i] || value[i] == ' ') {
+        value[i] = 0x00;
+      } else {
+        break;
+      }
+    }
+    break;
+  }
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
     if (flag) {
       printf(",");
     }
-    printf("\"%s\":\"%s\"",name,value);
+    printf(fmt_key_val, name, value);
     break;
   case JSON400_OUT_JSON_BUFF:
     if (flag) {
       custom_output_printf(out_caller, ",");
     }
-    custom_output_printf(out_caller, "\"%s\":\"%s\"",name,value);
+    custom_output_printf(out_caller, fmt_key_val, name, value);
     break;
   case JSON400_OUT_SPACE_STDOUT:
     if (flag) {
       printf(" ");
     }
-    printf("\"%s\"",value);
+    printf(fmt_val, value);
     break;
   case JSON400_OUT_SPACE_BUFF:
     if (flag) {
       custom_output_printf(out_caller, " ");
     }
-    custom_output_printf(out_caller, "\"%s\"",value);
+    custom_output_printf(out_caller, fmt_val, value);
     break;
   case JSON400_OUT_COMMA_STDOUT:
     if (flag) {
       printf(",");
     }
-    printf("\"%s\"",value);
+    printf(fmt_val, value);
     break;
   case JSON400_OUT_COMMA_BUFF:
     if (flag) {
       custom_output_printf(out_caller, ",");
     }
-    custom_output_printf(out_caller, "\"%s\"",value);
+    custom_output_printf(out_caller, fmt_val, value);
     break;
   default:
     break;
@@ -301,6 +343,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   SQLCHAR *buff_name[JSON400_MAX_COLS];
   SQLCHAR *buff_value[JSON400_MAX_COLS];
   SQLINTEGER buff_len[JSON400_MAX_COLS];
+  SQLSMALLINT buff_type[JSON400_MAX_COLS];
   SQLSMALLINT type = 0;
   SQLUINTEGER size = 0;
   SQLSMALLINT scale = 0;
@@ -409,9 +452,10 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           size = JSON400_EXPAND_COL_NAME;
           buff_name[i] = custom_json_new(size);
           buff_value[i] = NULL;
-          sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(i + 1), (SQLCHAR *)buff_name[i], size, &name_length, &type, &size, &scale, &nullable);
+          buff_type[i] = 0;
+          sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(i + 1), (SQLCHAR *)buff_name[i], size, &name_length, &buff_type[i], &size, &scale, &nullable);
           /* dbcs expansion */
-          switch (type) {
+          switch (buff_type[i]) {
           case SQL_CHAR:
           case SQL_VARCHAR:
           case SQL_CLOB:
@@ -464,7 +508,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           recs += 1;
           for (i = 0 ; i < nResultCols; i++) {
             if (buff_value[i]) {
-              custom_output_record_name_value(fmt,i,buff_name[i],buff_value[i], outjson);
+              custom_output_record_name_value(fmt,i,buff_name[i],buff_value[i], buff_type[i],outjson);
             }
           }
           custom_output_record_row_end(fmt, outjson);
