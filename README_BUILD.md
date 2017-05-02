@@ -30,9 +30,13 @@ compiles ...
   > ./make_libdb400.sh
 ```
 Note:
-- PASE include change - gcc compiles will not run unless you take force gcc align quadword action in notes for PASE /usr/include/as400_types.h.
-- PASE gmake -f Makefile compiles RPG programs (see utilities system400, CRTPGM, CRTRPGMOD).
+
+- PASE include change gcc compiles will not run unless you take force gcc align quadword action in notes for PASE /usr/include/as400_types.h.
+
+- PASE gmake Makefile compiles RPG programs (see utilities system400, CRTPGM, CRTRPGMOD).
+
 - PASE system400 new 'chroot' system utility. Created by Makefile (no action required). Technical: Uses QSQSRVR job via db2 libdb400.a.
+
 - PASE Makefile utilities CRTPGM, CRTRPGMOD use new system400 utility for ILE/RPG builds. Must export INICHROOT (above).
 
 I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
