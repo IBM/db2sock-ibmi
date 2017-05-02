@@ -74,7 +74,7 @@ Binary fixes (GCC OPS):
 - PaseCliInit.c          -- db2 resource table manager (read)
 - PaseCliInit.h          -- db2 resource table header
 
-##human rpg coding (see README_CGI.md usage):
+##human rpg coding (see README_CGI for configuration):
 - db2json.rpgle          -- RPG Apache CGI JSON interface to libdb400.a
 - iconv_h.rpgle          -- RPG iconv header
 - iconv.rpgle            -- RPG iconv
