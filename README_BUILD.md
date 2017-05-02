@@ -20,11 +20,12 @@ All make files have been converted to gcc compiles.
 optional (git already completed) ...
 > python gen.py
 
-gcc compiles ...
+compiles ...
 > ./make_libdb400.sh
 ```
-Note: The gcc compiles will not run unless you take force gcc align quadword 
-action in notes for PASE /usr/include/as400_types.h.
+Note:
+* The gcc compiles will not run unless you take force gcc align quadword action in notes for PASE /usr/include/as400_types.h.
+* PASE gmake db2sock/Makefile compiles RPG programs (see utilities system400, CRTPGM, CRTRPGMOD ).
 
 I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
 ```

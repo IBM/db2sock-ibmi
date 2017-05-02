@@ -1,0 +1,26 @@
+#!/bin/sh
+root=$INICHROOT
+here=$(pwd)
+lib=$1
+ifs=$2
+mod=$(echo "$ifs" | cut -d'.' -f1 | cut -d'/' -f2)
+touch "./$mod.mod"
+arg="CRTRPGMOD MODULE($lib/$mod) SRCSTMF('$root$here/$ifs') DBGVIEW(*SOURCE) OUTPUT(*PRINT) REPLACE(*YES) TGTCCSID(37)"
+echo "./system400 '$arg' chroot=$root"
+RES=$(./system400 "$arg" $root)
+OK=$(echo "$RES" | grep -c "00 highest severity")
+if (($OK==0))
+then
+  echo "$RES"
+  echo "==> $lib/$mod -- $OK of 00 highest severity"
+  BAD=$(echo "$RES" | grep "*RNF")
+  echo '===================================='
+  echo '===================================='
+  echo "$BAD"
+  echo '===================================='
+  echo '===================================='
+  exit
+else
+  echo "==> $lib/$mod -- 00 highest severity"
+fi
+

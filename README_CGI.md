@@ -4,13 +4,6 @@
 
 Apache REST json interface to new async libdb400.a driver. 
 
-# compile (makedb2json not work in chroot)
-
-```
-$ cd db2sock/db2json
-$ ./makedb2json.sh
-```
-
 # configure
 
 ```
@@ -69,7 +62,7 @@ set test authorization (shell)
 > export SQL_PWD400=MYPWD
 
 == php test
-> cd db2json/tests
+> cd tests
 > export PATH=/usr/local/zendphp7/bin:/usr/bin
 > export LIBPATH=/usr/local/zendphp7/bin:/usr/lib
 > php query.php

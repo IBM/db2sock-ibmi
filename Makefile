@@ -22,7 +22,7 @@ LIBOBJS      = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCli
 LIBEXPS      = -Wl,-bE:libdb400.exp
 SHRLIB32     = libdb400.a
 SHROBJ32     = shr.o
-LIBDEPS32    = -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread -shared -Wl,-brtl -Wl,-bnoquiet
+LIBDEPS32    = -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread -shared -Wl,-brtl
 SHRLIB64     = libdb400_64.a
 SHROBJ64     = shr_64.o
 LIBDEPS64    = $(LIBDEPS32) -maix64
@@ -41,14 +41,43 @@ SHROBJ       = $(SHROBJ32)
 LIBDEPS      = $(LIBDEPS32)
 endif
 
+### SYSTEM400
+SYSTEM40032         = system400
+SYSTEM400LIBOBJS32  = system400.o
+SYSTEM400LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
+LIBDEPALL           = -L. -ldb400 -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread
+
+SYSTEM400        = $(SYSTEM40032)
+SYSTEM400LIBOBJS = $(SYSTEM400LIBOBJS32)
+SYSTEM400LIBDEPS = $(SYSTEM400LIBDEPS32)
+
+
+### RPG
+CCRPG       = ./CRTRPGMOD
+CCPGM       = ./CRTPGM
+
+### RPG *PGM CGI - $(INIRPGLIB)/DB2JSON
+CGI400PGM  = db2json.pgm
+CGI400MOD  = $(INIRPGLIB)/db2json
+CGI400OBJS = db2json.mod iconv.mod ipase.mod
+CGI400MODS = $(INIRPGLIB)/db2json $(INIRPGLIB)/iconv $(INIRPGLIB)/ipase
+
+
 ### tells make all things to do (ordered)
-all: removeo $(SHRLIB) removeo 
+ifdef TGT64
+all: removeo talklib $(SHRLIB) talkcgi $(CGI400PGM)
+else
+all: clean removeo talklib $(SHRLIB) talksys $(SYSTEM400) 
+endif
 
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
 .SUFFIXES: .o .c
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
+.SUFFIXES: .mod .rpgle
+.rpgle.mod:
+	$(CCRPG) $(INIRPGLIB) $<
 
 ### -- Build the shared lib(s).
 $(SHROBJ): $(LIBOBJS)
@@ -56,8 +85,30 @@ $(SHROBJ): $(LIBOBJS)
 $(SHRLIB): $(SHROBJ)
 	$(AR) $(AROPT) ruv $(SHRLIB) $(SHROBJ)
 
+### -- SYSTEM400
+$(SYSTEM40032): $(SYSTEM400LIBOBJS)
+	$(CC) $(CCFLAGS) $(SYSTEM400LIBOBJS) $(SYSTEM400LIBDEPS) -o $(SYSTEM40032)
+
+### -- CGI400PGM (RPG)
+$(CGI400PGM): $(CGI400OBJS)
+	$(CCPGM) $(CGI400MOD) $(CGI400MODS)
+
+talklib:
+	$(info ==================)
+	$(info PASE db2 driver $(SHRLIB) ( $(SHROBJ) ) )
+	$(info ==================)
+talksys:
+	$(info ==================)
+	$(info PASE utility $(SYSTEM40032))
+	$(info ==================)
+talkcgi:
+	$(info ==================)
+	$(info RPG CGI $(CGI400PGM))
+	$(info ==================)
 clean:
 	rm -f $(SHRLIB)
+	rm -f $(CGI400PGM)
 removeo:
 	rm -f *.o
+	rm -f *.mod
 
