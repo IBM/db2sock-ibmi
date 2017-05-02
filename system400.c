@@ -37,10 +37,9 @@ void str_replace(char *target, const char *needle, const char *replacement)
   strcpy(target, buffer);
 }
 
-int main(int argc, char * argv[]) {
+SQLRETURN STRQSH(SQLHANDLE hdbc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0, j = 0;
-  SQLHANDLE hdbc = 0;
+  SQLRETURN sql_exec_rc = SQL_SUCCESS;
   SQLHANDLE hstmt = 0;
   char user_buff[SYS400_MAX_CMD];
   char sys_buff[SYS400_MAX_CMD];
@@ -58,12 +57,6 @@ int main(int argc, char * argv[]) {
   char pase_buf[SYS400_MAX_BUF];
   SQLINTEGER pase_len = SYS400_MAX_BUF;
 
-  /* environment db2 */
-  sqlrc = SQLOverrideCCSID400( 819 );
-  /* connection(s) db2 */
-  sqlrc = SQL400Connect(NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL);
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
   /* system */
   memset(ile_file,0,SYS400_MAX_CMD);
   sprintf(ile_file,"/tmp/output%d.txt",getpid());
@@ -71,12 +64,15 @@ int main(int argc, char * argv[]) {
   strcpy(user_buff,argv[1]);
   str_replace(user_buff, "'", "''");
   memset(sys_buff,0,SYS400_MAX_CMD);
-  sprintf(sys_buff,"STRQSH CMD('/usr/bin/system \"%s\" > %s%s')",
+  sprintf(sys_buff,"STRQSH CMD('/usr/bin/system -i \"%s\" > %s%s')",
     user_buff,argv[2],ile_file);
   printf("%s\n",sys_buff);
+
   /* call */
   memset(cmd_buff,0,SYS400_MAX_CMD);
   sprintf(cmd_buff,"CALL QSYS2.QCMDEXC(?,?)");
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
   /* prepare */
   sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
   /* string */
@@ -95,12 +91,11 @@ int main(int argc, char * argv[]) {
           sql_precision, sql_scale, (SQLPOINTER)&cmd_len, 0, NULL);
   /* execute */
   sqlrc = SQLExecute((SQLHSTMT)hstmt);
-  printf("==>SQLExecute rc=%d\n",sqlrc);
+  sql_exec_rc = sqlrc;
+  printf("==>STRQSH -- %d return code\n",sqlrc);
   /* close */
   sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  /* clean up */
-  sqlrc = SQLDisconnect((SQLHDBC)hdbc);
-  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+
   /* output to ascii */
   memset(ile_buf,0,ile_len);
   memset(pase_buf,0,pase_len);
@@ -113,6 +108,24 @@ int main(int argc, char * argv[]) {
   printf("%s\n",pase_buf);
   /* remove file */
   unlink(ile_file);
+
+  /* sqlrc */
+  return sql_exec_rc;
+}
+
+int main(int argc, char * argv[]) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLHANDLE hdbc = 0;
+
+  /* environment db2 */
+  sqlrc = SQLOverrideCCSID400( 819 );
+  /* connection(s) db2 (server mode QSQSRVR job) */
+  sqlrc = SQL400Connect(NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL);
+  /* make request */
+  sqlrc = STRQSH(hdbc, argv);
+  /* clean up */
+  sqlrc = SQLDisconnect((SQLHDBC)hdbc);
+  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
   return sqlrc;
 }
 

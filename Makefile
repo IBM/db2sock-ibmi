@@ -12,16 +12,6 @@
 ### RPG compiles
 ### - INIRPGLIB   - RPG Library (see make_libdb400.sh)
 ### - INICHROOT   - chroot base path (see make_libdb400.sh)
-$(info ==================)
-$(info chroot base path INICHROOT=$(INICHROOT) (see make_libdb400.sh))
-ifdef INIRPGLIB
-$(info RPG library INIRPGLIB=$(INIRPGLIB) (see make_libdb400.sh))
-else
-$(error missing RPG library INIRPGLIB (see make_libdb400.sh))
-endif
-$(info ==================)
-
-
 CC          = gcc
 # CCFLAGS32   = -v verbose
 CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
@@ -82,6 +72,14 @@ CGI400MODS = $(INIRPGLIB)/db2json $(INIRPGLIB)/iconv $(INIRPGLIB)/ipase
 ifdef TGT64
 all: removeo talklib $(SHRLIB) talkcgi $(CGI400PGM)
 else
+$(info ==================)
+$(info chroot base path INICHROOT=$(INICHROOT) (see make_libdb400.sh))
+ifdef INIRPGLIB
+$(info RPG library INIRPGLIB=$(INIRPGLIB) (see make_libdb400.sh))
+else
+$(error missing RPG library INIRPGLIB (see make_libdb400.sh))
+endif
+$(info ==================)
 all: clean removeo talklib $(SHRLIB) talksys $(SYSTEM400) 
 endif
 
