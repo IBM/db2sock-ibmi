@@ -6,7 +6,7 @@ ifs=$2
 mod=$(echo "$ifs" | cut -d'.' -f1 | cut -d'/' -f2)
 touch "./$mod.mod"
 arg="CRTRPGMOD MODULE($lib/$mod) SRCSTMF('$root$here/$ifs') DBGVIEW(*SOURCE) OUTPUT(*PRINT) REPLACE(*YES) TGTCCSID(37)"
-echo "./system400 '$arg' chroot=$root"
+echo "./system400 '$arg'"
 RES=$(./system400 "$arg" $root)
 OK=$(echo "$RES" | grep -c "00 highest severity")
 if (($OK==0))

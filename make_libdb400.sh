@@ -1,16 +1,13 @@
 #!/bin/sh
 # -------
-#
-# > ./make.sh library [...]
-#
 # examples:
-#   full build
-#   > export INIMODE=TEST
+# 1) compile from chroot
 #   > export INIRPGLIB=DB2JSON
 #   > export INICHROOT=/QOpenSys/zend7
-#   > export INIPATH=/QOpenSys/usr/bin
-#   > export INILIBPATH=/QOpenSys/usr/lib
-#   > ./make.sh
+#   > ./make_libdb400.sh
+# 2) compile from root
+#   > export INIRPGLIB=DB2JSON
+#   > ./make_libdb400.sh
 #
 ### RPG PTF required ###
 # TGTCCSID(37)
@@ -22,49 +19,31 @@
 # settings
 # -------
 echo "# -------"
-echo "# settings"
+echo "# environment variable settings"
 echo "# -------"
-if [[ -z "$INIMODE" ]]
+DIRECTORY="/QSYS.LIB"
+if [ -d "$DIRECTORY" ]
 then
-  INIMODE='TEST'
+  echo "compile root (not chroot)"
+  unset INICHROOT
+else
+  if [[ -z "$INICHROOT" ]]
+  then
+    echo "***Error: missing (export INICHROOT=/QOpenSys/path)" 
+    INICHROOT='/QOpenSys/zend7'
+  fi
+  echo "INICHROOT=$INICHROOT (export INICHROOT=/QOpenSys/zend7)"
+  export "INICHROOT=$INICHROOT"
 fi
-INIMODE=$(echo $INIMODE | tr [a-z] [A-Z])
-echo "INIMODE=$INIMODE (export INIMODE=TEST)"
-export "INIMODE=$INIMODE"
 
 if [[ -z "$INIRPGLIB" ]]
 then
+  echo "***Error: missing (export INIRPGLIB=library)" 
   INIRPGLIB='DB2JSON'
 fi
 INIRPGLIB=$(echo $INIRPGLIB | tr [a-z] [A-Z])
 echo "INIRPGLIB=$INIRPGLIB (export INIRPGLIB=DB2JSON)"
 export "INIRPGLIB=$INIRPGLIB"
-
-if [[ -z "$INICHROOT" ]]
-then
-  INICHROOT='/QOpenSys/zend7'
-fi
-echo "INICHROOT=$INICHROOT (export INICHROOT=/QOpenSys/zend7)"
-export "INICHROOT=$INICHROOT"
-
-if [[ -z "$INIPATH" ]]
-then
-  INIPATH='/QOpenSys/usr/bin'
-fi
-echo "INIPATH=$INIPATH (export INIPATH=/QOpenSys/usr/bin)"
-export "INIPATH=$INIPATH"
-
-if [[ -z "$INILIBPATH" ]]
-then
-  INILIBPATH='/QOpenSys/usr/lib'
-fi
-echo "INILIBPATH=$INILIBPATH (export INILIBPATH=/QOpenSys/usr/lib)"
-export "INILIBPATH=$INILIBPATH"
-
-BLDPWD=$(pwd)
-BLDFULL=$INICHROOT$BLDPWD
-echo "BLDFULL=$BLDFULL"
-export "BLDFULL=$BLDFULL"
 
 # -------"
 # build libdb400.a(shr.o)"

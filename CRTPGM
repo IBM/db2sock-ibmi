@@ -13,6 +13,6 @@ for arg in "$@"
 ppp=$(echo "$ifs" | cut -d'/' -f2)
 touch "./$ppp.pgm"
 arg="CRTPGM PGM($pgm) MODULE($mods) BNDSRVPGM(QHTTPSVR/QZSRCORE)"
-echo "./system400 '$arg'  chroot=$root"
+echo "./system400 '$arg'"
 ./system400 "$arg" $root
 

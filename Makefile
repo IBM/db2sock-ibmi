@@ -1,12 +1,27 @@
-### make
-### make TGT64=64
-### gcc options
+### ./make_libdb400.sh
+### gmake options (see make_libdb400.sh)
+### - gmake -f Makefile
+### - gmake -f Makefile TGT64=64
+### gcc options (Makefile)
 ### -v            - verbose compile
 ### -Wl,-bnoquiet - verbose linker
 ### -shared       - shared object
 ### -maix64       - 64bit
 ### -isystem      - compile PASE system headers
 ### -nostdlib     - remove libgcc_s.a and crtcxa_s.o
+### RPG compiles
+### - INIRPGLIB   - RPG Library (see make_libdb400.sh)
+### - INICHROOT   - chroot base path (see make_libdb400.sh)
+$(info ==================)
+$(info chroot base path INICHROOT=$(INICHROOT) (see make_libdb400.sh))
+ifdef INIRPGLIB
+$(info RPG library INIRPGLIB=$(INIRPGLIB) (see make_libdb400.sh))
+else
+$(error missing RPG library INIRPGLIB (see make_libdb400.sh))
+endif
+$(info ==================)
+
+
 CC          = gcc
 # CCFLAGS32   = -v verbose
 CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
@@ -103,7 +118,7 @@ talksys:
 	$(info ==================)
 talkcgi:
 	$(info ==================)
-	$(info RPG CGI $(CGI400PGM))
+	$(info RPG CGI $(INIRPGLIB)/$(CGI400PGM))
 	$(info ==================)
 clean:
 	rm -f $(SHRLIB)
