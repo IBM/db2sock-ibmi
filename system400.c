@@ -37,7 +37,7 @@ void str_replace(char *target, const char *needle, const char *replacement)
   strcpy(target, buffer);
 }
 
-SQLRETURN STRQSH(SQLHANDLE hdbc, char * argv[]) {
+SQLRETURN STRQSH_QSQSRVR(SQLHANDLE hdbc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sql_exec_rc = SQL_SUCCESS;
   SQLHANDLE hstmt = 0;
@@ -122,7 +122,7 @@ int main(int argc, char * argv[]) {
   /* connection(s) db2 (server mode QSQSRVR job) */
   sqlrc = SQL400Connect(NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL);
   /* make request */
-  sqlrc = STRQSH(hdbc, argv);
+  sqlrc = STRQSH_QSQSRVR(hdbc, argv);
   /* clean up */
   sqlrc = SQLDisconnect((SQLHDBC)hdbc);
   sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
