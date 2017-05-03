@@ -21,11 +21,11 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 #Source
 Source links have topical README.md.
 ```
-db2sock               - build source libdb400.a
-db2sock/tests         - PASE tests for libdb400.a
-db2sock/db2json       - RPG CGI json interface to libdb400.a
-db2sock/db2json/tests - tests for RPG CGI json interface
+db2sock               - build source PASE libdb400.a
+                      - build db2json RPG db2json (same Makefile)
+db2sock/tests         - various tests libdb400.a, php rest test json
 ```
+Build [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
 
 #pre-compiled test vesion new libdb400.a
 * [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver)
