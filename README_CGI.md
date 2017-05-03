@@ -31,12 +31,17 @@ ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
 
 Note: 
 - Must use CGIConvMode BINARY for directory.
-- db2json.rpgle (CGI) hard coded to my test chroot directory for libdb400.a
-       // test chroot (test)
-       DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/zend7+
-       /QOpenSys/usr/lib/');
-       // actual lib (production)
-       // DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/usr/lib/');
+- db2json.rpgle (CGI) path to libdb400.a (INITARGET)
+compiles ...
+1) compile from chroot
+  > export INICHROOT=/QOpenSys/zend7
+  > export INIRPGLIB=DB2JSON
+  > export INITARGET=/QOpenSys/usr/lib
+  > ./make_libdb400.sh
+2) compile from root
+  > export INIRPGLIB=DB2JSON
+  > export INITARGET=/QOpenSys/usr/lib
+  > ./make_libdb400.sh
 ```
 
 # binary

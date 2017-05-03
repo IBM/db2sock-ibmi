@@ -1,6 +1,11 @@
      H AlwNull(*UsrCtl)
      H BNDDIR('QC2LE')
 
+       // *************************************************
+       // iconf_h generated (see make_libdb400.sh)
+       // *************************************************
+
+      /copy iconf_h
       /copy ios_h
       /copy iconv_h
       /copy ipase_h
@@ -40,13 +45,7 @@
        DCL-C DB2_ENV1_PATH CONST('PATH=/usr/bin');
        DCL-C DB2_ENV2_LIBPATH CONST('LIBPATH=/usr/lib');
        DCL-C DB2_ENV3_ATTACH CONST('PASE_THREAD_ATTACH=Y');
-       DCL-C DB2_ENV4_TRACE CONST('TRACE=on');
-       // test chroot (test)
-       DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/zend7+
-       /QOpenSys/usr/lib/');
-       // actual lib (production)
-       // DCL-C DB2_PATH_LIBDB400 CONST('/QOpenSys/usr/lib/');
-       DCL-C DB2_FILE_LIBDB400 CONST('libdb400.a(shr.o)');
+       DCL-C DB2_FILE_LIBDB400 CONST('/libdb400.a(shr.o)');
        DCL-C DB2_SYM_SQL400JSON CONST('SQL400Json');
        dcl-c NULLTERM const(x'00');
        dcl-c CRLF const(x'15');
@@ -193,6 +192,7 @@
          elseif rc = QP2CALLPASE_TERMINATING;
            error1208('SQL400Json call error, PASE terminating');
            sLibDB400 = 0;
+           SQL400Json = *NULL;
            jsonPaseAllocFlag = 0;
            webPaseAllocFlag = 0;
          else;
@@ -363,7 +363,9 @@
 
          rcb = PaseStart32(pgm:arg:env:myPaseCCSID);
          if rcb = *ON;
-           if sLibDB400 = 0;
+           if sLibDB400 = 0 or SQL400Json = *NULL;
+             sLibDB400 = 0;
+             SQL400Json = *NULL;
              apilib = 
                DB2_PATH_LIBDB400 
              + DB2_FILE_LIBDB400 

@@ -22,11 +22,13 @@ optional (git already completed) ...
 
 compiles ...
 1) compile from chroot
-  > export INIRPGLIB=DB2JSON
   > export INICHROOT=/QOpenSys/zend7
+  > export INIRPGLIB=DB2JSON
+  > export INITARGET=/QOpenSys/usr/lib
   > ./make_libdb400.sh
 2) compile from root
   > export INIRPGLIB=DB2JSON
+  > export INITARGET=/QOpenSys/usr/lib
   > ./make_libdb400.sh
 ```
 Note:
@@ -76,6 +78,7 @@ Binary fixes (GCC OPS):
 
 ##human rpg coding (see README_CGI for configuration):
 - db2json.rpgle          -- RPG Apache CGI JSON interface to libdb400.a
+- iconf_h.rpgle          -- RPG header (generated see make_libdb400.sh)
 - iconv_h.rpgle          -- RPG iconv header
 - iconv.rpgle            -- RPG iconv
 - ios_h.rpgle            -- RPG various system APIs
