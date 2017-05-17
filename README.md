@@ -99,18 +99,37 @@ Could not load module /home/monoroot/libdb400/tests_c/./libdb400.a(shr_64.o).
         Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
 ```
 
-===
-ILE CGI use libdb400.a (above path may not work)
-===
-see [Source -> README_CGI.md](https://bitbucket.org/litmis/db2sock/src)
+#Run ILE CGI (REST json to libdb400.a)
+ILE CGI libdb400.a above path may not work [Source -> README_CGI.md](https://bitbucket.org/litmis/db2sock/src)
 
-===
-PASE facstcgi use libdb400.a (above path may not work)
-===
-see [Source -> README_FASTCGI.md](https://bitbucket.org/litmis/db2sock/src)
+#Run PASE fastcgi (REST json to libdb400.a)
+PASE facstcgi libdb400.a above path may not work [Source -> README_FASTCGI.md](https://bitbucket.org/litmis/db2sock/src)
+
+#Service (export TRACE=on/off)
+Driver service trace information [Source -> README_TRACE.md](https://bitbucket.org/litmis/db2sock/src)
+
+#Build
+Build information [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
+
+#Notes
+Clarification to avoid conspiracy theory [Source -> README_NOTES.md](https://bitbucket.org/litmis/db2sock/src).
+
+#ChangeLog
+See progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
+
+#Contributors
+- Tony Cairns, IBM
+- Aaron Bartell, Krengel Technology, Inc.
+- You can help test new libdb400.a driver to make sure there are no surprises (volunteers welcome).
+
+#Follow Along
+We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
+
+#License
+MIT
 
 
-#Future
+#Future Ideas (some already here)
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
 web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent
 versions that support all the APIs, async, wide, json, socket, etc. 
@@ -179,27 +198,5 @@ Ok, no promise, but, you get the idea. A basic design change is needed to PASE l
 We would like to do this publicly so ALL may clearly understand libdb400.a technology, and, possibly contribute.
 Author two cents, when stable, start using this driver, you will grow function by leaps with very little effort.
 
-#Service (export TRACE=on/off)
-Driver service trace information [Source -> README_TRACE.md](https://bitbucket.org/litmis/db2sock/src)
-
-#Build
-Build information [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
-
-#Notes
-Clarification to avoid conspiracy theory [Source -> README_NOTES.md](https://bitbucket.org/litmis/db2sock/src).
-
-#ChangeLog
-See progress [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver):
-
-#Contributors
-- Tony Cairns, IBM
-- Aaron Bartell, Krengel Technology, Inc.
-- You can help test new libdb400.a driver to make sure there are no surprises (volunteers welcome).
-
-#Follow Along
-We will be discussing things in the [Issues](http://bit.ly/db2sock-issues) section of this repo.  
-
-#License
-MIT
 
 
