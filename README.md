@@ -22,7 +22,7 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 Source links have topical README.md.
 ```
 db2sock               - build source PASE libdb400.a
-                      - build db2json RPG db2json (same Makefile)
+db2sock/ILE-CGI       - build CGI db2json.pgm (ILE c)
 db2sock/tests         - various tests libdb400.a, php rest test json
 ```
 Build [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
@@ -38,7 +38,7 @@ Build [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
 - (**available**) Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs 
 - (**available**) Async APIs - high performing async CLI APIs for all new PASE languages, 'callback' (nodejs), and, poll/reap (php).
 - (**few**) Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options 
-- (**few**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - RPG CGI for Apache).
+- (**few**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - ILE CGI for Apache).
 - (**none**) Socket APIs - enable socket based for ideas like 'private' connections
 - (**none**) Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
 

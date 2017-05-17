@@ -40,11 +40,11 @@ Note:
 
 - PASE include change gcc compiles will not run unless you take force gcc align quadword action in notes for PASE /usr/include/as400_types.h.
 
-- PASE gmake Makefile compiles RPG programs (see utilities system400, CRTPGM, CRTRPGMOD).
+- PASE gmake Makefile compiles ILE programs (see utilities system400, CRTPGM, CRTCMOD).
 
 - PASE system400 new 'chroot' system utility. Created by Makefile (no action required). Technical: Uses QSQSRVR job via db2 libdb400.a.
 
-- PASE Makefile utilities CRTPGM, CRTRPGMOD use new system400 utility for ILE/RPG builds. Must export INICHROOT (above).
+- PASE Makefile utilities CRTPGM, CRTCMOD use new system400 utility for ILE builds. Must export INICHROOT (above).
 
 I am using a chroot with following packages from [ibmichroot](https://bitbucket.org/litmis/ibmichroot). 
 ```
@@ -85,22 +85,8 @@ Binary fixes (GCC OPS):
 - db2json.c              -- ILE Apache CGI JSON interface to libdb400.a
 
 
-##examples
-```
-build
-> python genmake.py (already complete)
-> ./make_libdb400.sh test
-
-set user profile (optional)
-> cd tests
-> export SQL_DB400="*LOCAL"
-> export SQL_UID400="UID"
-> export SQL_PWD400="PWD"
-
-run 32-bit or 64-bit
-> testnnnn_32
-> testnnnn_64
-```
+##examples/tests
+Build [Source -> README_TESTS.md](https://bitbucket.org/litmis/db2sock/src)
 
 # Internal information (optional read)
 Test cases are best source for information on how to use. These are a few notes.
