@@ -11,7 +11,7 @@
 #   > export INITARGET=/QOpenSys/usr/lib
 #   > ./make_libdb400.sh
 # Subset compile:
-#   > ./make_libdb400.sh ile 400 test
+#   > ./make_libdb400.sh ile 400 fcgi test
 #   > ./make_libdb400.sh ile 400
 #   > ./make_libdb400.sh test
 #
@@ -33,7 +33,7 @@ for arg in "$@"
 }
 if [[ -z "$SELECT" ]]
 then
-  SELECT="400 ile test"
+  SELECT="400 ile fcgi test"
 fi
 echo "# -------"
 echo "# compile $SELECT"
@@ -98,16 +98,38 @@ case "$SELECT" in
 esac
 
 # -------
-# build tests
+# build tests_c
 # -------
 case "$SELECT" in
   *test*)
     echo "# -------"
-    echo "# build tests"
+    echo "# build tests_c"
     echo "# -------"
-    cd tests
+    cd tests_c
     gmake -f Makefile
     gmake -f Makefile TGT64=64
+    cd ..
+  ;;      
+esac
+
+# -------
+# build db2jsonfcgi
+# -------
+case "$SELECT" in
+  *fcgi*)
+    echo "# -------"
+    echo "# build db2jsonfcgi"
+    echo "# (ignore warnings in os_unix.c)"
+    echo "# -------"
+    cd fastcgi
+    tar -xf fcgi.tar
+    gmake -f Makefile
+    echo "# -------"
+    echo "# install db2jsonfcgi"
+    echo "# (Device busy, means copy fails)"
+    echo "# -------"
+    echo "cp db2jsonfcgi $INITARGET/."
+    cp db2jsonfcgi $INITARGET/.
     cd ..
   ;;      
 esac

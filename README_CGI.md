@@ -1,4 +1,4 @@
-#db2sock/db2json
+#db2sock/ILE-CGI
 
 ==Experimental==
 

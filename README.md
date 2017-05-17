@@ -21,9 +21,11 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 #Source
 Source links have topical README.md.
 ```
-db2sock               - build source PASE libdb400.a
-db2sock/ILE-CGI       - build CGI db2json.pgm (ILE c)
-db2sock/tests         - various tests libdb400.a, php rest test json
+db2sock               - build source libdb400.a (PASE c)
+db2sock/ILE-CGI       - build fastcgi db2jsonfcgi (PASE c)
+db2sock/fastcgi       - build CGI db2json.pgm (ILE c)
+db2sock/tests_c       - c tests libdb400.a (PASE c)
+db2sock/tests_php     - rest test json CGI/fastcgi (php)
 ```
 Build [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
 
@@ -93,7 +95,7 @@ bash-4.3$ echo $LIBPATH
 .:/opt/freeware/lib:/usr/lib
 bash-4.3$ test0003_async_callback_connect_64
 Could not load program test0003_async_callback_connect_64:
-Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
+Could not load module /home/monoroot/libdb400/tests_c/./libdb400.a(shr_64.o).
         Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
 ```
 

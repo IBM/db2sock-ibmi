@@ -1,4 +1,4 @@
-#db2sock/tests
+#db2sock/tests_c
 
 ==Experimental==
 
@@ -8,9 +8,10 @@ c tests.
 
 ```
 (genmake.py already completed) ...
-$ cd db2sock/tests
+$ cd db2sock/tests_c
 $ python genmake.py
 
+main db2sock/
 > ./make_libdb400.sh test
 ```
 
