@@ -22,8 +22,8 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 Source links have topical README.md.
 ```
 db2sock               - build source libdb400.a (PASE c)
-db2sock/ILE-CGI       - build fastcgi db2jsonfcgi (PASE c)
-db2sock/fastcgi       - build CGI db2json.pgm (ILE c)
+db2sock/fastcgi       - build fastcgi db2jsonfcgi (PASE c)
+db2sock/ILE-CGI       - build CGI db2json.pgm (ILE c)
 db2sock/tests_c       - c tests libdb400.a (PASE c)
 db2sock/tests_php     - rest test json CGI/fastcgi (php)
 ```
