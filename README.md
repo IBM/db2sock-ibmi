@@ -102,10 +102,12 @@ Could not load module /home/monoroot/libdb400/tests_c/./libdb400.a(shr_64.o).
 ===
 ILE CGI use libdb400.a (above path may not work)
 ===
-see [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
-```
-libdb400.a location (test version)
-```
+see [Source -> README_CGI.md](https://bitbucket.org/litmis/db2sock/src)
+
+===
+PASE facstcgi use libdb400.a (above path may not work)
+===
+see [Source -> README_FASTCGI.md](https://bitbucket.org/litmis/db2sock/src)
 
 
 #Future
