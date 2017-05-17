@@ -3,13 +3,18 @@
 # examples:
 # 1) compile from chroot
 #   > export INICHROOT=/QOpenSys/zend7
-#   > export INIRPGLIB=DB2JSON
+#   > export INILIB=DB2JSON
 #   > export INITARGET=/QOpenSys/usr/lib
 #   > ./make_libdb400.sh
 # 2) compile from root
-#   > export INIRPGLIB=DB2JSON
+#   > export INILIB=DB2JSON
 #   > export INITARGET=/QOpenSys/usr/lib
 #   > ./make_libdb400.sh
+# Subset compile:
+#   > ./make_libdb400.sh ile 400 test
+#   > ./make_libdb400.sh ile 400
+#   > ./make_libdb400.sh test
+#
 #
 ### RPG PTF required ###
 # TGTCCSID(37)
@@ -18,7 +23,24 @@
 # V7R3 - SI62958
 
 # -------
-# settings
+# main
+# -------
+SELECT=""
+opr="error"
+for arg in "$@"
+{
+  SELECT="$SELECT $arg"
+}
+if [[ -z "$SELECT" ]]
+then
+  SELECT="400 ile test"
+fi
+echo "# -------"
+echo "# compile $SELECT"
+echo "# -------"
+
+# -------
+# settings (env vars)
 # -------
 echo "# -------"
 echo "# environment variable settings"
@@ -39,14 +61,14 @@ else
   export "INICHROOT=$INICHROOT"
 fi
 
-if [[ -z "$INIRPGLIB" ]]
+if [[ -z "$INILIB" ]]
 then
-  echo "***Error: INIRPGLIB missing, using default (export INIRPGLIB=library)" 
-  INIRPGLIB='DB2JSON'
+  echo "***Error: INILIB missing, using default (export INILIB=library)" 
+  INILIB='DB2JSON'
 fi
-INIRPGLIB=$(echo $INIRPGLIB | tr [a-z] [A-Z])
-echo "INIRPGLIB=$INIRPGLIB (export INIRPGLIB=DB2JSON)"
-export "INIRPGLIB=$INIRPGLIB"
+INILIB=$(echo $INILIB | tr [a-z] [A-Z])
+echo "INILIB=$INILIB (export INILIB=DB2JSON)"
+export "INILIB=$INILIB"
 
 if [[ -z "$INITARGET" ]]
 then
@@ -56,42 +78,63 @@ fi
 echo "INITARGET=$INITARGET (export INITARGET=/QOpenSys/usr/lib)"
 export "INITARGET=$INITARGET"
 
+# -------
+# build libdb400.a(shr.o/shr_64.o)
+# -------
+case "$SELECT" in
+  *400*)
+    echo "# -------"
+    echo "# build libdb400.a(shr.o/shr_64.o)"
+    echo "# -------"
+    gmake -f Makefile
+    gmake -f Makefile TGT64=64
+    echo "# -------"
+    echo "# install libdb400.a"
+    echo "# (Device busy, means copy fails)"
+    echo "# -------"
+    echo "cp libdb400.a $INITARGET/."
+    cp libdb400.a $INITARGET/.
+  ;;      
+esac
 
 # -------
-# build iconf_h.rpgle
+# build tests
 # -------
-echo "      /if defined(ICONF_H)" > iconf_h.rpgle
-echo "      /eof" >> iconf_h.rpgle
-echo "      /endif" >> iconf_h.rpgle
-echo "      /define ICONF_H" >> iconf_h.rpgle
-echo "        " >> iconf_h.rpgle
-if [[ -z "$INICHROOT" ]]
-then
-  echo "       DCL-C DB2_PATH_LIBDB400 CONST('+" >> iconf_h.rpgle
-  echo "       $INITARGET');" >> iconf_h.rpgle
-else
-  echo "       DCL-C DB2_PATH_LIBDB400 CONST('$INICHROOT/+" >> iconf_h.rpgle
-  echo "       $INITARGET');" >> iconf_h.rpgle
-fi
-echo "       DCL-C DB2_ENV4_TRACE CONST('TRACE=off');" >> iconf_h.rpgle
+case "$SELECT" in
+  *test*)
+    echo "# -------"
+    echo "# build tests"
+    echo "# -------"
+    cd tests
+    gmake -f Makefile
+    gmake -f Makefile TGT64=64
+    cd ..
+  ;;      
+esac
 
 # -------
-# build libdb400.a(shr.o)
+# build ILE-CGI
 # -------
-gmake -f Makefile
-
-# -------
-# build libdb400.a()
-# -------
-gmake -f Makefile TGT64=64
-
-echo "# -------"
-echo "# install libdb400.a"
-echo "# (Device busy, means copy fails)"
-echo "# -------"
-echo "cp libdb400.a tests/."
-cp libdb400.a tests/.
-echo "cp libdb400.a $INITARGET/."
-cp libdb400.a $INITARGET/.
-
+case "$SELECT" in
+  *ile*)
+    echo "# -------"
+    echo "# build ILE-CGI"
+    echo "# -------"
+    cd ILE-CGI
+    pwd
+    echo "#ifndef _ICONF_H" > iconf.h
+    echo "#define _ICONF_H" >> iconf.h
+    if [[ -z "$INICHROOT" ]]
+    then
+      echo "#define DB2_FILE_LIBDB400 \"$INITARGET/libdb400.a(shr.o)\"" >> iconf.h
+    else
+      echo "#define DB2_FILE_LIBDB400 \"$INICHROOT$INITARGET/libdb400.a(shr.o)\"" >> iconf.h
+    fi
+    echo "#define DB2_SYM_SQL400JSON \"SQL400Json\"" >> iconf.h
+    echo "#define DB2_ENV_TRACE \"TRACE=off\"" >> iconf.h
+    echo "#endif /* _ICONF_HH */" >> iconf.h
+    gmake -f Makefile
+    cd ..
+  ;;      
+esac
 

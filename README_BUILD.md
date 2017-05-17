@@ -21,15 +21,20 @@ optional (git already completed) ...
 > python gen.py
 
 compiles ...
-1) compile from chroot
-  > export INICHROOT=/QOpenSys/zend7
-  > export INIRPGLIB=DB2JSON
-  > export INITARGET=/QOpenSys/usr/lib
-  > ./make_libdb400.sh
-2) compile from root
-  > export INIRPGLIB=DB2JSON
-  > export INITARGET=/QOpenSys/usr/lib
-  > ./make_libdb400.sh
+# examples:
+# 1) compile from chroot
+#   > export INICHROOT=/QOpenSys/zend7
+#   > export INILIB=DB2JSON
+#   > export INITARGET=/QOpenSys/usr/lib
+#   > ./make_libdb400.sh
+# 2) compile from root
+#   > export INILIB=DB2JSON
+#   > export INITARGET=/QOpenSys/usr/lib
+#   > ./make_libdb400.sh
+# Subset compile:
+#   > ./make_libdb400.sh ile 400 test
+#   > ./make_libdb400.sh ile 400
+#   > ./make_libdb400.sh test
 ```
 Note:
 
@@ -76,24 +81,18 @@ Binary fixes (GCC OPS):
 - PaseCliInit.c          -- db2 resource table manager (read)
 - PaseCliInit.h          -- db2 resource table header
 
-##human rpg coding (see README_CGI for configuration):
-- db2json.rpgle          -- RPG Apache CGI JSON interface to libdb400.a
-- iconf_h.rpgle          -- RPG header (generated see make_libdb400.sh)
-- iconv_h.rpgle          -- RPG iconv header
-- iconv.rpgle            -- RPG iconv
-- ios_h.rpgle            -- RPG various system APIs
-- ipase_h.rpgle          -- RPG PASE header
-- ipase.rpgle            -- RPG PASE load libdb400.a
+##human ILE c coding (see README_CGI for configuration):
+- db2json.c              -- ILE Apache CGI JSON interface to libdb400.a
 
 
 ##examples
 ```
 build
-> cd tests
-> python genmake.py
-> ./make_tests.sh
+> python genmake.py (already complete)
+> ./make_libdb400.sh test
 
 set user profile (optional)
+> cd tests
 > export SQL_DB400="*LOCAL"
 > export SQL_UID400="UID"
 > export SQL_PWD400="PWD"

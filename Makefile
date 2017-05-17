@@ -9,8 +9,8 @@
 ### -maix64       - 64bit
 ### -isystem      - compile PASE system headers
 ### -nostdlib     - remove libgcc_s.a and crtcxa_s.o
-### RPG compiles
-### - INIRPGLIB   - RPG Library (see make_libdb400.sh)
+### ILE c compiles
+### - INILIB      - ILE Library (see make_libdb400.sh)
 ### - INICHROOT   - chroot base path (see make_libdb400.sh)
 CC          = gcc
 # CCFLAGS32   = -v verbose
@@ -56,41 +56,27 @@ SYSTEM400        = $(SYSTEM40032)
 SYSTEM400LIBOBJS = $(SYSTEM400LIBOBJS32)
 SYSTEM400LIBDEPS = $(SYSTEM400LIBDEPS32)
 
-
-### RPG
-CCRPG       = ./CRTRPGMOD
-CCPGM       = ./CRTPGM
-
-### RPG *PGM CGI - $(INIRPGLIB)/DB2JSON
-CGI400PGM  = db2json.pgm
-CGI400MOD  = $(INIRPGLIB)/db2json
-CGI400OBJS = db2json.mod iconv.mod ipase.mod
-CGI400MODS = $(INIRPGLIB)/db2json $(INIRPGLIB)/iconv $(INIRPGLIB)/ipase
-
-
 ### tells make all things to do (ordered)
 ifdef TGT64
-all: removeo talklib $(SHRLIB) talkcgi $(CGI400PGM)
+all: removeo talklib $(SHRLIB)
 else
 $(info ==================)
 $(info chroot base path INICHROOT=$(INICHROOT) (see make_libdb400.sh))
-ifdef INIRPGLIB
-$(info RPG library INIRPGLIB=$(INIRPGLIB) (see make_libdb400.sh))
+ifdef INILIB
+$(info ILE library INILIB=$(INILIB) (see make_libdb400.sh))
 else
-$(error missing RPG library INIRPGLIB (see make_libdb400.sh))
+$(error missing ILE library INILIB (see make_libdb400.sh))
 endif
 $(info ==================)
 all: clean removeo talklib $(SHRLIB) talksys $(SYSTEM400) 
 endif
 
+### PASE
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
 .SUFFIXES: .o .c
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
-.SUFFIXES: .mod .rpgle
-.rpgle.mod:
-	$(CCRPG) $(INIRPGLIB) $<
 
 ### -- Build the shared lib(s).
 $(SHROBJ): $(LIBOBJS)
@@ -102,10 +88,6 @@ $(SHRLIB): $(SHROBJ)
 $(SYSTEM40032): $(SYSTEM400LIBOBJS)
 	$(CC) $(CCFLAGS) $(SYSTEM400LIBOBJS) $(SYSTEM400LIBDEPS) -o $(SYSTEM40032)
 
-### -- CGI400PGM (RPG)
-$(CGI400PGM): $(CGI400OBJS)
-	$(CCPGM) $(CGI400MOD) $(CGI400MODS)
-
 talklib:
 	$(info ==================)
 	$(info PASE db2 driver $(SHRLIB) ( $(SHROBJ) ) )
@@ -114,14 +96,8 @@ talksys:
 	$(info ==================)
 	$(info PASE utility $(SYSTEM40032))
 	$(info ==================)
-talkcgi:
-	$(info ==================)
-	$(info RPG CGI $(INIRPGLIB)/$(CGI400PGM))
-	$(info ==================)
 clean:
 	rm -f $(SHRLIB)
-	rm -f $(CGI400PGM)
 removeo:
 	rm -f *.o
-	rm -f *.mod
 

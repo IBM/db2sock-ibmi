@@ -4,7 +4,7 @@ import glob
 test_pgms = glob.glob("test*.c")
 test_pgms.sort()
 
-test_var_all = 'all: cpy $(SHRLIB)'
+test_var_all = 'all: cpy removeo $(SHRLIB)'
 test_var_dcl = ""
 test_var_32 = ""
 test_var_64 = ""

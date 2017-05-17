@@ -37,11 +37,11 @@ compiles ...
   > export INICHROOT=/QOpenSys/zend7
   > export INIRPGLIB=DB2JSON
   > export INITARGET=/QOpenSys/usr/lib
-  > ./make_libdb400.sh
+  > ./make_libdb400.sh ile
 2) compile from root
   > export INIRPGLIB=DB2JSON
   > export INITARGET=/QOpenSys/usr/lib
-  > ./make_libdb400.sh
+  > ./make_libdb400.sh ile
 ```
 
 # binary

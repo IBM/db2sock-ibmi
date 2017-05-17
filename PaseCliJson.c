@@ -677,11 +677,42 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
 }
 
 /* json
- * {"query":"select * from bobdata","fetch":"*ALL"}
- * {"query":"call proc(?,?,?)","parm":[1,2,"bob"]}
- * {"connect":["*LOCAL","UID","PWD"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
- * {"pconnect":["id"],"query":"call proc(?,?,?)","parm":[1,2,"bob"],"fetch":"*ALL"}
- * {"cmd":"ADDLIBLE LIB(DB2JSON)"}
+ * request {
+ * -- toolkit database --
+ * "query":"select * from bobdata",
+ *   "fetch":"*ALL",
+ * "query":"call proc(?,?,?)",
+ *   "parm":[1,2,"bob"],
+ * "connect":["*LOCAL","UID","PWD"],
+ *   "query":"call proc(?,?,?)",
+ *   "parm":[1,2,"bob"],
+ *   "fetch":"*ALL",
+ * "pconnect":["id"],
+ *   "query":"select * from davedata where name=? and level=? and reports=?",
+ *   "parm":[1,2,"bob"],
+ *   "fetch":"*ALL",
+ * -- toolkit commmand --
+ * "cmd":"ADDLIBLE LIB(DB2JSON)",
+ * -- toolkit program --
+ * "pgm":["NAME","LIB","procedure"],
+ *   "dcl-ds":["name",dimension, "in|out|both|value|return", "dou-name"],
+ *   "dcl-s":["name","type", value, dimension, "in|out|both|value|return"],
+ * -- complex parm (example) --
+ * "pgm":["CLIMATE","MYLIB","RegionTemps"],
+ *   "dcl-ds":["regions_t",0,"in"],
+ *     "dcl-s":["region","5a","TX"],
+ *     "dcl-s":["region","5a","MN"],
+ *     "dcl-s":["region","5a","", 20],
+ *   "end-ds":"regions_t",
+ * -- single parm --
+ *   "dcl-s":["countout","10i0",0,"both"],
+ * -- complex return value --
+ *   "dcl-ds":["temp_t",999, "return","countout"],
+ *     "dcl-s":["region","5a"],
+ *     "dcl-s":["min","12p2"],
+ *     "dcl-s":["max","12p2"],
+ *   "end-ds":"temp_t",
+ * }
  */
 SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
  SQLCHAR * injson,

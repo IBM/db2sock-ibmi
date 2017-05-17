@@ -97,6 +97,15 @@ Could not load module /home/monoroot/libdb400/tests/./libdb400.a(shr_64.o).
         Dependent module /opt/freeware/lib/libiconv.a(shr4_64.o) could not be loaded.
 ```
 
+===
+ILE CGI use libdb400.a (above path may not work)
+===
+see [Source -> README_BUILD.md](https://bitbucket.org/litmis/db2sock/src)
+```
+libdb400.a location (test version)
+```
+
+
 #Future
 Many more features are planned, such as, tracing CLI APIs, debug message to joblog, socket based db2,
 web based db2, json based db2, etc. Perhaps replace existing PASE language 'drivers' with consistent

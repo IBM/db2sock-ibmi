@@ -135,7 +135,7 @@ TEST1200LIBDEPS    = $(TEST1200LIBDEPS32)
 endif
 
 ### tells make all things to do (ordered)
-all: cpy $(SHRLIB) $(TEST0000PGM) $(TEST0001PGM) $(TEST0011PGM) $(TEST0012PGM) $(TEST1001PGM) $(TEST1011PGM) $(TEST1021PGM) $(TEST1200PGM)
+all: cpy removeo $(SHRLIB) $(TEST0000PGM) $(TEST0001PGM) $(TEST0011PGM) $(TEST0012PGM) $(TEST1001PGM) $(TEST1011PGM) $(TEST1021PGM) $(TEST1200PGM)
 
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
@@ -186,4 +186,6 @@ $(TEST1200PGM64): $(TEST1200LIBOBJS)
 
 cpy:
 	cp ../libdb400.a .
+removeo:
+	rm -f *.o
 
