@@ -286,7 +286,7 @@ void main() {
   rmvPlus(pContent,szContent);
   /* PASE path/libdb400.a->SQL400Json
    * (iconf.h - see make_libdb400.sh)
-   * SQLRETURN SQL400Json(
+   * SQLRETURN SQL400Json(SQLHDBC hdbc
    *   SQLCHAR * injson,
    *   SQLINTEGER inlen,
    *   SQLCHAR * outjson,
