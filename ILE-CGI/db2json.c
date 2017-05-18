@@ -1,3 +1,7 @@
+/*
+ * ILE CGI interface PASE libdb400.a->SQL400Json
+ * (see README_CGI.md)
+ */
 #include <stdlib.h>
 #include <sys/types.h>
 #include <stdio.h>
@@ -7,6 +11,15 @@
 #include <qp2user.h>
 #include <except.h>
 #include "iconf.h" /* see make_libdb400.sh */
+
+/* #define DB2_FILE_LIBDB400 "/path/libdb400.a(shr.o)"
+ * see iconf.h (make_libdb400.sh) 
+ */
+#define DB2_ARG0_PGM "/usr/lib/start32"
+#define DB2_ENV_PATH "PATH=/usr/bin"
+#define DB2_ENV_LIBPATH "LIBPATH=/usr/lib"
+#define DB2_ENV_ATTACH "PASE_THREAD_ATTACH=Y"
+#define DB2_MAX_JSON_OUT 512000
 
 #ifndef int16
 #define int16 short
@@ -48,39 +61,61 @@ char * mri37_header_plain = "Content-type: text/plain\n\n";
 char * mri37_error_binary = "CGIConvMode BINARY required";
 char * mri37_json_error = "{\"ok\":false,\"reason\":\"%s\"}";
 
-typedef struct PaseAlloc_t { 
-  void * ilePtr; 
-  uint64 pasePtr;
-  int32 sz;
+/*
+ * void* Qp2malloc(
+ *       QP2_dword_t size,
+ *       QP2_ptr64_t *mem_pase
+ *       );
+ */
+typedef struct PaseAlloc_struct {
+  void * ilePtr;  /* void* */
+  uint64 pasePtr; /* mem_pase */ 
+  int32 sz;       /* size */
 } PaseAlloc_t;
-typedef struct JsonAlloc_t {
-  int32 inhdbc; 
+/*
+ * int Qp2CallPase(
+ *    const void *target,
+ *    const void *arglist,
+ *    const QP2_arg_type_t *signature,  
+ *    QP2_result_type_t result_type,     
+ *    void *buf
+ *    );
+ */
+typedef struct SQL400Json_struct {
+  int32 inhdbc;  /* Qp2CallPase - arglist */
   uint32 injson; 
   int32 inlen; 
   uint32 outjson;
-  int32 outlen; 
-  int16 sig0;
+  int32 outlen;
+  int16 sig0;    /* Qp2CallPase - signature */ 
   int16 sig1;
   int16 sig2;
   int16 sig3;
   int16 sig4;
-  int32 ret;
-} JsonAlloc_t;
+  int32 ret;     /* Qp2CallPase - result_type */
+} SQL400Json_t;
 
-#define DB2_ARG0_PGM "/usr/lib/start32"
-#define DB2_ENV_PATH "PATH=/usr/bin"
-#define DB2_ENV_LIBPATH "LIBPATH=/usr/lib"
-#define DB2_ENV_ATTACH "PASE_THREAD_ATTACH=Y"
-#define DB2_MAX_JSON_OUT 512000
+/* persistent CGI - CRTPGM ACTGRP(DB2JSON)
+ * == start pase once (persistent CGI) ==
+ * 1) PASE starts once - /usr/lib/start32 (__RETURN alive)
+ * 2) sLibDB400        - load pase shared object "libdb400.a(shr.o)"
+ * 3) SQL400Json       - find libdb400.a symbol/function "SQL400Json"
+ * 4) webPaseAlloc     - alloc pase memory SQL400Json->injson
+ * 5) jsonPaseAlloc    - alloc pase memory SQL400Json->outjson
+ * == IF pase dies (unexpected error) ==
+ * paseDead reset pase memory, reload libdb400.a, etc.
+ */
+int32 webPaseAllocFlag;    /* persistent CGI pase allocated (injson)   */
+int32 jsonPaseAllocFlag;   /* persistent CGI pase allocated (outjson)  */
+uint64 sLibDB400;          /* Qp2CallPase - target - libdb400.a(shr.o) */
+void * SQL400Json;         /* Qp2CallPase - target - SQL400Json        */
+PaseAlloc_t webPaseAlloc;  /* Qp2CallPase - arglist - inbuf (injson)   */
+PaseAlloc_t jsonPaseAlloc; /* Qp2CallPase - arglist - outbuf (outjson) */
 
-/* paseDead reset */
-uint64 sLibDB400;
-void * SQL400Json;
-int32 webPaseAllocFlag;
-int32 jsonPaseAllocFlag;
-PaseAlloc_t webPaseAlloc;
-PaseAlloc_t jsonPaseAlloc;
-
+/* QHTTPSVR/QZSRCORE
+ * url decode function
+ * (decode json input)  
+ */
 extern int32 ap_unescape_url(void * value);
 
 void paseDead(void) {
@@ -124,7 +159,8 @@ void libdb400Pase32(void) {
     rc = Qp2RunPase(pgm,NULL,NULL,0,819,argv,envp);
     /* find libdb400.a(shr.o) */
     sLibDB400 = Qp2dlopen(apilib,QP2_RTLD_MEMBER|QP2_RTLD_NOW,0);
-    /* find libdb400.a->SQL400Json*/
+    /* Qp2CallPase - const void *target */
+    /* find libdb400.a->SQL400Json      */
     SQL400Json = Qp2dlsym(sLibDB400,apiname,0,NULL);
   }
 }
@@ -230,7 +266,7 @@ void main() {
   void * outPtr = NULL;
   int32 outLen = 0;
   int32 outSqlRc = 0;
-  JsonAlloc_t jsonIleCall;
+  SQL400Json_t jsonIleCall;
 
   /* re-open the stdin for the Persistent CGI Program */
   freopen("", "r", stdin);
@@ -294,23 +330,27 @@ void main() {
    *   )
    */
   if (jsonPaseAllocFlag == 0 ) {
+    /* Qp2CallPase - void *buf */
     newIlePtr = Qp2malloc(DB2_MAX_JSON_OUT,&newPasePtr);
     jsonPaseAlloc.ilePtr = newIlePtr;
     jsonPaseAlloc.pasePtr = newPasePtr;
     jsonPaseAlloc.sz = DB2_MAX_JSON_OUT;
     jsonPaseAllocFlag = 1;
   }
+  /* Qp2CallPase - const void *arglist */
   jsonIleCall.inhdbc = 0;
   jsonIleCall.injson = webPaseAlloc.pasePtr;
   jsonIleCall.inlen = webPaseAlloc.sz;
   jsonIleCall.outjson = jsonPaseAlloc.pasePtr;
   jsonIleCall.outlen = jsonPaseAlloc.sz;
-  jsonIleCall.sig0 = QP2_ARG_WORD;
-  jsonIleCall.sig1 = QP2_ARG_PTR32;
-  jsonIleCall.sig2 = QP2_ARG_WORD;
-  jsonIleCall.sig3 = QP2_ARG_PTR32;
-  jsonIleCall.sig4 = QP2_ARG_WORD;
-  jsonIleCall.ret = QP2_RESULT_WORD;
+  /* Qp2CallPase - const QP2_arg_type_t *signature        */
+  jsonIleCall.sig0 = QP2_ARG_WORD;   /* SQLHDBC hdbc      */
+  jsonIleCall.sig1 = QP2_ARG_PTR32;  /* SQLCHAR * injson  */
+  jsonIleCall.sig2 = QP2_ARG_WORD;   /* SQLINTEGER inlen  */
+  jsonIleCall.sig3 = QP2_ARG_PTR32;  /* SQLCHAR * outjson */
+  jsonIleCall.sig4 = QP2_ARG_WORD;   /* SQLINTEGER outlen */
+  /* Qp2CallPase - QP2_result_type_t result_type          */
+  jsonIleCall.ret = QP2_RESULT_WORD; /* SQLRETURN         */
   memset(jsonPaseAlloc.ilePtr,0,jsonPaseAlloc.sz);
   rc = Qp2CallPase(SQL400Json,
      &jsonIleCall.inhdbc,
