@@ -29,15 +29,24 @@
 
 #pragma convert(1208)
 char * mri1208_header_json = "Content-type: application/json; charset=utf-8\n\n";
-char * mri1208_json_error = "{\"ok\":false,\"reason\":\"%s\"}";
 char * mri1208_error_pase_term = "SQL400Json call error, PASE terminating";
 char * mri1208_error_pase_sql400json_call_error = "SQL400Json call error";
 char * mri1208_error_pase_sql400json_not_found = "SQL400Json was not found in libdb400.a";
+char * mri1208_error_empty = "empty";
+/* {"ok":false,"reason":"%s"} */
+char * mri1208_json_error_colon = ":";
+char * mri1208_json_error_comma = ",";
+char * mri1208_json_error_double = "\"";
+char * mri1208_json_error_open = "{";
+char * mri1208_json_error_ok = "\"ok\"";
+char * mri1208_json_error_false = "false";
+char * mri1208_json_error_reason = "\"reason\"";
+char * mri1208_json_error_close = "}";
 
 #pragma convert(37)
 char * mri37_header_plain = "Content-type: text/plain\n\n";
-char * mri37_json_error = "{\"ok\":false,\"reason\":\"%s\"}";
 char * mri37_error_binary = "CGIConvMode BINARY required";
+char * mri37_json_error = "{\"ok\":false,\"reason\":\"%s\"}";
 
 typedef struct PaseAlloc_t { 
   void * ilePtr; 
@@ -141,11 +150,23 @@ void header1208(void) {
   write(1,mri1208_header_json,len);
 }
 
+
 void error1208(char * reason) {
   int len = 0;
   char talk1208[4096];
   memset(talk1208,0,sizeof(talk1208));
-  sprintf(talk1208,mri1208_json_error,reason);
+  sprintf(talk1208,"%s%s%s%s%s%s%s%s%s%s%s",
+    mri1208_json_error_open,
+    mri1208_json_error_ok,
+    mri1208_json_error_colon,
+    mri1208_json_error_false,
+    mri1208_json_error_comma,
+    mri1208_json_error_reason,
+    mri1208_json_error_colon,
+    mri1208_json_error_double,
+    reason,
+    mri1208_json_error_double,
+    mri1208_json_error_close);
   len = strlen(talk1208);
   write(1,talk1208,len);
 } 
@@ -219,13 +240,21 @@ void main() {
   if (!cMode || strcmp(cMode,isBinary) != 0) {
     header37();
     error37(mri37_error_binary);
+    fflush(stdout);
     return;
   }
 
   /* header json */
   header1208();
+
   /* set-up pase (if needed) */
   libdb400Pase32();
+  if (!SQL400Json) {
+    error1208(mri1208_error_pase_sql400json_not_found);
+    fflush(stdout);
+    return;
+  }
+
   /* web request (json input) */
   cMethod = getenv("REQUEST_METHOD");
   /* POST method */
@@ -246,10 +275,15 @@ void main() {
       memcpy(pContent,rCopy,szContent);
     }
   }
-  if (szContent > 0) {
-    rc = ap_unescape_url(pContent);
-    rmvPlus(pContent,szContent);
+  /* empty */
+  if (szContent < 1) {
+    error1208(mri1208_error_empty);
+    fflush(stdout);
+    return;
   }
+  /* decoding */
+  rc = ap_unescape_url(pContent);
+  rmvPlus(pContent,szContent);
   /* PASE path/libdb400.a->SQL400Json
    * (iconf.h - see make_libdb400.sh)
    * SQLRETURN SQL400Json(
@@ -277,30 +311,22 @@ void main() {
   jsonIleCall.sig3 = QP2_ARG_PTR32;
   jsonIleCall.sig4 = QP2_ARG_WORD;
   jsonIleCall.ret = QP2_RESULT_WORD;
-  if (SQL400Json) {
-    memset(jsonPaseAlloc.ilePtr,0,jsonPaseAlloc.sz);
-    rc = Qp2CallPase(SQL400Json,
-       &jsonIleCall.inhdbc,
-       &jsonIleCall.sig0,
-       jsonIleCall.ret,
-       &outSqlRc);
-    if (rc == QP2CALLPASE_NORMAL) {
-      outPtr = jsonPaseAlloc.ilePtr;
-      outLen = strlen(outPtr);
-      write(1,outPtr,outLen);
-    } else if (rc == QP2CALLPASE_TERMINATING) {
-      error1208(mri1208_error_pase_term);
-      sLibDB400 = 0;
-      SQL400Json = NULL;
-      jsonPaseAllocFlag = 0;
-      webPaseAllocFlag = 0;
-    } else {
-      error1208(mri1208_error_pase_sql400json_call_error);
-    }
+  memset(jsonPaseAlloc.ilePtr,0,jsonPaseAlloc.sz);
+  rc = Qp2CallPase(SQL400Json,
+     &jsonIleCall.inhdbc,
+     &jsonIleCall.sig0,
+     jsonIleCall.ret,
+     &outSqlRc);
+  if (rc == QP2CALLPASE_NORMAL) {
+    outPtr = jsonPaseAlloc.ilePtr;
+    outLen = strlen(outPtr);
+    write(1,outPtr,outLen);
+  } else if (rc == QP2CALLPASE_TERMINATING) {
+    error1208(mri1208_error_pase_term);
+    paseDead();
   } else {
-    error1208(mri1208_error_pase_sql400json_not_found);
+    error1208(mri1208_error_pase_sql400json_call_error);
   }
-  /* flush stdout */
   fflush(stdout);
   return;
 }
