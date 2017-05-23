@@ -1549,6 +1549,10 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
+    /* don't bother trying ...
+     * nothing tested yet with pgm
+     * (just saving work until finished)
+     */
     case JSON400_KEY_PGM:
       isOut = 0;
       if (!hdbc) {
@@ -1560,6 +1564,9 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       /* clear parameter area */
       memset(&layout,0,sizeof(layout));
       break;
+    /*
+     * input copy in any dcl-s, dcl-ds
+     */
     case JSON400_KEY_DCL_S:
       nbr_arv = custom_json_parse_array_values(val[i], arv);
       sqlrc = custom_json_dcl_s(isOut, nbr_arv, arv, isDs, &layout);
@@ -1570,6 +1577,9 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
     case JSON400_KEY_END_DS:
       isDs = 0;
       break;
+    /*
+     * end-pgm we can run then copy out to json format
+     */
     case JSON400_KEY_END_PGM:
       isOut = 1;
       /* close */
