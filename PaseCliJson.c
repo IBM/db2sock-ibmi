@@ -697,6 +697,18 @@ SQLRETURN ile_pgm_str2double(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
+SQLRETURN ile_pgm_str2hole(char * where, int tlen, int tdim) {
+  int i = 0;
+  char * wherev = where;
+  /* copy in */
+  for (i=0; i < tdim; i++, wherev += tlen) {
+    memset(wherev,0,tlen);
+  }
+  return SQL_SUCCESS;
+}
+/*
+ * general idea -- need test
+ */
 SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
@@ -760,6 +772,9 @@ SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int ts
   }
   return SQL_SUCCESS;
 }
+/*
+ * general idea -- need test
+ */
 SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
@@ -818,6 +833,9 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
   }
   return SQL_SUCCESS;
 }
+/*
+ * general idea -- need test
+ */
 SQLRETURN ile_pgm_str2char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
   int rc = 0;
   int i = 0;
@@ -882,6 +900,9 @@ SQLRETURN ile_pgm_str2char(char * where, char *str, int tdim, int tlen, int tvar
   }
   return SQL_SUCCESS;
 }
+/*
+ * general idea -- need test
+ */
 SQLRETURN ile_pgm_str2bin(char * where, char *str, int tdim, int tlen, int tvary) {
   int i = 0;
   int j = 0;
@@ -908,15 +929,6 @@ SQLRETURN ile_pgm_str2bin(char * where, char *str, int tdim, int tlen, int tvary
       secondNibble = (char)(c[k++] & 0x000F);
       dec[j++] = (char)(firstNibble + secondNibble);
     }
-  }
-  return SQL_SUCCESS;
-}
-SQLRETURN ile_pgm_str2hole(char * where, int tlen, int tdim) {
-  int i = 0;
-  char * wherev = where;
-  /* copy in */
-  for (i=0; i < tdim; i++, wherev += tlen) {
-    memset(wherev,0,tlen);
   }
   return SQL_SUCCESS;
 }
