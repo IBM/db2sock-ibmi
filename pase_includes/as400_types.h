@@ -92,8 +92,11 @@ typedef union _ILEpointer {
 #pragma pack(1,16,_ILEpointer)	/* Force sCC quadword alignment */
 #endif
 /* CAUTION: Some compilers only provide 64-bits for long double */
-    long double		align;	/* Force xlc quadword alignment
-				   (with -qldbl128 -qalign=natural) */
+#if defined( __GNUC__ )
+    long double	align __attribute__((aligned(16))); /* force gcc align quadword */
+#else
+    long double align;	/* Force xlc quadword alignment (with -qldbl128 -qalign=natural) */
+#endif
 #ifndef _AIX
     void		*openPtr; /* MI open pointer (tagged quadword) */
 #endif
