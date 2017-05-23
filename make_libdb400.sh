@@ -2,7 +2,7 @@
 # -------
 # examples:
 # 1) compile from chroot
-#   > export INICHROOT=/QOpenSys/zend7
+#   > export INICHROOT=/QOpenSys/db2sock
 #   > export INILIB=DB2JSON
 #   > export INITARGET=/QOpenSys/usr/lib
 #   > ./make_libdb400.sh
@@ -55,9 +55,9 @@ else
   if [[ -z "$INICHROOT" ]]
   then
     echo "***Error: INICHROOT missing, using default (export INICHROOT=/QOpenSys/path)" 
-    INICHROOT='/QOpenSys/zend7'
+    INICHROOT='/QOpenSys/db2sock'
   fi
-  echo "INICHROOT=$INICHROOT (export INICHROOT=/QOpenSys/zend7)"
+  echo "INICHROOT=$INICHROOT (export INICHROOT=/QOpenSys/db2sock)"
   export "INICHROOT=$INICHROOT"
 fi
 

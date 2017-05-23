@@ -23,7 +23,7 @@ optional (git already completed) ...
 compiles ...
 # examples:
 # 1) compile from chroot
-#   > export INICHROOT=/QOpenSys/zend7
+#   > export INICHROOT=/QOpenSys/db2sock
 #   > export INILIB=DB2JSON
 #   > export INITARGET=/QOpenSys/usr/lib
 #   > ./make_libdb400.sh
@@ -202,4 +202,67 @@ When using xlc, use options -qldbl128 -qalign=natural.
 Missing these options will result in ILE DB2 call failures.
 See /usr/include/as400_types.h, type ILEpointer (quadword align compiler issues).
 ```
+
+
+#DRIVER BUILDER TOOLS
+How i set-up my tools.
+```
+qcmd:
+> CRTLIB LIB(DB2JSON) TEXT('super driver')
+> CHGUSRPRF USRPRF(DB2SOCK) LOCALE(*NONE) HOMEDIR('/QOpenSys/db2sock/./home/db2sock')
+
+=> copy ILE DB2 headers into root /usr/include (before chroot)<=
+bash-4.3$ cpysqlincludes.sh 
+
+=> following run using *SECOFR profile (not user profile db2sock) <=
+bash-4.3$ ./chroot_setup.sh chroot_minimal.lst /QOpenSys/db2sock
+bash-4.3$ ./chroot_setup.sh chroot_includes.lst /QOpenSys/db2sock
+bash-4.3$ ./chroot_setup.sh chroot_nls.lst /QOpenSys/db2sock
+bash-4.3$ ./chroot_setup.sh chroot_OPS_GCC.lst /QOpenSys/db2sock
+bash-4.3$ mkdir -p /QOpenSys/db2sock/home/db2sock
+bash-4.3$ ./chroot_chown.sh db2sock
+====
+i set up auto-login from my laptop over ssh (http://www.rebol.com/docs/ssh-auto-login.html)
+====
+ssh -X db2sock@ut28p63
+$ ksh
+$ cd /QOpenSys/QIBM/ProdData/OPS/GCC/pkg
+$ ./pkg_setup.sh pkg_perzl_bash-4.3.lst
+$ export PATH=/opt/freeware/bin:/QOpenSys/usr/bin
+$ bash
+bash-4.3$ ./pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
+====
+IMPORTANT: copy PASE libdb400.a to orignal location
+====
+mkdir -p /QOpenSys/QIBM/ProdData/OS400/PASE/lib
+bash-4.3$ cp /QOpenSys/usr/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a
+===
+IMPORTANT: as400_types.h must have force gcc align quadword  
+===
+bash-4.3$ cp pase_includes/* /QOpenSys/usr/include/
+bash-4.3$ grep gcc /usr/include/as400*       
+/usr/include/as400_types.h:    long double      align __attribute__((aligned(16))); /* force gcc align quadword */
+===
+try make
+===
+bash-4.3$ ./make_libdb400.sh 
+make: *** virtual memory exhausted.  Stop.
+====
+i needed new gmake (and m4)
+http://yips.idevcloud.com/wiki/index.php/PASE/OpenSourceBinaries
+====
+bash-4.3$ wget400 http://yips.idevcloud.com/wiki/uploads/PASE/gmake-4.2.zip
+bash-4.3$ wget400 http://yips.idevcloud.com/wiki/uploads/PASE/m4-1.4.17.zip
+bash-4.3$ unzip gmake-4.2.zip 
+bash-4.3$ unzip m4-1.4.17.zip
+bash-4.3$ cp gmake /opt/freeware/bin/gmake 
+bash-4.3$ cp m4 /opt/freeware/bin/m4       
+===
+re-try make
+===
+bash-4.3$ ./make_libdb400.sh 
+
+```
+
+
 

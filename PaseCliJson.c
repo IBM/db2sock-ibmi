@@ -76,11 +76,11 @@
  * "end-pgm":"NAME",
  * -- complex parm (example)               -- temp_t[] RegionTemps(regions_t,int,int)
  * "pgm":["CLIMATE","MYLIB","RegionTemps"],-- *SRVPGM MYLIB/CLIMATE
- *   "dcl-ds":["regions_t"],               -- ds parm assumed "both" --
+ *   "dcl-ds":["regions_t"],               -- ds parm assumed "both"
  *     "dcl-s":["region","5a","TX"],       -- region[0] = "TX"
  *     "dcl-s":["region","5a","MN"],       -- region[1] = "MN"
- *     "dcl-s":["region","5a","", 20],     -- region[2-21] = "" --
- *     "dcl-ds":["people_t",20],           -- ds[20] nested --
+ *     "dcl-s":["region","5a","", 20],     -- region[2-21] = ""
+ *     "dcl-ds":["people_t",20],           -- ds[20] nested
  *       "dcl-s":["first","32a"],
  *       "dcl-s":["last","32a"],
  *     "end-ds":"people_t",

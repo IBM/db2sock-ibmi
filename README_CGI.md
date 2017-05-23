@@ -34,7 +34,7 @@ Note:
 - db2json.c (CGI) path to libdb400.a (INITARGET)
 compiles ...
 1) compile from chroot
-  > export INICHROOT=/QOpenSys/zend7
+  > export INICHROOT=/QOpenSys/db2sock
   > export INILIB=DB2JSON
   > export INITARGET=/QOpenSys/usr/lib
   > ./make_libdb400.sh ile
@@ -53,11 +53,11 @@ with 'hard code' location of libdb400.a
 ```
   if you want to experiment with CGI (above), 
   create/copy new libdb400.a test directory
-  /QOpenSys/zend7/QOpenSys/usr/lib/libdb400.a
+  /QOpenSys/db2sock/QOpenSys/usr/lib/libdb400.a
   
 ```
 Note: 
-I am using a chroot for my development therefore /QOpenSys/zend7.
+I am using a chroot for my development therefore /QOpenSys/db2sock.
 You will have to replicate if you want to play around (please).
 When project is closer to finshed the final target dir will be choosen.
 

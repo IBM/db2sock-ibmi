@@ -23,14 +23,14 @@ AddHandler fastcgi-script .db2
 
 fastcgi.conf:
 ; Static DB2 servers
-Server type="application/x-httpd-db2" CommandLine="/QOpenSys/zend7/QOpenSys/usr/lib/db2jsonfcgi" StartProcesses="1" SetEnv="LIBPATH=/QOpenSys/zend7/QOpenSys/usr/lib"
+Server type="application/x-httpd-db2" CommandLine="/QOpenSys/db2sock/QOpenSys/usr/lib/db2jsonfcgi" StartProcesses="1" SetEnv="LIBPATH=/QOpenSys/db2sock/QOpenSys/usr/lib"
 ; Where to place socket files
 IpcDir /www/apachedft/logs
 
 
 compiles ...
 1) compile from chroot
-  > export INICHROOT=/QOpenSys/zend7
+  > export INICHROOT=/QOpenSys/db2sock
   > export INILIB=DB2JSON
   > export INITARGET=/QOpenSys/usr/lib
   > ./make_libdb400.sh fcgi
@@ -45,9 +45,9 @@ compiles ...
 ```
   if you want to experiment with fastcgi (above), 
   create/copy new libdb400.a test directory
-  /QOpenSys/zend7/QOpenSys/usr/lib/libdb400.a
+  /QOpenSys/db2sock/QOpenSys/usr/lib/libdb400.a
   also new db2jsonfcgi test directory
-  /QOpenSys/zend7/QOpenSys/usr/lib/db2jsonfcgi
+  /QOpenSys/db2sock/QOpenSys/usr/lib/db2jsonfcgi
 ```
 # json
 ```
