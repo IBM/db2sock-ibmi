@@ -639,7 +639,6 @@ int ile_pgm_isnum_decorated(char c) {
   }
   switch(c){
   case '-':
-  case '+':
   case '.':
     return 1;
   default:
@@ -1007,7 +1006,7 @@ SQLRETURN ile_pgm_str2bin(char * where, char *str, int tdim, int tlen, int tvary
   int j = 0;
   int k = 0;
   int outDigits = tlen;
-  int outLength = outDigits/2;
+  int outLength = outDigits;
   int inLength = 0;
   int firstNibble = 0;
   int secondNibble = 0;
@@ -1023,7 +1022,7 @@ SQLRETURN ile_pgm_str2bin(char * where, char *str, int tdim, int tlen, int tvary
     memset(wherev, 0, outLength);
     dec = wherev;
     c = str;
-    for (j=0, k=0; j < inLength-1; ) {
+    for (j=0, k=0; j < outDigits && k < inLength; ) {
       firstNibble = (char)(c[k++] & 0x000F) << 4;
       secondNibble = (char)(c[k++] & 0x000F);
       dec[j++] = (char)(firstNibble + secondNibble);
@@ -1181,7 +1180,7 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     }
     break;
   case 'b':
-    *spill_len = (tlen/2) * tdim;
+    *spill_len = tlen * tdim;
     break;
   case 'h':
     *spill_len = tlen * tdim;
