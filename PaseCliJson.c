@@ -565,6 +565,28 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   return *playout;
 }
 
+int ile_pgm_isnum_decorated(char c) {
+  if (c >= '0' && c <= '9') {
+    return 1;
+  }
+  switch(c){
+  case '-':
+  case '+':
+  case '.':
+    return 1;
+  default:
+    break;
+  }
+  return 0;
+}
+int ile_pgm_isnum_digit(char c) {
+  if (c >= '0' && c <= '9') {
+    return 1;
+  }
+  return 0;
+}
+
+
 int ile_pgm_round_up(int num, int factor) {
   return num + factor - 1 - (num - 1) % factor;
 }
@@ -678,7 +700,7 @@ SQLRETURN ile_pgm_str2float(char * where, const char *str, int tdim) {
   float * wherev = (float *) where;
   float value = 0.0;
   if (str) {
-    value = (float) atof(str);
+    value = (float) strtof(str,NULL);
   }
   for (i=0; i < tdim; i++, wherev++) {
     *wherev = value;
@@ -690,7 +712,7 @@ SQLRETURN ile_pgm_str2double(char * where, const char *str, int tdim) {
   double * wherev = (double *) where;
   double value = 0.0;
   if (str) {
-    value = (double) atof(str);
+    value = (double) strtod(str,NULL);
   }
   for (i=0; i < tdim; i++, wherev++) {
     *wherev = value;
@@ -737,7 +759,7 @@ SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int ts
     if (c[i] == '-') {
       sign = i + 1;
     } else {
-      if (c[i] >= '0' && c[i] <= '9') {
+      if (ile_pgm_isnum_digit(c[i])) {
         chr[j++] = c[i];
       }
     }
@@ -745,15 +767,23 @@ SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int ts
   /* convert string to packed */
   c = chr;
   inLength = strlen(c); 
+  j = 0;
   if (outDigits % 2 == 0) {
    leadingZeros = outDigits - inLength + 1;
   } else {
    leadingZeros = outDigits - inLength;
   }
-  if (leadingZeros % 2 != 0) {
-    dec[j++] = (char)(c[k++] & 0x000F);
+  /* write correct number of leading zero's */
+  for (i=0; i<leadingZeros-1; i+=2) {
+    dec[j++] = 0;
   }
-  while (j < inLength-1) {
+  if (leadingZeros > 0) {
+    if (leadingZeros % 2 != 0) {
+      dec[j++] = (char)(c[k++] & 0x000F);
+    }
+  }
+  /* place all the digits except last one */
+  while (j < outLength-1) {
     firstNibble = (char)(c[k++] & 0x000F) << 4;
     secondNibble = (char)(c[k++] & 0x000F);
     dec[j++] = (char)(firstNibble + secondNibble);
@@ -800,7 +830,7 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
     if (c[i] == '-') {
       sign = i + 1;
     } else {
-      if (c[i] >= '0' && c[i] <= '9') {
+      if (ile_pgm_isnum_digit(c[i])) {
         chr[j++] = c[i];
       }
     }
@@ -808,13 +838,14 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
   /* convert string to zoned */
   c = chr;
   inLength = strlen(c); 
+  j = 0;
   /* write correct number of leading zero's */
   for (i=0; i < outDigits-inLength; i++)
   {
     dec[j++] = (char)0xF0;
   }
   /* place all the digits except the last one */
-  while (j < inLength-1)
+  while (j < outLength-1)
   {
     dec[j++] = (char)((c[k++] & 0x000F) | 0x00F0);
   }
@@ -964,7 +995,7 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
   c = str;
   cl = strlen(c);
   for (i=0; cl && i < cl; i++) {
-    if (c[i] >= '0' || c[i] <= '9') {
+    if (ile_pgm_isnum_digit(c[i])) {
       /* len */
       if (t == ' ') {
         clen[j] = c[i];
@@ -988,16 +1019,16 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
   }
   /* len */
   if (j) {
-    rc = ile_pgm_str2int32((char *)&tlen, clen, 1);
+    rc = ile_pgm_str2int32((char *)tlen, clen, 1);
   }
   /* scale */
   if (k) {
-    rc = ile_pgm_str2int32((char *)&tscale, cscale, 1);
+    rc = ile_pgm_str2int32((char *)tscale, cscale, 1);
   }
   /* varying 2 or 4 */
   if (v1 != ' ') {
     if (l) {
-      rc = ile_pgm_str2int32((char *)&tvary, cvary, 1);
+      rc = ile_pgm_str2int32((char *)tvary, cvary, 1);
     } else {
       *tvary = 2;
     }
@@ -1007,10 +1038,91 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
 }
 
 /* in|out|both|value|const|return */
-int ile_pgm_by(char *str, int tlen, int isDs, int tdim, int * next_len) {
+int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len) {
   int by = ILE_PGM_BY_REF_IN;
   /* default length input */
-  *next_len = tlen * tdim;
+  switch (typ) {
+  case 'i':
+    switch (tlen) {
+    case 3:
+      *spill_len = sizeof(int8) * tdim;
+      break;
+    case 5:
+      *spill_len = sizeof(int16) * tdim;
+      break;
+    case 10:
+      *spill_len = sizeof(int32) * tdim;
+      break;
+    case 20:
+      *spill_len = sizeof(int64) * tdim;
+      break;
+    default:
+      *spill_len = sizeof(int32) * tdim;
+      break;
+    }
+    break;
+  case 'u':
+    switch (tlen) {
+    case 3:
+      *spill_len = sizeof(uint8) * tdim;
+      break;
+    case 5:
+      *spill_len = sizeof(uint16) * tdim;
+      break;
+    case 10:
+      *spill_len = sizeof(uint32) * tdim;
+      break;
+    case 20:
+      *spill_len = sizeof(uint64) * tdim;
+      break;
+    default:
+      *spill_len = sizeof(uint32) * tdim;
+      break;
+    }
+    break;
+  case 'f':
+    switch (tlen) {
+    case 4:
+      *spill_len = sizeof(float) * tdim;
+      break;
+    case 8:
+      *spill_len = sizeof(double) * tdim;
+      break;
+    default:
+      *spill_len = sizeof(double) * tdim;
+      break;
+    }
+    break;
+  case 'p':
+    *spill_len = (tlen/2+1) * tdim;
+    break;
+  case 's':
+    *spill_len = tlen * tdim;
+    break;
+  case 'a':
+    switch(tvary){
+    case 2:
+      *spill_len = (tlen+sizeof(uint16)) * tdim;
+      break;
+    case 4:
+      *spill_len = (tlen+sizeof(uint32)) * tdim;
+      break;
+    default:
+      *spill_len = tlen * tdim;
+      break;
+    }
+    break;
+  case 'b':
+    *spill_len = (tlen/2) * tdim;
+    break;
+  case 'h':
+    *spill_len = tlen * tdim;
+    break;
+  default:
+    *spill_len = tlen * tdim;
+    break;
+  }
+  /* pass by ref/val or isDS (val) */
   if (isDs) {
     by = ILE_PGM_BY_IN_DS;
   } else if (!str) {
@@ -1024,10 +1136,10 @@ int ile_pgm_by(char *str, int tlen, int isDs, int tdim, int * next_len) {
       by = ILE_PGM_BY_REF_BOTH;
     } else if (str[0] == 'v' || str[0] == 'c') {
       by = ILE_PGM_BY_VALUE;
-      if (*next_len > 8) {
+      if (*spill_len > 8) {
         by = ILE_PGM_BY_REF_IN;
       } else {
-        *next_len = 0;
+        *spill_len = 0;
       }
     } else if (str[0] == 'r') {
       by = ILE_PGM_BY_RETURN;
@@ -1118,9 +1230,9 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
   return where;
 }
 
-void ile_pgm_parm_next_location(int pos_len, ile_pgm_call_t * layout) {
+void ile_pgm_parm_next_location(int spill_len, ile_pgm_call_t * layout) {
   /* next position */
-  layout->pos += pos_len;
+  layout->pos += spill_len;
 }
 
 
@@ -1143,7 +1255,7 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   int tdim = 0;
   int tccsid = 0;
 
-  int pos_len = 0;
+  int spill_len = 0;
   int rc = 0;
   int by = 0;
   char * where = NULL;
@@ -1192,10 +1304,10 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   }
 
   /* parse in|out|both|value|const|return */
-  by = ile_pgm_by(in_by, tlen, tdim, isDs, &pos_len);
-  if (!isOut && pos_len) {
+  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len);
+  if (!isOut && spill_len) {
     /* grow template (if need) */
-    layout = ile_pgm_grow(playout, pos_len);
+    layout = ile_pgm_grow(playout, spill_len);
   }
 
   /* location of parm or ds data */
@@ -1208,7 +1320,7 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   switch (typ) {
   case 'i':
     switch (tlen) {
-    case 1:
+    case 3:
       if (!isOut) {
         rc = ile_pgm_str2int8(where, in_value, tdim);
       }
@@ -1235,7 +1347,7 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
     break;
   case 'u':
     switch (tlen) {
-    case 1:
+    case 3:
       if (!isOut) {
         rc = ile_pgm_str2uint8(where, in_value, tdim);
       }
@@ -1308,7 +1420,7 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   }
 
   /* next position */
-  ile_pgm_parm_next_location(pos_len, layout);
+  ile_pgm_parm_next_location(spill_len, layout);
 
   return SQL_SUCCESS;
 }
@@ -1770,10 +1882,11 @@ int custom_json_parse_array_values(char *c, char **v) {
   int idx = 0;
   char * f = c;
   char * g = c;
+  int max = strlen(c);
   /* "parm":[1,2,"bob"]
    *         x
    */
-  for (i=0; c[i]; i++) {
+  for (i=0; c[i] && i < max; i++) {
     switch(c[i]) {
     /* "parm":[1,2,"bob"]
      *             x
@@ -1800,10 +1913,10 @@ int custom_json_parse_array_values(char *c, char **v) {
       /* "parm":[1,2,"bob"]
        *         x
        */
-      if (c[i]>='0' && c[i]<='9') {
+      if (ile_pgm_isnum_decorated(c[i])) {
         f = &c[i];
         for (i++; ;i++) {
-          if (c[i] >= '0' && c[i] <= '9') {
+          if (ile_pgm_isnum_decorated(c[i])) {
             continue;
           }
           c[i]=0x00;

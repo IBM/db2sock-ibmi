@@ -86,6 +86,7 @@ case "$SELECT" in
     echo "# -------"
     echo "# build libdb400.a(shr.o/shr_64.o)"
     echo "# -------"
+    pwd
     gmake -f Makefile
     gmake -f Makefile TGT64=64
     echo "# -------"
@@ -106,6 +107,9 @@ case "$SELECT" in
     echo "# build tests_c"
     echo "# -------"
     cd tests_c
+    pwd
+    INIL=$(pwd)
+    export "INIL=$INICHROOT$INIL"
     gmake -f Makefile
     gmake -f Makefile TGT64=64
     cd ..
@@ -122,6 +126,7 @@ case "$SELECT" in
     echo "# (ignore warnings in os_unix.c)"
     echo "# -------"
     cd fastcgi
+    pwd
     tar -xf fcgi.tar
     gmake -f Makefile
     echo "# -------"
