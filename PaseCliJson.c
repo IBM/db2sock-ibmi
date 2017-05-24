@@ -799,9 +799,6 @@ SQLRETURN ile_pgm_str2hole(char * where, int tlen, int tdim) {
   }
   return SQL_SUCCESS;
 }
-/*
- * general idea -- need test
- */
 SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
@@ -873,9 +870,6 @@ SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int ts
   }
   return SQL_SUCCESS;
 }
-/*
- * general idea -- need test
- */
 SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
@@ -935,9 +929,6 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
   }
   return SQL_SUCCESS;
 }
-/*
- * general idea -- need test
- */
 SQLRETURN ile_pgm_str2char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
   int rc = 0;
   int i = 0;
@@ -1712,8 +1703,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
     /* don't bother trying ...
-     * nothing tested yet with pgm
-     * (just saving work until finished)
+     * still working on input pgm
      */
     case JSON400_KEY_PGM:
       isOut = 0;
