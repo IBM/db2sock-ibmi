@@ -54,6 +54,9 @@ int main(int argc, char * argv[]) {
   \"dcl-s\":[\"double\",\"8f\",123456.78],\
   \"dcl-s\":[\"packed\",\"12p2\",123456.78],\
   \"dcl-s\":[\"zoned\",\"12s2\",123456.78],\
+  \"dcl-s\":[\"char\",\"32a\",\"Hi there\"],\
+  \"dcl-s\":[\"varchar2\",\"32av2\",\"Hi there\"],\
+  \"dcl-s\":[\"varchar4\",\"32av4\",\"Hi there\"],\
   \"end-pgm\":\"FAKENAME\"\
   }";
   int inlen = strlen(injson);

@@ -177,14 +177,14 @@ typedef struct ile_pgm_call_struct {
   int arg_by[ILE_PGM_MAX_ARGS];
   int arg_pos[ILE_PGM_MAX_ARGS];
   int arg_len[ILE_PGM_MAX_ARGS];
+  char pgm[16];
+  char lib[16];
+  char func[128];
   int max;
   int pos;
   int vpos;
   int argc;
   int parmc;
-  char pgm[16];
-  char lib[16];
-  char func[128];
   char * buf;
 } ile_pgm_call_t;
 
@@ -530,37 +530,105 @@ int custom_output_sql_errors(int fmt, SQLHANDLE handle, SQLSMALLINT hType, int r
   return SQL_SUCCESS;
 }
 
+/* by ref area */
+void ile_pgm_reset_spill_pos(ile_pgm_call_t * layout) {
+  int delta = 0;
+  delta = (char *)&layout->buf - (char *)layout;
+  layout->pos = delta;
+}
+int ile_pgm_curr_spill_pos(ile_pgm_call_t * layout) {
+  return layout->pos;
+}
+char * ile_pgm_curr_spill_ptr(ile_pgm_call_t * layout) {
+  return (char *)layout + layout->pos;
+}
+void ile_pgm_next_spill_pos(ile_pgm_call_t * layout, int spill_len) {
+  layout->pos += spill_len;
+}
+
+/* by value area (register area) */
+void ile_pgm_reset_argv_pos(ile_pgm_call_t * layout) {
+  int delta = 0;
+  layout->argc = 0;
+  layout->parmc = 0;
+  layout->vpos = (char *)&layout->argv[0] - (char *)layout;
+}
+void ile_pgm_argv_full_reg_available(ile_pgm_call_t * layout) {
+  int beg_reg  = (char *)&layout->argv[layout->argc] - (char *)layout;
+  /* beyond register (use another register location) */
+  if (layout->vpos > beg_reg) {
+    layout->argc++;
+  }
+  /* register used for pass by ref, by value start next register location */
+  layout->vpos = (char *)&layout->argv[layout->argc + 1] - (char *)layout; 
+}
+char * ile_pgm_curr_argv_ptr_align(ile_pgm_call_t * layout, int tlen) {
+  int beg_reg  = (char *)&layout->argv[layout->argc] - (char *)layout;
+  int end_reg  = beg_reg + sizeof(ILEpointer);
+  /* natural alignment (by value) */
+  if (tlen == 2) {
+    layout->vpos = ile_pgm_round_up(layout->vpos, 2);
+  } else if (tlen <= 4) {
+    layout->vpos = ile_pgm_round_up(layout->vpos, 4);
+  } else if (tlen <= 8) {
+    layout->vpos = ile_pgm_round_up(layout->vpos, 8);
+  }
+  /* beyond register (use another register location) */
+  if (layout->vpos + tlen > end_reg) {
+    layout->argc++;
+  } 
+  return (char *)layout + layout->vpos;
+}
+int ile_pgm_curr_argv_pos(ile_pgm_call_t * layout) {
+  return layout->vpos;
+}
+void ile_pgm_next_argv_pos(ile_pgm_call_t * layout, int tlen) {
+  layout->vpos += tlen;
+}
+
 ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   int i = 0;
-  int sz = 0;
-  int len = 0;
-  int lmax = 0;
+  int new_len = 0;
+  int orig_len = 0;
   char * tmp = NULL;
+  int delta = 0;
   ile_pgm_call_t * layout = *playout;
   /* enough room ? */
-  if (layout && layout->max < size) {
-    return *playout;
-  }
-  /* need more space */
-  for (i=0; sz < size; i++) {
-    sz += ILE_PGM_ALLOC_BLOCK;
-  }
-  /* total template size */
   if (layout) {
-    len = layout->max;
-    lmax = layout->max + sz;
-  } else {
-    len = 0;
-    lmax = sz;
+    /* max length - current position */
+    delta = layout->max - layout->pos;
+    if (delta > size) {
+      return *playout;
+    }
+    new_len = layout->max;
+    orig_len = new_len;
+  }
+  /* need more space (block size alloc) */
+  for (i=0; new_len < size + sizeof(ile_pgm_call_t); i++) {
+    new_len += ILE_PGM_ALLOC_BLOCK;
   }
   /* expanded layout template */
-  tmp = custom_json_new(lmax);
+  tmp = custom_json_new(new_len);
   /* copy original data */
-  if (len) {
-    memcpy(tmp, layout, len);
+  if (orig_len) {
+    memcpy(tmp, layout, orig_len);
+  }
+  /* layout to new pointer */
+  layout = (ile_pgm_call_t *) tmp;
+  /* max template */
+  layout->max = new_len;
+  /* current spill pos */
+  if (!orig_len) {
+    ile_pgm_reset_argv_pos(layout);
+    ile_pgm_reset_spill_pos(layout);
+  }
+  /* old layout free */
+  tmp = (char *)(*playout);
+  if (tmp) {
+    custom_json_free(tmp);
   }
   /* rest layout template pointer */
-  *playout = (ile_pgm_call_t *) tmp;
+  *playout = layout;
   /* return new location (tmp ptrs) */
   return *playout;
 }
@@ -1135,11 +1203,12 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     } else if (str[0] == 'b') {
       by = ILE_PGM_BY_REF_BOTH;
     } else if (str[0] == 'v' || str[0] == 'c') {
-      by = ILE_PGM_BY_VALUE;
+      /* not fit in register (not by value) */
       if (*spill_len > 8) {
         by = ILE_PGM_BY_REF_IN;
+      /* ok, fit in register (by value/const) */
       } else {
-        *spill_len = 0;
+        by = ILE_PGM_BY_VALUE;
       }
     } else if (str[0] == 'r') {
       by = ILE_PGM_BY_RETURN;
@@ -1153,73 +1222,48 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
 char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layout) {
 
   char * where = NULL;
-  char * wherev = NULL;
-  int delta = 0;
-  int curr = 0;
 
-  /* current parm count */
-  curr = layout->parmc;
-  wherev = (char *)&layout->buf;
-  delta = (char *)wherev - (char *)layout;
-  if (layout->pos == 0) {
-    layout->pos = delta;
-  }
   /* current value assumed by ref buffer (or ds data)*/
-  where = (char *) &layout->buf + layout->pos;
+  where = ile_pgm_curr_spill_ptr(layout);
   switch (by) {
-  /* parm pass by ref (not ds data) */
+  /* parm pass by ref (spill area) */
   case ILE_PGM_BY_REF_IN:
   case ILE_PGM_BY_REF_OUT:
   case ILE_PGM_BY_REF_BOTH:
-    /* previuosly argv curr location for pass by value */
-    if (layout->pos != delta && layout->arg_pos[curr] < delta) {
-      layout->argc++;
-    }
+    ile_pgm_argv_full_reg_available(layout);
     if (!isOut) {
-      layout->argv_parm[layout->argc] = curr;
-      layout->arg_by[curr] = by;
-      layout->arg_pos[curr] = layout->pos;
-      layout->arg_len[curr] = tlen;
+      layout->argv_parm[layout->argc] = layout->parmc;
+      layout->arg_by[layout->parmc] = by;
+      layout->arg_pos[layout->parmc] = ile_pgm_curr_spill_pos(layout);
+      layout->arg_len[layout->parmc] = tlen;
     }
-    layout->vpos = 0;
     layout->argc++;
     layout->parmc++;
+    /* next position */
+    ile_pgm_next_spill_pos(layout, tlen);
     break;
   /* parm pass by value */
   case ILE_PGM_BY_VALUE:
-    wherev = (char *) &layout->argv[layout->argc];
-    if (layout->vpos == 0) {
-      layout->vpos = (char *)wherev - (char *)layout;
-    }
-    /* natural alignment */
-    if (tlen == 2) {
-      layout->vpos = ile_pgm_round_up(layout->vpos, 2);
-    } else if (tlen <= 4) {
-      layout->vpos = ile_pgm_round_up(layout->vpos, 4);
-    } else if (tlen <= 8) {
-      layout->vpos = ile_pgm_round_up(layout->vpos, 8);
-    }
-    /* length past parameter slot - next slot */
-    if (layout->vpos + tlen > sizeof(ILEpointer)) {
-      layout->argc++;
-      layout->vpos = 0;
-      wherev = (char *) &layout->argv[layout->argc];
-    }
-    where = wherev + layout->vpos;
-    /* by value argument aligned */
+    where = ile_pgm_curr_argv_ptr_align(layout, tlen);
     if (!isOut) {
       layout->argv_parm[layout->argc] = 0;
-      layout->arg_by[curr] = by;
-      layout->arg_pos[curr] = layout->vpos;
-      layout->arg_len[curr] = tlen;
+      layout->arg_by[layout->parmc] = by;
+      layout->arg_pos[layout->parmc] = ile_pgm_curr_argv_pos(layout);
+      layout->arg_len[layout->parmc] = tlen;
     }
     layout->parmc++;
+    /* next position */
+    ile_pgm_next_argv_pos(layout, tlen);
     break;
   /* return in buffer */
   case ILE_PGM_BY_RETURN:
+    /* next position */
+    ile_pgm_next_spill_pos(layout, tlen);
     break;
   /* ds data */
   case ILE_PGM_BY_IN_DS:
+    /* next position */
+    ile_pgm_next_spill_pos(layout, tlen);
     break;
   /* other??? */
   default:
@@ -1228,11 +1272,6 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
   }
   /* location of value */
   return where;
-}
-
-void ile_pgm_parm_next_location(int spill_len, ile_pgm_call_t * layout) {
-  /* next position */
-  layout->pos += spill_len;
 }
 
 
@@ -1311,7 +1350,7 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   }
 
   /* location of parm or ds data */
-  where = ile_pgm_parm_location(isOut, by, tlen, layout);
+  where = ile_pgm_parm_location(isOut, by, spill_len, layout);
   if (!where) {
     return SQL_ERROR;
   }
@@ -1418,10 +1457,6 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
     return SQL_ERROR;
     break;
   }
-
-  /* next position */
-  ile_pgm_parm_next_location(spill_len, layout);
-
   return SQL_SUCCESS;
 }
 
@@ -1706,6 +1741,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
      */
     case JSON400_KEY_END_PGM:
       isOut = 1;
+      ile_pgm_reset_spill_pos(layout);
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
