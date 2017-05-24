@@ -586,6 +586,11 @@ void ile_pgm_next_argv_pos(ile_pgm_call_t * layout, int tlen) {
   layout->vpos += tlen;
 }
 
+void ile_pgm_reset_pos(ile_pgm_call_t * layout) {
+  ile_pgm_reset_argv_pos(layout);
+  ile_pgm_reset_spill_pos(layout);
+}
+
 ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   int i = 0;
   int new_len = 0;
@@ -619,8 +624,7 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   layout->max = new_len;
   /* current spill pos */
   if (!orig_len) {
-    ile_pgm_reset_argv_pos(layout);
-    ile_pgm_reset_spill_pos(layout);
+    ile_pgm_reset_pos(layout);
   }
   /* old layout free */
   tmp = (char *)(*playout);
@@ -1719,8 +1723,6 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       }
       /* statement */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
-      /* clear parameter area */
-      memset(&layout,0,sizeof(layout));
       break;
     /*
      * input copy in any dcl-s, dcl-ds
@@ -1740,7 +1742,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
      */
     case JSON400_KEY_END_PGM:
       isOut = 1;
-      ile_pgm_reset_spill_pos(layout);
+      ile_pgm_reset_pos(layout);
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
