@@ -1478,6 +1478,75 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
   }
   return SQL_SUCCESS;
 }
+SQLRETURN ile_pgm_char_2_output(int fmt, char *out_caller, char * where, int tlen, int tvary, int tccsid, int tdim) {
+  int rc = 0;
+  int i = 0;
+  int j = 0;
+  char * wherev = where;
+  int len = 0;
+  char * utf8 = NULL;
+  char * c = NULL;
+  char * str_empty = "";
+  char * str_json_empty = "{}";
+  /* ebcdic ccsid? */
+  if (!tccsid) {
+    tccsid = Qp2jobCCSID();
+  }
+  /* copy in ebcdic 2 utf8 */
+  len = tlen;
+  utf8 = custom_json_new(len*4);
+  for (i=0; i < tdim; i++, wherev += tlen) {
+    /* vary */
+    if (tvary == 4) {
+      len = *(int *) wherev;
+      wherev += 4;
+    } else if (tvary) {
+      len = *(short *) wherev;
+      wherev += 2;
+    } else {
+      len = tlen;
+    }
+    if (len) {
+      /* convert ebcdic to utf8 */
+      memset(utf8,0,len*4);
+      rc = SQL400ToUtf8(0, wherev, len, utf8, len*4, tccsid);
+      /* trim */
+      len = strlen(utf8);
+      for (c = utf8, j = len - 1; j >= 0; j--) {
+        if (!c[j] || c[j] == 0x20) {
+          c[j] = 0x00;
+          len = j;
+        } else {
+          break;
+        }
+      }
+    } /* j loop (trim) */
+    /* output processing */
+    if (len) {
+      custom_output_pgm_dcl_s_data(fmt, out_caller, utf8, 0);
+    } else {
+      switch (fmt) {
+      case JSON400_OUT_JSON_STDOUT:
+        custom_output_pgm_dcl_s_data(fmt, out_caller, str_json_empty, 1);
+        break;
+      case JSON400_OUT_JSON_BUFF:
+        custom_output_pgm_dcl_s_data(fmt, out_caller, str_json_empty, 1);
+        break;
+      default:
+        custom_output_pgm_dcl_s_data(fmt, out_caller, str_empty, 1);
+        break;
+      }
+    }
+  } /* i loop (tdim) */
+  /* free temp storage */
+  if (utf8) {
+    custom_json_free(utf8);
+  }
+  return SQL_SUCCESS;
+}
+
+
+
 /*
  * general idea -- need test
  */
@@ -1490,6 +1559,8 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   int inLength = 0;
   int firstNibble = 0;
   int secondNibble = 0;
+  short * short_value = NULL;
+  int * int_value = NULL;
   char * dec = NULL;
   char * c = NULL;
   char * wherev = where;
@@ -1499,6 +1570,17 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   }
   /* copy in */
   for (i=0; i < tdim; i++, wherev += outLength) {
+    /* vary */
+    if (tvary == 4) {
+      int_value = (int *) wherev;
+      *int_value = inLength/2;
+      wherev += 4;
+    } else if (tvary) {
+      short_value = (short *) wherev;
+      *short_value = inLength/2;
+      wherev += 2;
+    }
+    /* digits */
     memset(wherev, 0, outLength);
     dec = wherev;
     c = str;
@@ -1507,6 +1589,111 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
       secondNibble = (char)(c[k++] & 0x000F);
       dec[j++] = (char)(firstNibble + secondNibble);
     }
+  }
+  return SQL_SUCCESS;
+}
+SQLRETURN ile_pgm_bin_2_output(int fmt, char *out_caller, char * where, int tlen, int tvary, int tdim) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  int len = 0;
+  char * wherev = (char *) where;
+  int outDigits = tlen;
+  int outLength = outDigits*2+1;
+  int leftDigitValue = 0;
+  int rightDigitValue = 0;
+  int anyDigitValue = 0;
+  char * c = NULL;
+  char * str = NULL;
+  str = custom_json_new(outLength);
+  for (i=0; i < tdim; i++, wherev += outDigits) {
+    /* vary */
+    if (tvary == 4) {
+      len = *(int *) wherev;
+      wherev += 4;
+    } else if (tvary) {
+      len = *(short *) wherev;
+      wherev += 2;
+    } else {
+      len = tlen;
+    }
+    /* digits */
+    memset(str,0,outLength);
+    for (k=0, c = wherev; k < len; k++) {
+      leftDigitValue = (char)((c[k] >> 4) & 0x0F);
+      rightDigitValue = (char)(c[k] & 0x0F);
+      for (l=0; l<2; l++) {
+        switch(l) {
+        case 0:
+          anyDigitValue = leftDigitValue;
+          break;
+        case 1:
+          anyDigitValue = rightDigitValue;
+          break;
+        default:
+          break;
+        }
+        /* digit to string */
+        switch(anyDigitValue) {
+        case 0:
+          str[j++] = '0';
+          break;
+        case 1:
+          str[j++] = '1';
+          break;
+        case 2:
+          str[j++] = '2';
+          break;
+        case 3:
+          str[j++] = '3';
+          break;
+        case 4:
+          str[j++] = '4';
+          break;
+        case 5:
+          str[j++] = '5';
+          break;
+        case 6:
+          str[j++] = '6';
+          break;
+        case 7:
+          str[j++] = '7';
+          break;
+        case 8:
+          str[j++] = '8';
+          break;
+        case 9:
+          str[j++] = '9';
+          break;
+        case 0xA:
+          str[j++] = 'A';
+          break;
+        case 0xB:
+          str[j++] = 'B';
+          break;
+        case 0xC:
+          str[j++] = 'C';
+          break;
+        case 0xD:
+          str[j++] = 'D';
+          break;
+        case 0xE:
+          str[j++] = 'E';
+          break;
+        case 0xF:
+          str[j++] = 'F';
+          break;
+        default:
+          break;
+        }
+      } /* l loop (digits) */
+    } /* k loop (outLength) */
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 0);
+  } /* i loop (tdim) */
+  /* free temp storage */
+  if (str) {
+    custom_json_free(str);
   }
   return SQL_SUCCESS;
 }
@@ -1947,12 +2134,16 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     }
     break;
   case 'a':
-    if (!isOut) {
+    if (isOut) {
+      ile_pgm_char_2_output(fmt, out_caller, where, tlen, tvary, tccsid, tdim);
+    } else {
       rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid);
     }
     break;
   case 'b':
-    if (!isOut) {
+    if (isOut) {
+      ile_pgm_bin_2_output(fmt, out_caller, where, tlen, tvary, tdim);
+    } else {
       rc = ile_pgm_str_2_bin(where, in_value, tdim, tlen, tvary);
     }
     break;
