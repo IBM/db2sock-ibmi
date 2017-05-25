@@ -111,8 +111,8 @@
  * "5u0"   uns(5)          uint16, ushort, unsigned short
  * "10u0"  uns(10)         uint32, uint, unsigned long
  * "20u0"  uns(20)         uint64, ulonglong, unsigned long long
- * "4f"    float           float
- * "8f"    double          double
+ * "4f2"   float           float
+ * "8f2"   double          double
  * "12p2"  packed(12:2)    (no c equiv)
  * "12s2"  zoned(12:2)     (no c equiv)
  * "8h"    hole            hole
@@ -868,7 +868,7 @@ SQLRETURN ile_pgm_int8_2_output(int fmt, char *out_caller, char * where, int tdi
   int i = 0;
   int8 * wherev = (int8 *) where;
   int8 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -895,7 +895,7 @@ SQLRETURN ile_pgm_int16_2_output(int fmt, char *out_caller, char * where, int td
   int i = 0;
   int16 * wherev = (int16 *) where;
   int16 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -922,7 +922,7 @@ SQLRETURN ile_pgm_int32_2_output(int fmt, char *out_caller, char * where, int td
   int i = 0;
   int32 * wherev = (int32 *) where;
   int32 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -949,7 +949,7 @@ SQLRETURN ile_pgm_int64_2_output(int fmt, char *out_caller, char * where, int td
   int i = 0;
   int64 * wherev = (int64 *) where;
   int64 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -976,7 +976,7 @@ SQLRETURN ile_pgm_uint8_2_output(int fmt, char *out_caller, char * where, int td
   int i = 0;
   uint8 * wherev = (uint8 *) where;
   uint8 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -1003,7 +1003,7 @@ SQLRETURN ile_pgm_uint16_2_output(int fmt, char *out_caller, char * where, int t
   int i = 0;
   uint16 * wherev = (uint16 *) where;
   uint16 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -1030,7 +1030,7 @@ SQLRETURN ile_pgm_uint32_2_output(int fmt, char *out_caller, char * where, int t
   int i = 0;
   uint32 * wherev = (uint32 *) where;
   uint32 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -1057,7 +1057,7 @@ SQLRETURN ile_pgm_uint64_2_output(int fmt, char *out_caller, char * where, int t
   int i = 0;
   uint64 * wherev = (uint64 *) where;
   uint64 value = 0;
-  char str[32];
+  char str[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
@@ -1079,15 +1079,22 @@ SQLRETURN ile_pgm_str_2_float(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_float_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_float_2_output(int fmt, char *out_caller, char * where, int tscale, int tdim) {
   int i = 0;
   float * wherev = (float *) where;
   float value = 0;
-  char str[32];
+  char str[128];
+  char outfmt[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%f",value);
+    if (tscale) {
+      memset(outfmt,0,sizeof(outfmt));
+      sprintf(outfmt,"%%.%df",tscale);
+      sprintf(str,outfmt,value);
+    } else {
+      sprintf(str,"%f",value);
+    }
     custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -1105,15 +1112,22 @@ SQLRETURN ile_pgm_str_2_double(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_double_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_double_2_output(int fmt, char *out_caller, char * where, int tscale, int tdim) {
   int i = 0;
   double * wherev = (double *) where;
   double value = 0;
-  char str[32];
+  char str[128];
+  char outfmt[128];
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%f",value);
+    if (tscale) {
+      memset(outfmt,0,sizeof(outfmt));
+      sprintf(outfmt,"%%.%df",tscale);
+      sprintf(str,outfmt,value);
+    } else {
+      sprintf(str,"%f",value);
+    }
     custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -1201,6 +1215,86 @@ SQLRETURN ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int 
   }
   return SQL_SUCCESS;
 }
+SQLRETURN ile_pgm_packed_2_output(int fmt, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  int isOk = 0;
+  int isDot = 0;
+  int isScale = 0;
+  char * wherev = (char *) where;
+  int outDigits = tlen;
+  int outLength = outDigits/2+1;
+  int leftDigitValue = 0;
+  int rightDigitValue = 0;
+  char * c = NULL;
+  char str[128];
+  for (i=0; i < tdim; i++, wherev += outLength) {
+    memset(str,0,sizeof(str));
+    /* sign negative */
+    c = wherev;
+    rightDigitValue = (char)(c[outLength-1] & 0x0F);
+    if (rightDigitValue == 0x0D) {
+      str[j++] = '-';
+    }
+    for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+      /* decimal point */
+      l++;
+      if (!isDot && tscale && l >= tlen) {
+        if (!isOk) {
+          str[j++] = (char) 0x30;
+        }
+        str[j++] = '.';
+        isDot = 1;
+        isOk = 1;
+      }
+      /* digits */
+      leftDigitValue = (char)((c[k] >> 4) & 0x0F);
+      if (isOk || leftDigitValue > 0) {
+        str[j++] = (char)(0x30 + leftDigitValue);
+        isOk = 1;
+        if (isDot) {
+          isScale++;
+        }
+      }
+      /* decimal point */
+      l++;
+      if (!isDot && tscale && l >= tlen) {
+        if (!isOk) {
+          str[j++] = (char) 0x30;
+        }
+        str[j++] = '.';
+        isDot = 1;
+        isOk = 1;
+      }
+      /* digits */
+      rightDigitValue = (char)(c[k] & 0x0F);
+      if (k < outLength-1 && (isOk || rightDigitValue > 0)) {
+        str[j++] = (char)(0x30 + rightDigitValue);
+        isOk = 1;
+        if (isDot) {
+          isScale++;
+        }
+      }
+    }
+    /* zero */
+    if (!isOk) {
+      str[j++] = (char) 0x30;
+      str[j++] = '.';
+      isOk = 1;
+      isDot = 1;
+      isScale = 0;
+    }
+    /* one significant decimal */
+    if (isDot && !isScale) {
+      str[j++] = (char) 0x30;
+    }
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
 SQLRETURN ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
@@ -1255,6 +1349,71 @@ SQLRETURN ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int t
   }
   return SQL_SUCCESS;
 }
+SQLRETURN ile_pgm_zoned_2_output(int fmt, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  int isOk = 0;
+  int isDot = 0;
+  int isScale = 0;
+  char * wherev = (char *) where;
+  int outDigits = tlen;
+  int outLength = outDigits;
+  int leftDigitValue = 0;
+  int rightDigitValue = 0;
+  char * c = NULL;
+  char str[128];
+  for (i=0; i < tdim; i++, wherev += outLength) {
+    memset(str,0,sizeof(str));
+    /* sign negative */
+    c = wherev;
+    leftDigitValue = (char)((c[outLength-1] >> 4) & 0x0F);
+    if (leftDigitValue == 0x0D) {
+      str[j++] = '-';
+    }
+    for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+      /* digits */
+      leftDigitValue = (char)((c[k] >> 4) & 0x0F);
+      /* decimal point */
+      if (!isDot && tscale && l >= tlen - tscale) {
+        if (!isOk) {
+          str[j++] = (char) 0x30;
+        }
+        str[j++] = '.';
+        isDot = 1;
+        isOk = 1;
+      }
+      l++;
+      /* digits */
+      rightDigitValue = (char)(c[k] & 0x0F);
+      if (isOk || rightDigitValue > 0) {
+        str[j++] = (char)(0x30 + rightDigitValue);
+        isOk = 1;
+        if (isDot) {
+          isScale++;
+        }
+      }
+    }
+    /* zero */
+    if (!isOk) {
+      str[j++] = (char) 0x30;
+      str[j++] = '.';
+      isOk = 1;
+      isDot = 1;
+      isScale = 0;
+    }
+    /* one significant decimal */
+    if (isDot && !isScale) {
+      str[j++] = (char) 0x30;
+    }
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+
+
 SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
   int rc = 0;
   int i = 0;
@@ -1756,14 +1915,14 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     switch (tlen) {
     case 4:
       if (isOut) {
-        rc = ile_pgm_float_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_float_2_output(fmt, out_caller, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_float(where, in_value, tdim);
       }
       break;
     case 8:
       if (isOut) {
-        rc = ile_pgm_double_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_double_2_output(fmt, out_caller, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_double(where, in_value, tdim);
       }
@@ -1774,12 +1933,16 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     }
     break;
   case 'p':
-    if (!isOut) {
+    if (isOut) {
+      ile_pgm_packed_2_output(fmt, out_caller, where, tlen, tscale, tdim);
+    } else {
       rc = ile_pgm_str_2_packed(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 's':
-    if (!isOut) {
+    if (isOut) {
+      ile_pgm_zoned_2_output(fmt, out_caller, where, tlen, tscale, tdim);
+    } else {
       rc = ile_pgm_str_2_zoned(where, in_value, tdim, tlen, tscale);
     }
     break;
