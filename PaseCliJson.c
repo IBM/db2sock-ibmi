@@ -1428,7 +1428,11 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
   if (!str) {
     str = "";
   }
+  /* truncate user overflow field area */
   len = strlen(str);
+  if (len > tlen) {
+    len = tlen;
+  }
   /* ebcdic ccsid? */
   if (!tccsid) {
     tccsid = Qp2jobCCSID();
@@ -1545,11 +1549,6 @@ SQLRETURN ile_pgm_char_2_output(int fmt, char *out_caller, char * where, int tle
   return SQL_SUCCESS;
 }
 
-
-
-/*
- * general idea -- need test
- */
 SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary) {
   int i = 0;
   int j = 0;
@@ -1567,6 +1566,10 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   /* length of char hex binary input */
   if (str) {
     inLength = strlen(str);
+  }
+  /* truncate user overflow field area */
+  if (inLength > tlen * 2) {
+    inLength = tlen * 2;
   }
   /* copy in */
   for (i=0; i < tdim; i++, wherev += outLength) {
@@ -1847,7 +1850,17 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     }
     break;
   case 'b':
-    *spill_len = tlen * tdim;
+    switch(tvary){
+    case 2:
+      *spill_len = (tlen+sizeof(uint16)) * tdim;
+      break;
+    case 4:
+      *spill_len = (tlen+sizeof(uint32)) * tdim;
+      break;
+    default:
+      *spill_len = tlen * tdim;
+      break;
+    }
     break;
   case 'h':
     *spill_len = tlen * tdim;

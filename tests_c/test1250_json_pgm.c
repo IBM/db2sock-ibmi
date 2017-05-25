@@ -58,6 +58,8 @@ int main(int argc, char * argv[]) {
   \"dcl-s\":[\"varchar2\",\"32av2\",\"Hi there\"],\
   \"dcl-s\":[\"varchar4\",\"32av4\",\"Hi there\"],\
   \"dcl-s\":[\"binary\",\"3b\",\"313233343536\"],\
+  \"dcl-s\":[\"varbinary2\",\"3bv2\",\"313233343536\"],\
+  \"dcl-s\":[\"varbinary4\",\"3bv4\",\"313233343536\"],\
   \"end-pgm\":\"FAKENAME\"\
   }";
   int inlen = strlen(injson);
