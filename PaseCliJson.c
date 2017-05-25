@@ -252,10 +252,10 @@ void custom_output_printf(int adjust, char *out_caller, const char * format, ...
 void custom_output_script_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":{");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":}");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -272,10 +272,10 @@ void custom_output_script_beg(int fmt, char *out_caller) {
 void custom_output_script_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}}\n");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}}\n");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
@@ -541,11 +541,11 @@ void custom_output_pgm_beg(int fmt, char *out_caller, char * name, char * lib, c
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
     custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"pgm\":[\"%s\",\"%s\",\"%s\"]", name, lib, func);
+      "\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
     break;
   case JSON400_OUT_JSON_BUFF:
     custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"pgm\":[\"%s\",\"%s\",\"%s\"]", name, lib, func);
+      "\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -559,15 +559,15 @@ void custom_output_pgm_beg(int fmt, char *out_caller, char * name, char * lib, c
     break;
   }
 }
-void custom_output_pgm_end(int fmt, char *out_caller, char * name) {
+void custom_output_pgm_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"end-pgm\":\"%s\"", name);
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+      "]");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"end-pgm\":\"%s\"", name);
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+      "]");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -587,11 +587,11 @@ void custom_output_pgm_dcl_s_beg(int fmt, char *out_caller, char * name, int tdi
     switch (fmt) {
     case JSON400_OUT_JSON_STDOUT:
       custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"dcl-s\":[\"%s\":[", name);
+        "{\"%s\":[", name);
       break;
     case JSON400_OUT_JSON_BUFF:
       custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"dcl-s\":[\"%s\":[", name);
+        "{\"%s\":[", name);
       break;
     case JSON400_OUT_SPACE_STDOUT:
       break;
@@ -608,11 +608,11 @@ void custom_output_pgm_dcl_s_beg(int fmt, char *out_caller, char * name, int tdi
     switch (fmt) {
     case JSON400_OUT_JSON_STDOUT:
       custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"dcl-s\":[\"%s\":", name);
+        "{\"%s\":", name);
       break;
     case JSON400_OUT_JSON_BUFF:
       custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"dcl-s\":[\"%s\":", name);
+        "{\"%s\":", name);
       break;
     case JSON400_OUT_SPACE_STDOUT:
       break;
@@ -677,11 +677,11 @@ void custom_output_pgm_dcl_s_end(int fmt, char *out_caller, int tdim) {
     switch (fmt) {
     case JSON400_OUT_JSON_STDOUT:
       custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]]");
+        "]}");
       break;
     case JSON400_OUT_JSON_BUFF:
       custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]]");
+        "]}");
       break;
     case JSON400_OUT_SPACE_STDOUT:
       break;
@@ -698,11 +698,11 @@ void custom_output_pgm_dcl_s_end(int fmt, char *out_caller, int tdim) {
     switch (fmt) {
     case JSON400_OUT_JSON_STDOUT:
       custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]");
+        "}");
       break;
     case JSON400_OUT_JSON_BUFF:
       custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]");
+        "}");
       break;
     case JSON400_OUT_SPACE_STDOUT:
       break;
@@ -2495,7 +2495,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
         i = pgmOut - 1;
         break;
       case 1:
-        custom_output_pgm_end(fmt, outjson, val[0]);
+        custom_output_pgm_end(fmt, outjson);
         isOut = 0;
         break;
       default:
@@ -2576,7 +2576,9 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   }
   /* free stdbuf */
   if (stdbuf) {
-    printf("%s\n",stdbuf);
+    printf(stdbuf);
+    printf("\n");
+    fflush(stdout);
     custom_json_free(stdbuf);
   }
   return sqlrc;
