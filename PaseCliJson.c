@@ -218,7 +218,7 @@ void custom_output_printf(int adjust, char *out_caller, const char * format, ...
   }
   switch (adjust) {
   case JSON400_ADJUST_ADD_COMMA:
-    if (q[0] == '{' || q[0] == '[') {
+    if (q[0] == '{' || q[0] == '[' || q[0] == ':') {
       /* do nothing */
     } else  if (q[0] != ',') {
       p[0] = ',';
@@ -530,6 +530,195 @@ int custom_output_sql_errors(int fmt, SQLHANDLE handle, SQLSMALLINT hType, int r
   return SQL_SUCCESS;
 }
 
+/* pgm call */
+void custom_output_pgm_beg(int fmt, char *out_caller, char * name, char * lib, char * func) {
+  if (!lib) {
+    lib = "*LIBL";
+  }
+  if (!func) {
+    func = "";
+  }
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"pgm\":[\"%s\",\"%s\",\"%s\"]", name, lib, func);
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"pgm\":[\"%s\",\"%s\",\"%s\"]", name, lib, func);
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    break;
+  default:
+    break;
+  }
+}
+void custom_output_pgm_end(int fmt, char *out_caller, char * name) {
+  switch (fmt) {
+  case JSON400_OUT_JSON_STDOUT:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"end-pgm\":\"%s\"", name);
+    break;
+  case JSON400_OUT_JSON_BUFF:
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"end-pgm\":\"%s\"", name);
+    break;
+  case JSON400_OUT_SPACE_STDOUT:
+    break;
+  case JSON400_OUT_SPACE_BUFF:
+    break;
+  case JSON400_OUT_COMMA_STDOUT:
+    break;
+  case JSON400_OUT_COMMA_BUFF:
+    break;
+  default:
+    break;
+  }
+}
+
+void custom_output_pgm_dcl_s_beg(int fmt, char *out_caller, char * name, int tdim) {
+  if (tdim > 1) {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"dcl-s\":[\"%s\":[", name);
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"dcl-s\":[\"%s\":[", name);
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  } else {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"dcl-s\":[\"%s\":", name);
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"dcl-s\":[\"%s\":", name);
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  }
+}
+void custom_output_pgm_dcl_s_data(int fmt, char *out_caller, char *value, int numFlag) {
+  if (numFlag == 1) {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "%s", value);
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "%s", value);
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  } else {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"%s\"", value);
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\"%s\"", value);
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  }
+}
+void custom_output_pgm_dcl_s_end(int fmt, char *out_caller, int tdim) {
+  if (tdim > 1) {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+        "]]");
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+        "]]");
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  } else {
+    switch (fmt) {
+    case JSON400_OUT_JSON_STDOUT:
+      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+        "]");
+      break;
+    case JSON400_OUT_JSON_BUFF:
+      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+        "]");
+      break;
+    case JSON400_OUT_SPACE_STDOUT:
+      break;
+    case JSON400_OUT_SPACE_BUFF:
+      break;
+    case JSON400_OUT_COMMA_STDOUT:
+      break;
+    case JSON400_OUT_COMMA_BUFF:
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+
 /* by ref area */
 void ile_pgm_reset_spill_pos(ile_pgm_call_t * layout) {
   int delta = 0;
@@ -662,7 +851,7 @@ int ile_pgm_round_up(int num, int factor) {
   return num + factor - 1 - (num - 1) % factor;
 }
 
-SQLRETURN ile_pgm_str2int8(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_str_2_int8(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   int8 * wherev = (int8 *) where;
@@ -675,7 +864,21 @@ SQLRETURN ile_pgm_str2int8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2int16(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_int8_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  int8 * wherev = (int8 *) where;
+  int8 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_int16(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   int16 * wherev = (int16 *) where;
@@ -688,7 +891,21 @@ SQLRETURN ile_pgm_str2int16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2int32(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_int16_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  int16 * wherev = (int16 *) where;
+  int16 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_int32(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   int32 * wherev = (int32 *) where;
@@ -701,7 +918,21 @@ SQLRETURN ile_pgm_str2int32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2int64(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_int32_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  int32 * wherev = (int32 *) where;
+  int32 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_int64(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   int64 * wherev = (int64 *) where;
@@ -714,7 +945,21 @@ SQLRETURN ile_pgm_str2int64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2uint8(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_int64_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  int64 * wherev = (int64 *) where;
+  int64 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_uint8(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   uint8 * wherev = (uint8 *) where;
@@ -727,7 +972,21 @@ SQLRETURN ile_pgm_str2uint8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2uint16(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_uint8_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  uint8 * wherev = (uint8 *) where;
+  uint8 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_uint16(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   uint16 * wherev = (uint16 *) where;
@@ -740,7 +999,21 @@ SQLRETURN ile_pgm_str2uint16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2uint32(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_uint16_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  uint16 * wherev = (uint16 *) where;
+  uint16 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_uint32(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   uint32 * wherev = (uint32 *) where;
@@ -753,7 +1026,21 @@ SQLRETURN ile_pgm_str2uint32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2uint64(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_uint32_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  uint32 * wherev = (uint32 *) where;
+  uint32 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_uint64(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
   uint64 * wherev = (uint64 *) where;
@@ -766,7 +1053,21 @@ SQLRETURN ile_pgm_str2uint64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2float(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_uint64_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  uint64 * wherev = (uint64 *) where;
+  uint64 value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%d",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_float(char * where, const char *str, int tdim) {
   int i = 0;
   float * wherev = (float *) where;
   float value = 0.0;
@@ -778,7 +1079,21 @@ SQLRETURN ile_pgm_str2float(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2double(char * where, const char *str, int tdim) {
+SQLRETURN ile_pgm_float_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  float * wherev = (float *) where;
+  float value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%f",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_double(char * where, const char *str, int tdim) {
   int i = 0;
   double * wherev = (double *) where;
   double value = 0.0;
@@ -790,7 +1105,21 @@ SQLRETURN ile_pgm_str2double(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2hole(char * where, int tlen, int tdim) {
+SQLRETURN ile_pgm_double_2_output(int fmt, char *out_caller, char * where, int tdim) {
+  int i = 0;
+  double * wherev = (double *) where;
+  double value = 0;
+  char str[32];
+  for (i=0; i < tdim; i++, wherev++) {
+    value = *wherev;
+    memset(str,0,sizeof(str));
+    sprintf(str,"%f",value);
+    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN ile_pgm_str_2_hole(char * where, int tlen, int tdim) {
   int i = 0;
   char * wherev = where;
   /* copy in */
@@ -799,7 +1128,9 @@ SQLRETURN ile_pgm_str2hole(char * where, int tlen, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int tscale) {
+
+
+SQLRETURN ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -870,7 +1201,7 @@ SQLRETURN ile_pgm_str2packed(char * where, char *str, int tdim, int tlen, int ts
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tscale) {
+SQLRETURN ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -905,22 +1236,17 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
   inLength = strlen(c); 
   j = 0;
   /* write correct number of leading zero's */
-  for (i=0; i < outDigits-inLength; i++)
-  {
+  for (i=0; i < outDigits-inLength; i++) {
     dec[j++] = (char)0xF0;
   }
   /* place all the digits except the last one */
-  while (j < outLength-1)
-  {
+  while (j < outLength-1) {
     dec[j++] = (char)((c[k++] & 0x000F) | 0x00F0);
   }
   /* place the sign and last digit */
-  if (!sign)
-  {
+  if (!sign) {
     dec[j++] = (char)((c[k++] & 0x000F) | 0x00F0);
-  }
-  else
-  {
+  } else {
     dec[j++] = (char)((c[k++] & 0x000F) | 0x00D0);
   }
   /* copy in */
@@ -929,7 +1255,7 @@ SQLRETURN ile_pgm_str2zoned(char * where, char *str, int tdim, int tlen, int tsc
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_str2char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
+SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
   int rc = 0;
   int i = 0;
   int j = 0;
@@ -996,7 +1322,7 @@ SQLRETURN ile_pgm_str2char(char * where, char *str, int tdim, int tlen, int tvar
 /*
  * general idea -- need test
  */
-SQLRETURN ile_pgm_str2bin(char * where, char *str, int tdim, int tlen, int tvary) {
+SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1081,16 +1407,16 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
   }
   /* len */
   if (j) {
-    rc = ile_pgm_str2int32((char *)tlen, clen, 1);
+    rc = ile_pgm_str_2_int32((char *)tlen, clen, 1);
   }
   /* scale */
   if (k) {
-    rc = ile_pgm_str2int32((char *)tscale, cscale, 1);
+    rc = ile_pgm_str_2_int32((char *)tscale, cscale, 1);
   }
   /* varying 2 or 4 */
   if (v1 != ' ') {
     if (l) {
-      rc = ile_pgm_str2int32((char *)tvary, cvary, 1);
+      rc = ile_pgm_str_2_int32((char *)tvary, cvary, 1);
     } else {
       *tvary = 2;
     }
@@ -1270,7 +1596,7 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
 
 
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
-SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
+SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
 
@@ -1325,13 +1651,13 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
   }
 
   /* parse dimension */
-  rc = ile_pgm_str2int32((char *)&tdim, in_dim, 1);
+  rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
   if (tdim < 1) {
     tdim = 1;
   }
 
   /* parse ccsid */
-  rc = ile_pgm_str2int32((char *)&tccsid, in_ccsid, 1);
+  rc = ile_pgm_str_2_int32((char *)&tccsid, in_ccsid, 1);
   if (tccsid < 1) {
     tccsid = 0;
   }
@@ -1349,109 +1675,138 @@ SQLRETURN custom_json_dcl_s(int isOut, int argc, char * argv[], int isDs, ile_pg
     return SQL_ERROR;
   }
 
+  /* output processing */
+  if (isOut) {
+    custom_output_pgm_dcl_s_beg(fmt, out_caller, in_name, tdim);
+  }
+
   /* dcl-s type */
   switch (typ) {
   case 'i':
     switch (tlen) {
     case 3:
-      if (!isOut) {
-        rc = ile_pgm_str2int8(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_int8_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_int8(where, in_value, tdim);
       }
       break;
     case 5:
-      if (!isOut) {
-        rc = ile_pgm_str2int16(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_int16_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_int16(where, in_value, tdim);
       }
       break;
     case 10:
-      if (!isOut) {
-        rc = ile_pgm_str2int32(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_int32_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_int32(where, in_value, tdim);
       }
       break;
     case 20:
-      if (!isOut) {
-        rc = ile_pgm_str2int64(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_int64_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_int64(where, in_value, tdim);
       }
       break;
     default:
-      return SQL_ERROR;
+      rc = SQL_ERROR;
       break;
     }
     break;
   case 'u':
     switch (tlen) {
     case 3:
-      if (!isOut) {
-        rc = ile_pgm_str2uint8(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_uint8_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_uint8(where, in_value, tdim);
       }
       break;
     case 5:
-      if (!isOut) {
-        rc = ile_pgm_str2uint16(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_uint16_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_uint16(where, in_value, tdim);
       }
       break;
     case 10:
-      if (!isOut) {
-        rc = ile_pgm_str2uint32(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_uint32_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_uint32(where, in_value, tdim);
       }
       break;
     case 20:
-      if (!isOut) {
-        rc = ile_pgm_str2uint64(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_uint64_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_uint64(where, in_value, tdim);
       }
       break;
     default:
-      return SQL_ERROR;
+      rc = SQL_ERROR;
       break;
     }
     break;
   case 'f':
     switch (tlen) {
     case 4:
-      if (!isOut) {
-        rc = ile_pgm_str2float(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_float_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_float(where, in_value, tdim);
       }
       break;
     case 8:
-      if (!isOut) {
-        rc = ile_pgm_str2double(where, in_value, tdim);
+      if (isOut) {
+        rc = ile_pgm_double_2_output(fmt, out_caller, where, tdim);
+      } else {
+        rc = ile_pgm_str_2_double(where, in_value, tdim);
       }
       break;
     default:
-      return SQL_ERROR;
+      rc = SQL_ERROR;
       break;
     }
     break;
   case 'p':
     if (!isOut) {
-      rc = ile_pgm_str2packed(where, in_value, tdim, tlen, tscale);
+      rc = ile_pgm_str_2_packed(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 's':
     if (!isOut) {
-      rc = ile_pgm_str2zoned(where, in_value, tdim, tlen, tscale);
+      rc = ile_pgm_str_2_zoned(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 'a':
     if (!isOut) {
-      rc = ile_pgm_str2char(where, in_value, tdim, tlen, tvary, tccsid);
+      rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid);
     }
     break;
   case 'b':
     if (!isOut) {
-      rc = ile_pgm_str2bin(where, in_value, tdim, tlen, tvary);
+      rc = ile_pgm_str_2_bin(where, in_value, tdim, tlen, tvary);
     }
     break;
   case 'h':
     if (!isOut) {
-      rc = ile_pgm_str2hole(where, tdim, tlen);
+      rc = ile_pgm_str_2_hole(where, tdim, tlen);
     }
     break;
   default:
-    return SQL_ERROR;
+    rc = SQL_ERROR;
     break;
   }
-  return SQL_SUCCESS;
+  /* output processing */
+  if (isOut) {
+    custom_output_pgm_dcl_s_end(fmt, out_caller, tdim);
+  }
+  return rc;
 }
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|return", "dou-name"], */
@@ -1472,6 +1827,10 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   int hdbc_external = 0;
   int isDs = 0;
   int isOut = 0;
+  int pgmOut = 0;
+  int pgmOk = 0;
+  char * pgmVal = NULL;
+  int pgmValLen = 0;
   ile_pgm_call_t * layout = NULL;
   SQLHENV henv = 0;
   SQLHANDLE hdbc = ihdbc;
@@ -1706,20 +2065,42 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
      * still working on input pgm
      */
     case JSON400_KEY_PGM:
-      isOut = 0;
-      if (!hdbc) {
-        sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+      pgmOut = i;
+      switch(isOut) {
+      case 0:
+        if (!hdbc) {
+          sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
+          sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+        }
+        /* statement */
+        sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+        break;
+      case 1:
+        /* "pgm":["CLIMATE","MYLIB","RegionTemps"] */
+        arv[0] = NULL;
+        arv[1] = NULL;
+        arv[2] = NULL;
+        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        custom_output_pgm_beg(fmt, outjson, arv[0], arv[1], arv[2]);
+        break;
+      default:
+        break;
       }
-      /* statement */
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
       break;
     /*
      * input copy in any dcl-s, dcl-ds
      */
     case JSON400_KEY_DCL_S:
-      nbr_arv = custom_json_parse_array_values(val[i], arv);
-      sqlrc = custom_json_dcl_s(isOut, nbr_arv, arv, isDs, &layout);
+      pgmVal = val[i];
+      pgmValLen = strlen(pgmVal);
+      if (pgmValLen > 0) {
+        val[i] = custom_json_new(pgmValLen);
+        strcpy(val[i], pgmVal);
+        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        sqlrc = custom_json_dcl_s(fmt, outjson, isOut, nbr_arv, arv, isDs, &layout);
+        custom_json_free(val[i]);
+        val[i] = pgmVal;
+      }
       break;
     case JSON400_KEY_DCL_DS:
       isDs = 1;
@@ -1731,10 +2112,28 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
      * end-pgm we can run then copy out to json format
      */
     case JSON400_KEY_END_PGM:
-      isOut = 1;
-      ile_pgm_reset_pos(layout);
-      /* close */
-      sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+      /* make sp call to ILE blob call wrapper
+       * (sp is simple load, activate, call, return) 
+       */
+      /* output processing */
+      switch(isOut) {
+      case 0:
+        /* close */
+        sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        /* reset top of parms */
+        ile_pgm_reset_pos(layout);
+        isOut = 1;
+        pgmOk = 1;
+        /* replay from start of "pgm" */
+        i = pgmOut - 1;
+        break;
+      case 1:
+        custom_output_pgm_end(fmt, outjson, val[0]);
+        isOut = 0;
+        break;
+      default:
+        break;
+      }
       break;
     default:
       break;
