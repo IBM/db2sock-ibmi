@@ -252,10 +252,10 @@ void custom_output_printf(int adjust, char *out_caller, const char * format, ...
 void custom_output_script_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":{");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":}");
+    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -272,10 +272,10 @@ void custom_output_script_beg(int fmt, char *out_caller) {
 void custom_output_script_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
@@ -297,10 +297,10 @@ void custom_output_script_end(int fmt, char *out_caller) {
 void custom_output_record_array_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"records\":[");
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{\"records\":[");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"records\":[");
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{\"records\":[");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -317,10 +317,10 @@ void custom_output_record_array_beg(int fmt, char *out_caller) {
 void custom_output_record_array_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}\n");
+    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
@@ -364,10 +364,10 @@ void custom_output_record_no_data_found(int fmt, char *out_caller) {
 void custom_output_record_row_beg(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{");
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{");
     break;
   case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{");
+    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -541,11 +541,11 @@ void custom_output_pgm_beg(int fmt, char *out_caller, char * name, char * lib, c
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
     custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
+      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
     break;
   case JSON400_OUT_JSON_BUFF:
     custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
+      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
@@ -563,11 +563,11 @@ void custom_output_pgm_end(int fmt, char *out_caller) {
   switch (fmt) {
   case JSON400_OUT_JSON_STDOUT:
     custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-      "]");
+      "]}");
     break;
   case JSON400_OUT_JSON_BUFF:
     custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-      "]");
+      "]}");
     break;
   case JSON400_OUT_SPACE_STDOUT:
     break;
