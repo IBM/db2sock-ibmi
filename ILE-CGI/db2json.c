@@ -10,16 +10,8 @@
 #include <qtqiconv.h>
 #include <qp2user.h>
 #include <except.h>
-#include "iconf.h" /* see make_libdb400.sh */
+#include "iconf.h" /* see Makefile (see iconf.h) */
 
-/* #define DB2_FILE_LIBDB400 "/path/libdb400.a(shr.o)"
- * see iconf.h (make_libdb400.sh) 
- */
-#define DB2_ARG0_PGM "/usr/lib/start32"
-#define DB2_ENV_PATH "PATH=/usr/bin"
-#define DB2_ENV_LIBPATH "LIBPATH=/usr/lib"
-#define DB2_ENV_ATTACH "PASE_THREAD_ATTACH=Y"
-#define DB2_MAX_JSON_OUT 512000
 
 #ifndef int16
 #define int16 short
@@ -150,6 +142,7 @@ void libdb400Pase32(void) {
     };
   char * apilib = DB2_FILE_LIBDB400;
   char * apiname = DB2_SYM_SQL400JSON;
+  char * loadError = NULL;
 
   /* start PASE */
   if (sLibDB400 != 0 && SQL400Json != NULL) {
@@ -159,6 +152,7 @@ void libdb400Pase32(void) {
     rc = Qp2RunPase(pgm,NULL,NULL,0,819,argv,envp);
     /* find libdb400.a(shr.o) */
     sLibDB400 = Qp2dlopen(apilib,QP2_RTLD_MEMBER|QP2_RTLD_NOW,0);
+    /* loadError = Qp2dlerror(); */
     /* Qp2CallPase - const void *target */
     /* find libdb400.a->SQL400Json      */
     SQL400Json = Qp2dlsym(sLibDB400,apiname,0,NULL);

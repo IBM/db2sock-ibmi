@@ -21,18 +21,17 @@ CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
 CCFLAGS64   = $(CCFLAGS32) -maix64 -DTGT64
 AR          = ar
 AROPT       = -X32_64
-INCLUDEPATH = -isystem /QOpenSys/usr/include -I.
+INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I..
 
 ###  shared lib
-LIBOBJSALL   = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCliInit.o PaseCliCustom.o \
-               PaseCliDev.o PaseCliDevConsole.o PaseCliDevFile.o PaseCliPrintf.o PaseCliDump_gen.o
-LIBEXPS      = -Wl,-bE:libdb400.exp
+LIBOBJSALL   =  PaseTool.o
+LIBEXPS      = -Wl,-bE:libtkit400.exp
 LIBOBJS32    = $(LIBOBJSALL)
-SHRLIB32     = libdb400.a
+SHRLIB32     = libtkit400.a
 SHROBJ32     = shr.o
-LIBDEPALL    = -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread -shared -Wl,-brtl
+LIBDEPALL    = -L/QOpenSys/usr/lib -nostdlib -ldb400 -lpthreads -lc -liconv -ldl -lpthread -shared -Wl,-brtl
 LIBDEPS32    = $(LIBDEPALL)
-SHRLIB64     = libdb400_64.a
+SHRLIB64     = libtkit400_64.a
 LIBOBJS64    = $(LIBOBJSALL)
 SHROBJ64     = shr_64.o
 LIBDEPS64    = -maix64 $(LIBDEPALL)

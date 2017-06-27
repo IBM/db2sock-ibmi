@@ -2,7 +2,7 @@
 # command:     python genmake.py
 import glob
 import os
-test_pgms = glob.glob("test*_32")
+test_pgms = glob.glob("test*32")
 test_pgms.sort()
 for name in test_pgms:
   print("=============================")
@@ -10,7 +10,7 @@ for name in test_pgms:
   print("=============================")
   os.system("./" + name);
 
-test_pgms = glob.glob("test*_64")
+test_pgms = glob.glob("test*64")
 test_pgms.sort()
 for name in test_pgms:
   print("=============================")

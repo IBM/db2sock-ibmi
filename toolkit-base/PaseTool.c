@@ -9,713 +9,107 @@
 #include <as400_protos.h>
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
+#include "PaseTool.h"
 
-/* === experimental (not finished) ===
- * This module has fancy 'big helper' APIs.
- *
- * Goal enable many operatins in one async call. Similar to
- * scripting APIs, one new SQL400xxx API (not CLI), many CLI calls
- * set attributes, bind columns, etc.
- *
- * Warning: 
- * Many bugs still here. Development is trial and error,
- * so don't exepct these APIs to be solid until this
- * warning is removed.
- */
-
-#define JSON400_OUT_MAX_STDOUT 1000000
-
-#define JSON400_MAX_KEY 65000
-
-#define JSON400_MAX_ARGS 32
-#define JSON400_MAX_COLS 1024
-
-#define JSON400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
-
-#define JSON400_EXPAND_CHAR 3
-#define JSON400_EXPAND_BINARY 2
-#define JSON400_EXPAND_OTHER 64
-#define JSON400_EXPAND_COL_NAME 128
-
-#define JSON400_UNKNOWN -1
-
-#define JSON400_CMD_HELP 1
-#define JSON400_CMD_QUERY 2
-
-#define JSON400_OUT_COMMA_STDOUT 11
-#define JSON400_OUT_JSON_STDOUT 12
-#define JSON400_OUT_SPACE_STDOUT 13
-#define JSON400_OUT_COMMA_BUFF 21
-#define JSON400_OUT_JSON_BUFF 22
-#define JSON400_OUT_SPACE_BUFF 23
-
-#define JSON400_MAX_CMD_BUFF 4096
-
-/* json
- * request {
- * -- toolkit database --
- * "query":"select * from bobdata",
- *   "fetch":"*ALL",
- * "query":"call proc(?,?,?)",
- *   "parm":[1,2,"bob"],
- * "connect":["*LOCAL","UID","PWD"],
- *   "query":"call proc(?,?,?)",
- *   "parm":[1,2,"bob"],
- *   "fetch":"*ALL",
- * "pconnect":["id"],
- *   "query":"select * from davedata where name=? and level=? and reports=?",
- *   "parm":[1,2,"bob"],
- *   "fetch":"*ALL",
- * -- toolkit commmand --
- * "cmd":"ADDLIBLE LIB(DB2JSON)",
- * -- toolkit program --
- * "pgm":["NAME","LIB","procedure"],
- *   "dcl-ds":["name",dimension, "in|out|both|value|const|return", "dou-name"],
- *   "end-ds":"name",
- *   "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return",ccsid],
- * "end-pgm":"NAME",
- * -- complex parm (example)               -- temp_t[] RegionTemps(regions_t,int,int)
- * "pgm":["CLIMATE","MYLIB","RegionTemps"],-- *SRVPGM MYLIB/CLIMATE
- *   "dcl-ds":["regions_t"],               -- ds parm assumed "both"
- *     "dcl-s":["region","5a","TX"],       -- region[0] = "TX"
- *     "dcl-s":["region","5a","MN"],       -- region[1] = "MN"
- *     "dcl-s":["region","5a","", 20],     -- region[2-21] = ""
- *     "dcl-ds":["people_t",20],           -- ds[20] nested
- *       "dcl-s":["first","32a"],
- *       "dcl-s":["last","32a"],
- *     "end-ds":"people_t",
- *   "end-ds":"regions_t",
- * -- single parm --
- *   "dcl-s":["countout","10i0",0,"both"],
- *   "dcl-s":["available","10i0"],         -- assumed "both" (not inside ds) --
- * -- complex return value --
- *   "dcl-ds":["temp_t",999, "return","countout"],
- *     "dcl-s":["region","5a"],
- *     "dcl-s":["min","12p2"],
- *     "dcl-s":["max","12p2"],
- *   "end-ds":"temp_t",
- * "end-pgm":"CLIMATE",
- * }
- * -- types --
- * "5a"    char(5)         char a[5]
- * "5av2"  varchar(5:2)    struct varchar{short,a[5]}
- * "5av4"  varchar(5:4)    struct varchar{int,a[5]}
- * "5b"    binary(5)       char a[5]
- * "5bv2"  varbinary(5:2)  struct varbinary{short,a[5]}
- * "5bv4"  varbinary(5:4)  struct varbinary{int,a[5]}
- * "3i0"   int(3)          int8, char
- * "5i0"   int(5)          int16, short
- * "10i0"  int(10)         int32, int, long
- * "20i0"  int(20)         int64, long long
- * "3u0"   uns(3)          uint8, uchar, char
- * "5u0"   uns(5)          uint16, ushort, unsigned short
- * "10u0"  uns(10)         uint32, uint, unsigned long
- * "20u0"  uns(20)         uint64, ulonglong, unsigned long long
- * "4f2"   float           float
- * "8f2"   double          double
- * "12p2"  packed(12:2)    (no c equiv)
- * "12s2"  zoned(12:2)     (no c equiv)
- * "8h"    hole            hole
- */
-#define JSON400_NBR_KEYS 11
-#define JSON400_KEY_CONN 1
-#define JSON400_KEY_PCONN 2
-#define JSON400_KEY_QUERY 10
-#define JSON400_KEY_PARM 20
-#define JSON400_KEY_FETCH 30
-#define JSON400_KEY_CMD 40
-#define JSON400_KEY_PGM 50
-#define JSON400_KEY_DCL_S 51
-#define JSON400_KEY_DCL_DS 52
-#define JSON400_KEY_END_DS 53
-#define JSON400_KEY_END_PGM 54
-char * JSON400_KEYS[JSON400_NBR_KEYS] = {
-  "\"pconnect\":",
-  "\"connect\":",
-  "\"query\":",
-  "\"parm\":",
-  "\"fetch\":",
-  "\"cmd\":",
-  "\"pgm\":",
-  "\"dcl-s\":",
-  "\"dcl-ds\":",
-  "\"end-ds\":",
-  "\"end-pgm\":"
-};
-int JSON400_ORDS[JSON400_NBR_KEYS] = {
-  JSON400_KEY_PCONN,
-  JSON400_KEY_CONN,
-  JSON400_KEY_QUERY,
-  JSON400_KEY_PARM,
-  JSON400_KEY_FETCH,
-  JSON400_KEY_CMD,
-  JSON400_KEY_PGM,
-  JSON400_KEY_DCL_S,
-  JSON400_KEY_DCL_DS,
-  JSON400_KEY_END_DS,
-  JSON400_KEY_END_PGM
-};
-
-#define JSON400_ADJUST_NDA 0
-#define JSON400_ADJUST_ADD_COMMA 1
-#define JSON400_ADJUST_ADD_SPACE 2
-#define JSON400_ADJUST_RMV_COMMA 3
-
-#define ILE_PGM_BY_REF_IN 1
-#define ILE_PGM_BY_REF_OUT 2
-#define ILE_PGM_BY_REF_BOTH 3
-#define ILE_PGM_BY_VALUE 4
-#define ILE_PGM_BY_RETURN 5
-#define ILE_PGM_BY_IN_DS 6
-
-
-#define ILE_PGM_MAX_ARGS 128
-#define ILE_PGM_ALLOC_BLOCK 4096
-typedef struct ile_pgm_call_struct {
-  ILEpointer argv[ILE_PGM_MAX_ARGS];
-  int argv_parm[ILE_PGM_MAX_ARGS];
-  int arg_by[ILE_PGM_MAX_ARGS];
-  int arg_pos[ILE_PGM_MAX_ARGS];
-  int arg_len[ILE_PGM_MAX_ARGS];
-  char pgm[16];
-  char lib[16];
-  char func[128];
-  int max;
-  int pos;
-  int vpos;
-  int argc;
-  int parmc;
-  char * buf;
-} ile_pgm_call_t;
-
-
-char * custom_json_parse_key_value(char * c, int find, char **find_key, int *find_ord, int *find_look, int idx, int *k, char **v, int *a);
-int custom_json_parse_array_values(char *c, char **v);
-
-void * custom_json_new(int size) {
+void * tool_new(int size) {
   void * buffer = malloc(size + 1);
   memset(buffer,0,size + 1);
   return buffer;
 }
-void custom_json_free(char *buffer) {
+void tool_free(char *buffer) {
   if (buffer) {
     free(buffer);
   }
 }
 
-void custom_output_printf(int adjust, char *out_caller, const char * format, ...) {
-  char *p = (char *) NULL; 
-  char *q = (char *) NULL; 
-  int l = 0;
-  int w = 0;
-  l = strlen(out_caller);
-  p = out_caller + l;
-  if (l) {
-    w = l - 1;
-    q = out_caller + w;
-  } else {
-    q = p;
-  }
-  switch (adjust) {
-  case JSON400_ADJUST_ADD_COMMA:
-    if (q[0] == '{' || q[0] == '[' || q[0] == ':') {
-      /* do nothing */
-    } else  if (q[0] != ',') {
-      p[0] = ',';
-      l++;
-      p = out_caller + l;
-    }
-    break;
-  case JSON400_ADJUST_ADD_SPACE:
-    if (q[0] != ' ') {
-      p[0] = ' ';
-      l++;
-      p = out_caller + l;
-    }
-    break;
-  case JSON400_ADJUST_RMV_COMMA:
-    if (q[0] == ',') {
-      q[0] = 0x00;
-      l--;
-      p = out_caller + l;
-    }
-    break;
-  default:
-    break;
-  }
-  va_list args;
-  va_start(args, format);
-  vsprintf(p, format, args);
-  va_end(args);
-}
-
-void custom_output_script_beg(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "{\"script\":[");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_script_end(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  default:
-    break;
-  }
-}
-
-void custom_output_record_array_beg(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{\"records\":[");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{\"records\":[");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_record_array_end(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "]}");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  default:
-    break;
-  }
-}
-
-void custom_output_record_no_data_found(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\"SQL_NO_DATA_FOUND\"");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\"SQL_NO_DATA_FOUND\"");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
-}
-
-
-void custom_output_record_row_beg(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "{");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_record_name_value(int fmt, char *name, char *value, int type, int fStrLen, char *out_caller) {
-  int i = 0;
-  int len = 0;
-  char * fmt_val_char = "\"%s\"";
-  char * fmt_key_val_char = "\"%s\":\"%s\"";
-  char * fmt_val_zero_dec = "0%s";
-  char * fmt_key_val_zero_dec = "\"%s\":0%s";
-  char * fmt_val_dec = "%s";
-  char * fmt_key_val_dec = "\"%s\":%s";
-  char * fmt_val = NULL;
-  char * fmt_key_val = NULL;
-  char * fmt_json_null = "null";
-  if (fStrLen == SQL_NULL_DATA) {
-    value = fmt_json_null;
-    fmt_val = fmt_val_dec;
-    fmt_key_val = fmt_key_val_dec;
-  } else {
-    switch (type) {
-    case SQL_BIGINT:
-    case SQL_DECFLOAT:
-    case SQL_SMALLINT:
-    case SQL_INTEGER:
-    case SQL_REAL:
-    case SQL_FLOAT:
-    case SQL_DOUBLE:
-    case SQL_DECIMAL:
-    case SQL_NUMERIC:
-      if (value[0] == '.') {
-        fmt_val = fmt_val_zero_dec;
-        fmt_key_val = fmt_key_val_zero_dec;
-      } else {
-        fmt_val = fmt_val_dec;
-        fmt_key_val = fmt_key_val_dec;
-      }
-      break;
-    default:
-      fmt_val = fmt_val_char;
-      fmt_key_val = fmt_key_val_char;
-      /* trim */
-      len = strlen(value);
-      for (i=len; i>0; i--) {
-        if (!value[i] || value[i] == ' ') {
-          value[i] = 0x00;
-        } else {
-          break;
-        }
-      }
-      break;
-    }
-  }
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_key_val, name, value);
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_key_val, name, value);
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, fmt_val, value);
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, fmt_val, value);
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_val, value);
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_val, value);
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_record_row_end(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, "}");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    custom_output_printf(JSON400_ADJUST_NDA, out_caller, "\n");
-    break;
-  default:
-    break;
-  }
-}
-
-/*
-  custom_output_sql_errors(fmt, henv, SQL_HANDLE_ENV,   rc);
-  custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC,   rc);
-  custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, rc);
-*/
-int custom_output_sql_errors(int fmt, SQLHANDLE handle, SQLSMALLINT hType, int rc, char *out_caller)
+tool_struct_t * tool_ctor(
+  parse_array_values_t parse_array_values,
+  output_script_beg_t output_script_beg,
+  output_script_end_t output_script_end,
+  output_record_array_beg_t output_record_array_beg,
+  output_record_array_end_t output_record_array_end,
+  output_record_no_data_found_t output_record_no_data_found,
+  output_record_row_beg_t output_record_row_beg,
+  output_record_name_value_t output_record_name_value,
+  output_record_row_end_t output_record_row_end,
+  output_sql_errors_t output_sql_errors,
+  output_pgm_beg_t output_pgm_beg,
+  output_pgm_end_t output_pgm_end,
+  output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
+  output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
+  output_pgm_dcl_s_end_t output_pgm_dcl_s_end
+) 
 {
-  SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
-  SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
-  SQLCHAR errMsg[JSON400_MAX_ERR_MSG_LEN];
-  SQLINTEGER sqlcode = 0;
-  SQLSMALLINT length = 0;
-  SQLCHAR *p = NULL;
-  SQLSMALLINT recno = 1;
-  if (rc == SQL_ERROR) {
-    memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
-    memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
-    memset(errMsg, '\0', JSON400_MAX_ERR_MSG_LEN);
-    if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
-      if (msg[length-1] == '\n') {
-        p = &msg[length-1];
-        *p = '\0';
-      }
-      switch (fmt) {
-      case JSON400_OUT_JSON_STDOUT:
-        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
-        break;
-      case JSON400_OUT_JSON_BUFF:
-        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\n{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
-        break;
-      case JSON400_OUT_SPACE_STDOUT:
-        custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, "\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
-        break;
-      case JSON400_OUT_SPACE_BUFF:
-        custom_output_printf(JSON400_ADJUST_ADD_SPACE, out_caller, "\"error=%s SQLCODE=%d\"\n",msg, sqlcode);
-        break;
-      case JSON400_OUT_COMMA_STDOUT:
-        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\"error %s, SQLCODE=%d\"\n",msg, sqlcode);
-        break;
-      case JSON400_OUT_COMMA_BUFF:
-        custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, "\"error=%s, SQLCODE=%d\"\n",msg, sqlcode);
-        break;
-      default:
-        break;
-      }
-      return SQL_ERROR;
-    }
-  }
-  return SQL_SUCCESS;
+  tool_struct_t *tool = tool_new(sizeof(tool_struct_t));
+  tool->parse_array_values = parse_array_values;
+  tool->output_script_beg = output_script_beg;
+  tool->output_script_end = output_script_end;
+  tool->output_record_array_beg = output_record_array_beg;
+  tool->output_record_array_end = output_record_array_end;
+  tool->output_record_no_data_found = output_record_no_data_found;
+  tool->output_record_row_beg = output_record_row_beg;
+  tool->output_record_name_value = output_record_name_value;
+  tool->output_record_row_end = output_record_row_end;
+  tool->output_sql_errors = output_sql_errors;
+  tool->output_pgm_beg = output_pgm_beg;
+  tool->output_pgm_end = output_pgm_end;
+  tool->output_pgm_dcl_s_beg = output_pgm_dcl_s_beg;
+  tool->output_pgm_dcl_s_data = output_pgm_dcl_s_data;
+  tool->output_pgm_dcl_s_end = output_pgm_dcl_s_end;
+  return tool;
 }
 
-/* pgm call */
-void custom_output_pgm_beg(int fmt, char *out_caller, char * name, char * lib, char * func) {
-  if (!lib) {
-    lib = "*LIBL";
-  }
-  if (!func) {
-    func = "";
-  }
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
-}
-void custom_output_pgm_end(int fmt, char *out_caller) {
-  switch (fmt) {
-  case JSON400_OUT_JSON_STDOUT:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-      "]}");
-    break;
-  case JSON400_OUT_JSON_BUFF:
-    custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-      "]}");
-    break;
-  case JSON400_OUT_SPACE_STDOUT:
-    break;
-  case JSON400_OUT_SPACE_BUFF:
-    break;
-  case JSON400_OUT_COMMA_STDOUT:
-    break;
-  case JSON400_OUT_COMMA_BUFF:
-    break;
-  default:
-    break;
-  }
+void tool_dtor(tool_struct_t *tool){
+  tool_free((char *)tool);
 }
 
-void custom_output_pgm_dcl_s_beg(int fmt, char *out_caller, char * name, int tdim) {
-  if (tdim > 1) {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "{\"%s\":[", name);
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "{\"%s\":[", name);
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  } else {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "{\"%s\":", name);
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "{\"%s\":", name);
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  }
+
+int tool_parse_array_values(tool_struct_t *tool, char *c, char **v) {
+  return tool->parse_array_values(c, v);
 }
-void custom_output_pgm_dcl_s_data(int fmt, char *out_caller, char *value, int numFlag) {
-  if (numFlag == 1) {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "%s", value);
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "%s", value);
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  } else {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"%s\"", value);
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\"%s\"", value);
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  }
+
+void tool_output_script_beg(tool_struct_t *tool, char *out_caller) {
+  tool->output_script_beg(out_caller);
 }
-void custom_output_pgm_dcl_s_end(int fmt, char *out_caller, int tdim) {
-  if (tdim > 1) {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]}");
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "]}");
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  } else {
-    switch (fmt) {
-    case JSON400_OUT_JSON_STDOUT:
-      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "}");
-      break;
-    case JSON400_OUT_JSON_BUFF:
-      custom_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
-        "}");
-      break;
-    case JSON400_OUT_SPACE_STDOUT:
-      break;
-    case JSON400_OUT_SPACE_BUFF:
-      break;
-    case JSON400_OUT_COMMA_STDOUT:
-      break;
-    case JSON400_OUT_COMMA_BUFF:
-      break;
-    default:
-      break;
-    }
-  }
+void tool_output_script_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_script_end(out_caller);
+}
+void tool_output_record_array_beg(tool_struct_t *tool, char *out_caller) {
+  tool->output_record_array_beg(out_caller);
+}
+void tool_output_record_array_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_record_array_end(out_caller);
+}
+void tool_output_record_no_data_found(tool_struct_t *tool, char *out_caller) {
+  tool->output_record_no_data_found(out_caller);
+}
+void tool_output_record_row_beg(tool_struct_t *tool, char *out_caller) {
+  tool->output_record_row_beg(out_caller);
+}
+void tool_output_record_name_value(tool_struct_t *tool, char *name, char *value, int type, int fStrLen, char *out_caller) {
+  tool->output_record_name_value(name, value, type, fStrLen, out_caller);
+}
+void tool_output_record_row_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_record_row_end(out_caller);
+}
+int tool_output_sql_errors(tool_struct_t *tool, SQLHANDLE handle, SQLSMALLINT hType, int rc, char *out_caller)
+{
+  return tool->output_sql_errors(handle, hType, rc, out_caller);
+}
+void tool_output_pgm_beg(tool_struct_t *tool, char *out_caller, char * name, char * lib, char * func) {
+  tool->output_pgm_beg(out_caller, name, lib, func);
+}
+void tool_output_pgm_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_pgm_end(out_caller);
+}
+void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char *out_caller, char * name, int tdim) {
+  tool->output_pgm_dcl_s_beg(out_caller, name, tdim);
+}
+void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *out_caller, char *value, int numFlag) {
+  tool->output_pgm_dcl_s_data(out_caller, value, numFlag);
+}
+void tool_output_pgm_dcl_s_end(tool_struct_t *tool, char *out_caller, int tdim) {
+  tool->output_pgm_dcl_s_end(out_caller, tdim);
 }
 
 
@@ -802,7 +196,7 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
     new_len += ILE_PGM_ALLOC_BLOCK;
   }
   /* expanded layout template */
-  tmp = custom_json_new(new_len);
+  tmp = tool_new(new_len);
   /* copy original data */
   if (orig_len) {
     memcpy(tmp, layout, orig_len);
@@ -818,7 +212,7 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   /* old layout free */
   tmp = (char *)(*playout);
   if (tmp) {
-    custom_json_free(tmp);
+    tool_free(tmp);
   }
   /* rest layout template pointer */
   *playout = layout;
@@ -864,7 +258,7 @@ SQLRETURN ile_pgm_str_2_int8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int8_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int8_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   int8 * wherev = (int8 *) where;
   int8 value = 0;
@@ -873,7 +267,7 @@ SQLRETURN ile_pgm_int8_2_output(int fmt, char *out_caller, char * where, int tdi
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -891,7 +285,7 @@ SQLRETURN ile_pgm_str_2_int16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int16_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int16_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   int16 * wherev = (int16 *) where;
   int16 value = 0;
@@ -900,7 +294,7 @@ SQLRETURN ile_pgm_int16_2_output(int fmt, char *out_caller, char * where, int td
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -918,7 +312,7 @@ SQLRETURN ile_pgm_str_2_int32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int32_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int32_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   int32 * wherev = (int32 *) where;
   int32 value = 0;
@@ -927,7 +321,7 @@ SQLRETURN ile_pgm_int32_2_output(int fmt, char *out_caller, char * where, int td
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -945,7 +339,7 @@ SQLRETURN ile_pgm_str_2_int64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int64_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int64_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   int64 * wherev = (int64 *) where;
   int64 value = 0;
@@ -954,7 +348,7 @@ SQLRETURN ile_pgm_int64_2_output(int fmt, char *out_caller, char * where, int td
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -972,7 +366,7 @@ SQLRETURN ile_pgm_str_2_uint8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint8_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint8_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   uint8 * wherev = (uint8 *) where;
   uint8 value = 0;
@@ -981,7 +375,7 @@ SQLRETURN ile_pgm_uint8_2_output(int fmt, char *out_caller, char * where, int td
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -999,7 +393,7 @@ SQLRETURN ile_pgm_str_2_uint16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint16_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint16_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   uint16 * wherev = (uint16 *) where;
   uint16 value = 0;
@@ -1008,7 +402,7 @@ SQLRETURN ile_pgm_uint16_2_output(int fmt, char *out_caller, char * where, int t
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1026,7 +420,7 @@ SQLRETURN ile_pgm_str_2_uint32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint32_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint32_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   uint32 * wherev = (uint32 *) where;
   uint32 value = 0;
@@ -1035,7 +429,7 @@ SQLRETURN ile_pgm_uint32_2_output(int fmt, char *out_caller, char * where, int t
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1053,7 +447,7 @@ SQLRETURN ile_pgm_str_2_uint64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint64_2_output(int fmt, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint64_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
   int i = 0;
   uint64 * wherev = (uint64 *) where;
   uint64 value = 0;
@@ -1062,7 +456,7 @@ SQLRETURN ile_pgm_uint64_2_output(int fmt, char *out_caller, char * where, int t
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1079,7 +473,7 @@ SQLRETURN ile_pgm_str_2_float(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_float_2_output(int fmt, char *out_caller, char * where, int tscale, int tdim) {
+SQLRETURN ile_pgm_float_2_output(tool_struct_t *tool, char *out_caller, char * where, int tscale, int tdim) {
   int i = 0;
   float * wherev = (float *) where;
   float value = 0;
@@ -1095,7 +489,7 @@ SQLRETURN ile_pgm_float_2_output(int fmt, char *out_caller, char * where, int ts
     } else {
       sprintf(str,"%f",value);
     }
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1112,7 +506,7 @@ SQLRETURN ile_pgm_str_2_double(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_double_2_output(int fmt, char *out_caller, char * where, int tscale, int tdim) {
+SQLRETURN ile_pgm_double_2_output(tool_struct_t *tool, char *out_caller, char * where, int tscale, int tdim) {
   int i = 0;
   double * wherev = (double *) where;
   double value = 0;
@@ -1128,7 +522,7 @@ SQLRETURN ile_pgm_double_2_output(int fmt, char *out_caller, char * where, int t
     } else {
       sprintf(str,"%f",value);
     }
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1215,7 +609,7 @@ SQLRETURN ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int 
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_packed_2_output(int fmt, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tscale, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1290,7 +684,7 @@ SQLRETURN ile_pgm_packed_2_output(int fmt, char *out_caller, char * where, int t
     if (isDot && !isScale) {
       str[j++] = (char) 0x30;
     }
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1349,7 +743,7 @@ SQLRETURN ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int t
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_zoned_2_output(int fmt, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+SQLRETURN ile_pgm_zoned_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tscale, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1407,7 +801,7 @@ SQLRETURN ile_pgm_zoned_2_output(int fmt, char *out_caller, char * where, int tl
     if (isDot && !isScale) {
       str[j++] = (char) 0x30;
     }
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1439,7 +833,7 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
   }
   /* convert ccsid */
   if (len) {
-    ebcdic = custom_json_new(len*4);
+    ebcdic = tool_new(len*4);
     rc = SQL400FromUtf8(0, str, len, ebcdic, len*4, tccsid);
     c = ebcdic;
     j = 0;
@@ -1478,11 +872,11 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
   }
   /* free temp storage */
   if (ebcdic) {
-    custom_json_free(ebcdic);
+    tool_free(ebcdic);
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_char_2_output(int fmt, char *out_caller, char * where, int tlen, int tvary, int tccsid, int tdim) {
+SQLRETURN ile_pgm_char_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tvary, int tccsid, int tdim) {
   int rc = 0;
   int i = 0;
   int j = 0;
@@ -1491,14 +885,14 @@ SQLRETURN ile_pgm_char_2_output(int fmt, char *out_caller, char * where, int tle
   char * utf8 = NULL;
   char * c = NULL;
   char * str_empty = "";
-  char * str_json_empty = "{}";
+  char * str_tool_empty = "{}";
   /* ebcdic ccsid? */
   if (!tccsid) {
     tccsid = Qp2jobCCSID();
   }
   /* copy in ebcdic 2 utf8 */
   len = tlen;
-  utf8 = custom_json_new(len*4);
+  utf8 = tool_new(len*4);
   for (i=0; i < tdim; i++, wherev += tlen) {
     /* vary */
     if (tvary == 4) {
@@ -1527,24 +921,14 @@ SQLRETURN ile_pgm_char_2_output(int fmt, char *out_caller, char * where, int tle
     } /* j loop (trim) */
     /* output processing */
     if (len) {
-      custom_output_pgm_dcl_s_data(fmt, out_caller, utf8, 0);
+      tool_output_pgm_dcl_s_data(tool, out_caller, utf8, 0);
     } else {
-      switch (fmt) {
-      case JSON400_OUT_JSON_STDOUT:
-        custom_output_pgm_dcl_s_data(fmt, out_caller, str_json_empty, 1);
-        break;
-      case JSON400_OUT_JSON_BUFF:
-        custom_output_pgm_dcl_s_data(fmt, out_caller, str_json_empty, 1);
-        break;
-      default:
-        custom_output_pgm_dcl_s_data(fmt, out_caller, str_empty, 1);
-        break;
-      }
+      tool_output_pgm_dcl_s_data(tool, out_caller, str_tool_empty, 1);
     }
   } /* i loop (tdim) */
   /* free temp storage */
   if (utf8) {
-    custom_json_free(utf8);
+    tool_free(utf8);
   }
   return SQL_SUCCESS;
 }
@@ -1595,7 +979,7 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_bin_2_output(int fmt, char *out_caller, char * where, int tlen, int tvary, int tdim) {
+SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tvary, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1609,7 +993,7 @@ SQLRETURN ile_pgm_bin_2_output(int fmt, char *out_caller, char * where, int tlen
   int anyDigitValue = 0;
   char * c = NULL;
   char * str = NULL;
-  str = custom_json_new(outLength);
+  str = tool_new(outLength);
   for (i=0; i < tdim; i++, wherev += outDigits) {
     /* vary */
     if (tvary == 4) {
@@ -1692,11 +1076,11 @@ SQLRETURN ile_pgm_bin_2_output(int fmt, char *out_caller, char * where, int tlen
         }
       } /* l loop (digits) */
     } /* k loop (outLength) */
-    custom_output_pgm_dcl_s_data(fmt, out_caller, str, 0);
+    tool_output_pgm_dcl_s_data(tool, out_caller, str, 0);
   } /* i loop (tdim) */
   /* free temp storage */
   if (str) {
-    custom_json_free(str);
+    tool_free(str);
   }
   return SQL_SUCCESS;
 }
@@ -1955,7 +1339,7 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
 
 
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
-SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
+SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
 
@@ -2036,7 +1420,7 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
 
   /* output processing */
   if (isOut) {
-    custom_output_pgm_dcl_s_beg(fmt, out_caller, in_name, tdim);
+    tool_output_pgm_dcl_s_beg(tool, out_caller, in_name, tdim);
   }
 
   /* dcl-s type */
@@ -2045,28 +1429,28 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     switch (tlen) {
     case 3:
       if (isOut) {
-        rc = ile_pgm_int8_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_int8_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_int8(where, in_value, tdim);
       }
       break;
     case 5:
       if (isOut) {
-        rc = ile_pgm_int16_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_int16_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_int16(where, in_value, tdim);
       }
       break;
     case 10:
       if (isOut) {
-        rc = ile_pgm_int32_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_int32_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_int32(where, in_value, tdim);
       }
       break;
     case 20:
       if (isOut) {
-        rc = ile_pgm_int64_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_int64_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_int64(where, in_value, tdim);
       }
@@ -2080,28 +1464,28 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     switch (tlen) {
     case 3:
       if (isOut) {
-        rc = ile_pgm_uint8_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_uint8_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint8(where, in_value, tdim);
       }
       break;
     case 5:
       if (isOut) {
-        rc = ile_pgm_uint16_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_uint16_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint16(where, in_value, tdim);
       }
       break;
     case 10:
       if (isOut) {
-        rc = ile_pgm_uint32_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_uint32_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint32(where, in_value, tdim);
       }
       break;
     case 20:
       if (isOut) {
-        rc = ile_pgm_uint64_2_output(fmt, out_caller, where, tdim);
+        rc = ile_pgm_uint64_2_output(tool, out_caller, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint64(where, in_value, tdim);
       }
@@ -2115,14 +1499,14 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     switch (tlen) {
     case 4:
       if (isOut) {
-        rc = ile_pgm_float_2_output(fmt, out_caller, where, tscale, tdim);
+        rc = ile_pgm_float_2_output(tool, out_caller, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_float(where, in_value, tdim);
       }
       break;
     case 8:
       if (isOut) {
-        rc = ile_pgm_double_2_output(fmt, out_caller, where, tscale, tdim);
+        rc = ile_pgm_double_2_output(tool, out_caller, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_double(where, in_value, tdim);
       }
@@ -2134,28 +1518,28 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
     break;
   case 'p':
     if (isOut) {
-      ile_pgm_packed_2_output(fmt, out_caller, where, tlen, tscale, tdim);
+      ile_pgm_packed_2_output(tool, out_caller, where, tlen, tscale, tdim);
     } else {
       rc = ile_pgm_str_2_packed(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 's':
     if (isOut) {
-      ile_pgm_zoned_2_output(fmt, out_caller, where, tlen, tscale, tdim);
+      ile_pgm_zoned_2_output(tool, out_caller, where, tlen, tscale, tdim);
     } else {
       rc = ile_pgm_str_2_zoned(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 'a':
     if (isOut) {
-      ile_pgm_char_2_output(fmt, out_caller, where, tlen, tvary, tccsid, tdim);
+      ile_pgm_char_2_output(tool, out_caller, where, tlen, tvary, tccsid, tdim);
     } else {
       rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid);
     }
     break;
   case 'b':
     if (isOut) {
-      ile_pgm_bin_2_output(fmt, out_caller, where, tlen, tvary, tdim);
+      ile_pgm_bin_2_output(tool, out_caller, where, tlen, tvary, tdim);
     } else {
       rc = ile_pgm_str_2_bin(where, in_value, tdim, tlen, tvary);
     }
@@ -2171,25 +1555,24 @@ SQLRETURN custom_json_dcl_s(int fmt, char *out_caller, int isOut, int argc, char
   }
   /* output processing */
   if (isOut) {
-    custom_output_pgm_dcl_s_end(fmt, out_caller, tdim);
+    tool_output_pgm_dcl_s_end(tool, out_caller, tdim);
   }
   return rc;
 }
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|return", "dou-name"], */
-SQLRETURN custom_json_dcl_ds(int isOut, int argc, char * arv[], int isDs, ile_pgm_call_t **playout) {
+SQLRETURN tool_dcl_ds(int isOut, int argc, char * arv[], int isDs, ile_pgm_call_t **playout) {
   return SQL_SUCCESS;
 }
 
-
-SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
- int fmt, int *key, char **val, int *arr) 
+SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
+ tool_struct_t *tool, int *key, char **val, int *arr) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int j = 0;
   int nbr_arv = 0;
-  char * arv[JSON400_MAX_KEY];
+  char * arv[TOOL400_MAX_KEY];
   int recs = 0;
   int hdbc_external = 0;
   int isDs = 0;
@@ -2207,10 +1590,10 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   SQLSMALLINT nParms = 0;
   SQLSMALLINT nResultCols = 0;
   SQLSMALLINT name_length = 0;
-  SQLCHAR *buff_name[JSON400_MAX_COLS];
-  SQLCHAR *buff_value[JSON400_MAX_COLS];
-  SQLINTEGER buff_len[JSON400_MAX_COLS];
-  SQLSMALLINT buff_type[JSON400_MAX_COLS];
+  SQLCHAR *buff_name[TOOL400_MAX_COLS];
+  SQLCHAR *buff_value[TOOL400_MAX_COLS];
+  SQLINTEGER buff_len[TOOL400_MAX_COLS];
+  SQLSMALLINT buff_type[TOOL400_MAX_COLS];
   SQLSMALLINT type = 0;
   SQLUINTEGER size = 0;
   SQLSMALLINT scale = 0;
@@ -2218,12 +1601,12 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   SQLINTEGER lob_loc = 0;
   SQLINTEGER loc_ind = 0;
   SQLSMALLINT loc_type = 0;
-  SQLINTEGER fStrLen[JSON400_MAX_COLS];
+  SQLINTEGER fStrLen[TOOL400_MAX_COLS];
   SQLSMALLINT sql_data_type = 0;
   SQLUINTEGER sql_precision = 0;
   SQLSMALLINT sql_scale = 0;
   SQLSMALLINT sql_nullable = SQL_NO_NULLS;
-  SQLCHAR cmd_buff[JSON400_MAX_CMD_BUFF];
+  SQLCHAR cmd_buff[TOOL400_MAX_CMD_BUFF];
   SQLINTEGER cmd_len = 0;
   /* hdbc external (caller?) */
   if (ihdbc) {
@@ -2235,9 +1618,9 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
     /* SQLRETURN SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, 
      *   SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
      */
-    case JSON400_KEY_PCONN:
+    case TOOL400_KEY_PCONN:
       if (arr[i]) {
-        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
         switch (nbr_arv) {
         case 4:
           sqlrc = SQL400pConnect( arv[0], arv[1], arv[2], arv[3], &hdbc, attr_isolation, NULL, NULL );
@@ -2251,16 +1634,16 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           sqlrc = SQL400pConnect( NULL, NULL, NULL, "ALL", &hdbc, attr_isolation, NULL, NULL );
           break;
         }
-        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
       }
       /* do not close (pool connection) */
       if (hdbc) {
         hdbc_external = 1;
       }
       break;
-    case JSON400_KEY_CONN:
+    case TOOL400_KEY_CONN:
       if (arr[i]) {
-        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
         switch (nbr_arv) {
         case 3:
           sqlrc = SQL400Connect( arv[0], arv[1], arv[2], &hdbc, attr_isolation, NULL, NULL );
@@ -2272,28 +1655,28 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, attr_isolation, NULL, NULL );
           break;
         }
-        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
       }
       break;
-    case JSON400_KEY_QUERY:
+    case TOOL400_KEY_QUERY:
       if (!hdbc) {
         sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
       }
       /* statement */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
       /* prepare */
       sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLCHAR*)val[i], (SQLINTEGER)SQL_NTS);
-      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       /* no parm? execute */
-      if (key[i+1] != JSON400_KEY_PARM) {
+      if (key[i+1] != TOOL400_KEY_PARM) {
         sqlrc = SQLExecute((SQLHSTMT)hstmt);
-        sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       }
       break;
-    case JSON400_KEY_PARM:
+    case TOOL400_KEY_PARM:
       if (arr[i]) {
-        nbr_arv = custom_json_parse_array_values(val[i], arv);
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
         /* number of input parms */
         sqlrc = SQLNumParams((SQLHSTMT)hstmt, (SQLSMALLINT*)&nParms);
         if (nParms > 0) {
@@ -2309,20 +1692,20 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
       }
       /* execute */
       sqlrc = SQLExecute((SQLHSTMT)hstmt);
-      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       /* no fetch? close */
-      if (key[i+1] != JSON400_KEY_FETCH) {
+      if (key[i+1] != TOOL400_KEY_FETCH) {
         sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       }
       break;
-    case JSON400_KEY_FETCH:
+    case TOOL400_KEY_FETCH:
       /* result set */
       sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
-      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       if (nResultCols > 0) {
         for (j = 0 ; j < nResultCols; j++) {
-          size = JSON400_EXPAND_COL_NAME;
-          buff_name[j] = custom_json_new(size);
+          size = TOOL400_EXPAND_COL_NAME;
+          buff_name[j] = tool_new(size);
           buff_value[j] = NULL;
           buff_type[j] = 0;
           fStrLen[j] = SQL_NTS;
@@ -2339,15 +1722,15 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           case SQL_GRAPHIC:
           case SQL_VARGRAPHIC:
           case SQL_XML:
-            size = size * JSON400_EXPAND_CHAR;
-            buff_value[j] = custom_json_new(size);
+            size = size * TOOL400_EXPAND_CHAR;
+            buff_value[j] = tool_new(size);
             sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           case SQL_BINARY:
           case SQL_VARBINARY:
           case SQL_BLOB:
-            size = size * JSON400_EXPAND_BINARY;
-            buff_value[j] = custom_json_new(size);
+            size = size * TOOL400_EXPAND_BINARY;
+            buff_value[j] = tool_new(size);
             sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           case SQL_TYPE_DATE:
@@ -2364,80 +1747,80 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
           case SQL_DECIMAL:
           case SQL_NUMERIC:
           default:
-            size = JSON400_EXPAND_OTHER;
-            buff_value[j] = custom_json_new(size);
+            size = TOOL400_EXPAND_OTHER;
+            buff_value[j] = tool_new(size);
             sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
             break;
           }
         }
         sqlrc = SQL_SUCCESS;
-        custom_output_record_array_beg(fmt, outjson);
+        tool_output_record_array_beg(tool, outarea);
         while (sqlrc == SQL_SUCCESS) {
           sqlrc = SQLFetch(hstmt);
           if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
             if (!recs) {
-              custom_output_record_no_data_found(fmt, outjson);
+              tool_output_record_no_data_found(tool, outarea);
             }
             break;
           }
-          custom_output_record_row_beg(fmt, outjson);
+          tool_output_record_row_beg(tool, outarea);
           recs += 1;
           for (j = 0 ; j < nResultCols; j++) {
             if (buff_value[j]) {
-              custom_output_record_name_value(fmt, buff_name[j], buff_value[j], buff_type[j], fStrLen[j], outjson);
+              tool_output_record_name_value(tool, buff_name[j], buff_value[j], buff_type[j], fStrLen[j], outarea);
             }
           }
-          custom_output_record_row_end(fmt, outjson);
+          tool_output_record_row_end(tool, outarea);
         }
-        custom_output_record_array_end(fmt, outjson);
+        tool_output_record_array_end(tool, outarea);
         for (j = 0 ; j < nResultCols; j++) {
           if (buff_value[j]) {
-            custom_json_free(buff_name[j]);
+            tool_free(buff_name[j]);
             buff_name[j] = NULL;
           }
           if (buff_name[j]) {
-            custom_json_free(buff_name[j]);
+            tool_free(buff_name[j]);
             buff_name[j] = NULL;
           }
         }
       } else {
-        custom_output_record_array_beg(fmt, outjson);
-        custom_output_record_no_data_found(fmt, outjson);
-        custom_output_record_array_end(fmt, outjson);
+        tool_output_record_array_beg(tool, outarea);
+        tool_output_record_no_data_found(tool, outarea);
+        tool_output_record_array_end(tool, outarea);
       }
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
-    case JSON400_KEY_CMD:
+    case TOOL400_KEY_CMD:
       if (!hdbc) {
         sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-        sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
       }
       /* statement */
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
       /* sql */
       cmd_len = strlen(val[i]);
-      memset(cmd_buff,0,JSON400_MAX_CMD_BUFF);
+      memset(cmd_buff,0,TOOL400_MAX_CMD_BUFF);
       sprintf(cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)",val[i],cmd_len);
       /* prepare */
       sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
-      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       /* execute */
       sqlrc = SQLExecute((SQLHSTMT)hstmt);
-      sqlrc = custom_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, sqlrc, outjson);
+      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
       /* close */
       sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
       break;
     /* don't bother trying ...
      * still working on input pgm
      */
-    case JSON400_KEY_PGM:
+    case TOOL400_KEY_PGM:
       pgmOut = i;
       switch(isOut) {
       case 0:
         if (!hdbc) {
           sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-          sqlrc = custom_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC, sqlrc, outjson);
+          sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
         }
         /* statement */
         sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
@@ -2447,8 +1830,8 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
         arv[0] = NULL;
         arv[1] = NULL;
         arv[2] = NULL;
-        nbr_arv = custom_json_parse_array_values(val[i], arv);
-        custom_output_pgm_beg(fmt, outjson, arv[0], arv[1], arv[2]);
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
+        tool_output_pgm_beg(tool, outarea, arv[0], arv[1], arv[2]);
         break;
       default:
         break;
@@ -2457,28 +1840,28 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
     /*
      * input copy in any dcl-s, dcl-ds
      */
-    case JSON400_KEY_DCL_S:
+    case TOOL400_KEY_DCL_S:
       pgmVal = val[i];
       pgmValLen = strlen(pgmVal);
       if (pgmValLen > 0) {
-        val[i] = custom_json_new(pgmValLen);
+        val[i] = tool_new(pgmValLen);
         strcpy(val[i], pgmVal);
-        nbr_arv = custom_json_parse_array_values(val[i], arv);
-        sqlrc = custom_json_dcl_s(fmt, outjson, isOut, nbr_arv, arv, isDs, &layout);
-        custom_json_free(val[i]);
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
+        sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, isDs, &layout);
+        tool_free(val[i]);
         val[i] = pgmVal;
       }
       break;
-    case JSON400_KEY_DCL_DS:
+    case TOOL400_KEY_DCL_DS:
       isDs = 1;
       break;
-    case JSON400_KEY_END_DS:
+    case TOOL400_KEY_END_DS:
       isDs = 0;
       break;
     /*
-     * end-pgm we can run then copy out to json format
+     * end-pgm we can run then copy out to format
      */
-    case JSON400_KEY_END_PGM:
+    case TOOL400_KEY_END_PGM:
       /* make sp call to ILE blob call wrapper
        * (sp is simple load, activate, call, return) 
        */
@@ -2495,7 +1878,7 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
         i = pgmOut - 1;
         break;
       case 1:
-        custom_output_pgm_end(fmt, outjson);
+        tool_output_pgm_end(tool, outarea);
         isOut = 0;
         break;
       default:
@@ -2512,217 +1895,15 @@ SQLRETURN custom_run(SQLHDBC ihdbc, SQLCHAR * outjson, SQLINTEGER outlen,
   }
 }
 
-SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
- SQLCHAR * injson,
- SQLINTEGER inlen, 
- SQLCHAR * outjson,
- SQLINTEGER outlen) {
+SQLRETURN tool_run(SQLHDBC hdbc, SQLCHAR * outarea, SQLINTEGER outlen,
+ tool_struct_t *tool, int *key, char **val, int *arr) 
+{
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0;
-  int j = 0;
-  int k = 0;
-  char * c = NULL;
-  char * f = NULL;
-  char * copyin = NULL;
-  char * stdbuf = NULL;
-  int fmt = JSON400_OUT_JSON_STDOUT;
-  int key[JSON400_MAX_KEY];
-  char * val[JSON400_MAX_KEY];
-  int arr[JSON400_MAX_KEY];
-  int find_look[JSON400_NBR_KEYS];
-  /* output format */
-  if (outjson && outlen) {
-    fmt = JSON400_OUT_JSON_BUFF;
-  } else {
-    fmt = JSON400_OUT_JSON_STDOUT;
-    stdbuf = custom_json_new(JSON400_OUT_MAX_STDOUT);
-    outjson = stdbuf;
-    outlen = JSON400_OUT_MAX_STDOUT;
-  }
-  /* copy in */
-  copyin = custom_json_new(inlen + 1);
-  strcpy(copyin,injson);
-  /* fast look loop */
-  for (i=0; i<JSON400_NBR_KEYS; i++) {
-    find_look[i] = 1;
-  }
-  /* parse json */
-  for (i=0, f=copyin, c=copyin; i+1<JSON400_MAX_KEY && f; i++) {
-    val[i] = NULL;
-    arr[i] = NULL;
-    key[i] = 0;
-    val[i+1] = NULL;
-    arr[i+1] = NULL;
-    key[i+1] = 0;
-    for (j=0, c = f; !key[i] && f && c[j]; j++) {
-      /* "key":[value,...]
-       * "key":"value"
-       * x
-       */
-      if (c[j] == '"') {
-        for (k=0; !key[i] && k < JSON400_NBR_KEYS; k++) {
-          f = custom_json_parse_key_value(&c[j], k, JSON400_KEYS, JSON400_ORDS, find_look, i, key, val, arr);
-        }
-      }
-    }
-  }   
-  /* run */
-  custom_output_script_beg(fmt, outjson);
-  sqlrc = custom_run(hdbc, outjson, outlen, fmt, key, val, arr);
-  custom_output_script_end(fmt, outjson);
-  /* free copyin */
-  if (copyin) {
-    custom_json_free(copyin);
-  }
-  /* free stdbuf */
-  if (stdbuf) {
-    printf(stdbuf);
-    printf("\n");
-    fflush(stdout);
-    custom_json_free(stdbuf);
-  }
+  tool_output_script_beg(tool, outarea);
+  sqlrc = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr);
+  tool_output_script_end(tool, outarea);
   return sqlrc;
 }
 
-char * custom_json_parse_key_value(char * c, int find, char **find_key, int *find_ord, int *find_look, int idx, int *k, char **v, int *a) {
-  int i = 0;
-  char * f = NULL;
-  char * w = NULL;
-  char * x = NULL;
-  char * key = NULL;
-  /* key will never be found 
-   * -- or --
-   * key already found at idx
-   */
-  if (!find_look[find] || k[idx]) {
-    return c;
-  }
-  /* find "key": */
-  key = find_key[find];
-  f = strstr(c,key);
-  /* found */
-  if (f) {
-    /* found in start position */
-    if ((void *)f == (void *)c) {
-      f[0] = ' ';
-      k[idx] = find_ord[find];
-      f += strlen(key);
-      c = f;
-    /* found, but not start position */
-    } else {
-      return c;
-    }
-  /* key will never be found */
-  } else {
-    find_look[find] = 0;
-    return c;
-  }
-  /* find :"value" */
-  for (i=0; c[i]; i++) {
-    switch(c[i]) {
-    /* "query":"select ..."
-     *         x
-     */
-    case '"':
-      i++;
-      w = &c[i];
-      a[idx] = 0;
-      for (; c[i]; i++) {
-        x = &c[i];
-        switch(c[i]) {
-        /* "query":"select ..."
-         *                    x
-         */
-        case '"':
-          c[i]=0x00;
-          v[idx] = w;
-          i++;
-          return &c[i+1];
-          break;
-        }
-      }
-      break;
-    /* "parm":[1,2,"bob"]
-     *        x
-     */
-    case '[':
-      i++;
-      w = &c[i];
-      a[idx] = 1;
-      for (; c[i]; i++) {
-        x = &c[i];
-        switch(c[i]) {
-        /* "parm":[1,2,"bob"]
-         *                  x
-         */
-        case ']':
-          c[i]=0x00;
-          v[idx] = w;
-          i++;
-          return &c[i+1];
-          break;
-        }
-      }
-      break;
-    default:
-      break;
-    }
-  }
-  return NULL;
-}
-
-
-int custom_json_parse_array_values(char *c, char **v) {
-  int i = 0;
-  int idx = 0;
-  char * f = c;
-  char * g = c;
-  int max = strlen(c);
-  /* "parm":[1,2,"bob"]
-   *         x
-   */
-  for (i=0; c[i] && i < max; i++) {
-    switch(c[i]) {
-    /* "parm":[1,2,"bob"]
-     *             x
-     */
-    case '"':
-      i++;
-      f = &c[i];
-      for (; c[i]; i++) {
-        g = &c[i];
-        /* "parm":[1,2,"bob"]
-         *                 x
-         */
-        if (c[i] == '"') {
-          c[i]=0x00;
-          v[idx] = f;
-          idx++;
-          break;
-        }
-      }
-      break;
-    case ' ':
-      break;
-    default:
-      /* "parm":[1,2,"bob"]
-       *         x
-       */
-      if (ile_pgm_isnum_decorated(c[i])) {
-        f = &c[i];
-        for (i++; ;i++) {
-          if (ile_pgm_isnum_decorated(c[i])) {
-            continue;
-          }
-          c[i]=0x00;
-          v[idx] = f;
-          idx++;
-          break;
-        }
-      }
-    }
-  }
-  return idx;
-}
 
 

@@ -1,154 +1,77 @@
-### make
-### make TGT64=64
-### gcc options
+### Compile (Makefile)
+### > make tgt32
+### > make tgt64
+### > make install
+### > make tgt32 tgt64 install
+### gcc options (Makefile)
 ### -v            - verbose compile
 ### -Wl,-bnoquiet - verbose linker
 ### -shared       - shared object
 ### -maix64       - 64bit
 ### -isystem      - compile PASE system headers
 ### -nostdlib     - remove libgcc_s.a and crtcxa_s.o
-CC                 = gcc
-CCFLAGS32          = -g -lg -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
-CCFLAGS64          = $(CCFLAGS32) -maix64
-AR                 = ar
-AROPT              = -X32_64
-INCLUDEPATH        = -isystem /QOpenSys/usr/include -I. -I..
-LIBDEPALL          = -L$(INIL) -ldb400 -L/QOpenSys/usr/lib -nostdlib -lpthreads -lc -liconv -ldl -lpthread
+### ar options (Makefile)
+### -X32_64       - 32bit or 64bit
 
-### TEST0000
-TEST0000PGM32      = test0000_resource_array_32
-TEST0000LIBOBJS32  = test0000_resource_array.o
-TEST0000LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0000PGM64      = test0000_resource_array_64
-TEST0000LIBOBJS64  = $(TEST0000LIBOBJS32)
-TEST0000LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST0001
-TEST0001PGM32      = test0001_error_32
-TEST0001LIBOBJS32  = test0001_error.o
-TEST0001LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0001PGM64      = test0001_error_64
-TEST0001LIBOBJS64  = $(TEST0001LIBOBJS32)
-TEST0001LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST0011
-TEST0011PGM32      = test0011_resource_array_async_callback_32
-TEST0011LIBOBJS32  = test0011_resource_array_async_callback.o
-TEST0011LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0011PGM64      = test0011_resource_array_async_callback_64
-TEST0011LIBOBJS64  = $(TEST0011LIBOBJS32)
-TEST0011LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST0012
-TEST0012PGM32      = test0012_resource_array_async_join_32
-TEST0012LIBOBJS32  = test0012_resource_array_async_join.o
-TEST0012LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST0012PGM64      = test0012_resource_array_async_join_64
-TEST0012LIBOBJS64  = $(TEST0012LIBOBJS32)
-TEST0012LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST1001
-TEST1001PGM32      = test1001_json_select_32
-TEST1001LIBOBJS32  = test1001_json_select.o
-TEST1001LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST1001PGM64      = test1001_json_select_64
-TEST1001LIBOBJS64  = $(TEST1001LIBOBJS32)
-TEST1001LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST1011
-TEST1011PGM32      = test1011_json_select_no_data_found_32
-TEST1011LIBOBJS32  = test1011_json_select_no_data_found.o
-TEST1011LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST1011PGM64      = test1011_json_select_no_data_found_64
-TEST1011LIBOBJS64  = $(TEST1011LIBOBJS32)
-TEST1011LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST1021
-TEST1021PGM32      = test1021_json_null_data_32
-TEST1021LIBOBJS32  = test1021_json_null_data.o
-TEST1021LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST1021PGM64      = test1021_json_null_data_64
-TEST1021LIBOBJS64  = $(TEST1021LIBOBJS32)
-TEST1021LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST1200
-TEST1200PGM32      = test1200_json_cmd_32
-TEST1200LIBOBJS32  = test1200_json_cmd.o
-TEST1200LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST1200PGM64      = test1200_json_cmd_64
-TEST1200LIBOBJS64  = $(TEST1200LIBOBJS32)
-TEST1200LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
-### TEST1250
-TEST1250PGM32      = test1250_json_pgm_32
-TEST1250LIBOBJS32  = test1250_json_pgm.o
-TEST1250LIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
-TEST1250PGM64      = test1250_json_pgm_64
-TEST1250LIBOBJS64  = $(TEST1250LIBOBJS32)
-TEST1250LIBDEPS64  = /QOpenSys/usr/lib/crt0_64.o $(LIBDEPALL)
+###  install
+INSTALLDIR   = /QOpenSys/usr/lib
+ 
+CC          = gcc
+CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
+CCFLAGS64   = $(CCFLAGS32) -maix64 -DTGT64
+AR          = ar
+AROPT       = -X32_64
+INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I.. -I../toolkit-base/.
 
-### make TGT64=64
-ifdef TGT64
-CCFLAGS            = $(CCFLAGS64)
-SHRLIB             = $(LIBSHR32)
-SHROBJ             = $(LIBOBJ64)
-LIBDEPS            = $(LIBDEPS64)
-TEST0000PGM        = $(TEST0000PGM64)
-TEST0000LIBOBJS    = $(TEST0000LIBOBJS64)
-TEST0000LIBDEPS    = $(TEST0000LIBDEPS64)
-TEST0001PGM        = $(TEST0001PGM64)
-TEST0001LIBOBJS    = $(TEST0001LIBOBJS64)
-TEST0001LIBDEPS    = $(TEST0001LIBDEPS64)
-TEST0011PGM        = $(TEST0011PGM64)
-TEST0011LIBOBJS    = $(TEST0011LIBOBJS64)
-TEST0011LIBDEPS    = $(TEST0011LIBDEPS64)
-TEST0012PGM        = $(TEST0012PGM64)
-TEST0012LIBOBJS    = $(TEST0012LIBOBJS64)
-TEST0012LIBDEPS    = $(TEST0012LIBDEPS64)
-TEST1001PGM        = $(TEST1001PGM64)
-TEST1001LIBOBJS    = $(TEST1001LIBOBJS64)
-TEST1001LIBDEPS    = $(TEST1001LIBDEPS64)
-TEST1011PGM        = $(TEST1011PGM64)
-TEST1011LIBOBJS    = $(TEST1011LIBOBJS64)
-TEST1011LIBDEPS    = $(TEST1011LIBDEPS64)
-TEST1021PGM        = $(TEST1021PGM64)
-TEST1021LIBOBJS    = $(TEST1021LIBOBJS64)
-TEST1021LIBDEPS    = $(TEST1021LIBDEPS64)
-TEST1200PGM        = $(TEST1200PGM64)
-TEST1200LIBOBJS    = $(TEST1200LIBOBJS64)
-TEST1200LIBDEPS    = $(TEST1200LIBDEPS64)
-TEST1250PGM        = $(TEST1250PGM64)
-TEST1250LIBOBJS    = $(TEST1250LIBOBJS64)
-TEST1250LIBDEPS    = $(TEST1250LIBDEPS64)
-### make (32)
-else
-CCFLAGS            = $(CCFLAGS32)
-SHRLIB             = $(LIBSHR32)
-SHROBJ             = $(LIBOBJ32)
-LIBDEPS            = $(LIBDEPS32)
-TEST0000PGM        = $(TEST0000PGM32)
-TEST0000LIBOBJS    = $(TEST0000LIBOBJS32)
-TEST0000LIBDEPS    = $(TEST0000LIBDEPS32)
-TEST0001PGM        = $(TEST0001PGM32)
-TEST0001LIBOBJS    = $(TEST0001LIBOBJS32)
-TEST0001LIBDEPS    = $(TEST0001LIBDEPS32)
-TEST0011PGM        = $(TEST0011PGM32)
-TEST0011LIBOBJS    = $(TEST0011LIBOBJS32)
-TEST0011LIBDEPS    = $(TEST0011LIBDEPS32)
-TEST0012PGM        = $(TEST0012PGM32)
-TEST0012LIBOBJS    = $(TEST0012LIBOBJS32)
-TEST0012LIBDEPS    = $(TEST0012LIBDEPS32)
-TEST1001PGM        = $(TEST1001PGM32)
-TEST1001LIBOBJS    = $(TEST1001LIBOBJS32)
-TEST1001LIBDEPS    = $(TEST1001LIBDEPS32)
-TEST1011PGM        = $(TEST1011PGM32)
-TEST1011LIBOBJS    = $(TEST1011LIBOBJS32)
-TEST1011LIBDEPS    = $(TEST1011LIBDEPS32)
-TEST1021PGM        = $(TEST1021PGM32)
-TEST1021LIBOBJS    = $(TEST1021LIBOBJS32)
-TEST1021LIBDEPS    = $(TEST1021LIBDEPS32)
-TEST1200PGM        = $(TEST1200PGM32)
-TEST1200LIBOBJS    = $(TEST1200LIBOBJS32)
-TEST1200LIBDEPS    = $(TEST1200LIBDEPS32)
-TEST1250PGM        = $(TEST1250PGM32)
-TEST1250LIBOBJS    = $(TEST1250LIBOBJS32)
-TEST1250LIBDEPS    = $(TEST1250LIBDEPS32)
-endif
+###  shared lib
+LIBCRT32     = /QOpenSys/usr/lib/crt0.o
+LIBCRT64     = /QOpenSys/usr/lib/crt0_64.o
+LIBDEPSALL   = -L/QOpenSys/usr/lib -nostdlib -ldb400 -lpthreads -lc -liconv -ldl -lpthread
+LIBDEPS32    = $(LIBDEPSALL) $(LIBCRT32)
+LIBDEPS64    = $(LIBDEPSALL) $(LIBCRT64) -maix64
+
+### tests
+TEST0000     = test0000_resource_array
+TEST0001     = test0001_error
+TEST0011     = test0011_resource_array_async_callback
+TEST0012     = test0012_resource_array_async_join
+TEST1001     = test1001_json_select
+TEST1011     = test1011_json_select_no_data_found
+TEST1021     = test1021_json_null_data
+TEST1200     = test1200_json_cmd
+TEST1250     = test1250_json_pgm
+
+### tells make all things to do (order)
+# do this if given an invalid target
+.DEFAULT:
+	@$(MAKE) help
+
+help:
+	@echo "------------------------------------------------------------"
+	@echo "'$(MAKE) xxx' where xxx = tgt32, tgt64, install"
+	@echo "'> make tgt32'"
+	@echo "'> make tgt64'"
+	@echo "'> make install'"
+	@echo "'> make tgt32 tgt64 install'"
+	@echo "------------------------------------------------------------"
 
 ### tells make all things to do (ordered)
-all: cpy removeo $(SHRLIB) $(TEST0000PGM) $(TEST0001PGM) $(TEST0011PGM) $(TEST0012PGM) $(TEST1001PGM) $(TEST1011PGM) $(TEST1021PGM) $(TEST1200PGM) $(TEST1250PGM)
+tgt64:
+	@$(MAKE) CCFLAGS="$(CCFLAGS64)" LIBDEPS="$(LIBDEPS64)" BIT="64" go
+
+tgt32:
+	@$(MAKE) CCFLAGS="$(CCFLAGS32)" LIBDEPS="$(LIBDEPS32)" BIT="32" go
+
+### tells make all things to do (ordered)
+go: $(TEST0000)$(BIT) \
+	$(TEST0011)$(BIT) \
+	$(TEST0012)$(BIT) \
+	$(TEST1001)$(BIT) \
+	$(TEST1011)$(BIT) \
+	$(TEST1021)$(BIT) \
+	$(TEST1200)$(BIT) \
+	$(TEST1250)$(BIT) \
+	clean
 
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
@@ -156,55 +79,26 @@ all: cpy removeo $(SHRLIB) $(TEST0000PGM) $(TEST0001PGM) $(TEST0011PGM) $(TEST00
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
 
-### -- test0000_resource_array_32/64
-$(TEST0000PGM32): $(TEST0000LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0000LIBOBJS) $(TEST0000LIBDEPS) -o $(TEST0000PGM32)
-$(TEST0000PGM64): $(TEST0000LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0000LIBOBJS) $(TEST0000LIBDEPS) -o $(TEST0000PGM64)
-### -- test0001_error_32/64
-$(TEST0001PGM32): $(TEST0001LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0001LIBOBJS) $(TEST0001LIBDEPS) -o $(TEST0001PGM32)
-$(TEST0001PGM64): $(TEST0001LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0001LIBOBJS) $(TEST0001LIBDEPS) -o $(TEST0001PGM64)
-### -- test0011_resource_array_async_callback_32/64
-$(TEST0011PGM32): $(TEST0011LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0011LIBOBJS) $(TEST0011LIBDEPS) -o $(TEST0011PGM32)
-$(TEST0011PGM64): $(TEST0011LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0011LIBOBJS) $(TEST0011LIBDEPS) -o $(TEST0011PGM64)
-### -- test0012_resource_array_async_join_32/64
-$(TEST0012PGM32): $(TEST0012LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0012LIBOBJS) $(TEST0012LIBDEPS) -o $(TEST0012PGM32)
-$(TEST0012PGM64): $(TEST0012LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST0012LIBOBJS) $(TEST0012LIBDEPS) -o $(TEST0012PGM64)
-### -- test1001_json_select_32/64
-$(TEST1001PGM32): $(TEST1001LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1001LIBOBJS) $(TEST1001LIBDEPS) -o $(TEST1001PGM32)
-$(TEST1001PGM64): $(TEST1001LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1001LIBOBJS) $(TEST1001LIBDEPS) -o $(TEST1001PGM64)
-### -- test1011_json_select_no_data_found_32/64
-$(TEST1011PGM32): $(TEST1011LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1011LIBOBJS) $(TEST1011LIBDEPS) -o $(TEST1011PGM32)
-$(TEST1011PGM64): $(TEST1011LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1011LIBOBJS) $(TEST1011LIBDEPS) -o $(TEST1011PGM64)
-### -- test1021_json_null_data_32/64
-$(TEST1021PGM32): $(TEST1021LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1021LIBOBJS) $(TEST1021LIBDEPS) -o $(TEST1021PGM32)
-$(TEST1021PGM64): $(TEST1021LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1021LIBOBJS) $(TEST1021LIBDEPS) -o $(TEST1021PGM64)
-### -- test1200_json_cmd_32/64
-$(TEST1200PGM32): $(TEST1200LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1200LIBOBJS) $(TEST1200LIBDEPS) -o $(TEST1200PGM32)
-$(TEST1200PGM64): $(TEST1200LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1200LIBOBJS) $(TEST1200LIBDEPS) -o $(TEST1200PGM64)
-### -- test1250_json_pgm_32/64
-$(TEST1250PGM32): $(TEST1250LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1250LIBOBJS) $(TEST1250LIBDEPS) -o $(TEST1250PGM32)
-$(TEST1250PGM64): $(TEST1250LIBOBJS)
-	$(CC) $(CCFLAGS) $(TEST1250LIBOBJS) $(TEST1250LIBDEPS) -o $(TEST1250PGM64)
+### -- tests
+$(TEST0000)$(BIT): $(TEST0000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0000).o -o $(TEST0000)$(BIT)
+$(TEST0011)$(BIT): $(TEST0011).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0011).o -o $(TEST0011)$(BIT)
+$(TEST0011)$(BIT): $(TEST0011).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0011).o -o $(TEST0011)$(BIT)
+$(TEST0012)$(BIT): $(TEST0012).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0012).o -o $(TEST0012)$(BIT)
+$(TEST1001)$(BIT): $(TEST1001).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1001).o -o $(TEST1001)$(BIT)
+$(TEST1011)$(BIT): $(TEST1011).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1011).o -o $(TEST1011)$(BIT)
+$(TEST1021)$(BIT): $(TEST1021).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1021).o -o $(TEST1021)$(BIT)
+$(TEST1200)$(BIT): $(TEST1200).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1200).o -o $(TEST1200)$(BIT)
+$(TEST1250)$(BIT): $(TEST1250).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1250).o -o $(TEST1250)$(BIT)
 
-removeo:
-	rm *.o
-
-cpy:
-	cp ../libdb400.a .
+clean:
+	rm -f *.o
 

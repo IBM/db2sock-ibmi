@@ -1,53 +1,67 @@
-### ./make_libdb400.sh
-### gmake options (see make_libdb400.sh)
-### - gmake -f Makefile
-### ILE c compiles
-### - INILIB      - ILE Library (see make_libdb400.sh)
-### - INICHROOT   - chroot base path (see make_libdb400.sh)
+### Compile (Makefile)
+### > export CHROOT=/path/chroot
+### > make cgi
+### > make ILELIB=ANYLIB mylib
+### Assumes borgi command and utilities
+### https://bitbucket.org/litmis/borgi
+###
+
+###  install
+INSTALLBIN   = /QOpenSys/usr/bin
+INSTALLDIR   = /QOpenSys/usr/lib
 
 ### ILE
-### CCRPG       = ./CRTRPGMOD
-CCC         = ./CRTCMOD
-CCPGM       = ./CRTPGM
+CCC         = crtcmod
+CCPGM       = crtpgm
 
-### *PGM CGI - $(INILIB)/DB2JSON
+### *PGM CGI
 CGI400PGM  = db2json.pgm
-CGI400MOD  = $(INILIB)/db2json
 CGI400OBJS = db2json.mod
-CGI400MODS = $(INILIB)/db2json
 
 ### tells make all things to do (order)
-$(info ==================)
-$(info chroot base path INICHROOT=$(INICHROOT) (see make_libdb400.sh))
-ifdef INILIB
-$(info ILE library INILIB=$(INILIB) (see make_libdb400.sh))
-else
-$(error missing ILE library INILIB (see make_libdb400.sh))
-endif
-$(info ==================)
-all: clean removeo cpy talkcgi $(CGI400PGM)
+# do this if given an invalid target
+.DEFAULT:
+	@$(MAKE) help
+help:
+	@echo "------------------------------------------------------------"
+	@echo "'$(MAKE) xxx' where xxx = cgi, mylib"
+	@echo "'> export CHROOT=/path/chroot'"
+	@echo "'> make cgi'  where ILELIB=DB2JSON"
+	@echo "'-- or --"
+	@echo "'> export CHROOT=/path/chroot'"
+	@echo "'> make ILELIB=ANYLIB mylib'"
+	@echo "------------------------------------------------------------"
+### tells make all things to do (ordered)
+cgi:
+	@$(MAKE) ILELIB=DB2JSON go
+mylib:
+	@$(MAKE) go
+go: mkinc removeo $(CGI400PGM)
 
-### ILE
-### .SUFFIXES: .mod .rpgle
-### .rpgle.mod:
-### 	$(CCRPG) $(INILIB) $<
 .SUFFIXES: .mod .c
+### CRTRPGMOD
 .c.mod:
-	$(CCC) $(INILIB) $<
-
+	$(CCC) --lib $(ILELIB) -g --src $<
 ### -- CGI400PGM (ILE c)
 $(CGI400PGM): $(CGI400OBJS)
-	$(CCPGM) $(CGI400MOD) $(CGI400MODS)
+	$(CCPGM) --pgm $(CGI400PGM) --lib $(ILELIB) --mod $(CGI400OBJS) --option "BNDSRVPGM(QHTTPSVR/QZSRCORE)"
 
-talkcgi:
-	$(info ==================)
-	$(info ILE CGI $(INILIB)/$(CGI400PGM))
-	$(info ==================)
+
+mkinc:
+	@echo "#ifndef _ICONF_H" > iconf.h
+	@echo "#define _ICONF_H" >> iconf.h
+	@echo "#define DB2_MAX_JSON_OUT 512000" >> iconf.h
+	@echo "#define DB2_ARG0_PGM \"/QOpenSys/usr/lib/start32\"" >> iconf.h
+	@echo "#define DB2_ENV_PATH \"PATH=$(INSTALLBIN):/usr/bin\"" >> iconf.h
+	@echo "#define DB2_ENV_LIBPATH \"LIBPATH=$(CHROOT)$(INSTALLDIR):$(INSTALLDIR):/usr/lib\"" >> iconf.h
+	@echo "#define DB2_ENV_ATTACH \"PASE_THREAD_ATTACH=Y\"" >> iconf.h
+	@echo "#define DB2_ENV_TRACE \"TRACE=off\"" >> iconf.h
+	@echo "#define DB2_FILE_LIBDB400 \"libdb400.a(shr.o)\"" >> iconf.h
+	@echo "#define DB2_SYM_SQL400JSON \"SQL400Json\"" >> iconf.h
+	@echo "#endif /* _ICONF_HH */" >> iconf.h
 clean:
 	rm -f $(CGI400PGM)
-cpy:
-	cp ../libdb400.a .
-	cp ../system400 .
+	rm -f *.mod
 removeo:
 	rm -f *.mod
 

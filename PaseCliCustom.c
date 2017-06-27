@@ -23,6 +23,10 @@
 static SQLHANDLE env_hndl;
 static int env_server_mode;
 
+SQLINTEGER custom_json_parser_flag;
+SQLRETURN (*custom_json_parser_symbol)( SQLHDBC, SQLCHAR *, SQLINTEGER, SQLCHAR *, SQLINTEGER );
+
+
 /*
  * utilities
  */ 
@@ -493,6 +497,24 @@ SQLRETURN custom_SQL400pClose(SQLHDBC hdbc) {
   sqlrc = custom_SQL400CloseAllStmts(hdbc);
   /* free connection */
   return custom_SQL400CloseBoth(hdbc);
+}
+
+SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
+ SQLCHAR * injson,
+ SQLINTEGER inlen, 
+ SQLCHAR * outjson,
+ SQLINTEGER outlen) 
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  void *dlhandle = NULL;
+  if (!custom_json_parser_flag) {
+    dlhandle = init_json_dlsym();
+    custom_json_parser_symbol = dlsym(dlhandle, "custom_SQL400Json");
+    custom_json_parser_flag = 1;
+  }
+  sqlrc = custom_json_parser_symbol( hdbc, injson, inlen, outjson, outlen );
+ // dynamic load of parser
+ return sqlrc;
 }
 
 

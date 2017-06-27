@@ -34,6 +34,10 @@ PaseConvResource IBMiCCSID[PASECLIMAXCCSID];
  */
 void *dlhandle = NULL;
 /* 
+ * dlopen handle of PASE json parser
+ */
+void *dlhandle_json = NULL;
+/* 
  * ile activate db2 
  */
 int db2_cli_srvpgm_mark;
@@ -168,6 +172,31 @@ void * init_cli_dlsym() {
     init_unlock();
   }
   return dlhandle;
+}
+/* 
+ * dlopen handle of PASE json parser
+ * Note: dlhandle_json is checked twice,
+ * second under global lock,
+ * to avoid race conditions
+ * multiple threads starting.
+ */
+void * init_json_dlsym() {
+  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR);
+  if (dlservice  == NULL) {
+    dlservice = DB2JSONPARSER;
+  }
+  if (dlhandle_json  == NULL) {
+    init_lock();
+    if (dlhandle_json  == NULL) {
+      dlhandle_json = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
+      if (dlhandle_json == NULL)  {
+        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
+        exit(-1);
+      }
+    }
+    init_unlock();
+  }
+  return dlhandle_json;
 }
 /* activate db2 srvpgm */
 int init_cli_srvpgm() {

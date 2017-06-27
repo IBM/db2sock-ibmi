@@ -1,0 +1,6 @@
+#!libtkit400(shr.o)
+
+tool_ctor
+tool_dtor
+tool_run
+
