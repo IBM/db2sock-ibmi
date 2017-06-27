@@ -139,13 +139,19 @@ For driver builders.
 
 1) Need to copy ILE CLI headers to PASE.
 ```
-> cd pase_includes
-> ./cpysqlincludes.sh 
-> cp sqlcli1.h /QOpenSys/usr/include/.
+> ./db2sock/pase_includes/cpysqlincludes.sh 
+> cp db2sock/pase_includes/sqlcli1.h /QOpenSys/usr/include/.
 ```
 
 2) edit PASE header to force gcc align quadword (aligned(16)).
 ```
+===
+IMPORTANT: as400_types.h must have force gcc align quadword (see edit above) 
+===
+> grep gcc /usr/include/as400*       
+/usr/include/as400_types.h:    long double      align __attribute__((aligned(16))); /* force gcc align quadword */
+
+=== edit this file ===
 /usr/include/as400_types.h:
 /*
  * Quadword (aligned) area for a tagged ILE pointer
@@ -212,7 +218,8 @@ bash-4.3$ ./chroot_chown.sh db2sock
 
 
 ====
-enter chroot db2sock auto-login from my laptop over ssh (http://www.rebol.com/docs/ssh-auto-login.html)
+enter chroot 
+db2sock auto-login from my laptop over ssh (http://www.rebol.com/docs/ssh-auto-login.html)
 ====
 ssh -X db2sock@ut28p63
 $ ksh
