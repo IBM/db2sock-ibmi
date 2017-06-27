@@ -191,7 +191,7 @@ qcmd:
 > CHGUSRPRF USRPRF(DB2SOCK) LOCALE(*NONE) HOMEDIR('/QOpenSys/db2sock/./home/db2sock')
 
 => copy ILE DB2 headers into root /usr/include (before chroot)<=
-bash-4.3$ cpysqlincludes.sh 
+bash-4.3$ ./db2sock/pase_includes/cpysqlincludes.sh 
 
 => following run using *SECOFR profile (not user profile db2sock) <=
 bash-4.3$ ./chroot_setup.sh chroot_minimal.lst /QOpenSys/db2sock
