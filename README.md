@@ -123,8 +123,8 @@ Note:
 install yips download pre-compile
 ===
 > cp libdb400.a /QOpenSys/usr/lib/.
-> cp libtkit400.a /QOpenSys/usr/lib/.
-> cp libjson400.a /QOpenSys/usr/lib/.
+> cp libtkit400.a /QOpenSys/usr/lib/. (optional toolkit)
+> cp libjson400.a /QOpenSys/usr/lib/. (optional json parser toolkit)
 ```
 
 #Run ILE CGI (optional)
