@@ -181,7 +181,8 @@ If you miss aligned(16) step, all will compile, but NOTHING will run (DB2 fails)
 - libdb400.exp           -- all CLI export APIs
 
 #DRIVER BUILDER TOOLS
-How i set-up my tools.
+How i set-up my tools. I used either GNU gmake or PASE make (gmake shown below).
+
 ```
 qcmd:
 > CRTLIB LIB(DB2JSON) TEXT('super driver')
@@ -221,7 +222,7 @@ bash-4.3$ grep gcc /usr/include/as400*
 ===
 try make
 ===
-bash-4.3$ ./make_libdb400.sh 
+bash-4.3$ gmake tgt32 tgt64 install 
 make: *** virtual memory exhausted.  Stop.
 ====
 i needed new gmake (and m4)
@@ -236,7 +237,7 @@ bash-4.3$ cp m4 /opt/freeware/bin/m4
 ===
 re-try make
 ===
-bash-4.3$ ./make_libdb400.sh 
+bash-4.3$ gmake tgt32 tgt64 install 
 
 ```
 
