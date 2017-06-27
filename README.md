@@ -218,7 +218,7 @@ bash-4.3$ cp /QOpenSys/usr/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib
 ===
 IMPORTANT: as400_types.h must have force gcc align quadword  
 ===
-bash-4.3$ cp pase_includes/* /QOpenSys/usr/include/
+bash-4.3$ cp db2sock/pase_includes/sqlcli1.h /QOpenSys/usr/include/.
 bash-4.3$ grep gcc /usr/include/as400*       
 /usr/include/as400_types.h:    long double      align __attribute__((aligned(16))); /* force gcc align quadword */
 ===
