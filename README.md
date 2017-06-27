@@ -186,12 +186,21 @@ If you miss aligned(16) step, all will compile, but NOTHING will run (DB2 fails)
 How i set-up my tools. I used either GNU gmake or PASE make (gmake shown below).
 
 ```
+====
+outside chroot -- *SECOFR
+====
 qcmd:
 > CRTLIB LIB(DB2JSON) TEXT('super driver')
 > CHGUSRPRF USRPRF(DB2SOCK) LOCALE(*NONE) HOMEDIR('/QOpenSys/db2sock/./home/db2sock')
 
 => copy ILE DB2 headers into root /usr/include (before chroot)<=
 bash-4.3$ ./db2sock/pase_includes/cpysqlincludes.sh 
+bash-4.3$ cp db2sock/pase_includes/sqlcli1.h /QOpenSys/usr/include/.
+===
+IMPORTANT: as400_types.h must have force gcc align quadword (see edit above) 
+===
+bash-4.3$ grep gcc /usr/include/as400*       
+/usr/include/as400_types.h:    long double      align __attribute__((aligned(16))); /* force gcc align quadword */
 
 => following run using *SECOFR profile (not user profile db2sock) <=
 bash-4.3$ ./chroot_setup.sh chroot_minimal.lst /QOpenSys/db2sock
@@ -200,8 +209,10 @@ bash-4.3$ ./chroot_setup.sh chroot_nls.lst /QOpenSys/db2sock
 bash-4.3$ ./chroot_setup.sh chroot_OPS_GCC.lst /QOpenSys/db2sock
 bash-4.3$ mkdir -p /QOpenSys/db2sock/home/db2sock
 bash-4.3$ ./chroot_chown.sh db2sock
+
+
 ====
-i set up auto-login from my laptop over ssh (http://www.rebol.com/docs/ssh-auto-login.html)
+enter chroot db2sock auto-login from my laptop over ssh (http://www.rebol.com/docs/ssh-auto-login.html)
 ====
 ssh -X db2sock@ut28p63
 $ ksh
@@ -211,16 +222,10 @@ $ export PATH=/opt/freeware/bin:/QOpenSys/usr/bin
 $ bash
 bash-4.3$ ./pkg_setup.sh pkg_perzl_gcc-4.8.3.lst
 ====
-IMPORTANT: copy PASE libdb400.a to orignal location
+IMPORTANT: copy PASE libdb400.a to orignal location (one time only)
 ====
 mkdir -p /QOpenSys/QIBM/ProdData/OS400/PASE/lib
 bash-4.3$ cp /QOpenSys/usr/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a
-===
-IMPORTANT: as400_types.h must have force gcc align quadword  
-===
-bash-4.3$ cp db2sock/pase_includes/sqlcli1.h /QOpenSys/usr/include/.
-bash-4.3$ grep gcc /usr/include/as400*       
-/usr/include/as400_types.h:    long double      align __attribute__((aligned(16))); /* force gcc align quadword */
 ===
 try make
 ===
