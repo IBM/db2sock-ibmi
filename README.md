@@ -69,6 +69,7 @@ Note:
 - manditory save PASE libdb400.a (first time only)
 - new driver uses PASE libdb400.a (above location)
 
+== chroot path (ILE compiles) ===
 > export CHROOT=/path/chroot
 
 == libdb400.a ===
@@ -88,8 +89,9 @@ Note:
 > make tgt32 tgt64 install
 
 == db2json.pgm (optional) ===
+> export CHROOT=/path/chroot
 > cd db2sock/ILE-CGI
-> make tgt32 tgt64 install
+> make cgi
 ```
 Note: db2json.pgm requires borgi project (https://bitbucket.org/litmis/borgi)
 
