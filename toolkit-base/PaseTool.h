@@ -111,6 +111,9 @@ typedef struct ile_pgm_call_struct {
   char * buf;
 } ile_pgm_call_t;
 
+/*
+ * Callbacks provided by parser (any json parser)
+ */
 typedef int (*parse_array_values_t)(char *c, char **v);
 typedef void (*output_script_beg_t)(char *);
 typedef void (*output_script_end_t)(char *);
@@ -144,6 +147,9 @@ typedef struct tool_struct {
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end;
 } tool_struct_t;
 
+/*
+ * toolkit ctor (new) with callbacks by parser (any json parser)
+ */
 tool_struct_t * tool_ctor(
   parse_array_values_t parse_array_values,
   output_script_beg_t output_script_beg,
@@ -162,8 +168,14 @@ tool_struct_t * tool_ctor(
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end
 );
 
+/*
+ * toolkit dtor (delete) by parser (any json parser)
+ */
 void tool_dtor(tool_struct_t *tool);
 
+/*
+ * toolkit run name/value operations by parser (any json parser)
+ */
 SQLRETURN tool_run(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
  tool_struct_t *tool, int *key, char **val, int *arr);
 
