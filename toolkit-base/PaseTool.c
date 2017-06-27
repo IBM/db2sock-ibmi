@@ -1895,7 +1895,7 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
   }
 }
 
-SQLRETURN tool_run(SQLHDBC hdbc, SQLCHAR * outarea, SQLINTEGER outlen,
+int tool_run(int hdbc, char * outarea, int outlen,
  tool_struct_t *tool, int *key, char **val, int *arr) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;

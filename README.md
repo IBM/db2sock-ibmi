@@ -51,6 +51,7 @@ Source links have topical README.md.
 db2sock                      - libdb400.a - db2 driver source
 db2sock/fastcgi              - db2jsonfcgi - fastcgi rest interface source (optional)
 db2sock/ILE-CGI              - db2json.pgm - ILE CGI rest interface source (optional)
+db2sock/ILE-PROC             - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
 db2sock/toolkit-base         - libtkit400.a - toolkit base driver source (optional)
 db2sock/toolkit-parser-json  - libjson400.a - toolkit json parser driver source (optional)
 db2sock/tests_c              - c tests (optional)
@@ -92,16 +93,21 @@ Note:
 > export CHROOT=/path/chroot
 > cd db2sock/ILE-CGI
 > make cgi
+
+== db2proc.srvpgm (optional) ===
+> export CHROOT=/path/chroot
+> cd db2sock/ILE-PROC
+> make proc
 ```
 Notes: 
 
-- db2json.pgm requires borgi project (https://bitbucket.org/litmis/borgi)
+- db2json.pgm, db2proc.srvpgm requires borgi project (https://bitbucket.org/litmis/borgi)
 
 - libjson400.a json toolkit parser is optionally dynamically loaded via SQL400Json API. 
 This default parser may be replaced by any Open Source json parser (DIY enabled).
 
 - libtkit400.a toolkit runner is dynamically loaded via SQL400Json API with libjson400.a.
-This object provides toolkit functions similar to XMLSERVICE (not using XMLSERVICE). 
+This object provides toolkit functions similar to XMLSERVICE (db2proc.srvpgm). 
 
 
 ##YIPS pre-compiled test vesion

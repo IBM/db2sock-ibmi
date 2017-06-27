@@ -1,3 +1,10 @@
+#ifndef _PASETOOL_H
+#define _PASETOOL_H
+
+
+#ifdef __IBMC__
+/* nothing ILE compiler */
+#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -9,6 +16,7 @@
 #include <as400_protos.h>
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
+#endif
 
 /* === experimental (not finished) ===
  * This module has fancy 'big helper' APIs.
@@ -30,7 +38,11 @@
 #define TOOL400_MAX_ARGS 32
 #define TOOL400_MAX_COLS 1024
 
+#ifdef __IBMC__
+/* nothing ILE compiler */
+#else
 #define TOOL400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
+#endif
 
 #define TOOL400_EXPAND_CHAR 3
 #define TOOL400_EXPAND_BINARY 2
@@ -95,7 +107,11 @@
 #define ILE_PGM_MAX_ARGS 128
 #define ILE_PGM_ALLOC_BLOCK 4096
 typedef struct ile_pgm_call_struct {
+#ifdef __IBMC__
+  char * argv[ILE_PGM_MAX_ARGS];
+#else
   ILEpointer argv[ILE_PGM_MAX_ARGS];
+#endif
   int argv_parm[ILE_PGM_MAX_ARGS];
   int arg_by[ILE_PGM_MAX_ARGS];
   int arg_pos[ILE_PGM_MAX_ARGS];
@@ -111,6 +127,9 @@ typedef struct ile_pgm_call_struct {
   char * buf;
 } ile_pgm_call_t;
 
+#ifdef __IBMC__
+/* nothing ILE compiler */
+#else
 /*
  * Callbacks provided by parser (any json parser)
  */
@@ -176,7 +195,10 @@ void tool_dtor(tool_struct_t *tool);
 /*
  * toolkit run name/value operations by parser (any json parser)
  */
-SQLRETURN tool_run(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
+int tool_run(int ihdbc, char * outarea, int outlen,
  tool_struct_t *tool, int *key, char **val, int *arr);
+#endif
+
+#endif /* _PASETOOL_H */
 
 
