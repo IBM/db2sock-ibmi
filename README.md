@@ -174,7 +174,7 @@ typedef union _ILEpointer {
 Note:
 If you miss aligned(16) step, all will compile, but NOTHING will run (DB2 fails).
 
-##gen.py creates (already run -- do not edit): 
+##gen.py creates (do not edit): 
 - PaseCliAsync.h         -- header asynchronous extensions (php, node, ...)
 - PaseCliAsync_gen.c     -- asynchronous driver APIs
 - PaseCliILE_gen.c       -- direct ILE call APIs (exported)
