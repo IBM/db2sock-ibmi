@@ -11,6 +11,16 @@
 #include "PaseCliAsync.h"
 #include "PaseTool.h"
 
+/*
+ * == WARNING ==
+ * The json format is changing. The 'temp format'
+ * below was only used to checkout some basic
+ * toolkit callback functions (db2sock/toolkit-base).
+ * When project warnings are removed, you may
+ * rely on json format.
+ */
+
+
 /* json
  * request {
  * -- toolkit database --
