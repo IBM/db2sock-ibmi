@@ -93,7 +93,15 @@ Note:
 > cd db2sock/ILE-CGI
 > make cgi
 ```
-Note: db2json.pgm requires borgi project (https://bitbucket.org/litmis/borgi)
+Notes: 
+
+- db2json.pgm requires borgi project (https://bitbucket.org/litmis/borgi)
+
+- libjson400.a json toolkit parser is optionally dynamically loaded via SQL400Json API. 
+This default parser may be replaced by any Open Source json parser (DIY enabled).
+
+- libtkit400.a toolkit runner is dynamically loaded via SQL400Json API with libjson400.a.
+This object provides toolkit functions similar to XMLSERVICE (not using XMLSERVICE). 
 
 
 ##YIPS pre-compiled test vesion
