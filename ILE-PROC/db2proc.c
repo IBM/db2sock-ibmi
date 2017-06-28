@@ -21,7 +21,7 @@ void iCall400(char * blob)
   int offset = 0;
   int by = 0;
   /* hey adc debug */
-  sleep(30);
+  /* sleep(30); */
   /* set ILE addresses based memory spill location offset */
   for (argc=0; argc < layout->argc; argc++) {
     /*  by reference */
