@@ -54,6 +54,7 @@ $(SP400SRVPGM): $(SP400OBJS)
 mkinc:
 	@echo "#ifndef _ICONF_H" > iconf.h
 	@echo "#define _ICONF_H" >> iconf.h
+	@echo "#define ILELIB \"$(ILELIB)\"" >> iconf.h
 	@echo "#endif /* _ICONF_HH */" >> iconf.h
 ### -- create stored procedures (iPLUG512K, etc.)
 crtsqlproc:

@@ -9,6 +9,7 @@
 #include <as400_protos.h>
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
+#include "../ILE-PROC/iconf.h" /* see ILE-PROC/Makefile */
 #include "PaseTool.h"
 
 void * tool_new(int size) {
@@ -1309,7 +1310,7 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
   case ILE_PGM_BY_VALUE:
     where = ile_pgm_curr_argv_ptr_align(layout, tlen);
     if (!isOut) {
-      layout->argv_parm[layout->argc] = 0;
+      layout->argv_parm[layout->argc] = -1;
       layout->arg_by[layout->parmc] = by;
       layout->arg_pos[layout->parmc] = ile_pgm_curr_argv_pos(layout);
       layout->arg_len[layout->parmc] = tlen;
@@ -1582,6 +1583,11 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
   char * pgmVal = NULL;
   int pgmValLen = 0;
   ile_pgm_call_t * layout = NULL;
+  char * ile_lib = ILELIB;
+  char * shift_ile = NULL;
+  char * shift_pase = NULL;
+  int shift_len = 0;
+  SQLINTEGER sql_max = 0;
   SQLHENV henv = 0;
   SQLHANDLE hdbc = ihdbc;
   SQLHANDLE hstmt = 0;
@@ -1862,14 +1868,56 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
      * end-pgm we can run then copy out to format
      */
     case TOOL400_KEY_END_PGM:
-      /* make sp call to ILE blob call wrapper
-       * (sp is simple load, activate, call, return) 
-       */
       /* output processing */
       switch(isOut) {
       case 0:
+        /* make sp call to ILE blob call wrapper
+         * (sp is simple load, activate, call, return)
+         * > export TOOLLIB=DB2JSON
+         */
+        ile_lib = getenv(TOOLLIB);
+        if (!ile_lib) {
+          ile_lib = ILELIB; /* see ILE_PROC Makefile (iconf.h) */
+        }
+        cmd_len = strlen(val[i]);
+        memset(cmd_buff,0,TOOL400_MAX_CMD_BUFF);
+        sprintf(cmd_buff,"CALL %s.DB2PROC(?)", ile_lib);
+        /* prepare */
+        sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
+        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
+        /* shift to blob alignment
+         * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+         *                                           .
+         *                                    ........
+         *                                    .
+         * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+         */
+        layout->blob_pad[0] = -1;
+        layout->blob_pad[1] = -1;
+        layout->blob_pad[2] = -1;
+        shift_ile = (char *)&layout->blob_pad[3];
+        shift_pase = shift_ile + 4;
+        shift_len = layout->max - (shift_pase - (char *)layout);
+        memcpy(shift_ile,shift_pase,shift_len);
+        /* bind parm */
+        sql_max = layout->max;
+        sqlrc = SQLBindParameter((SQLHSTMT)hstmt, (SQLUSMALLINT) 1,
+                SQL_PARAM_INPUT_OUTPUT, SQL_C_BINARY, SQL_BLOB,
+                layout->max, 0, (SQLPOINTER)layout, 0, &sql_max);
+        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
+        /* execute */
+        sqlrc = SQLExecute((SQLHSTMT)hstmt);
+        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
         /* close */
         sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+        /* shift to pase alignment
+         * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+         *                                           .
+         *                                    ........
+         *                                    .
+         * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+         */
+        memcpy(shift_pase,shift_ile,shift_len);
         /* reset top of parms */
         ile_pgm_reset_pos(layout);
         isOut = 1;

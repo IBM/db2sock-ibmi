@@ -77,6 +77,11 @@ Note:
 > cd db2sock
 > make tgt32 tgt64 install
 
+== db2proc.srvpgm (optional) ===
+> export CHROOT=/path/chroot
+> cd db2sock/ILE-PROC
+> make proc
+
 == libtkit400.a (optional) ===
 > cd db2sock/toolkit-base
 > make tgt32 tgt64 install
@@ -94,10 +99,6 @@ Note:
 > cd db2sock/ILE-CGI
 > make cgi
 
-== db2proc.srvpgm (optional) ===
-> export CHROOT=/path/chroot
-> cd db2sock/ILE-PROC
-> make proc
 ```
 Notes: 
 
@@ -107,7 +108,9 @@ Notes:
 This default parser may be replaced by any Open Source json parser (DIY enabled).
 
 - libtkit400.a toolkit runner is dynamically loaded via SQL400Json API with libjson400.a.
-This object provides toolkit functions similar to XMLSERVICE (db2proc.srvpgm). 
+This object provides toolkit functions similar to XMLSERVICE (db2proc.srvpgm).
+You must build db2proc.srvpgm db2 procedure before libtkit400.a to create ILE-PROC/iconf.h.
+At runtime you may override db2 procedure library location with env var TOOLLIB (optional).
 
 
 ##YIPS pre-compiled test vesion

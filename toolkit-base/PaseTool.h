@@ -27,9 +27,15 @@
  *
  * Warning: 
  * Many bugs still here. Development is trial and error,
- * so don't exepct these APIs to be solid until this
+ * so don't expect these APIs to be solid until this
  * warning is removed.
  */
+
+/* make sp call to ILE blob call wrapper
+ * > export TOOLLIB=DB2JSON
+ * (see ILE-PROC)
+ */
+#define TOOLLIB "TOOLLIB"
 
 #define TOOL400_OUT_MAX_STDOUT 1000000
 
@@ -108,8 +114,14 @@
 #define ILE_PGM_ALLOC_BLOCK 4096
 typedef struct ile_pgm_call_struct {
 #ifdef __IBMC__
+  /* pad blob alignment */
+  int blob_pad[3];
+  /* ILE address (set ILE side) */
   char * argv[ILE_PGM_MAX_ARGS];
 #else
+  /* pad pase alignment */
+  int blob_pad[4];
+  /* ILE address (untouched PASE side) */
   ILEpointer argv[ILE_PGM_MAX_ARGS];
 #endif
   int argv_parm[ILE_PGM_MAX_ARGS];
