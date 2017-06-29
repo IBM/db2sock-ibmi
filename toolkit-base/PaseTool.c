@@ -1338,6 +1338,38 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
   return where;
 }
 
+void ile_pgm_trim_ebcdic(char *str, int len) {
+  int j = 0;
+  char * c = NULL;
+  for (c = str, j = len - 1; j >= 0; j--) {
+    if (!c[j] || c[j] == 0x40) {
+      c[j] = 0x00;
+      len = j;
+    } else {
+      break;
+    }
+  }
+}
+
+/* "pgm":["NAME","LIB","procedure"], */
+SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) {
+  ile_pgm_call_t * layout = *playout;
+  int rc = 0;
+
+  /* grow template (if need) */
+  layout = ile_pgm_grow(playout, sizeof(ile_pgm_call_t));
+
+  /* copy ebcdic */
+  rc = ile_pgm_str_2_char((char *)&layout->pgm, pgm, 1, sizeof(layout->pgm), 0, 0);
+  ile_pgm_trim_ebcdic((char *)&layout->pgm, sizeof(layout->pgm));
+  rc = ile_pgm_str_2_char((char *)&layout->lib, lib, 1, sizeof(layout->lib), 0, 0);
+  ile_pgm_trim_ebcdic((char *)&layout->lib, sizeof(layout->lib));
+  rc = ile_pgm_str_2_char((char *)&layout->func, func, 1, sizeof(layout->func), 0, 0);
+  ile_pgm_trim_ebcdic((char *)&layout->func, sizeof(layout->func));
+
+  /* layout return */
+  *playout = layout;
+}
 
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
 SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
@@ -1824,6 +1856,12 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
       pgmOut = i;
       switch(isOut) {
       case 0:
+        /* "pgm":["CLIMATE","MYLIB","RegionTemps"] */
+        arv[0] = NULL;
+        arv[1] = NULL;
+        arv[2] = NULL;
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
+        tool_pgm(arv[0], arv[1], arv[2], &layout);
         if (!hdbc) {
           sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
           sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
@@ -1832,7 +1870,6 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
         sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
         break;
       case 1:
-        /* "pgm":["CLIMATE","MYLIB","RegionTemps"] */
         arv[0] = NULL;
         arv[1] = NULL;
         arv[2] = NULL;

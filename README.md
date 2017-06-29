@@ -56,6 +56,7 @@ db2sock/toolkit-base         - libtkit400.a - toolkit base driver source (option
 db2sock/toolkit-parser-json  - libjson400.a - toolkit json parser driver source (optional)
 db2sock/tests_c              - c tests (optional)
 db2sock/tests_php            - php tests (optional)
+db2sock/tests_c_ILE-RPG      - RPG tests (optional)
 ```
 
 ##make (see Yips pre-compile to skip) 
