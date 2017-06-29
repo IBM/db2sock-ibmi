@@ -2050,6 +2050,7 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
           i = dsOut;
         } else {
           tool_output_pgm_dcl_s_end(tool, outarea, ds_dim_save);
+          ds_dim_save = 0;
         }
         break;
       default:
