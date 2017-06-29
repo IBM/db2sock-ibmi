@@ -1719,6 +1719,8 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
   int ds_by = 0;
   char * ds_name = NULL;
   char * ds_where = NULL;
+  char * dsVal = NULL;
+  int dsValLen = 0;
   char * where = NULL;
   SQLINTEGER sql_max = 0;
   SQLHENV henv = 0;
@@ -2001,15 +2003,19 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
       break;
     case TOOL400_KEY_DCL_DS:
       isDs = 1;
+      dsOut = i;
+      /* "dcl-ds":["name", dimension, "in|out|both|value|const|return"] */
+      dsVal = val[i];
+      dsValLen = strlen(dsVal);
+      val[i] = tool_new(dsValLen);
+      strcpy(val[i], dsVal);
+      arv[0] = NULL;
+      arv[1] = NULL;
+      arv[2] = NULL;
+      nbr_arv = tool_parse_array_values(tool, val[i], arv);
+      sqlrc = tool_dcl_ds(nbr_arv, arv, &ds_name, &ds_dim, &ds_by, &ds_where, &layout);
       switch(isOut) {
       case 0:
-        dsOut = i;
-        /* "dcl-ds":["name", dimension, "in|out|both|value|const|return"] */
-        arv[0] = NULL;
-        arv[1] = NULL;
-        arv[2] = NULL;
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        sqlrc = tool_dcl_ds(nbr_arv, arv, &ds_name, &ds_dim, &ds_by, &ds_where, &layout);
         break;
       case 1:
         tool_output_pgm_dcl_s_beg(tool, outarea, ds_name, ds_dim);
@@ -2017,6 +2023,8 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
       default:
         break;
       }
+      tool_free(val[i]);
+      val[i] = dsVal;
       /* recusive call to keep ds_dim, ds_by, ds_where */
       i = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr, i+1, isOut, &layout);
       break;
