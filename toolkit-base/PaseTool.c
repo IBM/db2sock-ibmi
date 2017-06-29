@@ -113,7 +113,6 @@ void tool_output_pgm_dcl_s_end(tool_struct_t *tool, char *out_caller, int tdim) 
   tool->output_pgm_dcl_s_end(out_caller, tdim);
 }
 
-
 /* by ref area */
 void ile_pgm_reset_spill_pos(ile_pgm_call_t * layout) {
   int delta = 0;
@@ -1321,7 +1320,10 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
     break;
   /* return in buffer */
   case ILE_PGM_BY_RETURN:
-    /* next position */
+    /* start return position */
+    if (!layout->return_start) {
+      layout->return_start = layout->pos;
+    }
     ile_pgm_next_spill_pos(layout, tlen);
     break;
   /* ds data */
@@ -1593,32 +1595,131 @@ SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc,
   return rc;
 }
 
-/* "dcl-ds":["name",dimension, "in|out|both|value|return", "dou-name"], */
-SQLRETURN tool_dcl_ds(int isOut, int argc, char * arv[], int isDs, ile_pgm_call_t **playout) {
+/* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
+SQLRETURN tool_dcl_ds(int argc, char * argv[], char ** ds_name, int * ds_dim, int * ds_by, char ** ds_where, ile_pgm_call_t **playout) {
+
+  ile_pgm_call_t * layout = *playout;
+
+  char * in_name = NULL;
+  char * in_dim = NULL;
+  char * in_by = NULL;
+
+  char typ = ' ';
+  int tlen = 0;
+  int tscale = 0;
+  int tvary = 0;
+  int tdim = 0;
+
+  int spill_len = 0;
+  int rc = 0;
+  int by = 0;
+  char * where = NULL;
+
+  /* manditory - "name", "type" */
+  if (argc < 1) {
+    return SQL_ERROR;
+  }
+  /* manitory - name */
+  in_name = argv[0];
+  /* optional - dimension */
+  if (argc > 1) {
+    in_dim = argv[1];
+  }
+  /* optional - in|out|both|value|return */
+  if (argc > 2) {
+    in_by = argv[2];
+  }
+
+  /* parse dimension */
+  rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
+  if (tdim < 1) {
+    tdim = 1;
+  }
+
+  /* parse in|out|both|value|const|return */
+  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, 0, &spill_len);
+  if (spill_len) {
+    /* grow template (if need) */
+    layout = ile_pgm_grow(playout, spill_len);
+  }
+
+  /* location of parm or ds data */
+  where = ile_pgm_parm_location(0, by, spill_len, layout);
+  if (!where) {
+    return SQL_ERROR;
+  }
+
+  /* parse data */
+  *ds_name = in_name;
+  *ds_dim = tdim;
+  *ds_by = by;
+  *ds_where = where;
+
+  /* layout return */
+  *playout = layout;
+
+  return rc;
+}
+
+SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t **playout) {
+
+  ile_pgm_call_t * layout = *playout;
+
+  int j = 0;
+  int ds_spill_len = 0;
+  char * where = NULL;
+
+  /* multiple dim DS */
+  if (ds_dim > 1) {
+    where = ile_pgm_parm_location(0, ds_by, 0, layout);
+    ds_spill_len = where - ds_where;
+    for (j = 1; j < ds_dim; j++) {
+      /* where now */
+      where = ile_pgm_parm_location(0, ds_by, 0, layout);
+      /* grow template (if need) */
+      layout = ile_pgm_grow(playout, ds_spill_len);
+      /* copy additional ds */
+      memcpy(where,ds_where,ds_spill_len);
+    }
+  }
+
+  /* layout return */
+  *playout = layout;
+
   return SQL_SUCCESS;
 }
 
+
+
 SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
- tool_struct_t *tool, int *key, char **val, int *arr) 
+ tool_struct_t *tool, int *key, char **val, int *arr, int idx, int isOut, ile_pgm_call_t **playout) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  ile_pgm_call_t * layout = *playout;
   int i = 0;
   int j = 0;
   int nbr_arv = 0;
   char * arv[TOOL400_MAX_KEY];
   int recs = 0;
   int hdbc_external = 0;
+  char * myPgm = NULL;
+  char * myLib = NULL;
+  char * myFunc = NULL;
   int isDs = 0;
-  int isOut = 0;
+  int dsOut = 0;
   int pgmOut = 0;
-  int pgmOk = 0;
   char * pgmVal = NULL;
   int pgmValLen = 0;
-  ile_pgm_call_t * layout = NULL;
   char * ile_lib = ILELIB;
   char * shift_ile = NULL;
   char * shift_pase = NULL;
   int shift_len = 0;
+  int ds_dim = 0;
+  int ds_dim_save = 0;
+  int ds_by = 0;
+  char * ds_name = NULL;
+  char * ds_where = NULL;
+  char * where = NULL;
   SQLINTEGER sql_max = 0;
   SQLHENV henv = 0;
   SQLHANDLE hdbc = ihdbc;
@@ -1651,7 +1752,7 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
     hdbc_external = 1;
   }
   /* process */
-  for (i=0;key[i];i++) {
+  for (i=idx;key[i];i++) {
     switch (key[i]) {
     /* SQLRETURN SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, 
      *   SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
@@ -1861,7 +1962,10 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
         arv[1] = NULL;
         arv[2] = NULL;
         nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        tool_pgm(arv[0], arv[1], arv[2], &layout);
+        myPgm = arv[0];
+        myLib = arv[1];
+        myFunc = arv[2];
+        tool_pgm(myPgm, myLib, myFunc, &layout);
         if (!hdbc) {
           sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
           sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
@@ -1870,11 +1974,7 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
         sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
         break;
       case 1:
-        arv[0] = NULL;
-        arv[1] = NULL;
-        arv[2] = NULL;
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        tool_output_pgm_beg(tool, outarea, arv[0], arv[1], arv[2]);
+         tool_output_pgm_beg(tool, outarea, myPgm, myLib, myFunc);
         break;
       default:
         break;
@@ -1890,16 +1990,63 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
         val[i] = tool_new(pgmValLen);
         strcpy(val[i], pgmVal);
         nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, isDs, &layout);
+        if (idx) {
+          sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, 1, &layout);
+        } else {
+          sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, isDs, &layout);
+        }
         tool_free(val[i]);
         val[i] = pgmVal;
       }
       break;
     case TOOL400_KEY_DCL_DS:
       isDs = 1;
+      switch(isOut) {
+      case 0:
+        dsOut = i;
+        /* "dcl-ds":["name", dimension, "in|out|both|value|const|return"] */
+        arv[0] = NULL;
+        arv[1] = NULL;
+        arv[2] = NULL;
+        nbr_arv = tool_parse_array_values(tool, val[i], arv);
+        sqlrc = tool_dcl_ds(nbr_arv, arv, &ds_name, &ds_dim, &ds_by, &ds_where, &layout);
+        break;
+      case 1:
+        tool_output_pgm_dcl_s_beg(tool, outarea, ds_name, ds_dim);
+        break;
+      default:
+        break;
+      }
+      /* recusive call to keep ds_dim, ds_by, ds_where */
+      i = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr, i+1, isOut, &layout);
       break;
     case TOOL400_KEY_END_DS:
+      /* break recursive loop */
+      if (isDs == 0) {
+        /* layout return */
+        *playout = layout;
+        return i - 1;
+      }
       isDs = 0;
+      switch(isOut) {
+      case 0:
+        sqlrc = ile_pgm_copy_ds(ds_where, ds_dim, ds_by, &layout);
+        break;
+      case 1:
+        /* dim replay ds (from dsOut) */
+        if (!ds_dim_save) {
+          ds_dim_save = ds_dim;
+        }
+        ds_dim--;
+        if (ds_dim > 0) {
+          i = dsOut;
+        } else {
+          tool_output_pgm_dcl_s_end(tool, outarea, ds_dim_save);
+        }
+        break;
+      default:
+        break;
+      }
       break;
     /*
      * end-pgm we can run then copy out to format
@@ -1908,6 +2055,10 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
       /* output processing */
       switch(isOut) {
       case 0:
+        /* last return position */
+        if (layout->return_start) {
+          layout->return_end = layout->pos;
+        }
         /* make sp call to ILE blob call wrapper
          * (sp is simple load, activate, call, return)
          * > export TOOLLIB=DB2JSON
@@ -1958,7 +2109,6 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
         /* reset top of parms */
         ile_pgm_reset_pos(layout);
         isOut = 1;
-        pgmOk = 1;
         /* replay from start of "pgm" */
         i = pgmOut - 1;
         break;
@@ -1978,14 +2128,21 @@ SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
   if (!hdbc_external) {
     sqlrc = SQL400Close(hdbc);
   }
+
+  /* layout return */
+  *playout = layout;
+
+  return sqlrc;
 }
 
 int tool_run(int hdbc, char * outarea, int outlen,
  tool_struct_t *tool, int *key, char **val, int *arr) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int idx = 0;
+  ile_pgm_call_t * layout = NULL;
   tool_output_script_beg(tool, outarea);
-  sqlrc = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr);
+  sqlrc = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr, idx, 0, &layout);
   tool_output_script_end(tool, outarea);
   return sqlrc;
 }

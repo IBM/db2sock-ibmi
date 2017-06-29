@@ -136,6 +136,8 @@ typedef struct ile_pgm_call_struct {
   int vpos;
   int argc;
   int parmc;
+  int return_start;
+  int return_end;
   char * buf;
 } ile_pgm_call_t;
 

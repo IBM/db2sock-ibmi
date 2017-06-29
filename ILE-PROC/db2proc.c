@@ -51,7 +51,12 @@ char * p126,char * p127,char * p128
 #pragma linkage(os_pgm_128_t,OS)
 #pragma datamodel(pop)
 
-typedef char * (os_fct_128_t) 
+#define ICALL_MAX_RETURN 5000000
+typedef struct bighole_struct {
+  char hole[ICALL_MAX_RETURN];
+} bighole_t;
+
+typedef bighole_t (os_fct_128_t) 
 (
 char * p001,char * p002,char * p003,char * p004,char * p005,
 char * p006,char * p007,char * p008,char * p009,char * p010,
@@ -113,9 +118,9 @@ void iCallPgm128 (os_pgm_128_t *os_fct_ptr, ile_pgm_call_t* layout)
    );
 }
 
-void iCallFct128 (os_fct_128_t *os_fct_ptr, ile_pgm_call_t* layout) 
+bighole_t iCallFct128 (os_fct_128_t *os_fct_ptr, ile_pgm_call_t* layout) 
 {
-  os_fct_ptr(
+  return os_fct_ptr(
    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4],
    layout->argv[5], layout->argv[6], layout->argv[7], layout->argv[8], layout->argv[9],
    layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], layout->argv[14],
@@ -157,15 +162,18 @@ void iCall400(char * blob)
   int lenPgm = 0;
   int lenLib = 0;
   int lenFunc = 0;
+  int lenRet = 0;
   char * myPgm = NULL;
   char * myLib = NULL;
   char * myFunc = NULL;
   char * myLibl = "*LIBL";
+  char * myRet = NULL;
   os_pgm_128_t *os_pfct_ptr = NULL;
   os_fct_128_t *os_fct_ptr = NULL;
   _SYSPTR os_pgm_ptr = NULL;
   unsigned long long os_act_mark = 0;
   int os_obj_type = 0;
+  bighole_t bighole;
 
   /* hey adc debug */
   /* sleep(30); */
@@ -212,11 +220,19 @@ void iCall400(char * blob)
     if (!lenFunc) {
       iCallPgm128(os_pfct_ptr, layout);
     } else {
-      iCallFct128(os_fct_ptr, layout);
+      bighole = iCallFct128(os_fct_ptr, layout);
     }
   /* call mix by ref/val */
   } else {
     /* next work */
   }
+
+  /* return aggregate? */
+  if (layout->return_start && layout->return_start < layout->return_end) {
+    myRet = (char *)layout + layout->return_start;
+    lenRet = layout->return_end - layout->return_start;
+    memcpy(myRet,(char *)&bighole,lenRet);
+  }
+
 }
 

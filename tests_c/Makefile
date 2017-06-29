@@ -42,6 +42,8 @@ TEST1200     = test1200_json_cmd
 TEST1250     = test1250_json_pgm
 TEST1300     = test1300_json_pgm_hello
 TEST1310     = test1310_json_srvpgm_hello
+TEST1320     = test1320_json_srvpgm_hello_again
+TEST1330     = test1330_json_srvpgm_hello_ds
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -75,6 +77,8 @@ go: $(TEST0000)$(BIT) \
 	$(TEST1250)$(BIT) \
 	$(TEST1300)$(BIT) \
 	$(TEST1310)$(BIT) \
+	$(TEST1320)$(BIT) \
+	$(TEST1330)$(BIT) \
 	clean
 
 ### generic rules
@@ -106,6 +110,10 @@ $(TEST1300)$(BIT): $(TEST1300).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1300).o -o $(TEST1300)$(BIT)
 $(TEST1310)$(BIT): $(TEST1310).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1310).o -o $(TEST1310)$(BIT)
+$(TEST1320)$(BIT): $(TEST1320).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1320).o -o $(TEST1320)$(BIT)
+$(TEST1330)$(BIT): $(TEST1330).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1330).o -o $(TEST1330)$(BIT)
 
 clean:
 	rm -f *.o

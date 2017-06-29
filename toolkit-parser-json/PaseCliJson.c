@@ -339,7 +339,6 @@ void json_output_pgm_dcl_s_end(char *out_caller, int tdim) {
   }
 }
 
-
 char * json_parse_key_value(char * c, int find, char **find_key, int *find_ord, int *find_look, int idx, int *k, char **v, int *a) {
   int i = 0;
   char * f = NULL;
