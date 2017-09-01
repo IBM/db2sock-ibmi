@@ -9,8 +9,56 @@
 #include <as400_protos.h>
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
+#include "PaseCliDev.h"
+#include "PaseCliPrintf.h"
 #include "../ILE-PROC/iconf.h" /* see ILE-PROC/Makefile */
 #include "PaseTool.h"
+
+typedef struct tool_key_conn_struct {
+  int presistent;
+  int conn_type;
+  SQLHANDLE hdbc;
+  SQLCHAR * conn_db;
+  SQLCHAR * conn_uid;
+  SQLCHAR * conn_pwd;
+  SQLCHAR * conn_qual;
+  SQLINTEGER conn_commit;
+  SQLCHAR * conn_libl;
+  SQLCHAR * conn_curlib;
+} tool_key_conn_struct_t;
+
+typedef struct tool_key_query_struct {
+  SQLHANDLE hstmt;
+} tool_key_query_struct_t;
+
+typedef struct tool_key_cmd_struct {
+  SQLHANDLE hstmt;
+  SQLINTEGER cmd_len;
+  SQLCHAR cmd_buff[TOOL400_MAX_CMD_BUFF];
+} tool_key_cmd_struct_t;
+
+typedef struct tool_key_pgm_struct {
+  SQLHANDLE hstmt;
+  ile_pgm_call_t * layout;
+  char * pgm_ile_name;
+  char * pgm_ile_lib;
+  char * pgm_ile_func;
+  SQLINTEGER pgm_len;
+  SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
+} tool_key_pgm_struct_t;
+
+typedef struct tool_key_struct {
+  int hdbc;
+  tool_key_conn_struct_t * tconn;
+  char * outarea;
+  int outlen;
+  tool_struct_t *tool;
+  int idx;
+  int *key;
+  char **val;
+  int *lvl;
+} tool_key_t;
+
 
 void * tool_new(int size) {
   void * buffer = malloc(size + 1);
@@ -24,7 +72,6 @@ void tool_free(char *buffer) {
 }
 
 tool_struct_t * tool_ctor(
-  parse_array_values_t parse_array_values,
   output_script_beg_t output_script_beg,
   output_script_end_t output_script_end,
   output_record_array_beg_t output_record_array_beg,
@@ -42,7 +89,6 @@ tool_struct_t * tool_ctor(
 ) 
 {
   tool_struct_t *tool = tool_new(sizeof(tool_struct_t));
-  tool->parse_array_values = parse_array_values;
   tool->output_script_beg = output_script_beg;
   tool->output_script_end = output_script_end;
   tool->output_record_array_beg = output_record_array_beg;
@@ -60,13 +106,317 @@ tool_struct_t * tool_ctor(
   return tool;
 }
 
-void tool_dtor(tool_struct_t *tool){
-  tool_free((char *)tool);
+SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut);
+SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut);
+
+char * ile_pgm_spill_top_buf(ile_pgm_call_t * layout);
+int ile_pgm_spill_top_offset(ile_pgm_call_t * layout);
+int ile_pgm_spill_length(ile_pgm_call_t * layout);
+char * ile_pgm_argv_top_buf(ile_pgm_call_t * layout);
+int ile_pgm_argv_top_offset(ile_pgm_call_t * layout);
+int ile_pgm_argv_length(ile_pgm_call_t * layout);
+
+/*=================================================
+ * toolkit trace
+ */
+
+void tool_dump_key(char *mykey, int lvl, int key, char * val) {
+  switch (key) {
+
+    case TOOL400_KEY_CONN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CONN", val);
+      break;
+    case TOOL400_KEY_PCONN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PCONN", val);
+      break;
+    case TOOL400_CONN_DB:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_DB", val);
+      break;
+    case TOOL400_CONN_UID:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_UID", val);
+      break;
+    case TOOL400_CONN_PWD:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_PWD", val);
+      break;
+    case TOOL400_CONN_LIBL:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_LIBL", val);
+      break;
+    case TOOL400_CONN_CURLIB:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_CURLIB", val);
+      break;
+    case TOOL400_CONN_QUAL:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_QUAL", val);
+      break;
+    case TOOL400_CONN_ISOLATION:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_ISOLATION", val);
+      break;
+    case TOOL400_KEY_END_CONN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CONN", val);
+      break;
+
+    case TOOL400_KEY_QUERY:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_QUERY", val);
+      break;
+    case TOOL400_KEY_END_QUERY:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_QUERY", val);
+      break;
+
+    case TOOL400_KEY_PARM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PARM", val);
+      break;
+    case TOOL400_KEY_END_PARM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PARM", val);
+      break;
+
+    case TOOL400_KEY_FETCH:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_FETCH", val);
+      break;
+    case TOOL400_KEY_END_FETCH:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_FETCH", val);
+      break;
+
+    case TOOL400_KEY_CMD:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CMD", val);
+      break;
+    case TOOL400_KEY_END_CMD:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CMD", val);
+      break;
+
+    case TOOL400_KEY_PGM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PGM", val);
+      break;
+    case TOOL400_PGM_NAME:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_NAME", val);
+      break;
+    case TOOL400_PGM_LIB:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_LIB", val);
+      break;
+    case TOOL400_PGM_FUNC:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_FUNC", val);
+      break;
+    case TOOL400_KEY_END_PGM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PGM", val);
+      break;
+
+    case TOOL400_KEY_DCL_DS:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_DCL_DS", val);
+      break;
+    case TOOL400_DS_NAME:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_NAME", val);
+      break;
+    case TOOL400_DS_DIM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_DIM", val);
+      break;
+    case TOOL400_DS_BY:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_BY", val);
+      break;
+    case TOOL400_KEY_END_DS:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_DS", val);
+      break;
+
+    case TOOL400_KEY_DCL_S:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_DCL_S", val);
+      break;
+    case TOOL400_S_NAME:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_NAME", val);
+      break;
+    case TOOL400_S_DIM:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_DIM", val);
+      break;
+    case TOOL400_S_TYPE:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_TYPE", val);
+      break;
+    case TOOL400_S_BY:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_BY", val);
+      break;
+    case TOOL400_S_VALUE:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_VALUE", val);
+      break;
+    case TOOL400_KEY_END_S:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_S", val);
+      break;
+
+    case TOOL400_KEY_ARY_BEG:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_BEG", val);
+      break;
+    case TOOL400_KEY_ARY_SEP:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_SEP", val);
+      break;
+    case TOOL400_KEY_ARY_END:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_END", val);
+      break;
+
+    case TOOL400_KEY_ATTR_BEG:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_BEG", val);
+      break;
+    case TOOL400_KEY_ATTR_SEP:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_SEP", val);
+      break;
+    case TOOL400_KEY_ATTR_END:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_END", val);
+      break;
+    case TOOL400_KEY_SPEC_BEG:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_SPEC_BEG", val);
+      break;
+    case TOOL400_KEY_SEPC_END:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_SEPC_END", val);
+      break;
+    case TOOL400_KEY_HIGH:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_HIGH", val);
+      break;
+
+    default:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_?", val);
+      break;
+  }
+}
+void tool_dump_mykey(char * akey, char *func) {
+  char funckey[256];
+  sprintf(funckey,"tkbase_%s",func);
+  printf_key(akey,funckey);
+}
+void tool_dump_val(char * mykey, char * aval, int alen, char * val) {
+  int vlen = 0;
+  memset(aval,0,alen);
+  if (val) {
+    vlen = strlen(val);
+    if (vlen) {
+      if (vlen < alen - 1) {
+        strcpy(aval,val);
+      } else {
+        strncpy(aval,val,alen - 1);
+      }
+    }
+  }
+}
+void tool_dump_lvl_key_val(char * mykey, int lvl, int key, char * val) {
+  char myval[80];
+  tool_dump_val(mykey, myval, sizeof(myval), val);
+  tool_dump_key(mykey, lvl, key, val);
+}
+
+void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
+  char mykey[256];
+  int i = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  if (dev_go(sqlrc,"sql400json")) {
+    tool_dump_mykey(mykey,func);
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    /* printf_stack(mykey); */
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    dev_dump();
+    for (i = 0; sqlrc == SQL_SUCCESS; i++) {
+      key = tk->key[i];
+      val = tk->val[i];
+      lvl = tk->lvl[i];
+      /* no key */
+      if (!key) {
+        break;
+      }
+      tool_dump_lvl_key_val(mykey, lvl, key, val);
+      dev_dump();
+    }
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+
+void tool_dump(int flag, SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
+  char mykey[256];
+  if (dev_go(sqlrc,"sql400json")) {
+    tool_dump_mykey(mykey,func);
+    printf_clear();
+    if (flag) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    /* printf_stack(mykey); */
+    if (flag > 1) printf_sqlrc_status((char *)&mykey, sqlrc);
+    tool_dump_lvl_key_val(mykey, lvl, key, val);
+    if (flag) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+void tool_dump_attr(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
+  tool_dump(0, sqlrc, func, lvl, key, val);
+}
+void tool_dump_beg(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
+  tool_dump(1, sqlrc, func, lvl, key, val);
+}
+void tool_dump_end(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
+  tool_dump(2, sqlrc, func, lvl, key, val);
+}
+void tool_dump_hex_chunks(char * mykey, char *start, int size) {
+  int max = 0;
+  char * here = NULL;
+  int chunk = 256;
+  int partial_chunk = 0;
+  for (max = 0; max < size; max += chunk) {
+    here = start + max;
+    if (max + chunk < size) {
+      partial_chunk = chunk;
+    } else {
+      partial_chunk = size - max;
+    }
+    printf_hexdump(mykey, here, partial_chunk);
+  }
+}
+void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t * tpgm) {
+  char mykey[256];
+  ile_pgm_call_t * layout = NULL;
+  char * argv_area = NULL;
+  int argv_len = 0;
+  char * spill_area = NULL;
+  int spill_len = 0;
+  if (dev_go(sqlrc,"sql400json")) {
+    tool_dump_mykey(mykey,func);
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    /* printf_stack(mykey); */
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %d\n",mykey,"step",step);
+    if (tpgm) {
+      layout = tpgm->layout;
+      printf_format("%s.parm %s %s\n",mykey,"pgm_ile_name",tpgm->pgm_ile_name);
+      printf_format("%s.parm %s %s\n",mykey,"pgm_ile_lib",tpgm->pgm_ile_lib);
+      printf_format("%s.parm %s %s\n",mykey,"pgm_ile_func",tpgm->pgm_ile_func);
+    }
+    if (layout) {
+      printf_format("%s.parm %s %d\n",mykey,"argc",layout->argc);
+      printf_format("%s.parm %s %d\n",mykey,"parmc",layout->parmc);
+      printf_format("%s.parm %s %d\n",mykey,"vpos",layout->vpos);
+      printf_format("%s.parm %s %d\n",mykey,"pos",layout->pos);
+      printf_format("%s.parm %s %d\n",mykey,"max",layout->max);
+      argv_area = ile_pgm_argv_top_buf(layout);
+      argv_len = ile_pgm_argv_length(layout);
+      printf_format("%s.parm %s 0x%p (%d)\n",mykey,"argv_area", argv_area, argv_len);
+      tool_dump_hex_chunks(mykey, argv_area, argv_len);
+      spill_area = ile_pgm_spill_top_buf(layout);
+      spill_len = ile_pgm_spill_length(layout);
+      printf_format("%s.parm %s 0x%p (%d)\n",mykey,"spill_area", spill_area, spill_len);
+      tool_dump_hex_chunks(mykey, spill_area, spill_len);
+    }
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
 }
 
 
-int tool_parse_array_values(tool_struct_t *tool, char *c, char **v) {
-  return tool->parse_array_values(c, v);
+/*=================================================
+ * toolkit callback output format
+ */
+
+
+void tool_dtor(tool_struct_t *tool){
+  tool_free((char *)tool);
 }
 
 void tool_output_script_beg(tool_struct_t *tool, char *out_caller) {
@@ -113,11 +463,40 @@ void tool_output_pgm_dcl_s_end(tool_struct_t *tool, char *out_caller, int tdim) 
   tool->output_pgm_dcl_s_end(out_caller, tdim);
 }
 
-/* by ref area */
-void ile_pgm_reset_spill_pos(ile_pgm_call_t * layout) {
+/*=================================================
+ * toolkit copy in/out ILE parm layout
+ */
+char * ile_pgm_spill_top_buf(ile_pgm_call_t * layout) {
+  return (char *)&layout->buf;
+}
+int ile_pgm_spill_top_offset(ile_pgm_call_t * layout) {
   int delta = 0;
   delta = (char *)&layout->buf - (char *)layout;
-  layout->pos = delta;
+  return delta;
+}
+int ile_pgm_spill_length(ile_pgm_call_t * layout) {
+  int delta = 0;
+  delta = (char *)&layout->buf - (char *)layout;
+  return layout->pos - delta;
+}
+char * ile_pgm_argv_top_buf(ile_pgm_call_t * layout) {
+  return (char *)&layout->argv[0];
+}
+int ile_pgm_argv_top_offset(ile_pgm_call_t * layout) {
+  int delta = 0;
+  delta = (char *)&layout->argv[0] - (char *)layout;
+  return delta;
+}
+int ile_pgm_argv_length(ile_pgm_call_t * layout) {
+  int delta = 0;
+  delta = (char *)&layout->argv[0] - (char *)layout;
+  return layout->vpos - delta;
+}
+
+
+/* by ref area */
+void ile_pgm_reset_spill_pos(ile_pgm_call_t * layout) {
+  layout->pos = ile_pgm_spill_top_offset(layout);
 }
 int ile_pgm_curr_spill_pos(ile_pgm_call_t * layout) {
   return layout->pos;
@@ -134,7 +513,7 @@ void ile_pgm_reset_argv_pos(ile_pgm_call_t * layout) {
   int delta = 0;
   layout->argc = 0;
   layout->parmc = 0;
-  layout->vpos = (char *)&layout->argv[0] - (char *)layout;
+  layout->vpos = ile_pgm_argv_top_offset(layout);
 }
 void ile_pgm_argv_full_reg_available(ile_pgm_call_t * layout) {
   int beg_reg  = (char *)&layout->argv[layout->argc] - (char *)layout;
@@ -1253,7 +1632,7 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     *spill_len = tlen * tdim;
     break;
   }
-  /* pass by ref/val or isDS (val) */
+  /* pass by ref/val or isDs (val) */
   if (isDs) {
     by = ILE_PGM_BY_IN_DS;
   } else if (!str) {
@@ -1374,16 +1753,18 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) 
 }
 
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
-SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc, char * argv[], int isDs, ile_pgm_call_t **playout) {
+SQLRETURN tool_dcl_s(tool_struct_t *tool, 
+char *out_caller, int isOut, 
+char * in_name,
+char * in_type,
+char * in_value,
+char * in_dim,
+char * in_by,
+char * in_ccsid,
+int isDs,
+ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
-
-  char * in_name = NULL;
-  char * in_type = NULL;
-  char * in_value = NULL;
-  char * in_dim = NULL;
-  char * in_by = NULL;
-  char * in_ccsid = NULL;
 
   char typ = ' ';
   int tlen = 0;
@@ -1396,31 +1777,6 @@ SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc,
   int rc = 0;
   int by = 0;
   char * where = NULL;
-
-  /* manditory - "name", "type" */
-  if (argc < 2) {
-    return SQL_ERROR;
-  }
-  /* manitory - name */
-  in_name = argv[0];
-  /* manitory - type */
-  in_type = argv[1];
-  /* optional - value */
-  if (argc > 2) {
-    in_value = argv[2];
-  }
-  /* optional - dimension */
-  if (argc > 3) {
-    in_dim = argv[3];
-  }
-  /* optional - by */
-  if (argc > 4) {
-    in_by = argv[4];
-  }
-  /* optional - ccsid */
-  if (argc > 5) {
-    in_ccsid = argv[5];
-  }
 
   /* parse "12p2", "5a", "5av2", ... */
   typ = ile_pgm_type(in_type, &tlen, &tscale, &tvary);
@@ -1596,13 +1952,16 @@ SQLRETURN tool_dcl_s(tool_struct_t *tool, char *out_caller, int isOut, int argc,
 }
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
-SQLRETURN tool_dcl_ds(int argc, char * argv[], char ** ds_name, int * ds_dim, int * ds_by, char ** ds_where, ile_pgm_call_t **playout) {
+SQLRETURN tool_dcl_ds(
+char * in_name,
+char * in_dim,
+char * in_by,
+int * ds_dim, 
+int * ds_by, 
+char ** ds_where,
+ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
-
-  char * in_name = NULL;
-  char * in_dim = NULL;
-  char * in_by = NULL;
 
   char typ = ' ';
   int tlen = 0;
@@ -1614,21 +1973,6 @@ SQLRETURN tool_dcl_ds(int argc, char * argv[], char ** ds_name, int * ds_dim, in
   int rc = 0;
   int by = 0;
   char * where = NULL;
-
-  /* manditory - "name", "type" */
-  if (argc < 1) {
-    return SQL_ERROR;
-  }
-  /* manitory - name */
-  in_name = argv[0];
-  /* optional - dimension */
-  if (argc > 1) {
-    in_dim = argv[1];
-  }
-  /* optional - in|out|both|value|return */
-  if (argc > 2) {
-    in_by = argv[2];
-  }
 
   /* parse dimension */
   rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
@@ -1650,7 +1994,6 @@ SQLRETURN tool_dcl_ds(int argc, char * argv[], char ** ds_name, int * ds_dim, in
   }
 
   /* parse data */
-  *ds_name = in_name;
   *ds_dim = tdim;
   *ds_by = by;
   *ds_where = where;
@@ -1689,472 +2032,1246 @@ SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t 
   return SQL_SUCCESS;
 }
 
+/*=================================================
+ * toolkit run parsed key, val, lvl
+ */
 
-
-SQLRETURN tool_run_data(SQLHDBC ihdbc, SQLCHAR * outarea, SQLINTEGER outlen,
- tool_struct_t *tool, int *key, char **val, int *arr, int idx, int isOut, ile_pgm_call_t **playout) 
-{
+/* program */
+tool_key_pgm_struct_t * tool_key_pgm_ctor(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_pgm_struct_t * tpgm = (tool_key_pgm_struct_t *) tool_new(sizeof(tool_key_pgm_struct_t));
+  tpgm->hstmt = 0;
+  tpgm->layout = NULL;
+  tpgm->pgm_ile_name = NULL;
+  tpgm->pgm_ile_lib = NULL;
+  tpgm->pgm_ile_func = NULL;
+  tpgm->pgm_len = 0;
+  memset(tpgm->pgm_buff,0,TOOL400_MAX_CMD_BUFF);
+  return tpgm;
+}
+void tool_key_pgm_dtor(tool_key_pgm_struct_t * tpgm) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  ile_pgm_call_t * layout = *playout;
-  int i = 0;
-  int j = 0;
-  int nbr_arv = 0;
-  char * arv[TOOL400_MAX_KEY];
-  int recs = 0;
-  int hdbc_external = 0;
-  char * myPgm = NULL;
-  char * myLib = NULL;
-  char * myFunc = NULL;
-  int isDs = 0;
-  int dsOut = 0;
-  int pgmOut = 0;
-  char * pgmVal = NULL;
-  int pgmValLen = 0;
-  char * ile_lib = ILELIB;
-  char * shift_ile = NULL;
-  char * shift_pase = NULL;
-  int shift_len = 0;
-  int ds_dim = 0;
-  int ds_dim_save = 0;
-  int ds_by = 0;
-  char * ds_name = NULL;
-  char * ds_where = NULL;
-  char * dsVal = NULL;
-  int dsValLen = 0;
-  char * where = NULL;
-  SQLINTEGER sql_max = 0;
-  SQLHENV henv = 0;
-  SQLHANDLE hdbc = ihdbc;
-  SQLHANDLE hstmt = 0;
-  SQLINTEGER attr = SQL_TRUE;
-  SQLINTEGER attr_isolation = SQL_TXN_NO_COMMIT;
-  SQLSMALLINT nParms = 0;
-  SQLSMALLINT nResultCols = 0;
-  SQLSMALLINT name_length = 0;
-  SQLCHAR *buff_name[TOOL400_MAX_COLS];
-  SQLCHAR *buff_value[TOOL400_MAX_COLS];
-  SQLINTEGER buff_len[TOOL400_MAX_COLS];
-  SQLSMALLINT buff_type[TOOL400_MAX_COLS];
-  SQLSMALLINT type = 0;
-  SQLUINTEGER size = 0;
-  SQLSMALLINT scale = 0;
-  SQLSMALLINT nullable = 0;
-  SQLINTEGER lob_loc = 0;
-  SQLINTEGER loc_ind = 0;
-  SQLSMALLINT loc_type = 0;
-  SQLINTEGER fStrLen[TOOL400_MAX_COLS];
-  SQLSMALLINT sql_data_type = 0;
-  SQLUINTEGER sql_precision = 0;
-  SQLSMALLINT sql_scale = 0;
-  SQLSMALLINT sql_nullable = SQL_NO_NULLS;
-  SQLCHAR cmd_buff[TOOL400_MAX_CMD_BUFF];
-  SQLINTEGER cmd_len = 0;
-  /* hdbc external (caller?) */
-  if (ihdbc) {
-    hdbc_external = 1;
+  /* close */
+  if (tpgm->hstmt) {
+    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, tpgm->hstmt);
   }
-  /* process */
-  for (i=idx;key[i];i++) {
-    switch (key[i]) {
-    /* SQLRETURN SQL400pConnect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLCHAR * qual, 
-     *   SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
-     */
-    case TOOL400_KEY_PCONN:
-      if (arr[i]) {
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        switch (nbr_arv) {
-        case 4:
-          sqlrc = SQL400pConnect( arv[0], arv[1], arv[2], arv[3], &hdbc, attr_isolation, NULL, NULL );
-          break;
-        case 3:
-          sqlrc = SQL400pConnect( NULL, arv[0], arv[1], arv[2], &hdbc, attr_isolation, NULL, NULL );
-          break;
-        case 1:
-          sqlrc = SQL400pConnect( NULL, NULL, NULL, arv[0], &hdbc, attr_isolation, NULL, NULL );
-        default:
-          sqlrc = SQL400pConnect( NULL, NULL, NULL, "ALL", &hdbc, attr_isolation, NULL, NULL );
-          break;
-        }
-        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
-      }
-      /* do not close (pool connection) */
-      if (hdbc) {
-        hdbc_external = 1;
-      }
+  tpgm->hstmt = 0;
+  tool_free((char *)tpgm);
+}
+SQLRETURN tool_key_pgm_data_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  char * pgm_s_name = NULL;
+  char * pgm_s_type = NULL;
+  char * pgm_s_val = NULL;
+  char * pgm_s_dim = NULL;
+  char * pgm_s_by = NULL;
+  char * pgm_s_ccsid = NULL;
+  /* pgm attributes */
+  for (go = 1, i = idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
       break;
-    case TOOL400_KEY_CONN:
-      if (arr[i]) {
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        switch (nbr_arv) {
-        case 3:
-          sqlrc = SQL400Connect( arv[0], arv[1], arv[2], &hdbc, attr_isolation, NULL, NULL );
-          break;
-        case 2:
-          sqlrc = SQL400Connect( NULL, arv[0], arv[1], &hdbc, attr_isolation, NULL, NULL );
-          break;
-        default:
-          sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, attr_isolation, NULL, NULL );
-          break;
-        }
-        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
-      }
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    /* data attributes */
+    tool_dump_attr(sqlrc, "pgm_data_run2", lvl, key, val);
+    switch (key) {
+    case TOOL400_S_NAME:
+      pgm_s_name = val;
       break;
-    case TOOL400_KEY_QUERY:
-      if (!hdbc) {
-        sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
-      }
-      /* statement */
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
-      /* prepare */
-      sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLCHAR*)val[i], (SQLINTEGER)SQL_NTS);
-      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      /* no parm? execute */
-      if (key[i+1] != TOOL400_KEY_PARM) {
-        sqlrc = SQLExecute((SQLHSTMT)hstmt);
-        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      }
+    case TOOL400_S_DIM:
+      pgm_s_dim = val;
       break;
-    case TOOL400_KEY_PARM:
-      if (arr[i]) {
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        /* number of input parms */
-        sqlrc = SQLNumParams((SQLHSTMT)hstmt, (SQLSMALLINT*)&nParms);
-        if (nParms > 0) {
-          for (j = 0; j < nParms; j++) {
-            sqlrc = SQLDescribeParam((SQLHSTMT)hstmt, (SQLUSMALLINT)(j + 1), 
-                   &sql_data_type, &sql_precision, &sql_scale, &sql_nullable);
-            buff_len[j] = SQL_NTS;
-            sqlrc = SQLBindParameter((SQLHSTMT)hstmt, (SQLUSMALLINT)(j + 1),
-                   SQL_PARAM_INPUT, SQL_CHAR, sql_data_type,
-                   sql_precision, sql_scale, arv[j], 0, &buff_len[j]);
-          }
-        }
-      }
-      /* execute */
-      sqlrc = SQLExecute((SQLHSTMT)hstmt);
-      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      /* no fetch? close */
-      if (key[i+1] != TOOL400_KEY_FETCH) {
-        sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-      }
+    case TOOL400_S_TYPE:
+      pgm_s_type = val;
       break;
-    case TOOL400_KEY_FETCH:
-      /* result set */
-      sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
-      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      if (nResultCols > 0) {
-        for (j = 0 ; j < nResultCols; j++) {
-          size = TOOL400_EXPAND_COL_NAME;
-          buff_name[j] = tool_new(size);
-          buff_value[j] = NULL;
-          buff_type[j] = 0;
-          fStrLen[j] = SQL_NTS;
-          sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
-          /* dbcs expansion */
-          switch (buff_type[j]) {
-          case SQL_CHAR:
-          case SQL_VARCHAR:
-          case SQL_CLOB:
-          case SQL_DBCLOB:
-          case SQL_UTF8_CHAR:
-          case SQL_WCHAR:
-          case SQL_WVARCHAR:
-          case SQL_GRAPHIC:
-          case SQL_VARGRAPHIC:
-          case SQL_XML:
-            size = size * TOOL400_EXPAND_CHAR;
-            buff_value[j] = tool_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
-            break;
-          case SQL_BINARY:
-          case SQL_VARBINARY:
-          case SQL_BLOB:
-            size = size * TOOL400_EXPAND_BINARY;
-            buff_value[j] = tool_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
-            break;
-          case SQL_TYPE_DATE:
-          case SQL_TYPE_TIME:
-          case SQL_TYPE_TIMESTAMP:
-          case SQL_DATETIME:
-          case SQL_BIGINT:
-          case SQL_DECFLOAT:
-          case SQL_SMALLINT:
-          case SQL_INTEGER:
-          case SQL_REAL:
-          case SQL_FLOAT:
-          case SQL_DOUBLE:
-          case SQL_DECIMAL:
-          case SQL_NUMERIC:
-          default:
-            size = TOOL400_EXPAND_OTHER;
-            buff_value[j] = tool_new(size);
-            sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
-            break;
-          }
-        }
-        sqlrc = SQL_SUCCESS;
-        tool_output_record_array_beg(tool, outarea);
-        while (sqlrc == SQL_SUCCESS) {
-          sqlrc = SQLFetch(hstmt);
-          if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
-            if (!recs) {
-              tool_output_record_no_data_found(tool, outarea);
-            }
-            break;
-          }
-          tool_output_record_row_beg(tool, outarea);
-          recs += 1;
-          for (j = 0 ; j < nResultCols; j++) {
-            if (buff_value[j]) {
-              tool_output_record_name_value(tool, buff_name[j], buff_value[j], buff_type[j], fStrLen[j], outarea);
-            }
-          }
-          tool_output_record_row_end(tool, outarea);
-        }
-        tool_output_record_array_end(tool, outarea);
-        for (j = 0 ; j < nResultCols; j++) {
-          if (buff_value[j]) {
-            tool_free(buff_name[j]);
-            buff_name[j] = NULL;
-          }
-          if (buff_name[j]) {
-            tool_free(buff_name[j]);
-            buff_name[j] = NULL;
-          }
-        }
-      } else {
-        tool_output_record_array_beg(tool, outarea);
-        tool_output_record_no_data_found(tool, outarea);
-        tool_output_record_array_end(tool, outarea);
-      }
-      /* close */
-      sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    case TOOL400_S_VALUE:
+      pgm_s_val = val;
       break;
-    case TOOL400_KEY_CMD:
-      if (!hdbc) {
-        sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-        sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
-      }
-      /* statement */
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
-      /* sql */
-      cmd_len = strlen(val[i]);
-      memset(cmd_buff,0,TOOL400_MAX_CMD_BUFF);
-      sprintf(cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)",val[i],cmd_len);
-      /* prepare */
-      sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
-      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      /* execute */
-      sqlrc = SQLExecute((SQLHSTMT)hstmt);
-      sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-      /* close */
-      sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    case TOOL400_S_BY:
+      pgm_s_by = val;
       break;
-    /* don't bother trying ...
-     * still working on input pgm
-     */
-    case TOOL400_KEY_PGM:
-      pgmOut = i;
-      switch(isOut) {
-      case 0:
-        /* "pgm":["CLIMATE","MYLIB","RegionTemps"] */
-        arv[0] = NULL;
-        arv[1] = NULL;
-        arv[2] = NULL;
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        myPgm = arv[0];
-        myLib = arv[1];
-        myFunc = arv[2];
-        tool_pgm(myPgm, myLib, myFunc, &layout);
-        if (!hdbc) {
-          sqlrc = SQL400Connect( NULL, NULL, NULL, &hdbc, SQL_TXN_NO_COMMIT, NULL, NULL );
-          sqlrc = tool_output_sql_errors(tool, hdbc, SQL_HANDLE_DBC, sqlrc, outarea);
-        }
-        /* statement */
-        sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
-        break;
-      case 1:
-         tool_output_pgm_beg(tool, outarea, myPgm, myLib, myFunc);
-        break;
-      default:
-        break;
-      }
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_S:
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
       break;
-    /*
-     * input copy in any dcl-s, dcl-ds
-     */
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* write or read data */
+  sqlrc = tool_dcl_s(tk->tool, tk->outarea, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, *isDs, &tpgm->layout);
+  *isDs = 1;
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of pgms? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* run */
+    sqlrc = tool_key_pgm_data_run2(tk, tpgm, tk->idx, isDs, isOut, &key_ary);
+  }
+  return sqlrc;
+}
+
+
+SQLRETURN tool_key_pgm_ds_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  int pgm_ds_idx = 0;
+  int pgm_is_ds = 1;
+  char * pgm_ds_name = NULL;
+  char * pgm_ds_dim = NULL;
+  char * pgm_ds_by = NULL;
+  int pgm_ds_dim_cnt = 0;
+  int pgm_ds_dim_max = 0;
+  int pgm_ds_by_flag = 0;
+  char * pgm_ds_where_start = NULL;
+  /* pgm attributes */
+  for (go = 1, i = idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    /* ds attributes */
+    tool_dump_attr(sqlrc, "pgm_ds_run2", lvl, key, val);
+    switch (key) {
+    case TOOL400_DS_NAME:
+      pgm_ds_name = val;
+      break;
+    case TOOL400_DS_DIM:
+      pgm_ds_dim = val;
+      break;
+    case TOOL400_DS_BY:
+      pgm_ds_by = val;
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_DS:
+      *key_ary = -1;
+      go = 0;
+      break;
+    case TOOL400_KEY_ARY_SEP:
+    case TOOL400_KEY_ATTR_SEP:
+      tk->key[i] = TOOL400_KEY_ATTR_SEP;
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* where start here */
+  sqlrc = tool_dcl_ds(pgm_ds_name, pgm_ds_by, pgm_ds_dim, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
+  if (isOut) {
+    tool_output_pgm_dcl_s_beg(tk->tool, tk->outarea, pgm_ds_name, pgm_ds_dim_cnt);
+  }
+  /* handle children */
+  for (go = 1, i = idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tk->idx = i;
+    /* ds */
+    tool_dump_beg(sqlrc, "pgm_ds_run2", lvl, key, val);
+    switch (key) {
     case TOOL400_KEY_DCL_S:
-      pgmVal = val[i];
-      pgmValLen = strlen(pgmVal);
-      if (pgmValLen > 0) {
-        val[i] = tool_new(pgmValLen);
-        strcpy(val[i], pgmVal);
-        nbr_arv = tool_parse_array_values(tool, val[i], arv);
-        if (idx) {
-          sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, 1, &layout);
-        } else {
-          sqlrc = tool_dcl_s(tool, outarea, isOut, nbr_arv, arv, isDs, &layout);
-        }
-        tool_free(val[i]);
-        val[i] = pgmVal;
-      }
+      sqlrc = tool_key_pgm_data_run(tk, tpgm, i, isDs, isOut);
       break;
     case TOOL400_KEY_DCL_DS:
-      isDs = 1;
-      dsOut = i;
-      /* "dcl-ds":["name", dimension, "in|out|both|value|const|return"] */
-      dsVal = val[i];
-      dsValLen = strlen(dsVal);
-      val[i] = tool_new(dsValLen);
-      strcpy(val[i], dsVal);
-      arv[0] = NULL;
-      arv[1] = NULL;
-      arv[2] = NULL;
-      nbr_arv = tool_parse_array_values(tool, val[i], arv);
-      sqlrc = tool_dcl_ds(nbr_arv, arv, &ds_name, &ds_dim, &ds_by, &ds_where, &layout);
-      switch(isOut) {
-      case 0:
-        break;
-      case 1:
-        tool_output_pgm_dcl_s_beg(tool, outarea, ds_name, ds_dim);
-        break;
-      default:
-        break;
-      }
-      tool_free(val[i]);
-      val[i] = dsVal;
-      /* recusive call to keep ds_dim, ds_by, ds_where */
-      i = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr, i+1, isOut, &layout);
+      sqlrc = tool_key_pgm_ds_run(tk, tpgm, i, isDs, isOut);
       break;
+    case TOOL400_KEY_ARY_END:
     case TOOL400_KEY_END_DS:
-      /* break recursive loop */
-      if (isDs == 0) {
-        /* layout return */
-        *playout = layout;
-        return i - 1;
-      }
-      isDs = 0;
-      switch(isOut) {
-      case 0:
-        sqlrc = ile_pgm_copy_ds(ds_where, ds_dim, ds_by, &layout);
-        break;
-      case 1:
-        /* dim replay ds (from dsOut) */
-        if (!ds_dim_save) {
-          ds_dim_save = ds_dim;
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      if (!isOut) {
+        sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, pgm_ds_by_flag, &tpgm->layout);
+      } else {
+        /* dim replay ds (from pgm_ds_idx) */
+        if (!pgm_ds_dim_max) {
+          pgm_ds_dim_max = pgm_ds_dim_cnt;
         }
-        ds_dim--;
-        if (ds_dim > 0) {
-          i = dsOut;
+        pgm_ds_dim_cnt--;
+        if (pgm_ds_dim_cnt > 0) {
+          i = pgm_ds_idx;
         } else {
-          tool_output_pgm_dcl_s_end(tool, outarea, ds_dim_save);
-          ds_dim_save = 0;
+          tool_output_pgm_dcl_s_end(tk->tool, tk->outarea, pgm_ds_dim_max);
+          pgm_ds_dim_max = 0;
         }
-        break;
-      default:
-        break;
-      }
+      } /* isOut */
       break;
-    /*
-     * end-pgm we can run then copy out to format
-     */
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "pgm_ds_run2", lvl, key, val);
+    i_end = i;
+  }
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int idx, int * isDs, int isOut) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of pgms? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* run */
+    sqlrc = tool_key_pgm_ds_run2(tk, tpgm, tk->idx, isDs, isOut, &key_ary);
+  }
+  return sqlrc;
+}
+
+
+SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int isOut, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  int isDs = 0;
+  /* handle children */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tk->idx = i;
+    tool_dump_beg(sqlrc, "pgm_params_run", lvl, key, val);
+    switch (key) {
+    case TOOL400_KEY_DCL_S:
+      isDs = 0;
+      sqlrc = tool_key_pgm_data_run(tk, tpgm, i, &isDs, isOut);
+      break;
+    case TOOL400_KEY_DCL_DS:
+      isDs = 0;
+      sqlrc = tool_key_pgm_ds_run(tk, tpgm, i, &isDs, isOut);
+      break;
+    case TOOL400_KEY_ARY_END:
     case TOOL400_KEY_END_PGM:
-      /* output processing */
-      switch(isOut) {
-      case 0:
-        /* last return position */
-        if (layout->return_start) {
-          layout->return_end = layout->pos;
-        }
-        /* make sp call to ILE blob call wrapper
-         * (sp is simple load, activate, call, return)
-         * > export TOOLLIB=DB2JSON
-         */
-        ile_lib = getenv(TOOLLIB);
-        if (!ile_lib) {
-          ile_lib = ILELIB; /* see ILE_PROC Makefile (iconf.h) */
-        }
-        cmd_len = strlen(val[i]);
-        memset(cmd_buff,0,TOOL400_MAX_CMD_BUFF);
-        sprintf(cmd_buff,"CALL %s.DB2PROC(?)", ile_lib);
-        /* prepare */
-        sqlrc = SQLPrepare((SQLHSTMT)hstmt, cmd_buff, (SQLINTEGER)SQL_NTS);
-        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-        /* shift to blob alignment
-         * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
-         *                                           .
-         *                                    ........
-         *                                    .
-         * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
-         */
-        layout->blob_pad[0] = -1;
-        layout->blob_pad[1] = -1;
-        layout->blob_pad[2] = -1;
-        shift_ile = (char *)&layout->blob_pad[3];
-        shift_pase = shift_ile + 4;
-        shift_len = layout->max - (shift_pase - (char *)layout);
-        memcpy(shift_ile,shift_pase,shift_len);
-        /* bind parm */
-        sql_max = layout->max;
-        sqlrc = SQLBindParameter((SQLHSTMT)hstmt, (SQLUSMALLINT) 1,
-                SQL_PARAM_INPUT_OUTPUT, SQL_C_BINARY, SQL_BLOB,
-                layout->max, 0, (SQLPOINTER)layout, 0, &sql_max);
-        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-        /* execute */
-        sqlrc = SQLExecute((SQLHSTMT)hstmt);
-        sqlrc = tool_output_sql_errors(tool, hstmt, SQL_HANDLE_STMT, sqlrc, outarea);
-        /* close */
-        sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-        /* shift to pase alignment
-         * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
-         *                                           .
-         *                                    ........
-         *                                    .
-         * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
-         */
-        memcpy(shift_pase,shift_ile,shift_len);
-        /* reset top of parms */
-        ile_pgm_reset_pos(layout);
-        isOut = 1;
-        /* replay from start of "pgm" */
-        i = pgmOut - 1;
-        break;
-      case 1:
-        tool_output_pgm_end(tool, outarea);
-        isOut = 0;
-        break;
-      default:
-        break;
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "pgm_params_run", lvl, key, val);
+    i_end = i;
+  }
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+
+SQLRETURN tool_key_pgm_name_attr(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  /* pgm attributes */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tool_dump_attr(sqlrc, "pgm_name_attr", lvl, key, val);
+    switch (key) {
+    case TOOL400_PGM_NAME:
+      tpgm->pgm_ile_name = val;
+      break;
+    case TOOL400_PGM_LIB:
+      tpgm->pgm_ile_lib = val;
+      break;
+    case TOOL400_PGM_FUNC:
+      tpgm->pgm_ile_func = val;
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_PGM:
+      *key_ary = -1;
+      go = 0;
+      break;
+    case TOOL400_KEY_ARY_SEP:
+    case TOOL400_KEY_ATTR_SEP:
+      tk->key[i] = TOOL400_KEY_ATTR_SEP;
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* init pgm layout (ebcdic, etc) */
+  tool_pgm(tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func, &tpgm->layout);
+  return sqlrc;
+}
+SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  char * pgm_shift_ile = NULL;
+  char * pgm_shift_pase = NULL;
+  int pgm_shift_len = 0;
+  SQLINTEGER pgm_shift_sql_max = 0;
+  /* last return position */
+  if (tpgm->layout->return_start) {
+    tpgm->layout->return_end = tpgm->layout->pos;
+  }
+  /* shift to blob alignment
+   * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+   *                                           .
+   *                                    ........
+   *                                    .
+   * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+   */
+  tpgm->layout->blob_pad[0] = -1;
+  tpgm->layout->blob_pad[1] = -1;
+  tpgm->layout->blob_pad[2] = -1;
+  pgm_shift_ile = (char *)&tpgm->layout->blob_pad[3];
+  pgm_shift_pase = pgm_shift_ile + 4;
+  pgm_shift_len = tpgm->layout->max - (pgm_shift_pase - (char *)tpgm->layout);
+  memcpy(pgm_shift_ile,pgm_shift_pase,pgm_shift_len);
+  /* bind parm */
+  pgm_shift_sql_max = tpgm->layout->max;
+  sqlrc = SQLBindParameter((SQLHSTMT)tpgm->hstmt,
+                           (SQLUSMALLINT) 1,
+                           SQL_PARAM_INPUT_OUTPUT,
+                           SQL_C_BINARY,
+                           SQL_BLOB,
+                           tpgm->layout->max,
+                           0,
+                           (SQLPOINTER)tpgm->layout,
+                           0,
+                           &pgm_shift_sql_max);
+  /* execute */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLExecute((SQLHSTMT)tpgm->hstmt);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* shift to pase alignment
+   * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+   *                                           .
+   *                                    ........
+   *                                    .
+   * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+   */
+  memcpy(pgm_shift_pase,pgm_shift_ile,pgm_shift_len);
+  /* reset top of parms */
+  ile_pgm_reset_pos(tpgm->layout);
+  return sqlrc;
+}
+SQLRETURN tool_key_pgm_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  int step = 0;
+  int pgm_out_idx = 0;
+  /* sql */
+  /* make sp call to ILE blob call wrapper
+   * (sp is simple load, activate, call, return)
+   * > export TOOLLIB=DB2JSON
+   */
+  tpgm->pgm_ile_lib = getenv(TOOLLIB);
+  if (!tpgm->pgm_ile_lib) {
+    tpgm->pgm_ile_lib = ILELIB; /* see ILE_PROC Makefile (iconf.h) */
+  }
+  /* sql */
+  memset(tpgm->pgm_buff,0,TOOL400_MAX_CMD_BUFF);
+  sprintf(tpgm->pgm_buff,"CALL %s.DB2PROC(?)", tpgm->pgm_ile_lib);
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
+  /* prepare */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* call program (step 1-input, step 2-output)*/
+  pgm_out_idx = tk->idx;
+  for (step=0; step < 3 && sqlrc == SQL_SUCCESS; step++) {
+    tk->idx = pgm_out_idx;
+    tool_pgm_dump(sqlrc, "pgm_run2", step, tpgm);
+    switch(step) {
+    case 0:
+      sqlrc = tool_key_pgm_name_attr(tk, tpgm, key_ary);
+      break;
+    case 1:
+      if (tpgm->pgm_ile_name) {
+        tool_output_pgm_beg(tk->tool, tk->outarea, tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func);
+      }
+      sqlrc = tool_key_pgm_params_run(tk, tpgm, 0, key_ary);
+      break;
+    case 2:
+      sqlrc = tool_key_pgm_call_run(tk, tpgm);
+      break;
+    case 3:
+      sqlrc = tool_key_pgm_params_run(tk, tpgm, 1, key_ary);
+      if (tpgm->pgm_ile_name) {
+        tool_output_pgm_end(tk->tool, tk->outarea);
       }
       break;
     default:
       break;
     }
-  } /* end for */
-  /* hdbc external (caller?) or pool (pConnect) */
-  if (!hdbc_external) {
-    sqlrc = SQL400Close(hdbc);
+    tool_pgm_dump(sqlrc, "pgm_run2", step, tpgm);
   }
-
-  /* layout return */
-  *playout = layout;
-
+  if (tpgm->pgm_ile_name && sqlrc != SQL_SUCCESS) {
+    tool_output_pgm_end(tk->tool, tk->outarea);
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_pgm_run(tool_key_t * tk) {
+  tool_key_pgm_struct_t * tpgm = NULL;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of pgms? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* ctor */
+    tpgm = tool_key_pgm_ctor(tk);
+    /* run */
+    sqlrc = tool_key_pgm_run2(tk, tpgm, &key_ary);
+    /* dtor */
+    tool_key_pgm_dtor(tpgm);
+  }
   return sqlrc;
 }
 
-int tool_run(int hdbc, char * outarea, int outlen,
- tool_struct_t *tool, int *key, char **val, int *arr) 
+/* query */
+tool_key_query_struct_t * tool_key_query_ctor(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_query_struct_t * tqry = (tool_key_query_struct_t *) tool_new(sizeof(tool_key_query_struct_t));
+  int i = 0;
+  /* query */
+  tqry->hstmt = 0;
+  return tqry;
+}
+void tool_key_query_dtor(tool_key_query_struct_t *tqry) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* close */
+  if (tqry->hstmt) {
+    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, tqry->hstmt);
+  }
+  tqry->hstmt = 0;
+  tool_free((char *)tqry);
+}
+SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  /* fetch */
+  int fetch_recs = 0;
+  SQLSMALLINT fetch_cols = 0;
+  SQLSMALLINT fetch_col_name_len = 0;
+  SQLCHAR *fetch_col_name[TOOL400_MAX_COLS];
+  SQLCHAR *fetch_col_value[TOOL400_MAX_COLS];
+  SQLSMALLINT fetch_col_sql_type[TOOL400_MAX_COLS];
+  SQLUINTEGER fetch_col_size = 0;
+  SQLSMALLINT fetch_col_scale = 0;
+  SQLSMALLINT fetch_nullable = 0;
+  SQLINTEGER fetch_col_len[TOOL400_MAX_COLS];
+
+  /* result set */
+  memset(fetch_col_name, 0, sizeof(fetch_col_name));
+  memset(fetch_col_value,0,sizeof(fetch_col_value));
+  memset(fetch_col_sql_type,0, sizeof(fetch_col_sql_type));
+  memset(fetch_col_len, 0, sizeof(fetch_col_len));
+  sqlrc = SQLNumResultCols((SQLHSTMT)tqry->hstmt, 
+                           &fetch_cols);
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* no records */
+  if (fetch_cols < 1) {
+    tool_output_record_array_beg(tk->tool, tk->outarea);
+    tool_output_record_no_data_found(tk->tool, tk->outarea);
+    tool_output_record_array_end(tk->tool, tk->outarea);
+    return sqlrc;
+  }
+  /* SQLDescribeCol */
+  for (i = 0 ; i < fetch_cols; i++) {
+    fetch_col_size = TOOL400_EXPAND_COL_NAME;
+    fetch_col_name[i] = tool_new(fetch_col_size);
+    fetch_col_value[i] = NULL;
+    fetch_col_sql_type[i] = 0;
+    fetch_col_len[i] = SQL_NTS;
+    sqlrc = SQLDescribeCol((SQLHSTMT)tqry->hstmt, 
+                           (SQLSMALLINT)(i + 1), 
+                           (SQLCHAR *)fetch_col_name[i],
+                           fetch_col_size,
+                           &fetch_col_name_len, 
+                           &fetch_col_sql_type[i],
+                           &fetch_col_size,
+                           &fetch_col_scale,
+                           &fetch_nullable);
+    /* dbcs expansion */
+    switch (fetch_col_sql_type[i]) {
+    case SQL_CHAR:
+    case SQL_VARCHAR:
+    case SQL_CLOB:
+    case SQL_DBCLOB:
+    case SQL_UTF8_CHAR:
+    case SQL_WCHAR:
+    case SQL_WVARCHAR:
+    case SQL_GRAPHIC:
+    case SQL_VARGRAPHIC:
+    case SQL_XML:
+      fetch_col_size = fetch_col_size * TOOL400_EXPAND_CHAR;
+      fetch_col_value[i] = tool_new(fetch_col_size);
+      sqlrc = SQLBindCol((SQLHSTMT)tqry->hstmt,
+                         (i + 1),
+                         SQL_CHAR, 
+                         fetch_col_value[i],
+                         fetch_col_size,
+                         &fetch_col_len[i]);
+      break;
+    case SQL_BINARY:
+    case SQL_VARBINARY:
+    case SQL_BLOB:
+      fetch_col_size = fetch_col_size * TOOL400_EXPAND_BINARY;
+      fetch_col_value[i] = tool_new(fetch_col_size);
+      sqlrc = SQLBindCol((SQLHSTMT)tqry->hstmt,
+                         (i + 1),
+                         SQL_CHAR, 
+                         fetch_col_value[i],
+                         fetch_col_size,
+                         &fetch_col_len[i]);
+      break;
+    case SQL_TYPE_DATE:
+    case SQL_TYPE_TIME:
+    case SQL_TYPE_TIMESTAMP:
+    case SQL_DATETIME:
+    case SQL_BIGINT:
+    case SQL_DECFLOAT:
+    case SQL_SMALLINT:
+    case SQL_INTEGER:
+    case SQL_REAL:
+    case SQL_FLOAT:
+    case SQL_DOUBLE:
+    case SQL_DECIMAL:
+    case SQL_NUMERIC:
+    default:
+      fetch_col_size = TOOL400_EXPAND_OTHER;
+      fetch_col_value[i] = tool_new(fetch_col_size);
+      sqlrc = SQLBindCol((SQLHSTMT)tqry->hstmt,
+                         (i + 1),
+                         SQL_CHAR, 
+                         fetch_col_value[i],
+                         fetch_col_size,
+                         &fetch_col_len[i]);
+      break;
+    }
+  } /* SQLDescribeCol loop */
+  /* fetch */
+  sqlrc = SQL_SUCCESS;
+  tool_output_record_array_beg(tk->tool, tk->outarea);
+  while (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLFetch(tqry->hstmt);
+    if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+      if (!fetch_recs) {
+        tool_output_record_no_data_found(tk->tool, tk->outarea);
+      } else {
+        sqlrc = SQL_SUCCESS;
+      }
+      break;
+    }
+    tool_output_record_row_beg(tk->tool, tk->outarea);
+    fetch_recs += 1;
+    for (i = 0 ; i < fetch_cols; i++) {
+      if (fetch_col_value[i]) {
+        tool_output_record_name_value(tk->tool, fetch_col_name[i], fetch_col_value[i], fetch_col_sql_type[i], fetch_col_len[i], tk->outarea);
+      }
+    }
+    tool_output_record_row_end(tk->tool, tk->outarea);
+  } /* fetch loop */
+  tool_output_record_array_end(tk->tool, tk->outarea);
+  /* clean up col names */
+  for (i = 0 ; i < fetch_cols; i++) {
+    if (fetch_col_value[i]) {
+      tool_free(fetch_col_name[i]);
+      fetch_col_name[i] = NULL;
+    }
+    if (fetch_col_name[i]) {
+      tool_free(fetch_col_name[i]);
+      fetch_col_name[i] = NULL;
+    }
+  } /* name dtor loop */
+  return sqlrc;
+}
+
+SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  /* query */
+  SQLCHAR * query = NULL;
+  SQLSMALLINT parm_max = 0;
+  SQLSMALLINT parm_cnt = 0;
+  SQLINTEGER parm_len[TOOL400_MAX_COLS];
+  SQLSMALLINT parm_scale = 0;
+  SQLUINTEGER parm_precision = 0;
+  SQLSMALLINT parm_data_type = 0;
+  SQLSMALLINT parm_nullable = 0;
+
+  /* query */
+  memset(parm_len, 0, sizeof(parm_len));
+  query = tk->val[tk->idx];
+
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
+  /* prepare */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* parms? */
+  if (tqry->hstmt) {
+    sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* query attributes */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    switch (key) {
+    case TOOL400_KEY_PARM:
+      if (parm_cnt <= parm_max) {
+        sqlrc = SQLDescribeParam((SQLHSTMT)tqry->hstmt, 
+                (SQLUSMALLINT)parm_cnt + 1, /* running count */
+                &parm_data_type, 
+                &parm_precision,
+                &parm_scale,
+                &parm_nullable);
+        parm_len[parm_cnt] = SQL_NTS;
+        sqlrc = SQLBindParameter((SQLHSTMT)tqry->hstmt,
+                (SQLUSMALLINT)parm_cnt + 1,
+                SQL_PARAM_INPUT,
+                SQL_CHAR,
+                parm_data_type,
+                parm_precision,
+                parm_scale,
+                val, /* input value */
+                0,
+                &parm_len[parm_cnt] /* in/out length (above) */
+                );
+        parm_cnt++;
+      }
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_QUERY:
+      *key_ary = -1;
+      go = 0;
+      break;
+    case TOOL400_KEY_ARY_SEP:
+    case TOOL400_KEY_ATTR_SEP:
+      tk->key[i] = TOOL400_KEY_ATTR_SEP;
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* execute */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* handle children */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tk->idx = i;
+    tool_dump_beg(sqlrc, "query_run2", lvl, key, val);
+    switch (key) {
+    case TOOL400_KEY_FETCH:
+      sqlrc = tool_key_fetch_run(tk, tqry);
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_QUERY:
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "query_run2", lvl, key, val);
+    i_end = i;
+  }
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_query_run(tool_key_t * tk) {
+  tool_key_query_struct_t * tqry = NULL;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of querys? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* ctor */
+    tqry = tool_key_query_ctor(tk);
+    /* run */
+    sqlrc = tool_key_query_run2(tk, tqry, &key_ary);
+    /* dtor */
+    tool_key_query_dtor(tqry);
+  }
+  return sqlrc;
+}
+
+/* cmd */
+tool_key_cmd_struct_t * tool_key_cmd_ctor(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_cmd_struct_t * tcmd = (tool_key_cmd_struct_t *) tool_new(sizeof(tool_key_cmd_struct_t));
+  tcmd->hstmt = 0;
+  tcmd->cmd_len = 0;
+  memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
+  return tcmd;
+}
+void tool_key_cmd_dtor(tool_key_cmd_struct_t * tcmd) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* close */
+  if (tcmd->hstmt) {
+    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, tcmd->hstmt);
+  }
+  tcmd->hstmt = 0;
+  tool_free((char *)tcmd);
+}
+SQLRETURN tool_key_cmd_run2(tool_key_t * tk, tool_key_cmd_struct_t * tcmd, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  char * cmd = tk->val[tk->idx];
+  /* sql */
+  tcmd->cmd_len = strlen(cmd);
+  memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
+  sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tcmd->hstmt);
+  /* prepare */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* cmd attributes */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tool_dump_attr(sqlrc, "cmd_run2", lvl, key, val);
+    switch (key) {
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_CMD:
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* execute */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_cmd_run(tool_key_t * tk) {
+  tool_key_cmd_struct_t * tcmd = NULL;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of cmds? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* ctor */
+    tcmd = tool_key_cmd_ctor(tk);
+    /* run */
+    sqlrc = tool_key_cmd_run2(tk, tcmd, &key_ary);
+    /* dtor */
+    tool_key_cmd_dtor(tcmd);
+  }
+  return sqlrc;
+}
+
+/* connection */
+tool_key_conn_struct_t * tool_key_conn_ctor(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool_new(sizeof(tool_key_conn_struct_t));
+  int key = 0;
+  tconn->hdbc = tk->hdbc;
+  if (tconn->hdbc) {
+    tconn->presistent = 1;
+  } else {
+    tconn->presistent = 0;
+  }
+  key = tk->key[tk->idx];
+  switch (key) {
+  case TOOL400_KEY_CONN:
+    tconn->conn_type = 1;
+    tconn->hdbc = 0;
+    break;
+  case TOOL400_KEY_PCONN:
+    tconn->conn_type = 2;
+    tconn->hdbc = 0;
+    break;
+  default:
+    tconn->conn_type = 0;
+    break;
+  }
+  tconn->conn_db = NULL;
+  tconn->conn_uid = NULL;
+  tconn->conn_pwd = NULL;
+  tconn->conn_qual = NULL;
+  tconn->conn_commit = SQL_TXN_NO_COMMIT;
+  tconn->conn_libl = NULL;
+  tconn->conn_curlib = NULL;
+  tk->tconn = tconn;
+  return tconn;
+}
+void tool_key_conn_dtor(tool_key_conn_struct_t * tconn, tool_key_t * tk) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* hdbc external (caller?) or pool (pConnect) */
+  if (tconn->hdbc && !tconn->presistent) {
+    sqlrc = SQL400Close(tconn->hdbc);
+  }
+  tconn->hdbc = 0;
+  tk->tconn = NULL;
+  tool_free((char *)tconn);
+}
+SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  /* user request connection? */
+  if (tconn->conn_type) {
+    /* persistent? */
+    if (tconn->conn_type == 2) {
+      tconn->presistent = 1;
+    }
+    /* connect attributes */
+    for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+      key = tk->key[i];
+      val = tk->val[i];
+      lvl = tk->lvl[i];
+      /* no key */
+      if (!key) {
+        break;
+      }
+      /* check level */
+      if (!max) {
+        max = lvl;
+      }
+      if (lvl > max) {
+        continue;
+      }
+      tool_dump_attr(sqlrc, "conn_run2", lvl, key, val);
+      switch (key) {
+      case TOOL400_CONN_DB:
+        tconn->conn_db = val;
+        break;
+      case TOOL400_CONN_UID:
+        tconn->conn_uid = val;
+        break;
+      case TOOL400_CONN_PWD:
+        tconn->conn_pwd = val;
+        break;
+      case TOOL400_CONN_LIBL:
+        tconn->conn_libl = val;
+        break;
+      case TOOL400_CONN_CURLIB:
+        tconn->conn_curlib = val;
+        break;
+      case TOOL400_CONN_QUAL:
+        tconn->conn_qual = val;
+        break;
+      case TOOL400_CONN_ISOLATION:
+        if (strcmp(val,"nc")) {
+          tconn->conn_commit = SQL_TXN_NO_COMMIT;
+        } else
+        if (strcmp(val,"uc")) {
+          tconn->conn_commit = SQL_TXN_READ_UNCOMMITTED;
+        } else
+        if (strcmp(val,"cs")) {
+          tconn->conn_commit = SQL_TXN_READ_COMMITTED;
+        } else
+        if (strcmp(val,"rr")) {
+          tconn->conn_commit = SQL_TXN_REPEATABLE_READ;
+        } else
+        if (strcmp(val,"rs")) {
+          tconn->conn_commit = SQL_TXN_SERIALIZABLE;
+        } else {
+          tconn->conn_commit = SQL_TXN_NO_COMMIT;
+        }
+        break;
+      case TOOL400_KEY_ARY_END:
+      case TOOL400_KEY_END_CONN:
+        *key_ary = -1;
+        go = 0;
+        break;
+      case TOOL400_KEY_ARY_SEP:
+      case TOOL400_KEY_ATTR_SEP:
+        tk->key[i] = TOOL400_KEY_ATTR_SEP;
+        go = 0;
+        break;
+      default:
+        break;
+      }
+      i_end = i;
+    }
+  } /* user request connection? */
+  if (!tconn->hdbc) {
+    /* connect */
+    if (tconn->presistent) {
+      sqlrc = SQL400pConnect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, tconn->conn_qual, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
+    } else {
+      sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
+    }
+    sqlrc = tool_output_sql_errors(tk->tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc, tk->outarea);
+  } /* !tconn->hdbc */
+  /* handle children */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tk->idx = i;
+    /* top level */
+    tool_dump_beg(sqlrc, "conn_run2", lvl, key, val);
+    switch (key) {
+    case TOOL400_KEY_QUERY:
+      sqlrc = tool_key_query_run(tk);
+      break;
+    case TOOL400_KEY_CMD:
+      sqlrc = tool_key_cmd_run(tk);
+      break;
+    case TOOL400_KEY_PGM:
+      sqlrc = tool_key_pgm_run(tk);
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_CONN:
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "conn_run2", lvl, key, val);
+    i_end = i;
+  }
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+
+SQLRETURN tool_key_conn_run(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = NULL;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of connections? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* ctor */
+    tconn = tool_key_conn_ctor(tk);
+    /* run */
+    sqlrc = tool_key_conn_run2(tk, tconn, &key_ary);
+    /* dtor */
+    tool_key_conn_dtor(tconn, tk);
+  }
+  return sqlrc;
+}
+
+/* toolkit */
+tool_key_t * tk_ctor(int hdbc, char * outarea, int outlen, tool_struct_t *tool, int *key, char **val, int *lvl) {
+  tool_key_t * tk = (tool_key_t *) tool_new(sizeof(tool_key_t));
+  tk->hdbc = hdbc;
+  tk->tconn = NULL;
+  tk->outarea = outarea;
+  tk->outlen = outlen;
+  tk->tool = tool;
+  tk->idx = 0;
+  tk->key = key;
+  tk->val = val;
+  tk->lvl = lvl;
+  return tk;
+} 
+void tk_dtor(tool_key_t * tk) {
+  tool_free((char *)tk);
+}
+int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool, int *ikey, char **ival, int *ilvl) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int idx = 0;
-  ile_pgm_call_t * layout = NULL;
-  tool_output_script_beg(tool, outarea);
-  sqlrc = tool_run_data(hdbc, outarea, outlen, tool, key, val, arr, idx, 0, &layout);
-  tool_output_script_end(tool, outarea);
+  int i = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  tool_key_t * tk = NULL;
+  /* ctor */
+  tk = tk_ctor(hdbc, outarea, outlen, tool, ikey, ival, ilvl);
+  tool_graph(sqlrc, "tool_run", tk);
+  /* output start script */
+  tool_output_script_beg(tk->tool, tk->outarea);
+  /* top level */
+  for (i = tk->idx; sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tool_dump_beg(sqlrc, "tool_run", lvl, key, val);
+    switch (key) {
+    case TOOL400_KEY_CONN:
+      tk->idx = i;
+      sqlrc = tool_key_conn_run(tk);
+      break;
+    case TOOL400_KEY_PCONN:
+      tk->idx = i;
+      sqlrc = tool_key_conn_run(tk);
+      break;
+    case TOOL400_KEY_QUERY:
+      tk->idx = i - 1; /* no connect */
+      sqlrc = tool_key_conn_run(tk);
+      break;
+    case TOOL400_KEY_CMD:
+      tk->idx = i - 1; /* no connect */
+      sqlrc = tool_key_conn_run(tk);
+      break;
+    case TOOL400_KEY_PGM:
+      tk->idx = i - 1; /* no connect */
+      sqlrc = tool_key_conn_run(tk);
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "tool_run", lvl, key, val);
+  }
+  /* output end script */
+  tool_output_script_end(tk->tool, tk->outarea);
+  /* dtor */
+  tk_dtor(tk);
   return sqlrc;
 }
-
-
 

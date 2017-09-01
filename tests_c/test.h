@@ -18,5 +18,12 @@
 #define SQL_TRACE "TRACE"
 
 
+void test_replace_quote(char * c) {
+  for (; *c; c++) {
+    if (*c == 0x27) *c = '"';
+  }
+}
+
+
 #endif /* _TEST_H */
 

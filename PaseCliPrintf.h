@@ -34,7 +34,6 @@ extern void printf_sqlrc_head_foot(char *mykey, SQLRETURN sqlrc, int beg);
 
 /* special buffer printf not using internal buffer */
 extern void sprintf_format(char *buff, const char * format, ...);
-extern void printf_dbx_init();
 
 
 #endif /* _PASECLIPRINTF_H */

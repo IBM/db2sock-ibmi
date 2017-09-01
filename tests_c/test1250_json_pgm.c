@@ -44,27 +44,33 @@ int main(int argc, char * argv[]) {
  * "12s2"  zoned(12:2)     (no c equiv)
  * "8h"    hole            hole
 */
-  char * injson = "{\
-  \"pgm\":[\"FAKENAME\",\"FAKELIB\",\"FakeFunc\"]\",\
-  \"dcl-s\":[\"int8\",\"3i0\",3],\
-  \"dcl-s\":[\"int16\",\"5i0\",55],\
-  \"dcl-s\":[\"int32\",\"10i0\",101010],\
-  \"dcl-s\":[\"int64\",\"20i0\",20202020],\
-  \"dcl-s\":[\"float\",\"4f2\",1234.56],\
-  \"dcl-s\":[\"double\",\"8f3\",123456.78],\
-  \"dcl-s\":[\"packed\",\"12p2\",123456.78],\
-  \"dcl-s\":[\"zoned\",\"12s2\",123456.78],\
-  \"dcl-s\":[\"char\",\"32a\",\"Hi there\"],\
-  \"dcl-s\":[\"varchar2\",\"32av2\",\"Hi there\"],\
-  \"dcl-s\":[\"varchar4\",\"32av4\",\"Hi there\"],\
-  \"dcl-s\":[\"binary\",\"3b\",\"313233343536\"],\
-  \"dcl-s\":[\"varbinary2\",\"3bv2\",\"313233343536\"],\
-  \"dcl-s\":[\"varbinary4\",\"3bv4\",\"313233343536\"],\
-  \"end-pgm\":\"FAKENAME\"\
-  }";
-  int inlen = strlen(injson);
+  char * injson_easy_c = "\
+  {'pgm':[{'name':'FAKENAME',  'lib':'FAKELIB','func':'FakeFunc'},\
+          {'s':[{'name':'int8',      'type':'3i0',   'value':3},\
+                {'name':'int16',     'type':'5i0',   'value':55},\
+                {'name':'int32',     'type':'10i0',  'value':101010},\
+                {'name':'int64',     'type':'20i0',  'value':20202020},\
+                {'name':'float',     'type':'4f2',   'value':1234.56},\
+                {'name':'double',    'type':'8f3',   'value':123456.78},\
+                {'name':'packed',    'type':'12p2',  'value':123456.78},\
+                {'name':'zoned',     'type':'12s2',  'value':123456.78},\
+                {'name':'char',      'type':'32a',   'value':'Hi there'},\
+                {'name':'varchar2',  'type':'32av2', 'value':'Hi there'},\
+                {'name':'varchar4',  'type':'32av4', 'value':'Hi there'},\
+                {'name':'binary',    'type':'3b',    'value':'313233343536'},\
+                {'name':'varbinary2','type':'3bv2',  'value':'313233343536'},\
+                {'name':'varbinary4','type':'3bv4',  'value':'313233343536'}]}\
+         ]}";
+  char injson[4096];
+  int inlen = 0;
   char * outjson = NULL;
   int outlen = 0;
+
+  /* quote to double quote */
+  memset(injson,0,sizeof(injson));
+  strcpy(injson,injson_easy_c);
+  inlen = strlen(injson);
+  test_replace_quote(injson);
 
   /* profile db2 */
   db  = getenv(SQL_DB400);

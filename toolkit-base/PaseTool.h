@@ -39,8 +39,6 @@
 
 #define TOOL400_OUT_MAX_STDOUT 1000000
 
-#define TOOL400_MAX_KEY 65000
-
 #define TOOL400_MAX_ARGS 32
 #define TOOL400_MAX_COLS 1024
 
@@ -69,6 +67,72 @@
 
 #define TOOL400_MAX_CMD_BUFF 4096
 
+/*
+key[n]                                  val[n] - "names" parser dependent (anything)
+--------------------------------        --------------------------------
+*/
+#define TOOL400_KEY_CONN       1        /*"connect":*/
+#define TOOL400_KEY_PCONN      2        /*"pconnect":*/
+#define TOOL400_CONN_DB     1001        /*"database":"*LOCAL"*/
+#define TOOL400_CONN_UID    1002        /*"name":"MYUSER"*/
+#define TOOL400_CONN_PWD    1003        /*"password":"MYPWD"*/
+#define TOOL400_CONN_LIBL   1004        /*"libl":"MYLIB YOURLIB"*/
+#define TOOL400_CONN_CURLIB 1005        /*"curlib":"MYLIB"*/
+#define TOOL400_CONN_QUAL   1006        /*"qual":"myprivate1"*/
+#define TOOL400_CONN_ISOLATION 1007     /*"isolation":
+                                         *  "nc" - SQL_TXN_NO_COMMIT (No Commit)
+                                         *  "uc" - SQL_TXN_READ_UNCOMMITTED (Uncommitted Read)
+                                         *  "cs" - SQL_TXN_READ_COMMITTED (Cursor Stability)
+                                         *  "rr" - SQL_TXN_REPEATABLE_READ (Repeatable Read )
+                                         *  "rs" - SQL_TXN_SERIALIZABLE (Read Stability)
+                                         */
+#define TOOL400_KEY_END_CONN   9        /*"end"*/
+
+#define TOOL400_KEY_QUERY     10        /*"query":
+                                         "  select * from animals where breed=?"*/
+#define TOOL400_KEY_END_QUERY 19        /*"end"*/
+
+#define TOOL400_KEY_PARM      20        /*"parm":"fox"*/
+#define TOOL400_KEY_END_PARM  29        /*"end"*/
+
+#define TOOL400_KEY_FETCH     30        /*"fetch":"all"*/
+#define TOOL400_KEY_END_FETCH 39        /*"end"*/
+
+#define TOOL400_KEY_CMD       40        /*"cmd":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"*/
+#define TOOL400_KEY_END_CMD   49        /*"end"*/
+
+#define TOOL400_KEY_PGM       50        /*"pgm"*/
+#define TOOL400_PGM_NAME    1051        /*"name":"MYPGM"*/
+#define TOOL400_PGM_LIB     1052        /*"lib":"*LIBL"*/
+#define TOOL400_PGM_FUNC    1053        /*"func":"MYFUNC" (SRVPGM function)*/
+#define TOOL400_KEY_END_PGM   59        /*"end"*/
+
+#define TOOL400_KEY_DCL_DS    60        /*"dcl-ds"*/
+#define TOOL400_DS_NAME     1061        /*"name":"my_ds_t"*/
+#define TOOL400_DS_DIM      1062        /*"dim":"4"*/
+#define TOOL400_DS_BY       1063        /*"by":"in|out|both|value|const|return"*/
+#define TOOL400_KEY_END_DS    69        /*"end"*/
+
+#define TOOL400_KEY_DCL_S     70        /*"dcl-s"*/
+#define TOOL400_S_NAME      1071        /*"name":"myvar"*/
+#define TOOL400_S_DIM       1072        /*"dim":"4"*/
+#define TOOL400_S_TYPE      1073        /*"type":"5av2" (see below)*/
+#define TOOL400_S_BY        1074        /*"by":"in|out|both|value|const|return"*/
+#define TOOL400_S_VALUE     1075        /*"value":"42" */
+#define TOOL400_KEY_END_S     79        /*"end"*/
+
+#define TOOL400_KEY_ARY_BEG 2071        /*"["*/
+#define TOOL400_KEY_ARY_SEP 2072        /*","*/
+#define TOOL400_KEY_ARY_END 2073        /*"]"*/
+
+
+#define TOOL400_KEY_ATTR_BEG 1000       /* attribute range */
+#define TOOL400_KEY_ATTR_SEP 1998       /* attribute reserved (internal use only) */
+#define TOOL400_KEY_ATTR_END 1999       /* attribute range */
+#define TOOL400_KEY_SPEC_BEG 2000       /* special attribute range */
+#define TOOL400_KEY_SEPC_END 2999       /* special attribute range */
+#define TOOL400_KEY_HIGH    9000        /* everything above is parser only range */
+
 /* -- types --
  * "5a"    char(5)         char a[5]
  * "5av2"  varchar(5:2)    struct varchar{short,a[5]}
@@ -90,18 +154,6 @@
  * "12s2"  zoned(12:2)     (no c equiv)
  * "8h"    hole            hole
  */
-#define TOOL400_NBR_KEYS 11
-#define TOOL400_KEY_CONN 1
-#define TOOL400_KEY_PCONN 2
-#define TOOL400_KEY_QUERY 10
-#define TOOL400_KEY_PARM 20
-#define TOOL400_KEY_FETCH 30
-#define TOOL400_KEY_CMD 40
-#define TOOL400_KEY_PGM 50
-#define TOOL400_KEY_DCL_S 51
-#define TOOL400_KEY_DCL_DS 52
-#define TOOL400_KEY_END_DS 53
-#define TOOL400_KEY_END_PGM 54
 
 #define ILE_PGM_BY_REF_IN 1
 #define ILE_PGM_BY_REF_OUT 2
@@ -147,7 +199,6 @@ typedef struct ile_pgm_call_struct {
 /*
  * Callbacks provided by parser (any json parser)
  */
-typedef int (*parse_array_values_t)(char *c, char **v);
 typedef void (*output_script_beg_t)(char *);
 typedef void (*output_script_end_t)(char *);
 typedef void (*output_record_array_beg_t)(char *);
@@ -163,7 +214,6 @@ typedef void (*output_pgm_dcl_s_beg_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_data_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_end_t)(char *, int);
 typedef struct tool_struct {
-  parse_array_values_t parse_array_values;
   output_script_beg_t output_script_beg;
   output_script_end_t output_script_end;
   output_record_array_beg_t output_record_array_beg;
@@ -184,7 +234,6 @@ typedef struct tool_struct {
  * toolkit ctor (new) with callbacks by parser (any json parser)
  */
 tool_struct_t * tool_ctor(
-  parse_array_values_t parse_array_values,
   output_script_beg_t output_script_beg,
   output_script_end_t output_script_end,
   output_record_array_beg_t output_record_array_beg,
@@ -210,7 +259,7 @@ void tool_dtor(tool_struct_t *tool);
  * toolkit run name/value operations by parser (any json parser)
  */
 int tool_run(int ihdbc, char * outarea, int outlen,
- tool_struct_t *tool, int *key, char **val, int *arr);
+ tool_struct_t *tool, int *key, char **val, int *lvl);
 #endif
 
 #endif /* _PASETOOL_H */

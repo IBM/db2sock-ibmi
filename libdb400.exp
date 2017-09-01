@@ -662,3 +662,21 @@ SQL400JsonAsync
 SQL400JsonJoin
 
 
+dev_dump
+dev_go
+printf_key
+printf_buffer
+printf_clear
+printf_format
+printf_hexdump
+printf_stack
+printf_script
+printf_script_include
+printf_script_exclude
+printf_script_clear
+printf_force_SIGQUIT
+printf_sqlrc_status
+printf_sqlrc_head_foot
+sprintf_format
+
+
