@@ -2,6 +2,8 @@
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
+SQLJson400 interface under major reconstruction, libtkit400.a, libjson400.a (do not use).
+
 #db2sock
 
 Welcome to db2sock project. Goal is PASE DB2 CLI asynchronous API driver and more (libdb400.a).
