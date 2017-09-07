@@ -21,6 +21,8 @@ HELLOPGM     = hello.pgm
 HELLOOBJS    = hello.mod
 HELLOSRVPGM  = hellosrv.srvpgm
 HELLOSRVOBJS = hellosrv.mod
+RAINBOWPGM   = rainbow.pgm
+RAINBOWOBJS  = rainbow.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -40,7 +42,7 @@ rpg:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: removeo $(HELLOPGM) $(HELLOSRVPGM)
+go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) 
 
 .SUFFIXES: .mod .rpgle
 ### CRTRPGMOD
@@ -52,10 +54,10 @@ $(HELLOPGM): $(HELLOOBJS)
 ### -- HELLOSRVPGM (ILE RPG)
 $(HELLOSRVPGM): $(HELLOSRVOBJS)
 	$(CCSRVPGM) --pgm $(HELLOSRVPGM) --lib $(ILELIB) --mod $(HELLOSRVBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
+### -- RAINBOWPGM (ILE RPG)
+$(RAINBOWPGM): $(RAINBOWOBJS)
+	$(CCPGM) --pgm $(RAINBOWPGM) --lib $(ILELIB) --mod $(RAINBOWOBJS)
 
-clean:
-	rm -f $(HELLOPGM)
-	rm -f *.mod
 removeo:
 	rm -f *.mod
 
