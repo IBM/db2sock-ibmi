@@ -24,9 +24,7 @@ int main(int argc, char * argv[]) {
   SQLHANDLE hdbc = 0;
   char * injson_easy_c = "\
   {'pgm':[{'name':'HELLOSRV', 'lib':'DB2JSON', 'func':'HELLO'},\
-          {'s':[\
-                 {'name':'char', 'type':'128a', 'value':'Hi there'}\
-               ]}\
+          {'s':{'name':'char', 'type':'128a', 'value':'Hi there'}}\
          ]}";
   char injson[4096];
   int inlen = 0;
