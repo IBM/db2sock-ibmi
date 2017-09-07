@@ -74,9 +74,6 @@ tgt32:
 ### 	$(TEST1011)$(BIT) \
 ### 	$(TEST1021)$(BIT) \
 ### 	$(TEST1200)$(BIT) \
-### 	$(TEST1250)$(BIT) \
-### 	$(TEST1320)$(BIT) \
-### 	$(TEST1330)$(BIT) \
 ### 	clean
 go: $(TEST0000)$(BIT) \
 	$(TEST0011)$(BIT) \
@@ -84,6 +81,8 @@ go: $(TEST0000)$(BIT) \
 	$(TEST1250)$(BIT) \
  	$(TEST1300)$(BIT) \
  	$(TEST1310)$(BIT) \
+ 	$(TEST1320)$(BIT) \
+ 	$(TEST1330)$(BIT) \
 	clean
 
 ### generic rules

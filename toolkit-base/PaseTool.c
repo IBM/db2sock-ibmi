@@ -120,153 +120,155 @@ int ile_pgm_argv_length(ile_pgm_call_t * layout);
  * toolkit trace
  */
 
-void tool_dump_key(char *mykey, int lvl, int key, char * val) {
+void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
+  char widekey[256];
+  sprintf(widekey,"%s.node",mykey);
   switch (key) {
 
     case TOOL400_KEY_CONN:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CONN", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_CONN", val);
       break;
     case TOOL400_KEY_PCONN:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PCONN", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_PCONN", val);
       break;
     case TOOL400_CONN_DB:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_DB", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_DB", val);
       break;
     case TOOL400_CONN_UID:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_UID", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_UID", val);
       break;
     case TOOL400_CONN_PWD:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_PWD", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_PWD", val);
       break;
     case TOOL400_CONN_LIBL:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_LIBL", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_LIBL", val);
       break;
     case TOOL400_CONN_CURLIB:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_CURLIB", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_CURLIB", val);
       break;
     case TOOL400_CONN_QUAL:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_QUAL", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_QUAL", val);
       break;
     case TOOL400_CONN_ISOLATION:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_ISOLATION", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_ISOLATION", val);
       break;
     case TOOL400_KEY_END_CONN:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CONN", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_CONN", val);
       break;
 
     case TOOL400_KEY_QUERY:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_QUERY", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_QUERY", val);
       break;
     case TOOL400_KEY_END_QUERY:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_QUERY", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_QUERY", val);
       break;
 
     case TOOL400_KEY_PARM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PARM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_PARM", val);
       break;
     case TOOL400_KEY_END_PARM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PARM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_PARM", val);
       break;
 
     case TOOL400_KEY_FETCH:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_FETCH", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_FETCH", val);
       break;
     case TOOL400_KEY_END_FETCH:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_FETCH", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_FETCH", val);
       break;
 
     case TOOL400_KEY_CMD:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CMD", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_CMD", val);
       break;
     case TOOL400_KEY_END_CMD:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CMD", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_CMD", val);
       break;
 
     case TOOL400_KEY_PGM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PGM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_PGM", val);
       break;
     case TOOL400_PGM_NAME:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_NAME", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_PGM_NAME", val);
       break;
     case TOOL400_PGM_LIB:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_LIB", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_PGM_LIB", val);
       break;
     case TOOL400_PGM_FUNC:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PGM_FUNC", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_PGM_FUNC", val);
       break;
     case TOOL400_KEY_END_PGM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PGM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_PGM", val);
       break;
 
     case TOOL400_KEY_DCL_DS:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_DCL_DS", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_DCL_DS", val);
       break;
     case TOOL400_DS_NAME:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_NAME", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_NAME", val);
       break;
     case TOOL400_DS_DIM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_DIM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_DIM", val);
       break;
     case TOOL400_DS_BY:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_BY", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_BY", val);
       break;
     case TOOL400_KEY_END_DS:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_DS", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_DS", val);
       break;
 
     case TOOL400_KEY_DCL_S:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_DCL_S", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_DCL_S", val);
       break;
     case TOOL400_S_NAME:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_NAME", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_NAME", val);
       break;
     case TOOL400_S_DIM:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_DIM", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_DIM", val);
       break;
     case TOOL400_S_TYPE:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_TYPE", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_TYPE", val);
       break;
     case TOOL400_S_BY:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_BY", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_BY", val);
       break;
     case TOOL400_S_VALUE:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_VALUE", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_VALUE", val);
       break;
     case TOOL400_KEY_END_S:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_S", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_S", val);
       break;
 
     case TOOL400_KEY_ARY_BEG:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_BEG", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ARY_BEG", val);
       break;
     case TOOL400_KEY_ARY_SEP:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_SEP", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ARY_SEP", val);
       break;
     case TOOL400_KEY_ARY_END:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_END", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ARY_END", val);
       break;
 
     case TOOL400_KEY_ATTR_BEG:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_BEG", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_BEG", val);
       break;
     case TOOL400_KEY_ATTR_SEP:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_SEP", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_SEP", val);
       break;
     case TOOL400_KEY_ATTR_END:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_END", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_END", val);
       break;
     case TOOL400_KEY_SPEC_BEG:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_SPEC_BEG", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_SPEC_BEG", val);
       break;
     case TOOL400_KEY_SEPC_END:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_SEPC_END", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_SEPC_END", val);
       break;
     case TOOL400_KEY_HIGH:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_HIGH", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_HIGH", val);
       break;
 
     default:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_?", val);
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_?", val);
       break;
   }
 }
@@ -289,10 +291,10 @@ void tool_dump_val(char * mykey, char * aval, int alen, char * val) {
     }
   }
 }
-void tool_dump_lvl_key_val(char * mykey, int lvl, int key, char * val) {
+void tool_dump_lvl_key_val(char * mykey, int idx, int lvl, int key, char * val) {
   char myval[80];
   tool_dump_val(mykey, myval, sizeof(myval), val);
-  tool_dump_key(mykey, lvl, key, val);
+  tool_dump_key(mykey, idx, lvl, key, val);
 }
 
 void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
@@ -316,7 +318,7 @@ void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
       if (!key) {
         break;
       }
-      tool_dump_lvl_key_val(mykey, lvl, key, val);
+      tool_dump_lvl_key_val(mykey, i, lvl, key, val);
       dev_dump();
     }
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
@@ -326,30 +328,30 @@ void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
   }
 }
 
-void tool_dump(int flag, SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
+void tool_dump(int flag, SQLRETURN sqlrc, char *func, int idx, int lvl, int key,  char * val) {
   char mykey[256];
   if (dev_go(sqlrc,"sql400json")) {
     tool_dump_mykey(mykey,func);
     printf_clear();
-    if (flag) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    if (flag > 99) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
     /* printf_stack(mykey); */
     if (flag > 1) printf_sqlrc_status((char *)&mykey, sqlrc);
-    tool_dump_lvl_key_val(mykey, lvl, key, val);
-    if (flag) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    tool_dump_lvl_key_val(mykey, idx, lvl, key, val);
+    if (flag > 99) printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
     dev_dump();
     if (sqlrc < SQL_SUCCESS) {
       printf_force_SIGQUIT((char *)&mykey);
     }
   }
 }
-void tool_dump_attr(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
-  tool_dump(0, sqlrc, func, lvl, key, val);
+void tool_dump_attr(SQLRETURN sqlrc, char *func, int idx, int lvl, int key,  char * val) {
+  tool_dump(0, sqlrc, func, idx, lvl, key, val);
 }
-void tool_dump_beg(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
-  tool_dump(1, sqlrc, func, lvl, key, val);
+void tool_dump_beg(SQLRETURN sqlrc, char *func, int idx, int lvl, int key,  char * val) {
+  tool_dump(1, sqlrc, func, idx, lvl, key, val);
 }
-void tool_dump_end(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
-  tool_dump(2, sqlrc, func, lvl, key, val);
+void tool_dump_end(SQLRETURN sqlrc, char *func, int idx, int lvl, int key,  char * val) {
+  tool_dump(2, sqlrc, func, idx, lvl, key, val);
 }
 void tool_dump_hex_chunks(char * mykey, char *start, int size) {
   int max = 0;
@@ -2090,7 +2092,7 @@ SQLRETURN tool_key_pgm_data_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, 
       continue;
     }
     /* data attributes */
-    tool_dump_attr(sqlrc, "pgm_data_run2", lvl, key, val);
+    tool_dump_attr(sqlrc, "pgm_data_run2(a)", i, lvl, key, val);
     switch (key) {
     case TOOL400_S_NAME:
       pgm_s_name = val;
@@ -2183,7 +2185,7 @@ SQLRETURN tool_key_pgm_ds_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, in
       continue;
     }
     /* ds attributes */
-    tool_dump_attr(sqlrc, "pgm_ds_run2", lvl, key, val);
+    tool_dump_attr(sqlrc, "pgm_ds_run2(a)", i, lvl, key, val);
     switch (key) {
     case TOOL400_DS_NAME:
       pgm_ds_name = val;
@@ -2232,7 +2234,7 @@ SQLRETURN tool_key_pgm_ds_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, in
     }
     tk->idx = i;
     /* ds */
-    tool_dump_beg(sqlrc, "pgm_ds_run2", lvl, key, val);
+    tool_dump_beg(sqlrc, "pgm_ds_run2", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_DCL_S:
       sqlrc = tool_key_pgm_data_run(tk, tpgm, i, isDs, isOut);
@@ -2265,7 +2267,7 @@ SQLRETURN tool_key_pgm_ds_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, in
     default:
       break;
     }
-    tool_dump_end(sqlrc, "pgm_ds_run2", lvl, key, val);
+    tool_dump_end(sqlrc, "pgm_ds_run2", i, lvl, key, val);
     i_end = i;
   }
   /* next */
@@ -2324,7 +2326,7 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
       continue;
     }
     tk->idx = i;
-    tool_dump_beg(sqlrc, "pgm_params_run", lvl, key, val);
+    tool_dump_beg(sqlrc, "pgm_params_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_DCL_S:
       isDs = 0;
@@ -2337,13 +2339,14 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
     case TOOL400_KEY_ARY_END:
     case TOOL400_KEY_END_PGM:
       *key_ary = -1;
-    case TOOL400_KEY_ARY_SEP:
       go = 0;
+    case TOOL400_KEY_ARY_SEP:
+      /* go = 0; */
       break;
     default:
       break;
     }
-    tool_dump_end(sqlrc, "pgm_params_run", lvl, key, val);
+    tool_dump_end(sqlrc, "pgm_params_run", i, lvl, key, val);
     i_end = i;
   }
   /* next */
@@ -2379,7 +2382,7 @@ SQLRETURN tool_key_pgm_name_attr(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, 
     if (lvl > max) {
       continue;
     }
-    tool_dump_attr(sqlrc, "pgm_name_attr", lvl, key, val);
+    tool_dump_attr(sqlrc, "pgm_name_attr(a)", i, lvl, key, val);
     switch (key) {
     case TOOL400_PGM_NAME:
       tpgm->pgm_ile_name = val;
@@ -2826,7 +2829,7 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
       continue;
     }
     tk->idx = i;
-    tool_dump_beg(sqlrc, "query_run2", lvl, key, val);
+    tool_dump_beg(sqlrc, "query_run2", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_FETCH:
       sqlrc = tool_key_fetch_run(tk, tqry);
@@ -2840,7 +2843,7 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
     default:
       break;
     }
-    tool_dump_end(sqlrc, "query_run2", lvl, key, val);
+    tool_dump_end(sqlrc, "query_run2", i, lvl, key, val);
     i_end = i;
   }
   /* next */
@@ -2931,7 +2934,7 @@ SQLRETURN tool_key_cmd_run2(tool_key_t * tk, tool_key_cmd_struct_t * tcmd, int *
     if (lvl > max) {
       continue;
     }
-    tool_dump_attr(sqlrc, "cmd_run2", lvl, key, val);
+    tool_dump_attr(sqlrc, "cmd_run2(a)", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_ARY_END:
     case TOOL400_KEY_END_CMD:
@@ -3056,7 +3059,7 @@ SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, in
       if (lvl > max) {
         continue;
       }
-      tool_dump_attr(sqlrc, "conn_run2", lvl, key, val);
+      tool_dump_attr(sqlrc, "conn_run2(a)", i, lvl, key, val);
       switch (key) {
       case TOOL400_CONN_DB:
         tconn->conn_db = val;
@@ -3138,7 +3141,7 @@ SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, in
     }
     tk->idx = i;
     /* top level */
-    tool_dump_beg(sqlrc, "conn_run2", lvl, key, val);
+    tool_dump_beg(sqlrc, "conn_run2", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_QUERY:
       sqlrc = tool_key_query_run(tk);
@@ -3158,7 +3161,7 @@ SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, in
     default:
       break;
     }
-    tool_dump_end(sqlrc, "conn_run2", lvl, key, val);
+    tool_dump_end(sqlrc, "conn_run2", i, lvl, key, val);
     i_end = i;
   }
   /* next */
@@ -3241,7 +3244,7 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool, int *ike
     if (lvl > max) {
       continue;
     }
-    tool_dump_beg(sqlrc, "tool_run", lvl, key, val);
+    tool_dump_beg(sqlrc, "tool_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_CONN:
       tk->idx = i;
@@ -3266,7 +3269,7 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool, int *ike
     default:
       break;
     }
-    tool_dump_end(sqlrc, "tool_run", lvl, key, val);
+    tool_dump_end(sqlrc, "tool_run", i, lvl, key, val);
   }
   /* output end script */
   tool_output_script_end(tk->tool, tk->outarea);
