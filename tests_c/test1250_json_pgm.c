@@ -17,10 +17,6 @@ int main(int argc, char * argv[]) {
   char *libl  = NULL;
   char *curlib = NULL;
   char *trace  = NULL;
-  int expect_hdbc = 0;
-  int actual_hdbc = 0;
-  int expect_hstmt = 0;
-  int actual_hstmt = 0;
   SQLHANDLE hdbc = 0;
   char * injson_easy_c = "\
   {'pgm':[{'name':'FAKENAME',  'lib':'FAKELIB','func':'FakeFunc'},\
