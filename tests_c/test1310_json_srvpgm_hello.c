@@ -23,21 +23,9 @@ int main(int argc, char * argv[]) {
   int actual_hstmt = 0;
   SQLHANDLE hdbc = 0;
   char * injson_easy_c = "\
-  {'pgm':[{'name':'FAKENAME',  'lib':'FAKELIB','func':'FakeFunc'},\
-          {'s':[{'name':'int8',      'type':'3i0',   'value':3},\
-                {'name':'int16',     'type':'5i0',   'value':55},\
-                {'name':'int32',     'type':'10i0',  'value':101010},\
-                {'name':'int64',     'type':'20i0',  'value':20202020},\
-                {'name':'float',     'type':'4f2',   'value':1234.56},\
-                {'name':'double',    'type':'8f3',   'value':123456.78},\
-                {'name':'packed',    'type':'12p2',  'value':123456.78},\
-                {'name':'zoned',     'type':'12s2',  'value':123456.78},\
-                {'name':'char',      'type':'32a',   'value':'Hi there'},\
-                {'name':'varchar2',  'type':'32av2', 'value':'Hi there'},\
-                {'name':'varchar4',  'type':'32av4', 'value':'Hi there'},\
-                {'name':'binary',    'type':'3b',    'value':'313233343536'},\
-                {'name':'varbinary2','type':'3bv2',  'value':'313233343536'},\
-                {'name':'varbinary4','type':'3bv4',  'value':'313233343536'}\
+  {'pgm':[{'name':'HELLOSRV', 'lib':'DB2JSON', 'func':'HELLO'},\
+          {'s':[\
+                 {'name':'char', 'type':'128a', 'value':'Hi there'}\
                ]}\
          ]}";
   char injson[4096];

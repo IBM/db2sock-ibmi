@@ -178,6 +178,22 @@ void iCall400(char * blob)
   /* hey adc debug */
   /* sleep(30); */
 
+  /* set ILE addresses based memory spill location offset */
+  for (argc=0; argc < ILE_PGM_MAX_ARGS; argc++) {
+    if (argc < layout->argc) {
+      /*  by reference */
+      if (layout->argv_parm[argc] > -1) {
+        /* ILE address parm location (skip by value slots) */
+        parmc = layout->argv_parm[argc];
+        offset = layout->arg_pos[parmc];
+        /* set ILE address to data */
+        layout->argv[argc] = (char *)layout + offset;
+      }
+    } else {
+      layout->argv[argc] = NULL;
+    }
+  }
+
   /* resolve call  */
   myPgm = layout->pgm;
   myLib = layout->lib;
@@ -197,22 +213,6 @@ void iCall400(char * blob)
     os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
     os_act_mark = QleActBndPgmLong(& os_pgm_ptr, NULL, NULL, NULL, NULL);
     os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL); 
-  }
-
-  /* set ILE addresses based memory spill location offset */
-  for (argc=0; argc < ILE_PGM_MAX_ARGS; argc++) {
-    if (argc < layout->argc) {
-      /*  by reference */
-      if (layout->argv_parm[argc] > -1) {
-        /* ILE address parm location (skip by value slots) */
-        parmc = layout->argv_parm[argc];
-        offset = layout->arg_pos[parmc];
-        /* set ILE address to data */
-        layout->argv[argc] = (char *)layout + offset;
-      }
-    } else {
-      layout->argv[argc] = NULL;
-    }
   }
 
   /* call by ref */

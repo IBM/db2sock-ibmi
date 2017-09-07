@@ -354,7 +354,7 @@ void tool_dump_end(SQLRETURN sqlrc, char *func, int lvl, int key,  char * val) {
 void tool_dump_hex_chunks(char * mykey, char *start, int size) {
   int max = 0;
   char * here = NULL;
-  int chunk = 256;
+  int chunk = 80;
   int partial_chunk = 0;
   for (max = 0; max < size; max += chunk) {
     here = start + max;
@@ -394,11 +394,11 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
       printf_format("%s.parm %s %d\n",mykey,"max",layout->max);
       argv_area = ile_pgm_argv_top_buf(layout);
       argv_len = ile_pgm_argv_length(layout);
-      printf_format("%s.parm %s 0x%p (%d)\n",mykey,"argv_area", argv_area, argv_len);
+      printf_format("%s.parm %s 0x%p - 0x%p (0x%p)\n",mykey,"argv_area", argv_area, argv_area + argv_len, argv_len);
       tool_dump_hex_chunks(mykey, argv_area, argv_len);
       spill_area = ile_pgm_spill_top_buf(layout);
       spill_len = ile_pgm_spill_length(layout);
-      printf_format("%s.parm %s 0x%p (%d)\n",mykey,"spill_area", spill_area, spill_len);
+      printf_format("%s.parm %s 0x%p - 0x%p (0x%p)\n",mykey,"spill_area", spill_area, spill_area + spill_len, spill_len);
       tool_dump_hex_chunks(mykey, spill_area, spill_len);
     }
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
@@ -2120,7 +2120,6 @@ SQLRETURN tool_key_pgm_data_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, 
   }
   /* write or read data */
   sqlrc = tool_dcl_s(tk->tool, tk->outarea, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, *isDs, &tpgm->layout);
-  *isDs = 1;
   /* next */
   if (tk->idx < i_end) {
     tk->idx = i_end;
@@ -2237,6 +2236,7 @@ SQLRETURN tool_key_pgm_ds_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, in
     switch (key) {
     case TOOL400_KEY_DCL_S:
       sqlrc = tool_key_pgm_data_run(tk, tpgm, i, isDs, isOut);
+      *isDs = 1; /* if pass by ref, was the first argv->data element */
       break;
     case TOOL400_KEY_DCL_DS:
       sqlrc = tool_key_pgm_ds_run(tk, tpgm, i, isDs, isOut);
@@ -2458,8 +2458,6 @@ SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
    * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
    */
   memcpy(pgm_shift_pase,pgm_shift_ile,pgm_shift_len);
-  /* reset top of parms */
-  ile_pgm_reset_pos(tpgm->layout);
   return sqlrc;
 }
 SQLRETURN tool_key_pgm_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *key_ary) {
@@ -2495,7 +2493,7 @@ SQLRETURN tool_key_pgm_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *
   sqlrc = tool_output_sql_errors(tk->tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
   /* call program (step 1-input, step 2-output)*/
   pgm_out_idx = tk->idx;
-  for (step=0; step < 3 && sqlrc == SQL_SUCCESS; step++) {
+  for (step=0; step < 4 && sqlrc == SQL_SUCCESS; step++) {
     tk->idx = pgm_out_idx;
     tool_pgm_dump(sqlrc, "pgm_run2", step, tpgm);
     switch(step) {
@@ -2512,6 +2510,8 @@ SQLRETURN tool_key_pgm_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *
       sqlrc = tool_key_pgm_call_run(tk, tpgm);
       break;
     case 3:
+      /* reset top of parms */
+      ile_pgm_reset_pos(tpgm->layout);
       sqlrc = tool_key_pgm_params_run(tk, tpgm, 1, key_ary);
       if (tpgm->pgm_ile_name) {
         tool_output_pgm_end(tk->tool, tk->outarea);
