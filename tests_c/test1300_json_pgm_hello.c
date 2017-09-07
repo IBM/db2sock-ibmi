@@ -36,6 +36,7 @@ int main(int argc, char * argv[]) {
   strcpy(injson,injson_easy_c);
   inlen = strlen(injson);
   test_replace_quote(injson);
+  printf("input: %s\n",injson);
 
   /* profile db2 */
   db  = getenv(SQL_DB400);
