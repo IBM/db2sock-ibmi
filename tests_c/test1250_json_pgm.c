@@ -31,7 +31,7 @@ int main(int argc, char * argv[]) {
                 {'name':'achar',      'type':'32a',   'value':'Hi there'},\
                 {'name':'avarchar2',  'type':'32av2', 'value':'Hi there'},\
                 {'name':'avarchar4',  'type':'32av4', 'value':'Hi there'},\
-                {'name':'abinary',    'type':'3b',    'value':'313233343536'}\
+                {'name':'abinary',    'type':'3b',    'value':'313233'}\
                ]}\
          ]}";
   char injson[4096];

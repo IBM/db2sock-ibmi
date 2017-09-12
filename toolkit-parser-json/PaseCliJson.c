@@ -21,6 +21,9 @@
  * When project warnings are removed, you may
  * rely on json format.
  */
+
+#define JSON400_OUT_MAX_STDOUT 1000000
+
 #define JSON400_MAX_KEY 65000
 
 #define JSON400_ADJUST_NDA 0
@@ -592,6 +595,25 @@ void json_output_pgm_end(char *out_caller) {
     "]}");
 }
 
+void json_output_pgm_dcl_ds_beg(char *out_caller, char * name, int tdim) {
+  if (tdim > 1) {
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"%s\":[", name);
+  } else {
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"%s\":", name);
+  }
+}
+void json_output_pgm_dcl_ds_end(char *out_caller, int tdim) {
+  if (tdim > 1) {
+    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
+      "]}");
+  } else {
+    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+      "}");
+  }
+}
+
 void json_output_pgm_dcl_s_beg(char *out_caller, char * name, int tdim) {
   if (tdim > 1) {
     json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
@@ -619,6 +641,7 @@ void json_output_pgm_dcl_s_end(char *out_caller, int tdim) {
       "}");
   }
 }
+
 
 /* ==========================
  * input
@@ -757,13 +780,10 @@ void json_xform(int max, json_key_t * bigkey) {
 }
 
 /* parse compress */
-void json_xzip(int max, json_key_t * bigkey) {
+void json_xzip(int * key, char ** val, int * lvl, int max) {
   int i = 0;
   int j = 0;
   int k = 0;
-  int * key = bigkey->key;
-  char ** val = bigkey->val;
-  int * lvl = bigkey->lvl;
   /* condense array */
   for (i=0, k=0; i<max; i++) {
     if (key[i] < TOOL400_KEY_HIGH) {
@@ -781,6 +801,111 @@ void json_xzip(int max, json_key_t * bigkey) {
     val[i] = NULL;
     lvl[i] = 0;
   }
+}
+
+/* parse sort */
+int json_sort2(int * key, char ** val, int * lvl, int max, int idx, int imove, int level) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int tmpKey = 0;
+  char * tmpVal = 0;
+  int tmpLvl = 0;
+  int noMove = 0;
+  for (i=idx; i<max && key[i]; i++) {
+    if (key[i] == TOOL400_KEY_ARY_BEG) {
+      if (i-1 > 0 && key[i-1] == TOOL400_KEY_DCL_S) {
+        continue;
+      }
+      level = lvl[i];
+      imove = i + 1;
+      json_sort2(key, val, lvl, max, i + 1, imove, level);
+      level = 0;
+      imove = 0;
+    }
+    if (lvl[i] == level && key[i] == TOOL400_KEY_ARY_SEP) {
+      for (j=i+1, noMove = 0; !noMove && j<max && key[j]; j++) {
+        if (lvl[j] == level && (key[j] == TOOL400_KEY_ARY_SEP || key[j] == TOOL400_KEY_ARY_END)) {
+          break;
+        }
+        if (lvl[j] == level + 1 && key[j] > TOOL400_KEY_ATTR_BEG && key[j] < TOOL400_KEY_ATTR_SEP) {
+          noMove = 0;
+        } else {
+          noMove = 1;
+        }
+      }
+      /* move attr to position */
+      if (!noMove) {
+        for (j=i+1; j<max && key[j]; j++) {
+          if (lvl[j] == level && (key[j] == TOOL400_KEY_ARY_SEP || key[j] == TOOL400_KEY_ARY_END)) {
+            break;
+          }
+          if (lvl[j] == level + 1 && key[j] > TOOL400_KEY_ATTR_BEG && key[j] < TOOL400_KEY_ATTR_SEP) {
+            tmpKey = key[j];
+            tmpVal = val[j];
+            tmpLvl = lvl[j];
+            for (k=j; k > imove && key[k]; k--) {
+              key[k] = key[k-1];
+              val[k] = val[k-1];
+              lvl[k] = lvl[k-1];
+            }
+            key[imove] = tmpKey;
+            val[imove] = tmpVal;
+            lvl[imove] = tmpLvl;
+            imove++;
+          }
+        }
+      }
+    }
+    if (lvl[i] == level && key[i] == TOOL400_KEY_ARY_END) {
+      return;
+    }
+  }
+}
+
+int json_sort(int * key, char ** val, int * lvl, int max) {
+  int i = 0;
+  int j = 0;
+  int level = 0;
+  int imove = 0;
+  int tmpKey = 0;
+  char * tmpVal = 0;
+  int tmpLvl = 0;
+  for (i=0; i<max && key[i]; i++) {
+    /* key */
+    if (key[i] < TOOL400_KEY_ATTR_BEG) {
+      level = lvl[i];
+      imove = i + 1;
+    }
+    if (key[i] == TOOL400_KEY_ARY_BEG) {
+      level = lvl[i];
+      imove = i + 1;
+    }
+    if (key[i] == TOOL400_KEY_ARY_SEP) {
+      level = lvl[i];
+      imove = i + 1;
+    }
+    if (lvl[i] == level + 1 && key[i] > TOOL400_KEY_ATTR_BEG && key[i] < TOOL400_KEY_ATTR_SEP) {
+      if (imove == i) {
+        imove++;
+        continue;
+      }
+      /* move attr to position */
+      tmpKey = key[i];
+      tmpVal = val[i];
+      tmpLvl = lvl[i];
+      for (j=i; j > imove && key[j]; j--) {
+        key[j] = key[j-1];
+        val[j] = val[j-1];
+        lvl[j] = lvl[j-1];
+      }
+      key[imove] = tmpKey;
+      val[imove] = tmpVal;
+      lvl[imove] = tmpLvl;
+      imove++;
+    }
+  }
+  json_sort2(key, val, lvl, max, 0, 0, 0);
 }
 
 /* parse json */
@@ -939,25 +1064,28 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
 
   /* output format */
   if (!outjson || !outlen) {
-    stdbuf = json_new(TOOL400_OUT_MAX_STDOUT);
+    stdbuf = json_new(JSON400_OUT_MAX_STDOUT);
     outjson = stdbuf;
-    outlen = TOOL400_OUT_MAX_STDOUT;
+    outlen = JSON400_OUT_MAX_STDOUT;
   }
 
-  /* copy in */
+  /* copy in (enable parse null terminated strings) */
   copyin = json_new(inlen + 1);
   strcpy(copyin, injson);
 
-  /* parse json */
+  /* pass 1 - parse raw json */
   bigkey = json_ctor_key();
   max = json_parse(copyin, bigkey);
   json_graph(sqlrc, "json_parse", bigkey->key, bigkey->val, bigkey->lvl);
-
-  /* xform toolkit calls */
+  /* pass 2 - xform toolkit ordinals */
   json_xform(max, bigkey);
   json_graph(sqlrc, "json_xform", bigkey->key, bigkey->val, bigkey->lvl);
-  json_xzip(max, bigkey);
+  /* pass 3 - compress only toolkit ordinals */
+  json_xzip(bigkey->key, bigkey->val, bigkey->lvl, max);
   json_graph(sqlrc, "json_zip", bigkey->key, bigkey->val, bigkey->lvl);
+  /* pass 4,5 - sort attribute 1st toolkit ordinals (requirement tool_run) */
+  json_sort(bigkey->key, bigkey->val, bigkey->lvl, max);
+  json_graph(sqlrc, "json_sort", bigkey->key, bigkey->val, bigkey->lvl);
 
   /* run */
   tool = tool_ctor(
@@ -972,6 +1100,8 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     &json_output_sql_errors,
     &json_output_pgm_beg,
     &json_output_pgm_end,
+    &json_output_pgm_dcl_ds_beg,
+    &json_output_pgm_dcl_ds_end,
     &json_output_pgm_dcl_s_beg,
     &json_output_pgm_dcl_s_data,
     &json_output_pgm_dcl_s_end

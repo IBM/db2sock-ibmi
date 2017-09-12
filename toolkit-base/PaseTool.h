@@ -37,11 +37,6 @@
  */
 #define TOOLLIB "TOOLLIB"
 
-#define TOOL400_OUT_MAX_STDOUT 1000000
-
-#define TOOL400_MAX_ARGS 32
-#define TOOL400_MAX_COLS 1024
-
 #ifdef __IBMC__
 /* nothing ILE compiler */
 #else
@@ -53,21 +48,17 @@
 #define TOOL400_EXPAND_OTHER 64
 #define TOOL400_EXPAND_COL_NAME 128
 
-#define TOOL400_UNKNOWN -1
-
-#define TOOL400_CMD_HELP 1
-#define TOOL400_CMD_QUERY 2
-
-#define TOOL400_OUT_COMMA_STDOUT 11
-#define TOOL400_OUT_JSON_STDOUT 12
-#define TOOL400_OUT_SPACE_STDOUT 13
-#define TOOL400_OUT_COMMA_BUFF 21
-#define TOOL400_OUT_JSON_BUFF 22
-#define TOOL400_OUT_SPACE_BUFF 23
+#define TOOL400_MAX_ARGS 32
+#define TOOL400_MAX_COLS 1024
 
 #define TOOL400_MAX_CMD_BUFF 4096
 
 /*
+Order input array:
+  key begin (TOOL400_KEY_CONN)
+    key attr (TOOL400_CONN_DB) <- attributes before child nodes (json_sort, xml natural)
+      key children (TOOL400_KEY_PGM)
+
 key[n]                                  val[n] - "names" parser dependent (anything)
 --------------------------------        --------------------------------
 */
@@ -121,16 +112,16 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_S_VALUE     1075        /*"value":"42" */
 #define TOOL400_KEY_END_S     79        /*"end"*/
 
-#define TOOL400_KEY_ARY_BEG 2071        /*"["*/
-#define TOOL400_KEY_ARY_SEP 2072        /*","*/
-#define TOOL400_KEY_ARY_END 2073        /*"]"*/
-
-
 #define TOOL400_KEY_ATTR_BEG 1000       /* attribute range */
 #define TOOL400_KEY_ATTR_SEP 1998       /* attribute reserved (internal use only) */
 #define TOOL400_KEY_ATTR_END 1999       /* attribute range */
+
 #define TOOL400_KEY_SPEC_BEG 2000       /* special attribute range */
+#define TOOL400_KEY_ARY_BEG 2071        /*"["*/
+#define TOOL400_KEY_ARY_SEP 2072        /*","*/
+#define TOOL400_KEY_ARY_END 2073        /*"]"*/
 #define TOOL400_KEY_SEPC_END 2999       /* special attribute range */
+
 #define TOOL400_KEY_HIGH    9000        /* everything above is parser only range */
 
 /* -- types --
@@ -154,7 +145,6 @@ key[n]                                  val[n] - "names" parser dependent (anyth
  * "12s2"  zoned(12:2)     (no c equiv)
  * "8h"    hole            hole
  */
-
 #define ILE_PGM_BY_REF_IN 1
 #define ILE_PGM_BY_REF_OUT 2
 #define ILE_PGM_BY_REF_BOTH 3
@@ -210,6 +200,8 @@ typedef void (*output_record_row_end_t)(char *);
 typedef int (*output_sql_errors_t)(SQLHANDLE, SQLSMALLINT, int, char *);
 typedef void (*output_pgm_beg_t)(char *, char *, char *, char *);
 typedef void (*output_pgm_end_t)(char *);
+typedef void (*output_pgm_dcl_ds_beg_t)(char *, char *, int);
+typedef void (*output_pgm_dcl_ds_end_t)(char *, int);
 typedef void (*output_pgm_dcl_s_beg_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_data_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_end_t)(char *, int);
@@ -225,6 +217,8 @@ typedef struct tool_struct {
   output_sql_errors_t output_sql_errors;
   output_pgm_beg_t output_pgm_beg;
   output_pgm_end_t output_pgm_end;
+  output_pgm_dcl_ds_beg_t output_pgm_dcl_ds_beg;
+  output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end;
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg;
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data;
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end;
@@ -245,6 +239,8 @@ tool_struct_t * tool_ctor(
   output_sql_errors_t output_sql_errors,
   output_pgm_beg_t output_pgm_beg,
   output_pgm_end_t output_pgm_end,
+  output_pgm_dcl_ds_beg_t output_pgm_dcl_ds_beg,
+  output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end,
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end

@@ -20,8 +20,8 @@ int main(int argc, char * argv[]) {
   SQLHANDLE hdbc = 0;
   char * injson_easy_c = "\
   {'pgm':[{'name':'HELLOSRV', 'lib':'DB2JSON', 'func':'HELLODS'},\
-          {'ds':[{'name':'parm'},{'s':{'name':'char', 'type':'128a', 'value':'Hi there'}}]},\
-          {'ds':[{'name':'retn','by':'return'},{'s':{'name':'char', 'type':'128a', 'value':'Hi back'}}]}\
+          {'ds':[{'s':{'name':'char', 'type':'128a', 'value':'Hi there'}},{'name':'parm'}]},\
+          {'ds':[{'s':{'name':'char', 'type':'128a', 'value':'Hi back'}},{'name':'retn','by':'return'}]}\
          ]}";
   char injson[4096];
   int inlen = 0;
