@@ -10,14 +10,6 @@
 
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  int i = 0, j = 0;
-  char *db  = NULL;
-  char *uid = NULL;
-  char *pwd = NULL;
-  char *libl  = NULL;
-  char *curlib = NULL;
-  char *trace  = NULL;
-  SQLHANDLE hdbc = 0;
   char * injson_easy_c = "\
   {'pgm':[{'name':'RAINBOW',  'lib':'DB2JSON'},\
           {'s':[{'name':'aint8',      'type':'3i0',   'value':3},\
@@ -35,36 +27,25 @@ int main(int argc, char * argv[]) {
                ]}\
          ]}";
   char injson[4096];
-  int inlen = 0;
-  char * outjson = NULL;
-  int outlen = 0;
+  int inlen = sizeof(injson);
+  char outjson[4096];
+  int outlen = sizeof(outjson);
 
   /* quote to double quote */
-  memset(injson,0,sizeof(injson));
-  strcpy(injson,injson_easy_c);
-  inlen = strlen(injson);
-  test_replace_quote(injson);
-  printf("input: %s\n",injson);
+  test_single_double(injson_easy_c, injson, &inlen);
+  printf("input(%d): %s\n",inlen,injson);
 
-  /* profile db2 */
-  db  = getenv(SQL_DB400);
-  uid = getenv(SQL_UID400);
-  pwd = getenv(SQL_PWD400);
-  libl = getenv(SQL_LIBL400);
-  curlib = getenv(SQL_CURLIB400);
-  trace = getenv(SQL_TRACE);
-  printf("run (trace=%s)\n",trace);
-  /* environment db2 */
-  sqlrc = SQLOverrideCCSID400( 1208 );
-  /* connection(s) db2 */
-  sqlrc = SQL400ConnectUtf8(819, db, uid, pwd, &hdbc, SQL_TXN_NO_COMMIT, libl, curlib);
-  /* json call */
-  sqlrc = SQL400Json(hdbc, injson, inlen, outjson, outlen);
-  /* clean up */
-  sqlrc = SQLDisconnect((SQLHDBC)hdbc);
-  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
+  /* json call (hdbc=0 - json handles connection) */
+  sqlrc = SQL400Json(0, injson, inlen, outjson, outlen);
+  printf("output(%d): %s\n",strlen(outjson),outjson);
+
   /* output */
-  printf("success (trace=%s)\n",trace);
+  if (sqlrc == SQL_SUCCESS) {
+    printf("success (%d)\n",sqlrc);
+  } else {
+    printf("fail (%d)\n",sqlrc);
+  }
+
   return sqlrc;
 }
 

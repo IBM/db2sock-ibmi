@@ -24,6 +24,14 @@ void test_replace_quote(char * c) {
   }
 }
 
+void test_single_double(char * in, char * out, int * outlen) {
+  strcpy(out,in);
+  *outlen = strlen(out);
+  for (; *out; out++) {
+    if (*out == 0x27) *out = '"';
+  }
+}
+
 /*
  * -- types --
  * "5a"    char(5)         char a[5]

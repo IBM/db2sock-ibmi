@@ -1042,6 +1042,11 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   tool_struct_t *tool = NULL;
   json_key_t * bigkey = NULL;
 
+  /* nothing input */
+  if (!inlen) {
+    return SQL_ERROR;
+  }
+
   /* output format */
   if (!outjson || !outlen) {
     stdbuf = json_new(JSON400_OUT_MAX_STDOUT);
