@@ -24,31 +24,11 @@
 
 #define JSON400_OUT_MAX_STDOUT 1000000
 
-#define JSON400_MAX_KEY 65000
-
 #define JSON400_ADJUST_NDA 0
 #define JSON400_ADJUST_ADD_COMMA 1
 #define JSON400_ADJUST_ADD_SPACE 2
 #define JSON400_ADJUST_RMV_COMMA 3
 
-/*
-{"pgm":[{"name":"FAKENAME","lib":"FAKELIB","func":"FakeFunc"},
-        {"data":[{"name":"int8",      "type":"3i0",   "value":3},
-                 {"name":"int16",     "type":"5i0",   "value":55},
-                 {"name":"int32",     "type":"10i0",  "value":101010},
-                 {"name":"int64",     "type":"20i0",  "value":20202020},
-                 {"name":"float",     "type":"4f2",   "value":1234.56},
-                 {"name":"double",    "type":"8f3",   "value":123456.78},
-                 {"name":"packed",    "type":"12p2",  "value":123456.78},
-                 {"name":"zoned",     "type":"12s2",  "value":123456.78},
-                 {"name":"char",      "type":"32a",   "value":"Hi there"},
-                 {"name":"varchar2",  "type":"32av2", "value":"Hi there"},
-                 {"name":"varchar4",  "type":"32av4", "value":"Hi there"},
-                 {"name":"binary",    "type":"3b",    "value":"313233343536"},
-                 {"name":"varbinary2","type":"3bv2",  "value":"313233343536"},
-                 {"name":"varbinary4","type":"3bv4",  "value":"313233343536"}]}
-       ]}
-*/
 #define JSON400_KEY_BLOCK 4096
 typedef struct json_key_struct {
   int count;
