@@ -5,34 +5,20 @@ When this warning disappears, APIs will be considered stable.
 #db2sock - libtkit400.a
 
 Welcome to db2sock project. This 'toolkit' is a dynamically loaded toolkit interface. 
-Any JSON/XML parser can be used to call this interface.
-The parser simply includes PaseTool.h, compile with -ltkit400, calls toolkit APIs.
-Warning - current version in project is only a test. This is not formal interface.
-
-The toolkit constructor requires callbacks to output 'callback' result data into any form the parser desires (xml, json, csv, etc.)
-The toolkit requires a protocol independent fixed array set of key[], value[], level[], arguments to perform toolkit functions.
-Any parser may used to map 'any' format to key[], value[], level[]. Parse can be XML, JSON, CSV, anything protocol imaginable. 
+Any parser can be used to call this toolkit interface.
+Parser can be XML, JSON, CSV, (anything protocol imaginable). 
+Any parser simply includes PaseTool.h, compile with -ltkit400, calls toolkit APIs.
+The goal of any parser is to map it's protocol to toolkit key[], value[], level[] for input (tool_run). 
+The toolkit constructor requires parser callbacks to output 'callback' result data into any format (xml, json, csv, etc.).
  
-There are three functions exported from toolkit library (libtkit400.a).
+Three functions exported from toolkit library (libtkit400.a).
 ```
-tool_ctor - callbacks for output formating
-tool_run - parsed name, value pairs
+tool_ctor - callbacks for output formating (parser specific output callbacks json, xml, csv, etc.)
+tool_run - parsed to name,value,level pairs (key[], value[], level[])
 tool_dtor - clean-up memory
 ```
 
-The parsers are dynamically loaded via SQL400Json or SQL400Xml interfaces. 
-Default parser is provided (toolkit-parser-json, toolkit-parser-xml).
-An environment variable allows any override fo a parser your own.
-
-```
-> export DB2JSONPARSER32 libjson400.a(shr.o)
-> export DB2JSONPARSER64 libjson400.a(shr_64.o)
-> export DB2XMLPARSER32 libxml400.a(shr.o)
-> export DB2XMLPARSER64 libxml400.a(shr_64.o)
-```
-
-Formal interface to tool_run is simple key, value pairs (not complete yet).
-
+Formal interface to tool_run is simple key, value pairs (see PaseTool.h).
 ```
 #define TOOL400_KEY_ELEM_BEG 0          /* key 'action' elem range */
 #define TOOL400_KEY_ELEM_BEG 999        /* key 'action' elem range */
@@ -127,6 +113,17 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * "12s2"  zoned(12:2)     (no c equiv)
                                          * "8h"    hole            hole
                                          */
+```
+
+The parsers are dynamically loaded via SQL400Json or SQL400Xml interfaces (maybe others - tbd). 
+Default parser is provided (toolkit-parser-json, toolkit-parser-xml).
+An environment variable allows any override fo a parser your own.
+
+```
+> export DB2JSONPARSER32 libjson400.a(shr.o)
+> export DB2JSONPARSER64 libjson400.a(shr_64.o)
+> export DB2XMLPARSER32 libxml400.a(shr.o)
+> export DB2XMLPARSER64 libxml400.a(shr_64.o)
 ```
 
 

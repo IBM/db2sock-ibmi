@@ -38,14 +38,7 @@
 #define TOOLLIB "TOOLLIB"
 
 /*
-The toolkit constructor requires a protocol independent fixed array set of key[], value[], level[], arguments to perform toolkit functions.
-Any parser may used to map 'any' format to key[], value[], level[]. Parse can be XML, JSON, CSV, anything protocol imaginable.  
-The toolkit constructor requires callbacks to output 'callback' result data into any form the parser desires (xml, json, csv, etc.)
-There are three functions exported from toolkit library (libtkit400.a).
-tool_ctor -  key[], value[], level[] and callbacks for output format (constructor)
-tool_dtor - destroy toolkit memory used (destructor)
-tool_run - run the 'script'
-(See PaseTool.h)
+See README.md for details.
 */
 #define TOOL400_KEY_ELEM_BEG 0          /* key 'action' elem range */
 #define TOOL400_KEY_ELEM_BEG 999        /* key 'action' elem range */
