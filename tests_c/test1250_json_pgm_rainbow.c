@@ -16,8 +16,12 @@ int main(int argc, char * argv[]) {
                 {'name':'aint16',     'type':'5i0',   'value':2},\
                 {'name':'aint32',     'type':'10i0',  'value':3},\
                 {'name':'aint64',     'type':'20i0',  'value':4},\
+                {'name':'auint8',     'type':'3u0',   'value':5},\
+                {'name':'auint16',    'type':'5u0',   'value':6},\
+                {'name':'auint32',    'type':'10u0',  'value':7},\
+                {'name':'auint64',    'type':'20u0',  'value':8},\
                 {'name':'afloat',     'type':'4f2',   'value':5.55},\
-                {'name':'adouble',    'type':'8f3',   'value':6.66},\
+                {'name':'adouble',    'type':'8f3',   'value':6.666},\
                 {'name':'apacked',    'type':'12p2',  'value':7.77},\
                 {'name':'azoned',     'type':'12s2',  'value':8.88},\
                 {'name':'achar',      'type':'32a',   'value':'A'},\
@@ -29,6 +33,12 @@ int main(int argc, char * argv[]) {
   int inlen = sizeof(injson);
   char outjson[4096];
   int outlen = sizeof(outjson);
+  int i = 0;
+  char * expect[] = {"\"aint8\":2","\"aint16\":3","\"aint32\":4","\"aint64\":5","\"auint8\":6",
+                     "\"auint16\":7","\"auint32\":8","\"auint64\":9","\"afloat\":6.66",
+                     "\"adouble\":7.777","\"apacked\":8.88","\"azoned\":9.99",
+                     "\"achar\":\"A+1\"","\"avarchar2\":\"B+1\"","\"avarchar4\":\"C+1\"",
+                     NULL};
 
   /* quote to double quote */
   test_single_double(injson_easy_c, injson, &inlen);
@@ -39,6 +49,13 @@ int main(int argc, char * argv[]) {
   printf("output(%d): %s\n",strlen(outjson),outjson);
 
   /* output */
+  for (i=0; sqlrc == SQL_SUCCESS && expect[i]; i++) {
+    ptr = strcmp(outjson,expect[i]);
+    if (!ptr) {
+      printf("fail missing (%s)\n",expect[i]);
+      sqlrc == SQL_ERROR;
+    }
+  } 
   if (sqlrc == SQL_SUCCESS) {
     printf("success (%d)\n",sqlrc);
   } else {

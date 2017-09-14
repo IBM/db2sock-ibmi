@@ -8,6 +8,10 @@
          aint16 int(5);
          aint32 int(10);
          aint64 int(20);
+         auint8 uns(3);
+         auint16 uns(5);
+         auint32 uns(10);
+         auint64 uns(20);
          afloat float(4);
          adouble float(8);
          apacked packed(12:2);
@@ -25,6 +29,10 @@
          aint16 int(5);
          aint32 int(10);
          aint64 int(20);
+         auint8 uns(3);
+         auint16 uns(5);
+         auint32 uns(10);
+         auint64 uns(20);
          afloat float(4);
          adouble float(8);
          apacked packed(12:2);
@@ -37,8 +45,12 @@
          aint16 += 1;
          aint32 += 1;
          aint64 += 1;
+         auint8 += 1;
+         auint16 += 1;
+         auint32 += 1;
+         auint64 += 1;
          afloat += 1.11;
-         adouble += 1.11;
+         adouble += 1.111;
          apacked += 1.11;
          azonded += 1.11;
          achar = %trim(achar) + '+1';
