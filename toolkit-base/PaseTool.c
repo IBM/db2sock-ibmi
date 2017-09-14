@@ -1331,13 +1331,14 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   int outDigits = tlen;
   int outLength = outDigits;
   int inLength = 0;
-  int firstNibble = 0;
-  int secondNibble = 0;
   short * short_value = NULL;
   int * int_value = NULL;
   char * dec = NULL;
   char * c = NULL;
   char * wherev = where;
+  char bytex = ' ';
+  int hnbr = 0;
+  int lnbr = 0;
   /* length of char hex binary input */
   if (str) {
     inLength = strlen(str);
@@ -1362,10 +1363,76 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
     memset(wherev, 0, outLength);
     dec = wherev;
     c = str;
-    for (j=0, k=0; j < outDigits && k < inLength; ) {
-      firstNibble = (char)(c[k++] & 0x000F) << 4;
-      secondNibble = (char)(c[k++] & 0x000F);
-      dec[j++] = (char)(firstNibble + secondNibble);
+    for (j=0, k=0; j < outDigits && k < inLength; k += 2) {
+      bytex = str[k];
+      if (bytex=='F' || bytex=='f') {
+          hnbr = 15;
+      } else if (bytex=='E' || bytex=='e') {
+          hnbr = 14;
+      } else if (bytex=='D' || bytex=='d') {
+          hnbr = 13;
+      } else if (bytex=='C' || bytex=='c') {
+          hnbr = 12;
+      } else if (bytex=='B' || bytex=='b') {
+          hnbr = 11;
+      } else if (bytex=='A' || bytex=='a') {
+          hnbr = 10;
+      } else if (bytex=='9') {
+          hnbr = 9;
+      } else if (bytex=='8') {
+          hnbr = 8;
+      } else if (bytex=='7') {
+          hnbr = 7;
+      } else if (bytex=='6') {
+          hnbr = 6;
+      } else if (bytex=='5') {
+          hnbr = 5;
+      } else if (bytex=='4') {
+          hnbr = 4;
+      } else if (bytex=='3') {
+          hnbr = 3;
+      } else if (bytex=='2') {
+          hnbr = 2;
+      } else if (bytex=='1') {
+          hnbr = 1;
+      } else {
+          hnbr = 0;
+      }
+      bytex = str[k + 1];
+      if (bytex=='F' || bytex=='f') {
+          lnbr = 15;
+      } else if (bytex=='E' || bytex=='e') {
+          lnbr = 14;
+      } else if (bytex=='D' || bytex=='d') {
+          lnbr = 13;
+      } else if (bytex=='C' || bytex=='c') {
+          lnbr = 12;
+      } else if (bytex=='B' || bytex=='b') {
+          lnbr = 11;
+      } else if (bytex=='A' || bytex=='a') {
+          lnbr = 10;
+      } else if (bytex=='9') {
+          lnbr = 9;
+      } else if (bytex=='8') {
+          lnbr = 8;
+      } else if (bytex=='7') {
+          lnbr = 7;
+      } else if (bytex=='6') {
+          lnbr = 6;
+      } else if (bytex=='5') {
+          lnbr = 5;
+      } else if (bytex=='4') {
+          lnbr = 4;
+      } else if (bytex=='3') {
+          lnbr = 3;
+      } else if (bytex=='2') {
+          lnbr = 2;
+      } else if (bytex=='1') {
+          lnbr = 1;
+      } else {
+          lnbr = 0;
+      }
+      dec[j++] = (char)(hnbr*16 + lnbr);
     }
   }
   return SQL_SUCCESS;
@@ -1379,11 +1446,10 @@ SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char *out_caller, char * whe
   char * wherev = (char *) where;
   int outDigits = tlen;
   int outLength = outDigits*2+1;
-  int leftDigitValue = 0;
-  int rightDigitValue = 0;
-  int anyDigitValue = 0;
   char * c = NULL;
   char * str = NULL;
+  int hnbr = 0;
+  int lnbr = 0;
   str = tool_new(outLength);
   for (i=0; i < tdim; i++, wherev += outDigits) {
     /* vary */
@@ -1399,73 +1465,89 @@ SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char *out_caller, char * whe
     /* digits */
     memset(str,0,outLength);
     for (k=0, c = wherev; k < len; k++) {
-      leftDigitValue = (char)((c[k] >> 4) & 0x0F);
-      rightDigitValue = (char)(c[k] & 0x0F);
-      for (l=0; l<2; l++) {
-        switch(l) {
-        case 0:
-          anyDigitValue = leftDigitValue;
-          break;
-        case 1:
-          anyDigitValue = rightDigitValue;
-          break;
-        default:
-          break;
-        }
-        /* digit to string */
-        switch(anyDigitValue) {
-        case 0:
-          str[j++] = '0';
-          break;
-        case 1:
-          str[j++] = '1';
-          break;
-        case 2:
-          str[j++] = '2';
-          break;
-        case 3:
-          str[j++] = '3';
-          break;
-        case 4:
-          str[j++] = '4';
-          break;
-        case 5:
-          str[j++] = '5';
-          break;
-        case 6:
-          str[j++] = '6';
-          break;
-        case 7:
-          str[j++] = '7';
-          break;
-        case 8:
-          str[j++] = '8';
-          break;
-        case 9:
-          str[j++] = '9';
-          break;
-        case 0xA:
-          str[j++] = 'A';
-          break;
-        case 0xB:
-          str[j++] = 'B';
-          break;
-        case 0xC:
-          str[j++] = 'C';
-          break;
-        case 0xD:
-          str[j++] = 'D';
-          break;
-        case 0xE:
-          str[j++] = 'E';
-          break;
-        case 0xF:
+      hnbr = (int)c[k];
+      if (hnbr>=240) { /* x'FO' */
           str[j++] = 'F';
-          break;
-        default:
-          break;
-        }
-      } /* l loop (digits) */
+          lnbr = hnbr - 240;
+      } else if (hnbr>=224 && hnbr<240) { /* x'E0' */
+          str[j++] = 'E';
+          lnbr = hnbr - 224;
+      } else if (hnbr>=208 && hnbr<224) { /* x'D0' */
+          str[j++] = 'D';
+          lnbr = hnbr - 208;
+      } else if (hnbr>=192 && hnbr<208) { /* x'C0' */
+          str[j++] = 'C';
+          lnbr = hnbr - 192;
+      } else if (hnbr>=176 && hnbr<192) { /* x'B0' */
+          str[j++] = 'B';
+          lnbr = hnbr - 176;
+      } else if (hnbr>=160 && hnbr<176) { /* x'A0' */
+          str[j++] = 'A';
+          lnbr = hnbr - 160;
+      } else if (hnbr>=144 && hnbr<160) { /* x'90' */
+          str[j++] = '9';
+          lnbr = hnbr - 144;
+      } else if (hnbr>=128 && hnbr<144) { /* x'80' */
+          str[j++] = '8';
+          lnbr = hnbr - 128;
+      } else if (hnbr>=112 && hnbr<128) { /* x'70' */
+          str[j++] = '7';
+          lnbr = hnbr - 112;
+      } else if (hnbr>=96 && hnbr<112) { /* x'60' */
+          str[j++] = '6';
+          lnbr = hnbr - 96;
+      } else if (hnbr>=80 && hnbr<96) { /* x'50' */
+          str[j++] = '5';
+          lnbr = hnbr - 80;
+      } else if (hnbr>=64 && hnbr<80) { /* x'40' */
+          str[j++] = '4';
+          lnbr = hnbr - 64;
+      } else if (hnbr>=48 && hnbr<64) { /* x'30' */
+          str[j++] = '3';
+          lnbr = hnbr - 48;
+      } else if (hnbr>=32 && hnbr<48) { /* x'20' */
+          str[j++] = '2';
+          lnbr = hnbr - 32;
+      } else if (hnbr>=16 && hnbr<32) { /* x'10' */
+          str[j++] = '1';
+          lnbr = hnbr - 16;
+      } else {
+          str[j++] = '0';
+          lnbr = hnbr;
+      }
+      if (lnbr>=15) { /* x'0F' */
+          str[j++] = 'F';
+      } else if (lnbr>=14 && lnbr<15) { /* x'0E' */
+          str[j++] = 'E';
+      } else if (lnbr>=13 && lnbr<14) { /* x'0D' */
+          str[j++] = 'D';
+      } else if (lnbr>=12 && lnbr<13) { /* x'0C' */
+          str[j++] = 'C';
+      } else if (lnbr>=11 && lnbr<12) { /* x'0B' */
+          str[j++] = 'B';
+      } else if (lnbr>=10 && lnbr<11) { /* x'0A' */
+          str[j++] = 'A';
+      } else if (lnbr>=9 && lnbr<10) { /* x'09' */
+          str[j++] = '9';
+      } else if (lnbr>=8 && lnbr<9) { /* x'08' */
+          str[j++] = '8';
+      } else if (lnbr>=7 && lnbr<8) { /* x'07' */
+          str[j++] = '7';
+      } else if (lnbr>=6 && lnbr<7) { /* x'06' */
+          str[j++] = '6';
+      } else if (lnbr>=5 && lnbr<6) { /* x'05' */
+          str[j++] = '5';
+      } else if (lnbr>=4 && lnbr<5) { /* x'04' */
+          str[j++] = '4';
+      } else if (lnbr>=3 && lnbr<4) { /* x'03' */
+          str[j++] = '3';
+      } else if (lnbr>=2 && lnbr<3) { /* x'02' */
+          str[j++] = '2';
+      } else if (lnbr>=1 && lnbr<2) { /* x'01' */
+          str[j++] = '1';
+      } else {
+          str[j++] = '0';
+      }
     } /* k loop (outLength) */
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 0);
   } /* i loop (tdim) */
@@ -1625,17 +1707,7 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     }
     break;
   case 'b':
-    switch(tvary){
-    case 2:
-      *spill_len = (tlen+sizeof(uint16)) * tdim;
-      break;
-    case 4:
-      *spill_len = (tlen+sizeof(uint32)) * tdim;
-      break;
-    default:
-      *spill_len = tlen * tdim;
-      break;
-    }
+    *spill_len = tlen * tdim;
     break;
   case 'h':
     *spill_len = tlen * tdim;

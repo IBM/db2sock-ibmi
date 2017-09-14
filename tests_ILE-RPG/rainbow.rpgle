@@ -19,6 +19,17 @@
          achar char(32);
          avarchar2 varchar(32:2);
          avarchar4 varchar(32:4);
+         abin4 bindec(4);
+         abin9 bindec(9);
+         ahex1 bindec(1);
+         ahex2 bindec(2);
+         ahex3 bindec(3);
+         ahex4 bindec(4);
+         ahex5 bindec(5);
+         ahex6 bindec(6);
+         ahex7 bindec(7);
+         ahex8 bindec(8);
+         ahex9 bindec(9);
        end-pr;
 
        // ****************************************************          
@@ -40,6 +51,17 @@
          achar char(32);
          avarchar2 varchar(32:2);
          avarchar4 varchar(32:4);
+         abin4 bindec(4);
+         abin9 bindec(9);
+         ahex1 bindec(1);
+         ahex2 bindec(2);
+         ahex3 bindec(3);
+         ahex4 bindec(4);
+         ahex5 bindec(5);
+         ahex6 bindec(6);
+         ahex7 bindec(7);
+         ahex8 bindec(8);
+         ahex9 bindec(9);
        end-pi;
          aint8 += 1;
          aint16 += 1;
@@ -56,5 +78,16 @@
          achar = %trim(achar) + '+1';
          avarchar2 = %trim(avarchar2) + '+1';
          avarchar4 = %trim(avarchar4) + '+1';
+         abin4 += 1;
+         abin9 += 1;
+         ahex1 += 1;
+         ahex2 += 1;
+         ahex3 += 1;
+         ahex4 += 1;
+         ahex5 += 1;
+         ahex6 += 1;
+         ahex7 += 1;
+         ahex8 += 1;
+         ahex9 += 1;
        return;
 

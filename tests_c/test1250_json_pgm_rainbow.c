@@ -26,7 +26,18 @@ int main(int argc, char * argv[]) {
                 {'name':'azoned',     'type':'12s2',  'value':8.88},\
                 {'name':'achar',      'type':'32a',   'value':'A'},\
                 {'name':'avarchar2',  'type':'32av2', 'value':'B'},\
-                {'name':'avarchar4',  'type':'32av4', 'value':'C'}\
+                {'name':'avarchar4',  'type':'32av4', 'value':'C'},\
+                {'name':'abin4',      'type':'5i0',   'value':4},\
+                {'name':'abin9',      'type':'10i0',  'value':2},\
+                {'name':'ahex1',      'type':'2b',    'value':'0001'},\
+                {'name':'ahex2',      'type':'2b',    'value':'0002'},\
+                {'name':'ahex3',      'type':'2b',    'value':'0003'},\
+                {'name':'ahex4',      'type':'2b',    'value':'0004'},\
+                {'name':'ahex5',      'type':'4b',    'value':'00000005'},\
+                {'name':'ahex6',      'type':'4b',    'value':'00000006'},\
+                {'name':'ahex7',      'type':'4b',    'value':'00000007'},\
+                {'name':'ahex8',      'type':'4b',    'value':'00000008'},\
+                {'name':'ahex9',      'type':'4b',    'value':'00000009'}\
                ]}\
          ]}";
   char injson[4096];
@@ -39,6 +50,10 @@ int main(int argc, char * argv[]) {
                      "\"auint16\":7","\"auint32\":8","\"auint64\":9","\"afloat\":6.66",
                      "\"adouble\":7.777","\"apacked\":8.88","\"azoned\":9.99",
                      "\"achar\":\"A+1\"","\"avarchar2\":\"B+1\"","\"avarchar4\":\"C+1\"",
+                     "\"abin4\":5","\"abin9\":3",
+                     "\"ahex1\":\"0002\"","\"ahex2\":\"0003\"","\"ahex3\":\"0004\"",
+                     "\"ahex4\":\"0005\"","\"ahex5\":\"00000006\"","\"ahex6\":\"00000007\"",
+                     "\"ahex7\":\"00000008\"","\"ahex8\":\"00000009\"","\"ahex9\":\"0000000A\"",
                      NULL};
 
   /* quote to double quote */
