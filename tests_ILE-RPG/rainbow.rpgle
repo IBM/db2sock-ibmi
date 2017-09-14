@@ -30,6 +30,8 @@
          ahex7 bindec(7);
          ahex8 bindec(8);
          ahex9 bindec(9);
+         abuf12 char(12);
+         adateusa date(*USA);
        end-pr;
 
        // ****************************************************          
@@ -62,7 +64,10 @@
          ahex7 bindec(7);
          ahex8 bindec(8);
          ahex9 bindec(9);
+         abuf12 char(12);
+         adateusa date(*USA);
        end-pi;
+         dcl-s fdateusa date(*USA) inz(d'2017-09-14');
          aint8 += 1;
          aint16 += 1;
          aint32 += 1;
@@ -89,5 +94,11 @@
          ahex7 += 1;
          ahex8 += 1;
          ahex9 += 1;
+         abuf12 = %trim(abuf12) + '42';
+         if adateusa = fdateusa;
+           adateusa = d'2014-01-07';
+         else;
+           adateusa = d'2016-01-07';
+         endif;
        return;
 

@@ -37,7 +37,9 @@ int main(int argc, char * argv[]) {
                 {'name':'ahex6',      'type':'4b',    'value':'00000006'},\
                 {'name':'ahex7',      'type':'4b',    'value':'00000007'},\
                 {'name':'ahex8',      'type':'4b',    'value':'00000008'},\
-                {'name':'ahex9',      'type':'4b',    'value':'00000009'}\
+                {'name':'ahex9',      'type':'4b',    'value':'00000009'},\
+                {'name':'abuf12',     'type':'12b',   'value':'F0F1F2F3F4F5F6F7F8F94040'},\
+                {'name':'adateusa',   'type':'10a',   'value':'09/14/2017'}\
                ]}\
          ]}";
   char injson[4096];
@@ -54,6 +56,8 @@ int main(int argc, char * argv[]) {
                      "\"ahex1\":\"0002\"","\"ahex2\":\"0003\"","\"ahex3\":\"0004\"",
                      "\"ahex4\":\"0005\"","\"ahex5\":\"00000006\"","\"ahex6\":\"00000007\"",
                      "\"ahex7\":\"00000008\"","\"ahex8\":\"00000009\"","\"ahex9\":\"0000000A\"",
+                     "\"abuf12\":\"F0F1F2F3F4F5F6F7F8F9F4F2\"",
+                     "\"adateusa\":\"01/07/2014\"",
                      NULL};
 
   /* quote to double quote */
