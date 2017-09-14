@@ -113,7 +113,13 @@ int main(int argc, char * argv[]) {
   expect_hstmt = expect_hdbc * LOOP;
   printf("final expected hdbc=%d total hdbc=%d\n", expect_hdbc, actual_hdbc);
   printf("final expected hstmt=%d total hstmt=%d\n", expect_hstmt, actual_hstmt);
-  printf("success (trace=%s)\n",trace);
+
+  /* test passed? */
+  if (expect_hdbc == actual_hdbc && expect_hstmt && actual_hstmt) {
+    printf("success (%d)\n",sqlrc);
+  } else {
+    printf("failed (%d)\n",sqlrc);
+  }
   return sqlrc;
 }
 

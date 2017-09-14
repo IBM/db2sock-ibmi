@@ -1,5 +1,4 @@
-# description: Generate xlcmakefile
-# command:     python genmake.py
+# command:     python run.py
 import glob
 import os
 test_pgms = glob.glob("test*32")

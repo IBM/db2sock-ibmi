@@ -738,7 +738,7 @@ SQLRETURN ile_pgm_int64_2_output(tool_struct_t *tool, char *out_caller, char * w
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%d",value);
+    sprintf(str,"%lld",value);
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -765,7 +765,7 @@ SQLRETURN ile_pgm_uint8_2_output(tool_struct_t *tool, char *out_caller, char * w
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%d",value);
+    sprintf(str,"%u",value);
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -792,7 +792,7 @@ SQLRETURN ile_pgm_uint16_2_output(tool_struct_t *tool, char *out_caller, char * 
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%d",value);
+    sprintf(str,"%u",value);
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -819,7 +819,7 @@ SQLRETURN ile_pgm_uint32_2_output(tool_struct_t *tool, char *out_caller, char * 
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%d",value);
+    sprintf(str,"%u",value);
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -846,7 +846,7 @@ SQLRETURN ile_pgm_uint64_2_output(tool_struct_t *tool, char *out_caller, char * 
   for (i=0; i < tdim; i++, wherev++) {
     value = *wherev;
     memset(str,0,sizeof(str));
-    sprintf(str,"%d",value);
+    sprintf(str,"%llu",value);
     tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
   }
   return SQL_SUCCESS;
@@ -1228,7 +1228,7 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
     rc = SQL400FromUtf8(0, str, len, ebcdic, len*4, tccsid);
     c = ebcdic;
     j = 0;
-    for (i = len*4 - 1; i; i--) {
+    for (i = len*4 - 1; i>-1; i--) {
       if (c[i]) {
         j = i + 1;
         break;

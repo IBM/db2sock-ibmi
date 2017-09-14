@@ -41,7 +41,7 @@
 See README.md for details.
 */
 #define TOOL400_KEY_ELEM_BEG 0          /* key 'action' elem range */
-#define TOOL400_KEY_ELEM_BEG 999        /* key 'action' elem range */
+#define TOOL400_KEY_ELEM_END 999        /* key 'action' elem range */
 
 #define TOOL400_KEY_ATTR_BEG 1000       /* attribute range */
 #define TOOL400_KEY_ATTR_SEP 1998       /* attribute reserved (internal use only) */

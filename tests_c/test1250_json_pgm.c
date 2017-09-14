@@ -12,18 +12,17 @@ int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   char * injson_easy_c = "\
   {'pgm':[{'name':'RAINBOW',  'lib':'DB2JSON'},\
-          {'s':[{'name':'aint8',      'type':'3i0',   'value':3},\
-                {'name':'aint16',     'type':'5i0',   'value':55},\
-                {'name':'aint32',     'type':'10i0',  'value':101010},\
-                {'name':'aint64',     'type':'20i0',  'value':20202020},\
-                {'name':'afloat',     'type':'4f2',   'value':1234.56},\
-                {'name':'adouble',    'type':'8f3',   'value':123456.78},\
-                {'name':'apacked',    'type':'12p2',  'value':123456.78},\
-                {'name':'azoned',     'type':'12s2',  'value':123456.78},\
-                {'name':'achar',      'type':'32a',   'value':'Hi there'},\
-                {'name':'avarchar2',  'type':'32av2', 'value':'Hi there'},\
-                {'name':'avarchar4',  'type':'32av4', 'value':'Hi there'},\
-                {'name':'abinary',    'type':'3b',    'value':'313233'}\
+          {'s':[{'name':'aint8',      'type':'3i0',   'value':1},\
+                {'name':'aint16',     'type':'5i0',   'value':2},\
+                {'name':'aint32',     'type':'10i0',  'value':3},\
+                {'name':'aint64',     'type':'20i0',  'value':4},\
+                {'name':'afloat',     'type':'4f2',   'value':5.55},\
+                {'name':'adouble',    'type':'8f3',   'value':6.66},\
+                {'name':'apacked',    'type':'12p2',  'value':7.77},\
+                {'name':'azoned',     'type':'12s2',  'value':8.88},\
+                {'name':'achar',      'type':'32a',   'value':'A'},\
+                {'name':'avarchar2',  'type':'32av2', 'value':'B'},\
+                {'name':'avarchar4',  'type':'32av4', 'value':'C'}\
                ]}\
          ]}";
   char injson[4096];

@@ -15,7 +15,6 @@
          achar char(32);
          avarchar2 varchar(32:2);
          avarchar4 varchar(32:4);
-         abin bindec(3);
        end-pr;
 
        // ****************************************************          
@@ -33,19 +32,17 @@
          achar char(32);
          avarchar2 varchar(32:2);
          avarchar4 varchar(32:4);
-         abin bindec(3);
        end-pi;
-         aint8 = 1;
-         aint16 = 2;
-         aint32 = 3;
-         aint64 = 4;
-         afloat = 5.5;
-         adouble = 6.6;
-         apacked = 7.77;
-         azonded = 8.88;
-         achar = '999';
-         avarchar2 = 'AAA';
-         avarchar4 = 'BBB';
-         abin = 12;
+         aint8 += 1;
+         aint16 += 1;
+         aint32 += 1;
+         aint64 += 1;
+         afloat += 1.11;
+         adouble += 1.11;
+         apacked += 1.11;
+         azonded += 1.11;
+         achar = %trim(achar) + '+1';
+         avarchar2 = %trim(avarchar2) + '+1';
+         avarchar4 = %trim(avarchar4) + '+1';
        return;
 

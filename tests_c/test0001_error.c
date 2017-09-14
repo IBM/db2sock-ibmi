@@ -29,11 +29,12 @@ int main(int argc, char * argv[]) {
   }
   /* invalid handle number '0' */
   sqlrc = SQLSetConnectAttr((SQLHDBC)0, SQL_ATTR_DEFAULT_LIB, (SQLPOINTER)NULL, 0);
+
+  /* test passed? */
   if (sqlrc < SQL_SUCCESS) {
-    printf("final expected sqlrc %d\n",sqlrc);
-    printf("success (trace=%s)\n",trace);
+    printf("success (%d)\n",sqlrc);
   } else {
-    printf("fail: sqlrc %d SQL_SUCCESS \n",sqlrc);
+    printf("fail (%d)\n",sqlrc);
   }
   return sqlrc;
 }
