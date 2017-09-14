@@ -34,6 +34,7 @@ int main(int argc, char * argv[]) {
   char outjson[4096];
   int outlen = sizeof(outjson);
   int i = 0;
+  char * ptr = NULL;
   char * expect[] = {"\"aint8\":2","\"aint16\":3","\"aint32\":4","\"aint64\":5","\"auint8\":6",
                      "\"auint16\":7","\"auint32\":8","\"auint64\":9","\"afloat\":6.66",
                      "\"adouble\":7.777","\"apacked\":8.88","\"azoned\":9.99",
@@ -50,7 +51,7 @@ int main(int argc, char * argv[]) {
 
   /* output */
   for (i=0; sqlrc == SQL_SUCCESS && expect[i]; i++) {
-    ptr = strcmp(outjson,expect[i]);
+    ptr = strstr(outjson,expect[i]);
     if (!ptr) {
       printf("fail missing (%s)\n",expect[i]);
       sqlrc == SQL_ERROR;

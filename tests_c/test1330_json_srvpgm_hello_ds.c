@@ -19,6 +19,9 @@ int main(int argc, char * argv[]) {
   int inlen = sizeof(injson);
   char outjson[4096];
   int outlen = sizeof(outjson);
+  int i = 0;
+  char * ptr = NULL;
+  char * expect[] = {"\"parm\":","\"char\":\"Hello World\"", "\"retn\":","\"char\":\"Hi back\"", NULL};
 
   /* quote to double quote */
   test_single_double(injson_easy_c, injson, &inlen);
@@ -29,6 +32,13 @@ int main(int argc, char * argv[]) {
   printf("output(%d): %s\n",strlen(outjson),outjson);
 
   /* output */
+  for (i=0; sqlrc == SQL_SUCCESS && expect[i]; i++) {
+    ptr = strstr(outjson,expect[i]);
+    if (!ptr) {
+      printf("fail missing (%s)\n",expect[i]);
+      sqlrc == SQL_ERROR;
+    }
+  } 
   if (sqlrc == SQL_SUCCESS) {
     printf("success (%d)\n",sqlrc);
   } else {
