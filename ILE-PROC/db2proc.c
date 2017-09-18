@@ -177,6 +177,7 @@ void iCall400(char * blob)
 
   /* hey adc debug */
   /* sleep(30); */
+  layout->step = 1;
 
   /* set ILE addresses based memory spill location offset */
   for (argc=0; argc < ILE_PGM_MAX_ARGS; argc++) {
@@ -193,6 +194,7 @@ void iCall400(char * blob)
       layout->argv[argc] = NULL;
     }
   }
+  layout->step = 2;
 
   /* resolve call  */
   myPgm = layout->pgm;
@@ -214,6 +216,7 @@ void iCall400(char * blob)
     os_act_mark = QleActBndPgmLong(& os_pgm_ptr, NULL, NULL, NULL, NULL);
     os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL); 
   }
+  layout->step = 3;
 
   /* call by ref */
   if (layout->argc == layout->parmc) {
@@ -226,6 +229,7 @@ void iCall400(char * blob)
   } else {
     /* next work */
   }
+  layout->step = 4;
 
   /* return aggregate? */
   if (layout->return_start && layout->return_start < layout->return_end) {
@@ -233,6 +237,7 @@ void iCall400(char * blob)
     lenRet = layout->return_end - layout->return_start;
     memcpy(myRet,(char *)&bighole,lenRet);
   }
+  layout->step = 5;
 
 }
 

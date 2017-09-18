@@ -1,0 +1,7 @@
+{"script":[
+  {"cmd":{"exec":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"}},
+  {"pgm":[{"name":"HELLO"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}
+]}
+

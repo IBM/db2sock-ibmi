@@ -90,7 +90,8 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_KEY_FETCH     30        /*"fetch":"all"*/
 #define TOOL400_KEY_END_FETCH 39        /*"end"*/
 
-#define TOOL400_KEY_CMD       40        /*"cmd":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"*/
+#define TOOL400_KEY_CMD       40        /*"cmd"*/
+#define TOOL400_CMD_EXEC    1041        /*"exec":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"*/
 #define TOOL400_KEY_END_CMD   49        /*"end"*/
 
 #define TOOL400_KEY_PGM       50        /*"pgm"*/
@@ -174,6 +175,7 @@ typedef struct ile_pgm_call_struct {
   char pgm[16];
   char lib[16];
   char func[128];
+  int step;
   int max;
   int pos;
   int vpos;
@@ -183,6 +185,11 @@ typedef struct ile_pgm_call_struct {
   int return_end;
   char * buf;
 } ile_pgm_call_t;
+
+/* error */
+#define TOOL400_JOBLOG_MAX_COLS 15
+#define TOOL400_JOBLOG_MAX_SIZE 200
+#define TOOL400_JOBLOG_MAX_REC 4
 
 /*
  * Callbacks provided by parser (any json, xml, csv, etc. parser)
@@ -207,6 +214,11 @@ typedef void (*output_pgm_dcl_ds_end_t)(char *, int);
 typedef void (*output_pgm_dcl_s_beg_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_data_t)(char *, char *, int);
 typedef void (*output_pgm_dcl_s_end_t)(char *, int);
+typedef void (*output_cmd_beg_t)(char *, char *);
+typedef void (*output_cmd_end_t)(char *);
+typedef void (*output_joblog_beg_t)(char *);
+typedef void (*output_joblog_rec_t)(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
+typedef void (*output_joblog_end_t)(char *);
 typedef struct tool_struct {
   output_script_beg_t output_script_beg;
   output_script_end_t output_script_end;
@@ -224,6 +236,11 @@ typedef struct tool_struct {
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg;
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data;
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end;
+  output_cmd_beg_t output_cmd_beg;
+  output_cmd_end_t output_cmd_end;
+  output_joblog_beg_t output_joblog_beg;
+  output_joblog_rec_t output_joblog_rec;
+  output_joblog_end_t output_joblog_end;
 } tool_struct_t;
 
 /*
@@ -245,7 +262,12 @@ tool_struct_t * tool_ctor(
   output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end,
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
-  output_pgm_dcl_s_end_t output_pgm_dcl_s_end
+  output_pgm_dcl_s_end_t output_pgm_dcl_s_end,
+  output_cmd_beg_t output_cmd_beg,
+  output_cmd_end_t output_cmd_end,
+  output_joblog_beg_t output_joblog_beg,
+  output_joblog_rec_t output_joblog_rec,
+  output_joblog_end_t output_joblog_end
 );
 
 /*

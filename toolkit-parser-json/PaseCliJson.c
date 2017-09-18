@@ -75,9 +75,9 @@ int json_query_tool [] = {0};
 /* {"fetch":"all"} */
 char * json_fetch_attr [] = {NULL};
 int json_fetch_tool [] = {0};
-/* {"cmd":"addlible mylib"} */
-char * json_cmd_attr [] = {NULL};
-int json_cmd_tool [] = {0};
+/* {"cmd":{"exec":"addlible mylib"}} */
+char * json_cmd_attr [] = {"exec",NULL};
+int json_cmd_tool [] = {TOOL400_CMD_EXEC};
 
 /* primary elements */
 char * json_elem_key [] = {"pconnect","connect","query","fetch","cmd","pgm","ds", "s", NULL};
@@ -243,6 +243,9 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
 
     case TOOL400_KEY_CMD:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CMD", val);
+      break;
+    case TOOL400_CMD_EXEC:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CMD_EXEC", val);
       break;
     case TOOL400_KEY_END_CMD:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CMD", val);
@@ -565,10 +568,12 @@ void json_output_pgm_beg(char *out_caller, char * name, char * lib, char * func)
     lib = "*LIBL";
   }
   if (!func) {
-    func = "";
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"pgm\":[\"%s\",\"%s\"", name, lib);
+  } else {
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
   }
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-    "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
 }
 void json_output_pgm_end(char *out_caller) {
   json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
@@ -622,6 +627,59 @@ void json_output_pgm_dcl_s_end(char *out_caller, int tdim) {
   }
 }
 
+/* cmd call */
+void json_output_cmd_beg(char *out_caller, char * cmd) {
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"cmd\":[\"%s\"", cmd);
+}
+void json_output_cmd_end(char *out_caller) {
+  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+    "]}");
+}
+
+/* joblog */
+void json_output_joblog_beg(char *out_caller) {
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"joblog\":[");
+}
+void json_output_joblog_rec(char *out_caller, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) 
+{
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{");
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgid\":\"%s\"",msgid);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtype\":\"%s\"",msgtype);
+  if (strlen(msgsub)) {
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgsub\":\"na\"");
+  } else {
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgsub\":\"%s\"",msgsub);
+  }
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgsev\":\"%s\"",msgsev);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgstamp\":\"%s\"",msgstamp);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtolib\":\"%s\"",msgtolib);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtopgm\":\"%s\"",msgtopgm);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtomod\":\"%s\"",msgtomod);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtoproc\":\"%s\"",msgtoproc);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtoinst\":\"%s\"",msgtoinst);
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "\"msgtxt\":\"%s\"",msgtxt);
+  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+      "}");
+}
+void json_output_joblog_end(char *out_caller) {
+  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+    "]}");
+}
 
 /* ==========================
  * input
@@ -1089,7 +1147,12 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     &json_output_pgm_dcl_ds_end,
     &json_output_pgm_dcl_s_beg,
     &json_output_pgm_dcl_s_data,
-    &json_output_pgm_dcl_s_end
+    &json_output_pgm_dcl_s_end,
+    &json_output_cmd_beg,
+    &json_output_cmd_end,
+    &json_output_joblog_beg,
+    &json_output_joblog_rec,
+    &json_output_joblog_end
   );
   sqlrc = tool_run(hdbc, outjson, outlen, tool, bigkey->key, bigkey->val, bigkey->lvl);
   tool_dtor(tool);

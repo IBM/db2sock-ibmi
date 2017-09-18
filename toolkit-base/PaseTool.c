@@ -40,6 +40,7 @@ typedef struct tool_key_cmd_struct {
 typedef struct tool_key_pgm_struct {
   SQLHANDLE hstmt;
   ile_pgm_call_t * layout;
+  char * pgm_proc_lib;
   char * pgm_ile_name;
   char * pgm_ile_lib;
   char * pgm_ile_func;
@@ -87,7 +88,12 @@ tool_struct_t * tool_ctor(
   output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end,
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
-  output_pgm_dcl_s_end_t output_pgm_dcl_s_end
+  output_pgm_dcl_s_end_t output_pgm_dcl_s_end,
+  output_cmd_beg_t output_cmd_beg,
+  output_cmd_end_t output_cmd_end,
+  output_joblog_beg_t output_joblog_beg,
+  output_joblog_rec_t output_joblog_rec,
+  output_joblog_end_t output_joblog_end
 ) 
 {
   tool_struct_t *tool = tool_new(sizeof(tool_struct_t));
@@ -107,6 +113,11 @@ tool_struct_t * tool_ctor(
   tool->output_pgm_dcl_s_beg = output_pgm_dcl_s_beg;
   tool->output_pgm_dcl_s_data = output_pgm_dcl_s_data;
   tool->output_pgm_dcl_s_end = output_pgm_dcl_s_end;
+  tool->output_cmd_beg = output_cmd_beg;
+  tool->output_cmd_end = output_cmd_end;
+  tool->output_joblog_beg = output_joblog_beg;
+  tool->output_joblog_rec = output_joblog_rec;
+  tool->output_joblog_end = output_joblog_end;
   return tool;
 }
 
@@ -183,6 +194,9 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
 
     case TOOL400_KEY_CMD:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_CMD", val);
+      break;
+    case TOOL400_CMD_EXEC:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CMD_EXEC", val);
       break;
     case TOOL400_KEY_END_CMD:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_CMD", val);
@@ -397,6 +411,7 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
       printf_format("%s.parm %s %d\n",mykey,"parmc",layout->parmc);
       printf_format("%s.parm %s %d\n",mykey,"vpos",layout->vpos);
       printf_format("%s.parm %s %d\n",mykey,"pos",layout->pos);
+      printf_format("%s.parm %s %d\n",mykey,"step",layout->step);
       printf_format("%s.parm %s %d\n",mykey,"max",layout->max);
       argv_area = ile_pgm_argv_top_buf(layout);
       argv_len = ile_pgm_argv_length(layout);
@@ -474,6 +489,23 @@ void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char *out_caller, char * na
 void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, char *out_caller, int tdim) {
   tool->output_pgm_dcl_ds_end(out_caller, tdim);
 }
+void tool_output_cmd_beg(tool_struct_t *tool, char *out_caller, char * cmd) {
+  tool->output_cmd_beg(out_caller, cmd);
+}
+void tool_output_cmd_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_cmd_end(out_caller);
+}
+
+void tool_output_joblog_beg(tool_struct_t *tool, char *out_caller) {
+  tool->output_joblog_beg(out_caller);
+}
+void tool_output_joblog_rec(tool_struct_t *tool, char *out_caller, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) {
+  tool->output_joblog_rec(out_caller,msgid,msgtype,msgsub,msgsev,msgstamp,msgtolib,msgtopgm,msgtomod,msgtoproc,msgtoinst,msgtxt);
+}
+void tool_output_joblog_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_joblog_end(out_caller);
+}
+
 
 /*=================================================
  * toolkit copy in/out ILE parm layout
@@ -2126,6 +2158,15 @@ tool_key_pgm_struct_t * tool_key_pgm_ctor(tool_key_t * tk) {
   tool_key_pgm_struct_t * tpgm = (tool_key_pgm_struct_t *) tool_new(sizeof(tool_key_pgm_struct_t));
   tpgm->hstmt = 0;
   tpgm->layout = NULL;
+  tpgm->pgm_proc_lib = NULL;
+  /* make sp call to ILE blob call wrapper
+   * (sp is simple load, activate, call, return)
+   * > export TOOLLIB=DB2JSON
+   */
+  tpgm->pgm_proc_lib = getenv(TOOLLIB);
+  if (!tpgm->pgm_proc_lib) {
+    tpgm->pgm_proc_lib = ILELIB; /* see ILE_PROC Makefile (iconf.h) */
+  }
   tpgm->pgm_ile_name = NULL;
   tpgm->pgm_ile_lib = NULL;
   tpgm->pgm_ile_func = NULL;
@@ -2498,6 +2539,8 @@ SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
   char * pgm_shift_pase = NULL;
   int pgm_shift_len = 0;
   SQLINTEGER pgm_shift_sql_max = 0;
+  /* how far? */
+  tpgm->layout->step = 0;
   /* last return position */
   if (tpgm->layout->return_start) {
     tpgm->layout->return_end = tpgm->layout->pos;
@@ -2556,17 +2599,8 @@ SQLRETURN tool_key_pgm_run2(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int *
   int step = 0;
   int pgm_out_idx = 0;
   /* sql */
-  /* make sp call to ILE blob call wrapper
-   * (sp is simple load, activate, call, return)
-   * > export TOOLLIB=DB2JSON
-   */
-  tpgm->pgm_ile_lib = getenv(TOOLLIB);
-  if (!tpgm->pgm_ile_lib) {
-    tpgm->pgm_ile_lib = ILELIB; /* see ILE_PROC Makefile (iconf.h) */
-  }
-  /* sql */
   memset(tpgm->pgm_buff,0,TOOL400_MAX_CMD_BUFF);
-  sprintf(tpgm->pgm_buff,"CALL %s.DB2PROC(?)", tpgm->pgm_ile_lib);
+  sprintf(tpgm->pgm_buff,"CALL %s.DB2PROC(?)", tpgm->pgm_proc_lib);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
   /* prepare */
@@ -2632,6 +2666,119 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk) {
     sqlrc = tool_key_pgm_run2(tk, tpgm, &key_ary);
     /* dtor */
     tool_key_pgm_dtor(tpgm);
+  }
+  return sqlrc;
+}
+
+/* cmd */
+tool_key_cmd_struct_t * tool_key_cmd_ctor(tool_key_t * tk) {
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_cmd_struct_t * tcmd = (tool_key_cmd_struct_t *) tool_new(sizeof(tool_key_cmd_struct_t));
+  tcmd->hstmt = 0;
+  tcmd->cmd_len = 0;
+  memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
+  return tcmd;
+}
+void tool_key_cmd_dtor(tool_key_cmd_struct_t * tcmd) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  /* close */
+  if (tcmd->hstmt) {
+    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, tcmd->hstmt);
+  }
+  tcmd->hstmt = 0;
+  tool_free((char *)tcmd);
+}
+SQLRETURN tool_key_cmd_run2(tool_key_t * tk, tool_key_cmd_struct_t * tcmd, int *key_ary) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = tk->tconn;
+  int i = 0;
+  int i_end = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  char * cmd = NULL;
+  /* cmd attributes (parser order 1st) */
+  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tool_dump_attr(sqlrc, "cmd_run2(a)", i, lvl, key, val);
+    switch (key) {
+    case TOOL400_CMD_EXEC:
+      cmd = val;
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_CMD:
+      *key_ary = -1;
+    case TOOL400_KEY_ARY_SEP:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+    i_end = i;
+  }
+  /* output */
+  tool_output_cmd_beg(tk->tool, tk->outarea, cmd);
+  /* sql */
+  tcmd->cmd_len = strlen(cmd);
+  memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
+  sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tcmd->hstmt);
+  /* prepare */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* execute */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* output */
+  tool_output_cmd_end(tk->tool, tk->outarea);
+  /* next */
+  if (tk->idx < i_end) {
+    tk->idx = i_end;
+  }
+  return sqlrc;
+}
+SQLRETURN tool_key_cmd_run(tool_key_t * tk) {
+  tool_key_cmd_struct_t * tcmd = NULL;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int key_ary = 0;
+  int key_idx = tk->idx + 1;
+  /* array of cmds? */
+  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
+    /* is array (run multiple) */
+    if (key_ary == TOOL400_KEY_ARY_BEG) {
+      if (tk->idx < key_idx) {
+        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
+      }
+    /* not array (run once) */
+    } else {
+      key_ary = -1;
+    }
+    /* ctor */
+    tcmd = tool_key_cmd_ctor(tk);
+    /* run */
+    sqlrc = tool_key_cmd_run2(tk, tcmd, &key_ary);
+    /* dtor */
+    tool_key_cmd_dtor(tcmd);
   }
   return sqlrc;
 }
@@ -2958,112 +3105,6 @@ SQLRETURN tool_key_query_run(tool_key_t * tk) {
   return sqlrc;
 }
 
-/* cmd */
-tool_key_cmd_struct_t * tool_key_cmd_ctor(tool_key_t * tk) {
-  tool_key_conn_struct_t * tconn = tk->tconn;
-  tool_key_cmd_struct_t * tcmd = (tool_key_cmd_struct_t *) tool_new(sizeof(tool_key_cmd_struct_t));
-  tcmd->hstmt = 0;
-  tcmd->cmd_len = 0;
-  memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
-  return tcmd;
-}
-void tool_key_cmd_dtor(tool_key_cmd_struct_t * tcmd) {
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  /* close */
-  if (tcmd->hstmt) {
-    sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, tcmd->hstmt);
-  }
-  tcmd->hstmt = 0;
-  tool_free((char *)tcmd);
-}
-SQLRETURN tool_key_cmd_run2(tool_key_t * tk, tool_key_cmd_struct_t * tcmd, int *key_ary) {
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  tool_key_conn_struct_t * tconn = tk->tconn;
-  int i = 0;
-  int i_end = 0;
-  int key = 0;
-  char * val = NULL;
-  int lvl = 0;
-  int max = 0;
-  int go = 1;
-  char * cmd = tk->val[tk->idx];
-  /* sql */
-  tcmd->cmd_len = strlen(cmd);
-  memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
-  sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tcmd->hstmt);
-  /* prepare */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
-  }
-  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
-  /* cmd attributes (parser order 1st) */
-  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
-    key = tk->key[i];
-    val = tk->val[i];
-    lvl = tk->lvl[i];
-    /* no key */
-    if (!key) {
-      break;
-    }
-    /* check level */
-    if (!max) {
-      max = lvl;
-    }
-    if (lvl > max) {
-      continue;
-    }
-    tool_dump_attr(sqlrc, "cmd_run2(a)", i, lvl, key, val);
-    switch (key) {
-    case TOOL400_KEY_ARY_END:
-    case TOOL400_KEY_END_CMD:
-      *key_ary = -1;
-    case TOOL400_KEY_ARY_SEP:
-      go = 0;
-      break;
-    default:
-      break;
-    }
-    i_end = i;
-  }
-  /* execute */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
-  }
-  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
-  /* next */
-  if (tk->idx < i_end) {
-    tk->idx = i_end;
-  }
-  return sqlrc;
-}
-SQLRETURN tool_key_cmd_run(tool_key_t * tk) {
-  tool_key_cmd_struct_t * tcmd = NULL;
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int key_ary = 0;
-  int key_idx = tk->idx + 1;
-  /* array of cmds? */
-  for (key_ary = tk->key[key_idx]; sqlrc == SQL_SUCCESS && key_ary > -1;) {
-    /* is array (run multiple) */
-    if (key_ary == TOOL400_KEY_ARY_BEG) {
-      if (tk->idx < key_idx) {
-        tk->idx++; /* forward TOOL400_KEY_ARY_BEG */
-      }
-    /* not array (run once) */
-    } else {
-      key_ary = -1;
-    }
-    /* ctor */
-    tcmd = tool_key_cmd_ctor(tk);
-    /* run */
-    sqlrc = tool_key_cmd_run2(tk, tcmd, &key_ary);
-    /* dtor */
-    tool_key_cmd_dtor(tcmd);
-  }
-  return sqlrc;
-}
-
 /* connection */
 tool_key_conn_struct_t * tool_key_conn_ctor(tool_key_t * tk) {
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool_new(sizeof(tool_key_conn_struct_t));
@@ -3108,6 +3149,96 @@ void tool_key_conn_dtor(tool_key_conn_struct_t * tconn, tool_key_t * tk) {
   tk->tconn = NULL;
   tool_free((char *)tconn);
 }
+SQLRETURN tool_key_conn_joblog(tool_key_t * tk, SQLHANDLE hdbc) {
+  /*
+  *sort time descend (new entries first)
+  */
+  char * hostSql = "select\
+  message_id as msgid,\
+  message_type as msgtype,\
+  message_subtype as msgsub,\
+  severity as msgsev,\
+  cast(message_timestamp as varchar(26)) as msgstamp,\
+  to_library as msgtolib,\
+  to_program as msgtopgm,\
+  to_module as msgtomod,\
+  cast(to_procedure as varchar(128)) as msgtoproc,\
+  to_instruction as msgtoinst,\
+  cast(message_text as varchar(200) ccsid 37) as msgtxt\
+  from table(qsys2.joblog_info('*')) a\
+  where severity >= 20 order by msgstamp DESC";
+  int j = 0;
+  int rec = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLRETURN sql_exec_rc = SQL_SUCCESS;
+  SQLHANDLE hstmt = 0;
+  SQLSMALLINT nResultCols = 0;
+  SQLCHAR buff_name[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
+  SQLCHAR buff_value[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
+  SQLINTEGER buff_len[TOOL400_JOBLOG_MAX_COLS];
+  SQLSMALLINT buff_type[TOOL400_JOBLOG_MAX_COLS];
+  SQLINTEGER fStrLen[TOOL400_JOBLOG_MAX_COLS];
+  SQLSMALLINT name_length = 0;
+  SQLSMALLINT type = 0;
+  SQLINTEGER size = 0;
+  SQLSMALLINT scale = 0;
+  SQLSMALLINT nullable = 0;
+
+  /* output */
+  tool_output_joblog_beg(tk->tool, tk->outarea);
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+  /* prepare */
+  sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLPOINTER)hostSql, (SQLINTEGER)SQL_NTS);
+  /* execute */
+  sqlrc = SQLExecute((SQLHSTMT)hstmt);
+  sql_exec_rc = sqlrc;
+  /* result set */
+  sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
+  if (nResultCols > 0) {
+    for (j = 0 ; j < nResultCols; j++) {
+      size = TOOL400_JOBLOG_MAX_SIZE;
+      memset(buff_name[j],0,TOOL400_JOBLOG_MAX_SIZE);
+      memset(buff_value[j],0,TOOL400_JOBLOG_MAX_SIZE);
+      buff_type[j] = 0;
+      fStrLen[j] = SQL_NTS;
+      sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
+      sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
+    }
+    sqlrc = SQL_SUCCESS;
+    while (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLFetch(hstmt);
+      if ( sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+        break;
+      }
+      tool_output_joblog_rec(tk->tool, tk->outarea,
+        buff_value[0],
+        buff_value[1],
+        buff_value[2],
+        buff_value[3],
+        buff_value[4],
+        buff_value[5],
+        buff_value[6],
+        buff_value[7],
+        buff_value[8],
+        buff_value[9],
+        buff_value[10]);
+      rec++;
+      if (rec > TOOL400_JOBLOG_MAX_REC) {
+        break;
+      }
+    }
+  } else {
+    sql_exec_rc = -1;
+  }
+  /* close */
+  sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  /* output */
+  tool_output_joblog_end(tk->tool, tk->outarea);
+
+ return sql_exec_rc;
+}
+
 SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, int *key_ary) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
@@ -3243,6 +3374,10 @@ SQLRETURN tool_key_conn_run2(tool_key_t * tk, tool_key_conn_struct_t * tconn, in
     }
     tool_dump_end(sqlrc, "conn_run2", i, lvl, key, val);
     i_end = i;
+    /* joblog info */
+    if (sqlrc == SQL_ERROR) {
+      tool_key_conn_joblog(tk, tconn->hdbc);
+    }
   }
   /* next */
   if (tk->idx < i_end) {
@@ -3329,22 +3464,27 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool, int *ike
     case TOOL400_KEY_CONN:
       tk->idx = i;
       sqlrc = tool_key_conn_run(tk);
+      i = tk->idx;
       break;
     case TOOL400_KEY_PCONN:
       tk->idx = i;
       sqlrc = tool_key_conn_run(tk);
+      i = tk->idx;
       break;
     case TOOL400_KEY_QUERY:
       tk->idx = i - 1; /* no connect */
       sqlrc = tool_key_conn_run(tk);
+      i = tk->idx;
       break;
     case TOOL400_KEY_CMD:
       tk->idx = i - 1; /* no connect */
       sqlrc = tool_key_conn_run(tk);
+      i = tk->idx;
       break;
     case TOOL400_KEY_PGM:
       tk->idx = i - 1; /* no connect */
       sqlrc = tool_key_conn_run(tk);
+      i = tk->idx;
       break;
     default:
       break;
