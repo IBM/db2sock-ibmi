@@ -28,10 +28,10 @@ int main(int argc, char * argv[]) {
   fp_json = fopen(fp_file_json,"r");
   if (!fp_json) {
     printf("file '%s' not found\n",fp_file_json);
-    sqlrc == SQL_ERROR;
+    sqlrc = SQL_ERROR;
   }
   memset(injson,0,sizeof(injson));
-  while (sqlrc == SQL_SUCCESS && fgets(fp_buf, sizeof(fp_buf), fp_json) != NULL) {
+  while (sqlrc == SQL_SUCCESS && (fgets(fp_buf, sizeof(fp_buf), fp_json) != NULL)) {
     strcat(injson,fp_buf);
   } 
 
@@ -40,7 +40,7 @@ int main(int argc, char * argv[]) {
   fp_exp = fopen(fp_file_exp,"r");
   if (!fp_exp) {
     printf("file '%s' not found\n",fp_file_exp);
-    sqlrc == SQL_ERROR;
+    sqlrc = SQL_ERROR;
   }
 
   /* test */
@@ -52,14 +52,14 @@ int main(int argc, char * argv[]) {
 
   /* output */
   printf("result:\n");
-  while (sqlrc == SQL_SUCCESS && fgets(fp_buf, sizeof(fp_buf), fp_exp) != NULL) {
+  while (sqlrc == SQL_SUCCESS && (fgets(fp_buf, sizeof(fp_buf), fp_exp) != NULL)) {
     len = strlen(fp_buf);
     if (!len) continue;
     fp_buf[len-1] = '\0';
     ptr = strstr(outjson,fp_buf);
     if (!ptr) {
       printf("fail missing (%s)\n",fp_buf);
-      sqlrc == SQL_ERROR;
+      sqlrc = SQL_ERROR;
     }
   } 
   if (sqlrc == SQL_SUCCESS) {
