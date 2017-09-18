@@ -22,6 +22,7 @@ int main(int argc, char * argv[]) {
   char fp_file_exp[1024];
   FILE *fp_exp = NULL;
   char * fp_prefix = argv[1];
+  char * bad = "_bad.";
 
   /* json test file */
   sprintf(fp_file_json,"%s.json",fp_prefix);
@@ -52,6 +53,14 @@ int main(int argc, char * argv[]) {
 
   /* output */
   printf("result:\n");
+  /* bad expected ? */
+  if (sqlrc == SQL_ERROR) {
+    ptr = strstr(fp_file_json,bad);
+    if (ptr) {
+      printf("expected bad (%d)\n",sqlrc);
+      sqlrc = SQL_SUCCESS;
+    }
+  }
   while (sqlrc == SQL_SUCCESS && (fgets(fp_buf, sizeof(fp_buf), fp_exp) != NULL)) {
     len = strlen(fp_buf);
     if (!len) continue;
