@@ -35,15 +35,7 @@ TEST0000     = test0000_resource_array
 TEST0001     = test0001_error
 TEST0011     = test0011_resource_array_async_callback
 TEST0012     = test0012_resource_array_async_join
-TEST1001     = test1001_json_select
-TEST1011     = test1011_json_select_no_data_found
-TEST1021     = test1021_json_null_data
-TEST1200     = test1200_json_cmd
-TEST1250     = test1250_json_pgm_rainbow
-TEST1300     = test1300_json_pgm_hello
-TEST1310     = test1310_json_srvpgm_hello
-TEST1320     = test1320_json_srvpgm_hello_again
-TEST1330     = test1330_json_srvpgm_hello_ds
+TEST1000     = test1000_sql400json
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -67,22 +59,10 @@ tgt32:
 	@$(MAKE) CCFLAGS="$(CCFLAGS32)" LIBDEPS="$(LIBDEPS32)" BIT="32" go
 
 ### tells make all things to do (ordered)
-### go: $(TEST0000)$(BIT) \
-### 	$(TEST0011)$(BIT) \
-### 	$(TEST0012)$(BIT) \
-### 	$(TEST1001)$(BIT) \
-### 	$(TEST1011)$(BIT) \
-### 	$(TEST1021)$(BIT) \
-### 	$(TEST1200)$(BIT) \
-### 	clean
 go: $(TEST0000)$(BIT) \
 	$(TEST0011)$(BIT) \
 	$(TEST0012)$(BIT) \
-	$(TEST1250)$(BIT) \
- 	$(TEST1300)$(BIT) \
- 	$(TEST1310)$(BIT) \
- 	$(TEST1320)$(BIT) \
- 	$(TEST1330)$(BIT) \
+	$(TEST1000)$(BIT) \
 	clean
 
 ### generic rules
@@ -100,24 +80,8 @@ $(TEST0011)$(BIT): $(TEST0011).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0011).o -o $(TEST0011)$(BIT)
 $(TEST0012)$(BIT): $(TEST0012).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0012).o -o $(TEST0012)$(BIT)
-$(TEST1001)$(BIT): $(TEST1001).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1001).o -o $(TEST1001)$(BIT)
-$(TEST1011)$(BIT): $(TEST1011).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1011).o -o $(TEST1011)$(BIT)
-$(TEST1021)$(BIT): $(TEST1021).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1021).o -o $(TEST1021)$(BIT)
-$(TEST1200)$(BIT): $(TEST1200).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1200).o -o $(TEST1200)$(BIT)
-$(TEST1250)$(BIT): $(TEST1250).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1250).o -o $(TEST1250)$(BIT)
-$(TEST1300)$(BIT): $(TEST1300).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1300).o -o $(TEST1300)$(BIT)
-$(TEST1310)$(BIT): $(TEST1310).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1310).o -o $(TEST1310)$(BIT)
-$(TEST1320)$(BIT): $(TEST1320).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1320).o -o $(TEST1320)$(BIT)
-$(TEST1330)$(BIT): $(TEST1330).o
-	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1330).o -o $(TEST1330)$(BIT)
+$(TEST1000)$(BIT): $(TEST1000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1000).o -o $(TEST1000)$(BIT)
 
 clean:
 	rm -f *.o

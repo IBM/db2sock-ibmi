@@ -1,0 +1,5 @@
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLODS"},
+        {"ds":[{"s":{"name":"char", "type":"128a", "value":"Hi there"}},{"name":"parm"}]},
+        {"ds":[{"s":{"name":"char", "type":"128a", "value":"Hi back"}},{"name":"retn","by":"return"}]}
+       ]}
+
