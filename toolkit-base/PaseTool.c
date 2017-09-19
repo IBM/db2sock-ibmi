@@ -75,6 +75,8 @@ void tool_free(char *buffer) {
 tool_struct_t * tool_ctor(
   output_script_beg_t output_script_beg,
   output_script_end_t output_script_end,
+  output_query_beg_t output_query_beg,
+  output_query_end_t output_query_end,
   output_record_array_beg_t output_record_array_beg,
   output_record_array_end_t output_record_array_end,
   output_record_no_data_found_t output_record_no_data_found,
@@ -99,6 +101,8 @@ tool_struct_t * tool_ctor(
   tool_struct_t *tool = tool_new(sizeof(tool_struct_t));
   tool->output_script_beg = output_script_beg;
   tool->output_script_end = output_script_end;
+  tool->output_query_beg = output_query_beg;
+  tool->output_query_end = output_query_end;
   tool->output_record_array_beg = output_record_array_beg;
   tool->output_record_array_end = output_record_array_end;
   tool->output_record_no_data_found = output_record_no_data_found;
@@ -454,6 +458,12 @@ void tool_output_script_beg(tool_struct_t *tool, char *out_caller) {
 }
 void tool_output_script_end(tool_struct_t *tool, char *out_caller) {
   tool->output_script_end(out_caller);
+}
+void tool_output_query_beg(tool_struct_t *tool, char *out_caller, char *query) {
+  tool->output_query_beg(out_caller, query);
+}
+void tool_output_query_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_query_end(out_caller);
 }
 void tool_output_record_array_beg(tool_struct_t *tool, char *out_caller) {
   tool->output_record_array_beg(out_caller);
@@ -3019,6 +3029,8 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
     }
     return sqlrc;
   }
+  /* output */
+  tool_output_query_beg(tk->tool, tk->outarea, query);  
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
   /* prepare */
@@ -3104,6 +3116,8 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
   }
   /* parms error */
   if (sqlrc == SQL_ERROR) {
+    /* output */
+    tool_output_query_end(tk->tool, tk->outarea);  
     /* next */
     if (tk->idx < i_end) {
       tk->idx = i_end;
@@ -3118,6 +3132,8 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
   sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
   /* execute error */
   if (sqlrc == SQL_ERROR) {
+    /* output */
+    tool_output_query_end(tk->tool, tk->outarea);  
     return sqlrc;
   }
 
@@ -3169,6 +3185,8 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
     tool_dump_end(sqlrc, "query_run2-2", i, lvl, key, val);
     i_end = i;
   }
+  /* output */
+  tool_output_query_end(tk->tool, tk->outarea);  
   /* next */
   if (tk->idx < i_end) {
     tk->idx = i_end;

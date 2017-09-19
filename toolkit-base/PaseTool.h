@@ -203,12 +203,14 @@ typedef struct ile_pgm_call_struct {
 #define TOOL400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
 typedef void (*output_script_beg_t)(char *);
 typedef void (*output_script_end_t)(char *);
+typedef void (*output_query_beg_t)(char *,char *);
 typedef void (*output_record_array_beg_t)(char *);
 typedef void (*output_record_array_end_t)(char *);
 typedef void (*output_record_no_data_found_t)(char *);
 typedef void (*output_record_row_beg_t)(char *);
 typedef void (*output_record_name_value_t)(char *, char *, int, int, char *);
 typedef void (*output_record_row_end_t)(char *);
+typedef void (*output_query_end_t)(char *);
 typedef int (*output_sql_errors_t)(SQLHANDLE, SQLSMALLINT, int, char *);
 typedef void (*output_pgm_beg_t)(char *, char *, char *, char *);
 typedef void (*output_pgm_end_t)(char *);
@@ -225,6 +227,8 @@ typedef void (*output_joblog_end_t)(char *);
 typedef struct tool_struct {
   output_script_beg_t output_script_beg;
   output_script_end_t output_script_end;
+  output_query_beg_t output_query_beg;
+  output_query_end_t output_query_end;
   output_record_array_beg_t output_record_array_beg;
   output_record_array_end_t output_record_array_end;
   output_record_no_data_found_t output_record_no_data_found;
@@ -252,6 +256,8 @@ typedef struct tool_struct {
 tool_struct_t * tool_ctor(
   output_script_beg_t output_script_beg,
   output_script_end_t output_script_end,
+  output_query_beg_t output_query_beg,
+  output_query_end_t output_query_end,
   output_record_array_beg_t output_record_array_beg,
   output_record_array_end_t output_record_array_end,
   output_record_no_data_found_t output_record_no_data_found,

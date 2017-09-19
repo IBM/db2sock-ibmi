@@ -476,6 +476,14 @@ void json_output_script_end(char *out_caller) {
     "]}");
 }
 
+void json_output_query_beg(char *out_caller, char * query) {
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "{\"query\":[\"%s\"", query);
+}
+void json_output_query_end(char *out_caller) {
+  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+    "]}");
+}
 void json_output_record_array_beg(char *out_caller) {
   json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
     "{\"records\":[");
@@ -969,7 +977,7 @@ int json_sort(int * key, char ** val, int * lvl, int max) {
     if (key[i] == TOOL400_KEY_ARY_END || key[i] < TOOL400_KEY_ELEM_END) {
       for (j=i; j>-1 && key[j]; j--) {
         if (key[j] == TOOL400_KEY_ARY_SEP) {
-          key[j] = TOOL400_KEY_ATTR_SEP; /* sep ignored non-attr */
+          key[j] = TOOL400_KEY_ATTR_SEP; /* sep ignored */
         } else {
           break;
         }
@@ -1166,6 +1174,8 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   tool = tool_ctor(
     &json_output_script_beg,
     &json_output_script_end,
+    &json_output_query_beg,
+    &json_output_query_end,
     &json_output_record_array_beg,
     &json_output_record_array_end,
     &json_output_record_no_data_found,
