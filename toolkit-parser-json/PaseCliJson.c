@@ -69,22 +69,28 @@ int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY};
 /* {"data":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|value|const|return","value":"MYVALUE"}} */
 char * json_s_attr [] = {"name","dim","type","value","by",NULL};
 int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY};
-/* {"query":"select * from bug"} */
-char * json_query_attr [] = {NULL};
-int json_query_tool [] = {0};
-/* {"fetch":"all"} */
-char * json_fetch_attr [] = {NULL};
-int json_fetch_tool [] = {0};
+/* {"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
+        {"parm":[{"value":"Jones"},{"value":"Vine"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]} 
+*/
+char * json_query_attr [] = {"stmt",NULL};
+int json_query_tool [] = {TOOL400_QUERY_STMT};
+char * json_parm_attr [] = {"value",NULL};
+int json_parm_tool [] = {TOOL400_PARM_VALUE};
+char * json_fetch_attr [] = {"rec",NULL};
+int json_fetch_tool [] = {TOOL400_FETCH_REC};
 /* {"cmd":{"exec":"addlible mylib"}} */
 char * json_cmd_attr [] = {"exec",NULL};
 int json_cmd_tool [] = {TOOL400_CMD_EXEC};
 
 /* primary elements */
-char * json_elem_key [] = {"pconnect","connect","query","fetch","cmd","pgm","ds", "s", NULL};
+char * json_elem_key [] = {"pconnect","connect","query","parm","fetch","cmd","pgm","ds", "s", NULL};
 int json_elem_tool_beg [] = {
 TOOL400_KEY_PCONN,
 TOOL400_KEY_CONN,
 TOOL400_KEY_QUERY,
+TOOL400_KEY_PARM,
 TOOL400_KEY_FETCH,
 TOOL400_KEY_CMD,
 TOOL400_KEY_PGM,
@@ -94,6 +100,7 @@ int json_elem_tool_end [] = {
 TOOL400_KEY_END_CONN,
 TOOL400_KEY_END_CONN,
 TOOL400_KEY_END_QUERY,
+TOOL400_KEY_END_PARM,
 TOOL400_KEY_END_FETCH,
 TOOL400_KEY_END_CMD,
 TOOL400_KEY_END_PGM,
@@ -103,6 +110,7 @@ char ** json_elem_attr_key[] = {
 json_conn_attr,
 json_conn_attr,
 json_query_attr,
+json_parm_attr,
 json_fetch_attr,
 json_cmd_attr,
 json_pgm_attr,
@@ -113,6 +121,7 @@ int * json_elem_attr_tool [] = {
 json_conn_tool,
 json_conn_tool,
 json_query_tool,
+json_parm_tool,
 json_fetch_tool,
 json_cmd_tool,
 json_pgm_tool,
@@ -223,23 +232,35 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_KEY_QUERY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_QUERY", val);
       break;
+    case TOOL400_QUERY_STMT:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_QUERY_STMT", val);
+      break;
     case TOOL400_KEY_END_QUERY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_QUERY", val);
       break;
 
+
     case TOOL400_KEY_PARM:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PARM", val);
+      break;
+    case TOOL400_PARM_VALUE:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_PARM_VALUE", val);
       break;
     case TOOL400_KEY_END_PARM:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PARM", val);
       break;
 
+
     case TOOL400_KEY_FETCH:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_FETCH", val);
+      break;
+    case TOOL400_FETCH_REC:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_FETCH_REC", val);
       break;
     case TOOL400_KEY_END_FETCH:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_FETCH", val);
       break;
+
 
     case TOOL400_KEY_CMD:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CMD", val);
@@ -944,6 +965,17 @@ int json_sort(int * key, char ** val, int * lvl, int max) {
     }
   }
   json_sort2(key, val, lvl, max, 0, 0, 0);
+  for (i=0; i<max && key[i]; i++) {
+    if (key[i] == TOOL400_KEY_ARY_END || key[i] < TOOL400_KEY_ELEM_END) {
+      for (j=i; j>-1 && key[j]; j--) {
+        if (key[j] == TOOL400_KEY_ARY_SEP) {
+          key[j] = TOOL400_KEY_ATTR_SEP; /* sep ignored non-attr */
+        } else {
+          break;
+        }
+      }
+    }
+  }
 }
 
 /* parse json */

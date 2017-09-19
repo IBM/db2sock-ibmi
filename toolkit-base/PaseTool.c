@@ -174,6 +174,9 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
     case TOOL400_KEY_QUERY:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_QUERY", val);
       break;
+    case TOOL400_QUERY_STMT:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_QUERY_STMT", val);
+      break;
     case TOOL400_KEY_END_QUERY:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_QUERY", val);
       break;
@@ -181,12 +184,18 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
     case TOOL400_KEY_PARM:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_PARM", val);
       break;
+    case TOOL400_PARM_VALUE:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_PARM_VALUE", val);
+      break;
     case TOOL400_KEY_END_PARM:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_PARM", val);
       break;
 
     case TOOL400_KEY_FETCH:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_FETCH", val);
+      break;
+    case TOOL400_FETCH_REC:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_FETCH_REC", val);
       break;
     case TOOL400_KEY_END_FETCH:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_FETCH", val);
@@ -2953,6 +2962,7 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
   int lvl = 0;
   int max = 0;
   int go = 1;
+  int i_sep = 0;
   /* query */
   SQLCHAR * query = NULL;
   SQLSMALLINT parm_max = 0;
@@ -2963,24 +2973,8 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
   SQLSMALLINT parm_data_type = 0;
   SQLSMALLINT parm_nullable = 0;
 
-  /* query */
-  memset(parm_len, 0, sizeof(parm_len));
-  query = tk->val[tk->idx];
-
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
-  /* prepare */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
-  }
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
-  /* parms? */
-  if (tqry->hstmt) {
-    sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
-  }
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
   /* query attributes (parser order 1st) */
-  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+  for (go = 1, i = tk->idx + 1, i_sep = 0; go && sqlrc == SQL_SUCCESS; i++) {
     key = tk->key[i];
     val = tk->val[i];
     lvl = tk->lvl[i];
@@ -2995,8 +2989,79 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
     if (lvl > max) {
       continue;
     }
+    tool_dump_beg(sqlrc, "query_run2", i, lvl, key, val);
     switch (key) {
-    case TOOL400_KEY_PARM:
+    case TOOL400_QUERY_STMT:
+      query = val;
+      break;
+    case TOOL400_KEY_ARY_END:
+    case TOOL400_KEY_END_QUERY:
+      *key_ary = -1;
+      go = 0;
+      break;
+    case TOOL400_KEY_ARY_SEP:
+    case TOOL400_KEY_ATTR_SEP:
+      tk->key[i] = TOOL400_KEY_ATTR_SEP;
+      go = 0;
+      i_sep = i;
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "query_run2", i, lvl, key, val);
+    i_end = i;
+  }
+  /* no query */
+  if (!query || !i_sep) {
+    /* next */
+    if (tk->idx < i_end) {
+      tk->idx = i_end;
+    }
+    return sqlrc;
+  }
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
+  /* prepare */
+  if (sqlrc == SQL_SUCCESS) {
+    sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+
+  /* parms? */
+  memset(parm_len, 0, sizeof(parm_len));
+  if (tqry->hstmt) {
+    sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
+  }
+  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* query attributes (parser order 1st) */
+  if (i_sep) {
+    tk->idx = i_sep;
+  }
+  for (go = 1, i = tk->idx + 1, i_sep = 0, max = 0; go && sqlrc == SQL_SUCCESS; i++) {
+    key = tk->key[i];
+    val = tk->val[i];
+    lvl = tk->lvl[i];
+    /* no key */
+    if (!key) {
+      break;
+    }
+    /* check level */
+    if (!max) {
+      max = lvl;
+    }
+    switch (key) {
+    case TOOL400_PARM_VALUE:
+      max = lvl;
+      break;
+    default:
+      break;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    tool_dump_beg(sqlrc, "query_run2-1", i, lvl, key, val);
+    switch (key) {
+    case TOOL400_PARM_VALUE:
       if (parm_cnt <= parm_max) {
         sqlrc = SQLDescribeParam((SQLHSTMT)tqry->hstmt, 
                 (SQLUSMALLINT)parm_cnt + 1, /* running count */
@@ -3019,28 +3084,48 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
         parm_cnt++;
       }
       break;
-    case TOOL400_KEY_ARY_END:
     case TOOL400_KEY_END_QUERY:
       *key_ary = -1;
       go = 0;
       break;
+    case TOOL400_KEY_END_PARM:
+      go = 0;
+      i_sep = i;
+      break;
     case TOOL400_KEY_ARY_SEP:
     case TOOL400_KEY_ATTR_SEP:
       tk->key[i] = TOOL400_KEY_ATTR_SEP;
-      go = 0;
       break;
     default:
       break;
     }
+    tool_dump_end(sqlrc, "query_run2-1", i, lvl, key, val);
     i_end = i;
   }
+  /* parms error */
+  if (sqlrc == SQL_ERROR) {
+    /* next */
+    if (tk->idx < i_end) {
+      tk->idx = i_end;
+    }
+    return sqlrc;
+  }
+
   /* execute */
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
   }
   sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  /* execute error */
+  if (sqlrc == SQL_ERROR) {
+    return sqlrc;
+  }
+
   /* query children (parser order next) */
-  for (go = 1, i = tk->idx + 1; go && sqlrc == SQL_SUCCESS; i++) {
+  if (i_sep) {
+    tk->idx = i_sep;
+  }
+  for (go = 1, i = tk->idx + 1, max = 0; go && sqlrc == SQL_SUCCESS; i++) {
     key = tk->key[i];
     val = tk->val[i];
     lvl = tk->lvl[i];
@@ -3052,25 +3137,36 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
     if (!max) {
       max = lvl;
     }
-    if (lvl > max) {
-      continue;
-    }
-    tk->idx = i;
-    tool_dump_beg(sqlrc, "query_run2", i, lvl, key, val);
     switch (key) {
-    case TOOL400_KEY_FETCH:
-      sqlrc = tool_key_fetch_run(tk, tqry);
-      break;
-    case TOOL400_KEY_ARY_END:
-    case TOOL400_KEY_END_QUERY:
-      *key_ary = -1;
-    case TOOL400_KEY_ARY_SEP:
-      go = 0;
+    case TOOL400_FETCH_REC:
+      max = lvl;
       break;
     default:
       break;
     }
-    tool_dump_end(sqlrc, "query_run2", i, lvl, key, val);
+    if (lvl > max) {
+      continue;
+    }
+    tk->idx = i;
+    tool_dump_beg(sqlrc, "query_run2-2", i, lvl, key, val);
+    switch (key) {
+    case TOOL400_FETCH_REC:
+      sqlrc = tool_key_fetch_run(tk, tqry);
+      break;
+    case TOOL400_KEY_END_QUERY:
+      *key_ary = -1;
+      go = 0;
+      break;
+    case TOOL400_KEY_END_FETCH:
+      go = 0;
+      break;
+    case TOOL400_KEY_ARY_SEP:
+      tk->key[i] = TOOL400_KEY_ATTR_SEP;
+      break;
+    default:
+      break;
+    }
+    tool_dump_end(sqlrc, "query_run2-2", i, lvl, key, val);
     i_end = i;
   }
   /* next */
@@ -3079,6 +3175,7 @@ SQLRETURN tool_key_query_run2(tool_key_t * tk, tool_key_query_struct_t * tqry, i
   }
   return sqlrc;
 }
+
 SQLRETURN tool_key_query_run(tool_key_t * tk) {
   tool_key_query_struct_t * tqry = NULL;
   SQLRETURN sqlrc = SQL_SUCCESS;

@@ -81,13 +81,16 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          */
 #define TOOL400_KEY_END_CONN   9        /*"end"*/
 
-#define TOOL400_KEY_QUERY     10        /*"query":"select * from animals where breed=?"*/
+#define TOOL400_KEY_QUERY     10        /*"query": */
+#define TOOL400_QUERY_STMT  1011        /*"stmt":"select * from animals where breed=?"*/
 #define TOOL400_KEY_END_QUERY 19        /*"end"*/
 
-#define TOOL400_KEY_PARM      20        /*"parm":"fox"*/
-#define TOOL400_KEY_END_PARM  29        /*"end"*/
+#define TOOL400_KEY_PARM     20         /*"parm": */
+#define TOOL400_PARM_VALUE 1021         /*"value":"fox"*/
+#define TOOL400_KEY_END_PARM 29         /*"end"*/
 
-#define TOOL400_KEY_FETCH     30        /*"fetch":"all"*/
+#define TOOL400_KEY_FETCH     30        /*"fetch": */
+#define TOOL400_FETCH_REC   1031        /*"rec":"all"*/
 #define TOOL400_KEY_END_FETCH 39        /*"end"*/
 
 #define TOOL400_KEY_CMD       40        /*"cmd"*/
