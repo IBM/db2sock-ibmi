@@ -24,6 +24,8 @@ tool_key_match_beg_2_end - parser helper
 tool_key_match_end_2_beg - parser helper
 tool_key_match_attr_2_beg - parser helper
 tool_run  - run link list
+
+(see PaseTool.h)
 ```
 
 The parsers are dynamically loaded via SQL400Json or SQL400Xml interfaces (maybe others - tbd). 
