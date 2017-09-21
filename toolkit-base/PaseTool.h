@@ -79,7 +79,7 @@ See README.md for details.
 /*
 Order input array:
   key begin (TOOL400_KEY_CONN)
-    key attr (TOOL400_CONN_DB) <- attributes before child nodes (json sort, xml natural)
+    key attr (TOOL400_CONN_DB) <- attributes before child nodes
       key children (TOOL400_KEY_PGM)
 
 key[n]                                  val[n] - "names" parser dependent (anything)
