@@ -2,5 +2,13 @@
 
 tool_ctor
 tool_dtor
+tool_node_beg
+tool_node_sep
+tool_node_end
+tool_node_attr
+tool_key_range
+tool_key_match_beg_2_end
+tool_key_match_end_2_beg
+tool_key_match_attr_2_beg
 tool_run
 

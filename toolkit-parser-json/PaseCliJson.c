@@ -97,7 +97,7 @@ TOOL400_KEY_PGM,
 TOOL400_KEY_DCL_DS,
 TOOL400_KEY_DCL_S};
 int json_elem_tool_end [] = {
-TOOL400_KEY_END_CONN,
+TOOL400_KEY_END_PCONN,
 TOOL400_KEY_END_CONN,
 TOOL400_KEY_END_QUERY,
 TOOL400_KEY_END_PARM,
@@ -228,6 +228,9 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_KEY_END_CONN:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CONN", val);
       break;
+    case TOOL400_KEY_END_PCONN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PCONN", val);
+      break;
 
     case TOOL400_KEY_QUERY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_QUERY", val);
@@ -336,14 +339,11 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ARY_END", val);
       break;
 
-    case TOOL400_KEY_ATTR_BEG:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_BEG", val);
+    case TOOL400_KEY_ATTR_RSV_BEG:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_RSV_BEG", val);
       break;
-    case TOOL400_KEY_ATTR_SEP:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_SEP", val);
-      break;
-    case TOOL400_KEY_ATTR_END:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_END", val);
+    case TOOL400_KEY_ATTR_RSV_END:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ATTR_RSV_END", val);
       break;
     case TOOL400_KEY_SPEC_BEG:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_SPEC_BEG", val);
@@ -385,12 +385,13 @@ void json_dump_lvl_key_val(char * mykey, int lvl, int key, char * val) {
   json_dump_key(mykey, lvl, key, val);
 }
 
-void json_graph(SQLRETURN sqlrc, char *func, int *ikey, char **ival, int *ilvl) {
+void json_graph(char *func, int *ikey, char **ival, int *ilvl) {
   char mykey[256];
   int i = 0;
   int key = 0;
   char * val = NULL;
   int lvl = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
   if (dev_go(sqlrc,"sql400json")) {
     json_dump_mykey(mykey,func);
     printf_clear();
@@ -416,6 +417,29 @@ void json_graph(SQLRETURN sqlrc, char *func, int *ikey, char **ival, int *ilvl) 
   }
 }
 
+void json_dump_one(char *func, int lvl, int key, char * val) {
+  char mykey[256];
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (dev_go(sqlrc,"sql400json")) {
+    json_dump_mykey(mykey,func);
+    json_dump_lvl_key_val(mykey, lvl, key, val);
+    dev_dump();
+  }
+}
+
+void json_dump_null(char *func, char * val) {
+  char mykey[256];
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (dev_go(sqlrc,"sql400json")) {
+    json_dump_mykey(mykey,func);
+    if (val) {
+      printf_format("%s.node (%p)\n",mykey, val);
+    } else {
+      printf_format("%s.node (NULL)\n",mykey);
+    }
+    dev_dump();
+  }
+}
 
 /* ==========================
  * output
@@ -769,6 +793,7 @@ void json_xform(int max, json_key_t * bigkey) {
   int minlevel = 0;
   int maxlevel = 0;
   int arylevel = 0;
+  int arycnt = 0;
   char * ckey = NULL;
   char ** elem_key = json_elem_key;
   int * elem_val = json_elem_tool_beg;
@@ -792,7 +817,7 @@ void json_xform(int max, json_key_t * bigkey) {
           attr_key = json_elem_attr_key[j];
           attr_val = json_elem_attr_tool[j];
           /* handle attr(s) */
-          for (k = i+1, minlevel = lvl[i], level = lvl[i], maxlevel = 0, arylevel = 0; k<max; k++) {
+          for (k = i+1, minlevel = lvl[i], level = lvl[i], maxlevel = 0, arylevel = 0, arycnt = 0; k<max; k++) {
             /* see val (debug) */
             akey = val[k];
             level = lvl[k];
@@ -804,6 +829,7 @@ void json_xform(int max, json_key_t * bigkey) {
               case JSON400_ARY_BEG:
                 arylevel = level;
                 key[k] = TOOL400_KEY_ARY_BEG;
+                arycnt = 0;
                 continue;
                 break;
               case JSON400_OBJ_BEG:
@@ -818,9 +844,10 @@ void json_xform(int max, json_key_t * bigkey) {
             if (level > maxlevel) {
               continue;
             }
-            /* end of element in array */
+            /* end of element in array (normalize toolkit nodes) */
             if (level == arylevel && key[k] == JSON400_COMMA) {
               key[k] = TOOL400_KEY_ARY_SEP;
+              arycnt++;
             }
             /* end of array */
             if (level == arylevel && key[k] == JSON400_ARY_END) {
@@ -847,20 +874,59 @@ void json_xform(int max, json_key_t * bigkey) {
 }
 
 /* parse compress */
-void json_xzip(int * key, char ** val, int * lvl, int max) {
+void json_xzip(tool_struct_t *tool, int max, json_key_t * bigkey) {
   int i = 0;
   int j = 0;
   int k = 0;
+  int * key = bigkey->key;
+  char ** val = bigkey->val;
+  int * lvl = bigkey->lvl;
+  int key1 = 0;
+  char * val1 = NULL;
+  int lvl1 = 0;
+  tool_node_t * node = NULL;
+  int range = 0;
   /* condense array */
   for (i=0, k=0; i<max; i++) {
     if (key[i] < TOOL400_KEY_HIGH) {
-      key[k++] = key[i];
+      key1 = key[k++] = key[i];
       if (i+2 < max && key[i+1] == JSON400_COLON && key[i+2] > JSON400_AT_VAL && key[i+2] < JSON400_AT_END) {
-        val[k-1] = val[i+2];
+        val1 = val[k-1] = val[i+2];
       } else {
-        val[k-1] = val[i];
+        val1 = val[k-1] = val[i];
       }
-      lvl[k-1] = lvl[i];
+      lvl1 = lvl[k-1] = lvl[i];
+      json_dump_null("json_xzip(1)", (char *) node);
+      json_dump_one("json_xzip(1)", lvl1, key1, val1);
+      range = tool_key_range(key1);
+      switch (range) {
+      case TOOL400_RANGE_ELEM_RSV_BEG:
+      case TOOL400_RANGE_ELEM_USR_BEG:
+        json_dump_one("json_xzip(2)", lvl1, key1, val1);
+        node = tool_node_beg(tool, key1, lvl1);
+        break;
+      case TOOL400_RANGE_ELEM_RSV_END:
+      case TOOL400_RANGE_ELEM_USR_END:
+        node = tool_node_end(tool, node, key1, lvl1);
+        break;
+      case TOOL400_RANGE_ATTR_RSV:
+      case TOOL400_RANGE_ATTR_USR:
+        node = tool_node_attr(tool, node, key1, val1, lvl1);
+        break;
+      case TOOL400_RANGE_KEY_SPEC:
+        switch(key1) {
+        case TOOL400_KEY_ARY_SEP:
+          json_dump_one("json_xzip(3)", lvl1, key1, val1);
+          node = tool_node_sep(tool, node, key1, lvl1);
+          break;
+        default:
+          break;
+        }
+        break;
+      case TOOL400_RANGE_HIGH:
+      default:
+        break;
+      }
     }
   }
   for (i=k; i<max; i++) {
@@ -870,121 +936,6 @@ void json_xzip(int * key, char ** val, int * lvl, int max) {
   }
 }
 
-/* parse sort */
-int json_sort2(int * key, char ** val, int * lvl, int max, int idx, int imove, int level) {
-  int i = 0;
-  int j = 0;
-  int k = 0;
-  int tmpKey = 0;
-  char * tmpVal = 0;
-  int tmpLvl = 0;
-  int noMove = 0;
-  for (i=idx; i<max && key[i]; i++) {
-    if (key[i] == TOOL400_KEY_ARY_BEG) {
-      if (i-1 > 0 && key[i-1] == TOOL400_KEY_DCL_S) {
-        continue;
-      }
-      level = lvl[i];
-      imove = i + 1;
-      json_sort2(key, val, lvl, max, i + 1, imove, level);
-      level = 0;
-      imove = 0;
-    }
-    if (lvl[i] == level && key[i] == TOOL400_KEY_ARY_SEP) {
-      for (j=i+1, noMove = 0; !noMove && j<max && key[j]; j++) {
-        if (lvl[j] == level && (key[j] == TOOL400_KEY_ARY_SEP || key[j] == TOOL400_KEY_ARY_END)) {
-          break;
-        }
-        if (lvl[j] == level + 1 && key[j] > TOOL400_KEY_ATTR_BEG && key[j] < TOOL400_KEY_ATTR_SEP) {
-          noMove = 0;
-        } else {
-          noMove = 1;
-        }
-      }
-      /* move attr to position */
-      if (!noMove) {
-        for (j=i+1; j<max && key[j]; j++) {
-          if (lvl[j] == level && (key[j] == TOOL400_KEY_ARY_SEP || key[j] == TOOL400_KEY_ARY_END)) {
-            break;
-          }
-          if (lvl[j] == level + 1 && key[j] > TOOL400_KEY_ATTR_BEG && key[j] < TOOL400_KEY_ATTR_SEP) {
-            tmpKey = key[j];
-            tmpVal = val[j];
-            tmpLvl = lvl[j];
-            for (k=j; k > imove && key[k]; k--) {
-              key[k] = key[k-1];
-              val[k] = val[k-1];
-              lvl[k] = lvl[k-1];
-            }
-            key[imove] = tmpKey;
-            val[imove] = tmpVal;
-            lvl[imove] = tmpLvl;
-            imove++;
-          }
-        }
-      }
-    }
-    if (lvl[i] == level && key[i] == TOOL400_KEY_ARY_END) {
-      return;
-    }
-  }
-}
-
-int json_sort(int * key, char ** val, int * lvl, int max) {
-  int i = 0;
-  int j = 0;
-  int level = 0;
-  int imove = 0;
-  int tmpKey = 0;
-  char * tmpVal = 0;
-  int tmpLvl = 0;
-  for (i=0; i<max && key[i]; i++) {
-    /* key */
-    if (key[i] < TOOL400_KEY_ATTR_BEG) {
-      level = lvl[i];
-      imove = i + 1;
-    }
-    if (key[i] == TOOL400_KEY_ARY_BEG) {
-      level = lvl[i];
-      imove = i + 1;
-    }
-    if (key[i] == TOOL400_KEY_ARY_SEP) {
-      level = lvl[i];
-      imove = i + 1;
-    }
-    if (lvl[i] == level + 1 && key[i] > TOOL400_KEY_ATTR_BEG && key[i] < TOOL400_KEY_ATTR_SEP) {
-      if (imove == i) {
-        imove++;
-        continue;
-      }
-      /* move attr to position */
-      tmpKey = key[i];
-      tmpVal = val[i];
-      tmpLvl = lvl[i];
-      for (j=i; j > imove && key[j]; j--) {
-        key[j] = key[j-1];
-        val[j] = val[j-1];
-        lvl[j] = lvl[j-1];
-      }
-      key[imove] = tmpKey;
-      val[imove] = tmpVal;
-      lvl[imove] = tmpLvl;
-      imove++;
-    }
-  }
-  json_sort2(key, val, lvl, max, 0, 0, 0);
-  for (i=0; i<max && key[i]; i++) {
-    if (key[i] == TOOL400_KEY_ARY_END || key[i] < TOOL400_KEY_ELEM_END) {
-      for (j=i; j>-1 && key[j]; j--) {
-        if (key[j] == TOOL400_KEY_ARY_SEP) {
-          key[j] = TOOL400_KEY_ATTR_SEP; /* sep ignored */
-        } else {
-          break;
-        }
-      }
-    }
-  }
-}
 
 /* parse json */
 int json_parse(char * json, json_key_t * bigkey) {
@@ -1156,21 +1107,7 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   copyin = json_new(inlen + 1);
   strcpy(copyin, injson);
 
-  /* pass 1 - parse raw json */
-  bigkey = json_ctor_key();
-  max = json_parse(copyin, bigkey);
-  json_graph(sqlrc, "json_parse", bigkey->key, bigkey->val, bigkey->lvl);
-  /* pass 2 - xform toolkit ordinals */
-  json_xform(max, bigkey);
-  json_graph(sqlrc, "json_xform", bigkey->key, bigkey->val, bigkey->lvl);
-  /* pass 3 - compress only toolkit ordinals */
-  json_xzip(bigkey->key, bigkey->val, bigkey->lvl, max);
-  json_graph(sqlrc, "json_zip", bigkey->key, bigkey->val, bigkey->lvl);
-  /* pass 4,5 - sort attribute 1st toolkit ordinals (requirement tool_run) */
-  json_sort(bigkey->key, bigkey->val, bigkey->lvl, max);
-  json_graph(sqlrc, "json_sort", bigkey->key, bigkey->val, bigkey->lvl);
-
-  /* run */
+  /* ctor toolkit callbacks */
   tool = tool_ctor(
     &json_output_script_beg,
     &json_output_script_end,
@@ -1196,7 +1133,20 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     &json_output_joblog_rec,
     &json_output_joblog_end
   );
-  sqlrc = tool_run(hdbc, outjson, outlen, tool, bigkey->key, bigkey->val, bigkey->lvl);
+
+  /* pass 1 - parse raw json */
+  bigkey = json_ctor_key();
+  max = json_parse(copyin, bigkey);
+  json_graph("json_parse", bigkey->key, bigkey->val, bigkey->lvl);
+  /* pass 2 - xform toolkit ordinals */
+  json_xform(max, bigkey);
+  json_graph("json_xform", bigkey->key, bigkey->val, bigkey->lvl);
+  /* pass 3 - compress only toolkit ordinals */
+  json_xzip(tool, max, bigkey);
+  json_graph("json_zip", bigkey->key, bigkey->val, bigkey->lvl);
+
+  /* run */
+  sqlrc = tool_run(hdbc, outjson, outlen, tool);
   tool_dtor(tool);
 
   /* free copyin */
