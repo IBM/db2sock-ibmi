@@ -134,9 +134,14 @@ Note:
 ===
 install yips download pre-compile
 ===
+call qp2term
 > cp libdb400.a /QOpenSys/usr/lib/.
 > cp libtkit400.a /QOpenSys/usr/lib/. (optional toolkit)
 > cp libjson400.a /QOpenSys/usr/lib/. (optional json parser toolkit)
+> cp db2jsonfcgi /QOpenSys/usr/lib/. (optional toolkit fastcgi 32 bit)
+> cp db2jsonfcgi_64 /QOpenSys/usr/lib/. (optional toolkit fastcgi 64 bit)
+qcmd (proc for toolkit + RPG tests)
+RSTLIB SAVLIB(DB2JSON) DEV(*SAVF) SAVF(QGPL/DB2JSON)
 ```
 
 #Run ILE CGI (optional)
