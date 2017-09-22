@@ -76,15 +76,13 @@ See README.md for details.
 
 #define TOOL400_KEY_HIGH         9000   /* everything above parser only range (remove before call) */
 
-/*
-Order input array:
-  key begin (TOOL400_KEY_CONN)
-    key attr (TOOL400_CONN_DB) <- attributes before child nodes
-      key children (TOOL400_KEY_PGM)
 
+/*
 key[n]                                  val[n] - "names" parser dependent (anything)
 --------------------------------        --------------------------------
 */
+#define TOOL400_ATTR_MAX          9     /* max 9 attributes per element (TOOL400_KEY_PGM, etc.) */
+
 #define TOOL400_KEY_QUERY        10     /*"query": */
 #define TOOL400_QUERY_STMT     1011     /*"stmt":"select * from animals where breed=?"*/
 #define TOOL400_KEY_END_QUERY   410     /*"end"*/
@@ -219,7 +217,19 @@ typedef struct ile_pgm_call_struct {
 #ifdef __IBMC__
 /* nothing ILE compiler */
 #else
-#define TOOL400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
+
+typedef struct tool_node {
+  int ord;
+  int fin;
+  int key;
+  char * val;
+  int akey[TOOL400_ATTR_MAX];
+  char * aval[TOOL400_ATTR_MAX];
+  void * ctor;
+  void * prev;
+  void * next;
+} tool_node_t;
+
 typedef void (*output_script_beg_t)(char *);
 typedef void (*output_script_end_t)(char *);
 typedef void (*output_query_beg_t)(char *,char *);
@@ -243,19 +253,6 @@ typedef void (*output_cmd_end_t)(char *);
 typedef void (*output_joblog_beg_t)(char *);
 typedef void (*output_joblog_rec_t)(char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 typedef void (*output_joblog_end_t)(char *);
-
-typedef struct tool_node {
-  int ord;
-  int fin;
-  int key;
-  char * val;
-  int acnt;
-  int * akey;
-  char ** aval;
-  void * ctor;
-  void * prev;
-  void * next;
-} tool_node_t;
 
 typedef struct tool_struct {
   output_script_beg_t output_script_beg;
@@ -281,7 +278,6 @@ typedef struct tool_struct {
   output_joblog_beg_t output_joblog_beg;
   output_joblog_rec_t output_joblog_rec;
   output_joblog_end_t output_joblog_end;
-  int ord;
   tool_node_t * first;
   tool_node_t * curr;
   tool_node_t * last;

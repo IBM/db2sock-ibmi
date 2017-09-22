@@ -24,6 +24,8 @@
 
 #define JSON400_OUT_MAX_STDOUT 1000000
 
+#define JSON400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
+
 #define JSON400_ADJUST_NDA 0
 #define JSON400_ADJUST_ADD_COMMA 1
 #define JSON400_ADJUST_ADD_SPACE 2
@@ -583,7 +585,7 @@ int json_output_sql_errors(SQLHANDLE handle, SQLSMALLINT hType, int rc, char *ou
 {
   SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
   SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
-  SQLCHAR errMsg[TOOL400_MAX_ERR_MSG_LEN];
+  SQLCHAR errMsg[JSON400_MAX_ERR_MSG_LEN];
   SQLINTEGER sqlcode = 0;
   SQLSMALLINT length = 0;
   SQLCHAR *p = NULL;
@@ -591,7 +593,7 @@ int json_output_sql_errors(SQLHANDLE handle, SQLSMALLINT hType, int rc, char *ou
   if (rc == SQL_ERROR) {
     memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
     memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
-    memset(errMsg, '\0', TOOL400_MAX_ERR_MSG_LEN);
+    memset(errMsg, '\0', JSON400_MAX_ERR_MSG_LEN);
     if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
       if (msg[length-1] == '\n') {
         p = &msg[length-1];
