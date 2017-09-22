@@ -219,7 +219,7 @@ tool_node_t * tool_node_elem_push(tool_struct_t * tool, int key, char * val, int
   tool_node_t * node = tool_node_ctor(key, ord, val, size);
   if (!tool->first) {
     /* must have a connection node */
-    if (node->key == TOOL400_KEY_CONN || node->key == TOOL400_KEY_PCONN) {
+    if (node->key == TOOL400_KEY_CONN) {
       tool->first = node;
       tool->curr = node;
       tool->last = node;
@@ -280,12 +280,6 @@ tool_node_t * tool_node_add(tool_struct_t * tool, int key, char *val, int ord) {
     size = sizeof(tool_key_conn_struct_t);
     break;
   case TOOL400_KEY_END_CONN:
-    break;
-
-  case TOOL400_KEY_PCONN:
-    size = sizeof(tool_key_conn_struct_t);
-    break;
-  case TOOL400_KEY_END_PCONN:
     break;
 
   case TOOL400_KEY_QUERY:
@@ -524,9 +518,6 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
     case TOOL400_KEY_CONN:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_CONN", val);
       break;
-    case TOOL400_KEY_PCONN:
-      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_PCONN", val);
-      break;
     case TOOL400_CONN_DB:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_CONN_DB", val);
       break;
@@ -550,9 +541,6 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
       break;
     case TOOL400_KEY_END_CONN:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_CONN", val);
-      break;
-    case TOOL400_KEY_END_PCONN:
-      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_PCONN", val);
       break;
 
     case TOOL400_KEY_QUERY:
@@ -3413,10 +3401,6 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     case TOOL400_KEY_CONN:
       tconn->conn_type = 1;
       break;
-    case TOOL400_KEY_PCONN:
-      tconn->conn_type = 2;
-      tconn->presistent = 1;
-      break;
     default:
       tconn->conn_type = 3;
       break;
@@ -3457,6 +3441,8 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
         break;
       case TOOL400_CONN_QUAL:
         tconn->conn_qual = val;
+        tconn->conn_type = 2;
+        tconn->presistent = 1;
         break;
       case TOOL400_CONN_ISOLATION:
         if (strcmp(val,"nc")) {
@@ -3516,7 +3502,6 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
       sqlrc = tool_key_pgm_run(tk, &node);
       break;
     case TOOL400_KEY_END_CONN:
-    case TOOL400_KEY_END_PCONN:
       go = 0;
       break;
     default:
@@ -3571,7 +3556,6 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool)
     tool_dump_beg(sqlrc, "tool_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_CONN:
-    case TOOL400_KEY_PCONN:
       sqlrc = tool_key_conn_run(tk, &node);
       break;
     default:

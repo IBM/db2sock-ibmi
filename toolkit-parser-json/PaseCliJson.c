@@ -57,7 +57,7 @@ typedef struct json_key_struct {
  * json <map> tool keys
  * ==========================
  */
-/* {"(p)connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"*libl","curlib":"curlib"}} */
+/* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"*libl","curlib":"curlib"}} */
 char * json_conn_attr [] = {"db","uid","pwd","qual","iso","libl","curlib", NULL};
 int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL400_CONN_QUAL,TOOL400_CONN_LIBL,TOOL400_CONN_ISOLATION,TOOL400_CONN_CURLIB};
 /* {"pgm":{"name":"MYPGM","lib":"MYLIB","func":"MyFunc"}} */
@@ -85,9 +85,8 @@ char * json_cmd_attr [] = {"exec",NULL};
 int json_cmd_tool [] = {TOOL400_CMD_EXEC};
 
 /* primary elements */
-char * json_elem_key [] = {"pconnect","connect","query","parm","fetch","cmd","pgm","ds", "s", NULL};
+char * json_elem_key [] = {"connect","query","parm","fetch","cmd","pgm","ds", "s", NULL};
 int json_elem_tool_beg [] = {
-TOOL400_KEY_PCONN,
 TOOL400_KEY_CONN,
 TOOL400_KEY_QUERY,
 TOOL400_KEY_PARM,
@@ -97,7 +96,6 @@ TOOL400_KEY_PGM,
 TOOL400_KEY_DCL_DS,
 TOOL400_KEY_DCL_S};
 int json_elem_tool_end [] = {
-TOOL400_KEY_END_PCONN,
 TOOL400_KEY_END_CONN,
 TOOL400_KEY_END_QUERY,
 TOOL400_KEY_END_PARM,
@@ -108,7 +106,6 @@ TOOL400_KEY_END_DS,
 TOOL400_KEY_END_S};
 char ** json_elem_attr_key[] = {
 json_conn_attr,
-json_conn_attr,
 json_query_attr,
 json_parm_attr,
 json_fetch_attr,
@@ -118,7 +115,6 @@ json_ds_attr,
 json_s_attr
 };
 int * json_elem_attr_tool [] = {
-json_conn_tool,
 json_conn_tool,
 json_query_tool,
 json_parm_tool,
@@ -201,9 +197,6 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_KEY_CONN:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CONN", val);
       break;
-    case TOOL400_KEY_PCONN:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_PCONN", val);
-      break;
     case TOOL400_CONN_DB:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CONN_DB", val);
       break;
@@ -227,9 +220,6 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
       break;
     case TOOL400_KEY_END_CONN:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CONN", val);
-      break;
-    case TOOL400_KEY_END_PCONN:
-      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_PCONN", val);
       break;
 
     case TOOL400_KEY_QUERY:
@@ -810,7 +800,7 @@ void json_xform(int max, json_key_t * bigkey) {
     ckey = val[i];
     /* "key":... */
     if (key[i] == JSON400_KEY) {
-      /* check primary key like "pconnect", "pgm", ... */
+      /* check primary key like "connect", "pgm", ... */
       for (j=0; ckey && *ckey && elem_key[j]; j++) {
         if (!strcmp(elem_key[j],ckey)) {
           key[i] = elem_val[j];
@@ -867,14 +857,14 @@ void json_xform(int max, json_key_t * bigkey) {
             }
           } /* attr loop (k) */
           break; /* break loop (j) */
-        } /* found valid primary key "pconnect", "pgm", ... */
+        } /* found valid primary key "connect", "pgm", ... */
       } /* loop primary key (j) */
     } /* found "key": ... */
   } /* loop i (raw parse) */
 }
 
 /* parse compress */
-void json_xzip(tool_struct_t *tool, int max, json_key_t * bigkey) {
+void json_tkit(tool_struct_t *tool, int max, json_key_t * bigkey) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -896,13 +886,13 @@ void json_xzip(tool_struct_t *tool, int max, json_key_t * bigkey) {
         val1 = val[k-1] = val[i];
       }
       lvl1 = lvl[k-1] = lvl[i];
-      json_dump_null("json_xzip(1)", (char *) node);
-      json_dump_one("json_xzip(1)", lvl1, key1, val1);
+      json_dump_null("json_tkit(1)", (char *) node);
+      json_dump_one("json_tkit(1)", lvl1, key1, val1);
       range = tool_key_range(key1);
       switch (range) {
       case TOOL400_RANGE_ELEM_RSV_BEG:
       case TOOL400_RANGE_ELEM_USR_BEG:
-        json_dump_one("json_xzip(2)", lvl1, key1, val1);
+        json_dump_one("json_tkit(2)", lvl1, key1, val1);
         node = tool_node_beg(tool, key1, lvl1);
         break;
       case TOOL400_RANGE_ELEM_RSV_END:
@@ -916,7 +906,7 @@ void json_xzip(tool_struct_t *tool, int max, json_key_t * bigkey) {
       case TOOL400_RANGE_KEY_SPEC:
         switch(key1) {
         case TOOL400_KEY_ARY_SEP:
-          json_dump_one("json_xzip(3)", lvl1, key1, val1);
+          json_dump_one("json_tkit(3)", lvl1, key1, val1);
           node = tool_node_sep(tool, node, key1, lvl1);
           break;
         default:
@@ -1141,9 +1131,9 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   /* pass 2 - xform toolkit ordinals */
   json_xform(max, bigkey);
   json_graph("json_xform", bigkey->key, bigkey->val, bigkey->lvl);
-  /* pass 3 - compress only toolkit ordinals */
-  json_xzip(tool, max, bigkey);
-  json_graph("json_zip", bigkey->key, bigkey->val, bigkey->lvl);
+  /* pass 3 - build toolkit nodes */
+  json_tkit(tool, max, bigkey);
+  json_graph("json_tkit", bigkey->key, bigkey->val, bigkey->lvl);
 
   /* run */
   sqlrc = tool_run(hdbc, outjson, outlen, tool);

@@ -85,24 +85,6 @@ Order input array:
 key[n]                                  val[n] - "names" parser dependent (anything)
 --------------------------------        --------------------------------
 */
-#define TOOL400_KEY_CONN          1     /*"connect":*/
-#define TOOL400_KEY_PCONN         2     /*"pconnect":*/
-#define TOOL400_CONN_DB        1001     /*"database":"*LOCAL"*/
-#define TOOL400_CONN_UID       1002     /*"name":"MYUSER"*/
-#define TOOL400_CONN_PWD       1003     /*"password":"MYPWD"*/
-#define TOOL400_CONN_LIBL      1004     /*"libl":"MYLIB YOURLIB"*/
-#define TOOL400_CONN_CURLIB    1005     /*"curlib":"MYLIB"*/
-#define TOOL400_CONN_QUAL      1006     /*"qual":"myprivate1"*/
-#define TOOL400_CONN_ISOLATION 1007     /*"isolation":
-                                         *  "nc" - SQL_TXN_NO_COMMIT (No Commit)
-                                         *  "uc" - SQL_TXN_READ_UNCOMMITTED (Uncommitted Read)
-                                         *  "cs" - SQL_TXN_READ_COMMITTED (Cursor Stability)
-                                         *  "rr" - SQL_TXN_REPEATABLE_READ (Repeatable Read )
-                                         *  "rs" - SQL_TXN_SERIALIZABLE (Read Stability)
-                                         */
-#define TOOL400_KEY_END_CONN    401     /*"end"*/
-#define TOOL400_KEY_END_PCONN   402     /*"end"*/
-
 #define TOOL400_KEY_QUERY        10     /*"query": */
 #define TOOL400_QUERY_STMT     1011     /*"stmt":"select * from animals where breed=?"*/
 #define TOOL400_KEY_END_QUERY   410     /*"end"*/
@@ -159,6 +141,22 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * "12s2"  zoned(12:2)     (no c equiv)
                                          * "8h"    hole            hole
                                          */
+#define TOOL400_KEY_CONN         90     /*"connect":*/
+#define TOOL400_CONN_DB        1091     /*"database":"*LOCAL"*/
+#define TOOL400_CONN_UID       1092     /*"name":"MYUSER"*/
+#define TOOL400_CONN_PWD       1093     /*"password":"MYPWD"*/
+#define TOOL400_CONN_LIBL      1094     /*"libl":"MYLIB YOURLIB"*/
+#define TOOL400_CONN_CURLIB    1095     /*"curlib":"MYLIB"*/
+#define TOOL400_CONN_QUAL      1096     /*"qual":"myper1" (persistent connection) */
+#define TOOL400_CONN_ISOLATION 1097     /*"isolation":
+                                         *  "nc" - SQL_TXN_NO_COMMIT (No Commit)
+                                         *  "uc" - SQL_TXN_READ_UNCOMMITTED (Uncommitted Read)
+                                         *  "cs" - SQL_TXN_READ_COMMITTED (Cursor Stability)
+                                         *  "rr" - SQL_TXN_REPEATABLE_READ (Repeatable Read )
+                                         *  "rs" - SQL_TXN_SERIALIZABLE (Read Stability)
+                                         */
+#define TOOL400_KEY_END_CONN    490     /*"end"*/
+
 /* other defines */
 #define TOOL400_EXPAND_CHAR 3
 #define TOOL400_EXPAND_BINARY 2
