@@ -19,6 +19,7 @@ An environment variable allows any override any parser of your own (json, xml, c
 > export DB2XMLPARSER64 libxml400.a(shr_64.o)
 ```
 
-Formal interface to tool_run is simple key, value pairs.
-See toolkit-base/README.md for details.
+For json examples see source/tests_c (*.json).
+
+See toolkit-base/README.md for post-parser toolkit interface details.
 
