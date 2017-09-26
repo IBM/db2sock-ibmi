@@ -12,10 +12,10 @@
 #include <as400_protos.h>
 #include "PaseCliLic.h"
 
-#define DB2JSONPARSER_ENV_VAR_32 "DB2JSONPARSER"
-#define DB2JSONPARSER32 "libjson400.a(shr_64.o)"
-#define DB2JSONPARSER_ENV_VAR_64 "DB2JSONPARSER"
-#define DB2JSONPARSER64 "libjson400.a(shr.o)"
+#define DB2JSONPARSER_ENV_VAR_32 "DB2JSONPARSER32"
+#define DB2JSONPARSER32 "libjson400.a(shr.o)"
+#define DB2JSONPARSER_ENV_VAR_64 "DB2JSONPARSER64"
+#define DB2JSONPARSER64 "libjson400.a(shr_64.o)"
 
 #ifdef __64BIT__
 #define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
