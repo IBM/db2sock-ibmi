@@ -171,10 +171,15 @@ tool_struct_t * tool_ctor(
   tool->output_joblog_end = output_joblog_end;
   tool->first = NULL;
   tool->curr = NULL;
+  tool->last = NULL;
   return tool;
 }
 
 void tool_dtor(tool_struct_t *tool){
+  tool_node_t * node = NULL;
+  for (node = tool->last; node; node = node->prev) {
+    tool_free((char *)node);
+  }
   tool_free((char *)tool);
 }
 
