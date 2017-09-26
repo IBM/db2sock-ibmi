@@ -159,7 +159,17 @@ void custom_iconv_close(int myccsid, int utfccsid) {
  * multiple threads starting.
  */
 void * init_cli_dlsym() {
-  char *dlservice = PASECLIDRIVER;
+#ifdef __64BIT__
+  char *dlservice = getenv(PASECLIDRIVER64_ENV_VAR);
+  if (dlservice  == NULL) {
+    dlservice = PASECLIDRIVER64;
+  }
+#else
+  char *dlservice = getenv(PASECLIDRIVER32_ENV_VAR);
+  if (dlservice  == NULL) {
+    dlservice = PASECLIDRIVER32;
+  }
+#endif
   if (dlhandle  == NULL) {
     init_lock();
     if (dlhandle  == NULL) {
@@ -182,12 +192,12 @@ void * init_cli_dlsym() {
  */
 void * init_json_dlsym() {
 #ifdef __64BIT__
-  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR_64);
+  char *dlservice = getenv(DB2JSONPARSER64_ENV_VAR);
   if (dlservice  == NULL) {
     dlservice = DB2JSONPARSER64;
   }
 #else
-  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR_32);
+  char *dlservice = getenv(DB2JSONPARSER32_ENV_VAR);
   if (dlservice  == NULL) {
     dlservice = DB2JSONPARSER32;
   }

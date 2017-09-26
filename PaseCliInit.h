@@ -12,19 +12,22 @@
 #include <as400_protos.h>
 #include "PaseCliLic.h"
 
-#define DB2JSONPARSER_ENV_VAR_32 "DB2JSONPARSER32"
+/* customer replace json parser (toolkit-parser-json) */
+#define DB2JSONPARSER32_ENV_VAR "DB2JSONPARSER32"
 #define DB2JSONPARSER32 "libjson400.a(shr.o)"
-#define DB2JSONPARSER_ENV_VAR_64 "DB2JSONPARSER64"
+#define DB2JSONPARSER64_ENV_VAR "DB2JSONPARSER64"
 #define DB2JSONPARSER64 "libjson400.a(shr_64.o)"
 
-#ifdef __64BIT__
-#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
-#else
-#define PASECLIDRIVER "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
-#endif
+/* original PASE driver */
+#define PASECLIDRIVER32_ENV_VAR "PASECLIDRIVER32"
+#define PASECLIDRIVER32 "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
+#define PASECLIDRIVER64_ENV_VAR "PASECLIDRIVER64"
+#define PASECLIDRIVER64 "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
 
+/* IBM i DB2 CLI interface (ILE) */
 #define DB2CLISRVPGM "QSYS/QSQCLI"
 
+/* IBM i DB2 max handles per-process (32k actually) */
 #define PASECLIMAXRESOURCE 33000
 typedef struct PaseCliResource {
   int hstmt;                       /* index hstmt or hdbc   */
