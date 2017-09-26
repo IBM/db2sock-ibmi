@@ -15,9 +15,7 @@
 
 /*
  * == WARNING ==
- * The json format is changing. The 'temp format'
- * below was only used to checkout some basic
- * toolkit callback functions (db2sock/toolkit-base).
+ * The json format is changing.
  * When project warnings are removed, you may
  * rely on json format.
  */
@@ -66,7 +64,7 @@ int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC};
 /* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return"}} */
 char * json_ds_attr [] = {"name","dim","by",NULL};
 int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY};
-/* {"data":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|value|const|return","value":"MYVALUE"}} */
+/* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|value|const|return","value":"MYVALUE"}} */
 char * json_s_attr [] = {"name","dim","type","value","by",NULL};
 int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY};
 /* {"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
