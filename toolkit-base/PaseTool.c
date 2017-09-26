@@ -830,15 +830,34 @@ void tool_output_record_no_data_found(tool_struct_t *tool, char *out_caller) {
 void tool_output_record_row_beg(tool_struct_t *tool, char *out_caller) {
   tool->output_record_row_beg(tool->curr, out_caller);
 }
-void tool_output_record_name_value(tool_struct_t *tool, char *name, char *value, int type, int fStrLen, char *out_caller) {
-  tool->output_record_name_value(tool->curr, name, value, type, fStrLen, out_caller);
+void tool_output_record_name_value(tool_struct_t *tool, char *out_caller, char *name, char *value, int type, int fStrLen) {
+  if (fStrLen == SQL_NULL_DATA) {
+    fStrLen = TOOL400_DATA_IS_NULL;
+  }
+  switch (type) {
+  case SQL_BIGINT:
+  case SQL_DECFLOAT:
+  case SQL_SMALLINT:
+  case SQL_INTEGER:
+  case SQL_REAL:
+  case SQL_FLOAT:
+  case SQL_DOUBLE:
+  case SQL_DECIMAL:
+  case SQL_NUMERIC:
+    type = TOOL400_DATA_TYPE_NBR;
+    break;
+  default:
+    type = TOOL400_DATA_TYPE_CHAR;
+    break;
+  }
+  tool->output_record_name_value(tool->curr, out_caller, name, value, type, fStrLen);
 }
 void tool_output_record_row_end(tool_struct_t *tool, char *out_caller) {
   tool->output_record_row_end(tool->curr, out_caller);
 }
-int tool_output_sql_errors(tool_struct_t *tool, SQLHANDLE handle, SQLSMALLINT hType, int rc, char *out_caller)
+void tool_output_sql_errors(tool_struct_t *tool, char *out_caller, int rc, int sqlCode, char * sqlState, char *sqlMsg)
 {
-  return tool->output_sql_errors(tool->curr, handle, hType, rc, out_caller);
+  tool->output_sql_errors(tool->curr, out_caller, rc, sqlCode, sqlState, sqlMsg);
 }
 void tool_output_pgm_beg(tool_struct_t *tool, char *out_caller, char * name, char * lib, char * func) {
   tool->output_pgm_beg(tool->curr, out_caller, name, lib, func);
@@ -2524,6 +2543,29 @@ SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t 
  * toolkit run parsed key, val, lvl
  */
 
+int tool_sql_errors(tool_key_t * tk, SQLHANDLE handle, SQLSMALLINT hType, int rc)
+{
+  SQLSMALLINT length = 0;
+  SQLCHAR *p = NULL;
+  SQLSMALLINT recno = 1;
+  tool_struct_t *tool = tk->tool;
+  tool->sqlCode = 0;
+  if (rc == SQL_ERROR) {
+    memset(tool->sqlMsg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
+    memset(tool->sqlState, '\0', SQL_SQLSTATE_SIZE + 1);
+    if ( SQLGetDiagRec(hType, handle, recno, tool->sqlState, &tool->sqlCode, tool->sqlMsg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
+      if (tool->sqlMsg[length-1] == '\n') {
+        p = &tool->sqlMsg[length-1];
+        *p = '\0';
+      }
+      tool_output_sql_errors(tk->tool, tk->outarea, rc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
+      return SQL_ERROR;
+    }
+  }
+  return SQL_SUCCESS;
+}
+
+
 /* program */
 SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -2761,7 +2803,7 @@ SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tpgm->hstmt);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* shift to pase alignment
    * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
    *                                           .
@@ -2835,7 +2877,7 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* call program (step 1-input, step 2-output)*/
   for (step=1; step < 4 && sqlrc == SQL_SUCCESS; step++) {
     node = pgm_out_idx;
@@ -2925,12 +2967,12 @@ SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* execute */
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* output */
   tool_output_cmd_end(tk->tool, tk->outarea);
   /* close */
@@ -2965,7 +3007,7 @@ SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
   memset(fetch_col_len, 0, sizeof(fetch_col_len));
   sqlrc = SQLNumResultCols((SQLHSTMT)tqry->hstmt, 
                            &fetch_cols);
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* no records */
   if (fetch_cols < 1) {
     tool_output_record_array_beg(tk->tool, tk->outarea);
@@ -3064,7 +3106,7 @@ SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
     fetch_recs += 1;
     for (i = 0 ; i < fetch_cols; i++) {
       if (fetch_col_value[i]) {
-        tool_output_record_name_value(tk->tool, fetch_col_name[i], fetch_col_value[i], fetch_col_sql_type[i], fetch_col_len[i], tk->outarea);
+        tool_output_record_name_value(tk->tool, tk->outarea, fetch_col_name[i], fetch_col_value[i], fetch_col_sql_type[i], fetch_col_len[i]);
       }
     }
     tool_output_record_row_end(tk->tool, tk->outarea);
@@ -3139,14 +3181,14 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
 
   /* parms? */
   memset(parm_len, 0, sizeof(parm_len));
   if (tqry->hstmt) {
     sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* query parms */
   if (!node_next) {
     node_next = node->next;
@@ -3226,7 +3268,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
   }
-  sqlrc = tool_output_sql_errors(tk->tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc, tk->outarea);
+  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* execute error */
   if (sqlrc == SQL_ERROR) {
     /* output */
@@ -3487,7 +3529,7 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     } else {
       sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
     }
-    sqlrc = tool_output_sql_errors(tk->tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc, tk->outarea);
+    sqlrc = tool_sql_errors(tk, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
   } /* !tconn->hdbc */
   /* connect children (parser order next) */
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {

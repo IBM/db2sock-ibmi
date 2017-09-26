@@ -211,6 +211,7 @@ typedef struct ile_pgm_call_struct {
 #define TOOL400_JOBLOG_MAX_SIZE 200
 #define TOOL400_JOBLOG_MAX_REC 4
 
+
 /*
  * Callbacks provided by parser (any json, xml, csv, etc. parser)
  */
@@ -237,10 +238,13 @@ typedef void (*output_record_array_beg_t)(tool_node_t *, char *);
 typedef void (*output_record_array_end_t)(tool_node_t *, char *);
 typedef void (*output_record_no_data_found_t)(tool_node_t *, char *);
 typedef void (*output_record_row_beg_t)(tool_node_t *, char *);
-typedef void (*output_record_name_value_t)(tool_node_t *, char *, char *, int, int, char *);
+#define TOOL400_DATA_TYPE_NBR 1
+#define TOOL400_DATA_TYPE_CHAR 2
+#define TOOL400_DATA_IS_NULL SQL_NULL_DATA
+typedef void (*output_record_name_value_t)(tool_node_t *, char *, char *, char *, int, int);
 typedef void (*output_record_row_end_t)(tool_node_t *, char *);
 typedef void (*output_query_end_t)(tool_node_t *, char *);
-typedef int (*output_sql_errors_t)(tool_node_t *, SQLHANDLE, SQLSMALLINT, int, char *);
+typedef void (*output_sql_errors_t)(tool_node_t *, char *, int, int, char *, char *);
 typedef void (*output_pgm_beg_t)(tool_node_t *, char *, char *, char *, char *);
 typedef void (*output_pgm_end_t)(tool_node_t *, char *);
 typedef void (*output_pgm_dcl_ds_beg_t)(tool_node_t *, char *, char *, int);
@@ -281,6 +285,9 @@ typedef struct tool_struct {
   tool_node_t * first;
   tool_node_t * curr;
   tool_node_t * last;
+  SQLINTEGER sqlCode;
+  SQLCHAR sqlState[SQL_SQLSTATE_SIZE + 1];
+  SQLCHAR sqlMsg[SQL_MAX_MESSAGE_LENGTH + 1];
 } tool_struct_t;
 
 /*

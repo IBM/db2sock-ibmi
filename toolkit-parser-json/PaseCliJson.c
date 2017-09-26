@@ -24,8 +24,6 @@
 
 #define JSON400_OUT_MAX_STDOUT 1000000
 
-#define JSON400_MAX_ERR_MSG_LEN (SQL_MAX_MESSAGE_LENGTH + SQL_SQLSTATE_SIZE + 10)
-
 #define JSON400_ADJUST_NDA 0
 #define JSON400_ADJUST_ADD_COMMA 1
 #define JSON400_ADJUST_ADD_SPACE 2
@@ -519,7 +517,7 @@ void json_output_record_row_beg(tool_node_t *tool, char *out_caller) {
   json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
     "{");
 }
-void json_output_record_name_value(tool_node_t *tool, char *name, char *value, int type, int fStrLen, char *out_caller) {
+void json_output_record_name_value(tool_node_t *tool, char *out_caller, char *name, char *value, int type, int fStrLen) {
   int i = 0;
   int len = 0;
   char * fmt_val_char = "\"%s\"";
@@ -531,21 +529,13 @@ void json_output_record_name_value(tool_node_t *tool, char *name, char *value, i
   char * fmt_val = NULL;
   char * fmt_key_val = NULL;
   char * fmt_json_null = "null";
-  if (fStrLen == SQL_NULL_DATA) {
+  if (fStrLen == TOOL400_DATA_IS_NULL) {
     value = fmt_json_null;
     fmt_val = fmt_val_dec;
     fmt_key_val = fmt_key_val_dec;
   } else {
     switch (type) {
-    case SQL_BIGINT:
-    case SQL_DECFLOAT:
-    case SQL_SMALLINT:
-    case SQL_INTEGER:
-    case SQL_REAL:
-    case SQL_FLOAT:
-    case SQL_DOUBLE:
-    case SQL_DECIMAL:
-    case SQL_NUMERIC:
+    case TOOL400_DATA_TYPE_NBR:
       if (value[0] == '.') {
         fmt_val = fmt_val_zero_dec;
         fmt_key_val = fmt_key_val_zero_dec;
@@ -554,6 +544,7 @@ void json_output_record_name_value(tool_node_t *tool, char *name, char *value, i
         fmt_key_val = fmt_key_val_dec;
       }
       break;
+    case TOOL400_DATA_TYPE_CHAR:
     default:
       fmt_val = fmt_val_char;
       fmt_key_val = fmt_key_val_char;
@@ -576,35 +567,12 @@ void json_output_record_row_end(tool_node_t *tool, char *out_caller) {
     "}");
 }
 
-/*
-  json_output_sql_errors(fmt, henv, SQL_HANDLE_ENV,   rc);
-  json_output_sql_errors(fmt, hdbc, SQL_HANDLE_DBC,   rc);
-  json_output_sql_errors(fmt, hstmt, SQL_HANDLE_STMT, rc);
-*/
-int json_output_sql_errors(tool_node_t *tool, SQLHANDLE handle, SQLSMALLINT hType, int rc, char *out_caller)
+void json_output_sql_errors(tool_node_t *tool, char *out_caller, int rc, int sqlCode, char * sqlState, char *sqlMsg)
 {
-  SQLCHAR msg[SQL_MAX_MESSAGE_LENGTH + 1];
-  SQLCHAR sqlstate[SQL_SQLSTATE_SIZE + 1];
-  SQLCHAR errMsg[JSON400_MAX_ERR_MSG_LEN];
-  SQLINTEGER sqlcode = 0;
-  SQLSMALLINT length = 0;
-  SQLCHAR *p = NULL;
-  SQLSMALLINT recno = 1;
   if (rc == SQL_ERROR) {
-    memset(msg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
-    memset(sqlstate, '\0', SQL_SQLSTATE_SIZE + 1);
-    memset(errMsg, '\0', JSON400_MAX_ERR_MSG_LEN);
-    if ( SQLGetDiagRec(hType, handle, recno, sqlstate, &sqlcode, msg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
-      if (msg[length-1] == '\n') {
-        p = &msg[length-1];
-        *p = '\0';
-      }
-      json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
-        "\n{\"ok\":false,\"reason\":\"error %s SQLCODE=%d\"}",msg, sqlcode);
-      return SQL_ERROR;
-    }
+    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+        "\n{\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"}", sqlCode, sqlState, sqlMsg);
   }
-  return SQL_SUCCESS;
 }
 
 /* pgm call */
