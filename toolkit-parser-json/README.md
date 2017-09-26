@@ -8,12 +8,6 @@ Welcome to db2sock project. This 'toolkit' is a dynamically loaded toolkit inter
 Any JSON/XML parser can be used to call this interface.
 The parser simply includes PaseTool.h, compile with -ltkit400, calls toolkit APIs.
 
-```
-tool_ctor - callbacks for output formating
-tool_run - parsed name, value pairs
-tool_dtor - clean-up memory
-```
-
 The parsers are dynamically loaded via SQL400Json or SQL400Xml interfaces. 
 Default parser is provided (toolkit-parser-json, toolkit-parser-xml).
 An environment variable allows any override any parser of your own (json, xml, csv, etc.).
