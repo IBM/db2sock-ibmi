@@ -15,8 +15,6 @@ An environment variable allows any override any parser of your own (json, xml, c
 ```
 > export DB2JSONPARSER32 libjson400.a(shr.o)
 > export DB2JSONPARSER64 libjson400.a(shr_64.o)
-> export DB2XMLPARSER32 libxml400.a(shr.o)
-> export DB2XMLPARSER64 libxml400.a(shr_64.o)
 ```
 
 For json examples see source/tests_c (*.json).

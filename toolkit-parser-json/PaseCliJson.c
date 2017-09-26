@@ -20,6 +20,10 @@
  * rely on json format.
  */
 
+/* ==========================
+ * json output control
+ * ==========================
+ */
 #define JSON400_OUT_MAX_STDOUT 1000000
 
 #define JSON400_ADJUST_NDA 0
@@ -27,6 +31,10 @@
 #define JSON400_ADJUST_ADD_SPACE 2
 #define JSON400_ADJUST_RMV_COMMA 3
 
+/* ==========================
+ * json raw parse ordinals
+ * ==========================
+ */
 #define JSON400_KEY_BLOCK 4096
 typedef struct json_key_struct {
   int count;
@@ -52,7 +60,7 @@ typedef struct json_key_struct {
 #define JSON400_ARY_END 9702
 
 /* ==========================
- * json <map> tool keys
+ * json <map> toolkit keys
  * ==========================
  */
 /* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"*libl","curlib":"curlib"}} */
@@ -1037,6 +1045,10 @@ int json_parse(char * json, json_key_t * bigkey) {
   return k;
 }
 
+/* ==========================
+ * SQL400Json interface (dynamic loaded)
+ * ==========================
+ */
 SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
  SQLCHAR * injson,
  SQLINTEGER inlen, 

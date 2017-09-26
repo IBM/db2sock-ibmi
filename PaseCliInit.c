@@ -181,10 +181,17 @@ void * init_cli_dlsym() {
  * multiple threads starting.
  */
 void * init_json_dlsym() {
-  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR);
+#ifdef __64BIT__
+  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR_64);
   if (dlservice  == NULL) {
-    dlservice = DB2JSONPARSER;
+    dlservice = DB2JSONPARSER64;
   }
+#else
+  char *dlservice = getenv(DB2JSONPARSER_ENV_VAR_32);
+  if (dlservice  == NULL) {
+    dlservice = DB2JSONPARSER32;
+  }
+#endif
   if (dlhandle_json  == NULL) {
     init_lock();
     if (dlhandle_json  == NULL) {
