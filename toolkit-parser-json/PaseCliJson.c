@@ -608,6 +608,14 @@ void json_output_pgm_dcl_ds_beg(tool_node_t *tool, char *out_caller, char * name
       "{\"%s\":", name);
   }
 }
+void json_output_pgm_dcl_ds_rec_beg(tool_node_t *tool, char *out_caller) {
+  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+      "[");
+}
+void json_output_pgm_dcl_ds_rec_end(tool_node_t *tool, char *out_caller) {
+  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
+      "]");
+}
 void json_output_pgm_dcl_ds_end(tool_node_t *tool, char *out_caller, int tdim) {
   if (tdim > 1) {
     json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
@@ -1094,6 +1102,8 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     &json_output_pgm_end,
     &json_output_pgm_dcl_ds_beg,
     &json_output_pgm_dcl_ds_end,
+    &json_output_pgm_dcl_ds_rec_beg,
+    &json_output_pgm_dcl_ds_rec_end,
     &json_output_pgm_dcl_s_beg,
     &json_output_pgm_dcl_s_data,
     &json_output_pgm_dcl_s_end,

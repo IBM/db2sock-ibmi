@@ -135,6 +135,8 @@ tool_struct_t * tool_ctor(
   output_pgm_end_t output_pgm_end,
   output_pgm_dcl_ds_beg_t output_pgm_dcl_ds_beg,
   output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end,
+  output_pgm_dcl_ds_rec_beg_t output_pgm_dcl_ds_rec_beg,
+  output_pgm_dcl_ds_rec_end_t output_pgm_dcl_ds_rec_end,
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end,
@@ -161,6 +163,8 @@ tool_struct_t * tool_ctor(
   tool->output_pgm_end = output_pgm_end;
   tool->output_pgm_dcl_ds_beg = output_pgm_dcl_ds_beg;
   tool->output_pgm_dcl_ds_end = output_pgm_dcl_ds_end;
+  tool->output_pgm_dcl_ds_rec_beg = output_pgm_dcl_ds_rec_beg;
+  tool->output_pgm_dcl_ds_rec_end = output_pgm_dcl_ds_rec_end;
   tool->output_pgm_dcl_s_beg = output_pgm_dcl_s_beg;
   tool->output_pgm_dcl_s_data = output_pgm_dcl_s_data;
   tool->output_pgm_dcl_s_end = output_pgm_dcl_s_end;
@@ -881,6 +885,12 @@ void tool_output_pgm_dcl_s_end(tool_struct_t *tool, char *out_caller, int tdim) 
 }
 void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char *out_caller, char * name, int tdim) {
   tool->output_pgm_dcl_ds_beg(tool->curr, out_caller, name, tdim);
+}
+void tool_output_pgm_dcl_ds_rec_beg(tool_struct_t *tool, char *out_caller) {
+  tool->output_pgm_dcl_ds_rec_beg(tool->curr, out_caller);
+}
+void tool_output_pgm_dcl_ds_rec_end(tool_struct_t *tool, char *out_caller) {
+  tool->output_pgm_dcl_ds_rec_end(tool->curr, out_caller);
 }
 void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, char *out_caller, int tdim) {
   tool->output_pgm_dcl_ds_end(tool->curr, out_caller, tdim);
@@ -2668,6 +2678,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tk->tool, tk->outarea, pgm_ds_name, pgm_ds_dim_cnt);
+    if (pgm_ds_dim_cnt) {
+      tool_output_pgm_dcl_ds_rec_beg(tk->tool, tk->outarea);
+    }
   }
   /* pgm ds children (parser order next) */
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
@@ -2703,8 +2716,15 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
         }
         pgm_ds_dim_cnt--;
         if (pgm_ds_dim_cnt > 0) {
+          if (pgm_ds_dim_max) {
+            tool_output_pgm_dcl_ds_rec_end(tk->tool, tk->outarea);
+            tool_output_pgm_dcl_ds_rec_beg(tk->tool, tk->outarea);
+          }
           node = pgm_ds_idx;
         } else {
+          if (pgm_ds_dim_max) {
+            tool_output_pgm_dcl_ds_rec_end(tk->tool, tk->outarea);
+          }
           tool_output_pgm_dcl_ds_end(tk->tool, tk->outarea, pgm_ds_dim_max);
           pgm_ds_dim_max = 0;
           go = 0;

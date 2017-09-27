@@ -249,6 +249,8 @@ typedef void (*output_pgm_beg_t)(tool_node_t *, char *, char *, char *, char *);
 typedef void (*output_pgm_end_t)(tool_node_t *, char *);
 typedef void (*output_pgm_dcl_ds_beg_t)(tool_node_t *, char *, char *, int);
 typedef void (*output_pgm_dcl_ds_end_t)(tool_node_t *, char *, int);
+typedef void (*output_pgm_dcl_ds_rec_beg_t)(tool_node_t *, char *);
+typedef void (*output_pgm_dcl_ds_rec_end_t)(tool_node_t *, char *);
 typedef void (*output_pgm_dcl_s_beg_t)(tool_node_t *, char *, char *, int);
 typedef void (*output_pgm_dcl_s_data_t)(tool_node_t *, char *, char *, int);
 typedef void (*output_pgm_dcl_s_end_t)(tool_node_t *, char *, int);
@@ -274,6 +276,8 @@ typedef struct tool_struct {
   output_pgm_end_t output_pgm_end;
   output_pgm_dcl_ds_beg_t output_pgm_dcl_ds_beg;
   output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end;
+  output_pgm_dcl_ds_rec_beg_t output_pgm_dcl_ds_rec_beg;
+  output_pgm_dcl_ds_rec_end_t output_pgm_dcl_ds_rec_end;
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg;
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data;
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end;
@@ -309,6 +313,8 @@ tool_struct_t * tool_ctor(
   output_pgm_end_t output_pgm_end,
   output_pgm_dcl_ds_beg_t output_pgm_dcl_ds_beg,
   output_pgm_dcl_ds_end_t output_pgm_dcl_ds_end,
+  output_pgm_dcl_ds_rec_beg_t output_pgm_dcl_ds_rec_beg,
+  output_pgm_dcl_ds_rec_end_t output_pgm_dcl_ds_rec_end,
   output_pgm_dcl_s_beg_t output_pgm_dcl_s_beg,
   output_pgm_dcl_s_data_t output_pgm_dcl_s_data,
   output_pgm_dcl_s_end_t output_pgm_dcl_s_end,

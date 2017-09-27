@@ -1,7 +1,7 @@
 {"pgm":[
     {"name":"HAMELA01",  "lib":"DB2JSON"},
     {"s": {"name":"rows", "type":"5s0", "value":20}},
-    {"ds": [{"name":"itemDS","dim":20},
+    {"ds": [{"name":"items","dim":20},
         {"s":[
             {"name":"field1", "type":"5a", "value":"ff1"},
             {"name":"field2", "type":"5a", "value":"ff2"},
