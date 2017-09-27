@@ -795,6 +795,10 @@ SQLRETURN SQLTransact(SQLHENV henv,
 # custom interfaces, not CLI libdb400.a
 # ------------------
 
+# custom version
+
+SQLRETURN SQL400Version(SQLPOINTER outversion, SQLINTEGER outlen)
+
 # custom mode set driver by ccsid
 
 SQLRETURN SQLOverrideCCSID400(SQLINTEGER newCCSID)

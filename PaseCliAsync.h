@@ -163,6 +163,7 @@ typedef struct SQL400DescStruct {
 /* do common work for language driver */
 /* composite calls to CLI also async  */
 
+SQLRETURN SQL400Version( SQLPOINTER  outversion, SQLINTEGER  outlen );
 SQLRETURN SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
 SQLRETURN SQL400Connect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
 SQLRETURN SQL400ConnectW( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
@@ -442,6 +443,7 @@ typedef struct SQLTablePrivilegesWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQL
 typedef struct SQLTablesStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLCHAR * szTableQualifier; SQLSMALLINT  cbTableQualifier; SQLCHAR * szTableOwner; SQLSMALLINT  cbTableOwner; SQLCHAR * szTableName; SQLSMALLINT  cbTableName; SQLCHAR * szTableType; SQLSMALLINT  cbTableType; void * callback; } SQLTablesStruct;
 typedef struct SQLTablesWStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLWCHAR * szTableQualifier; SQLSMALLINT  cbTableQualifier; SQLWCHAR * szTableOwner; SQLSMALLINT  cbTableOwner; SQLWCHAR * szTableName; SQLSMALLINT  cbTableName; SQLWCHAR * szTableType; SQLSMALLINT  cbTableType; void * callback; } SQLTablesWStruct;
 typedef struct SQLTransactStruct { SQLRETURN sqlrc; SQLHENV  henv; SQLHDBC  hdbc; SQLSMALLINT  fType; void * callback; } SQLTransactStruct;
+typedef struct SQL400VersionStruct { SQLRETURN sqlrc; SQLPOINTER  outversion; SQLINTEGER  outlen; void * callback; } SQL400VersionStruct;
 typedef struct SQL400Stmt2HdbcStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLINTEGER * ohnd; void * callback; } SQL400Stmt2HdbcStruct;
 typedef struct SQL400ConnectStruct { SQLRETURN sqlrc; SQLCHAR * db; SQLCHAR * uid; SQLCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectStruct;
 typedef struct SQL400ConnectWStruct { SQLRETURN sqlrc; SQLWCHAR * db; SQLWCHAR * uid; SQLWCHAR * pwd; SQLINTEGER * ohnd; SQLINTEGER  acommit; SQLCHAR * alibl; SQLCHAR * acurlib; void * callback; } SQL400ConnectWStruct;
@@ -705,6 +707,8 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag);
 SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQLTransactCallback(SQLTransactStruct* ); */
 SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400VersionCallback(SQL400VersionStruct* ); */
+SQL400VersionStruct * SQL400VersionJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400Stmt2HdbcCallback(SQL400Stmt2HdbcStruct* ); */
 SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400ConnectCallback(SQL400ConnectStruct* ); */
@@ -874,6 +878,7 @@ pthread_t SQLTablePrivilegesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifie
 pthread_t SQLTablesAsync ( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType, void * callback );
 pthread_t SQLTablesWAsync ( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType, void * callback );
 pthread_t SQLTransactAsync ( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType, void * callback );
+pthread_t SQL400VersionAsync ( SQLPOINTER  outversion, SQLINTEGER  outlen, void * callback );
 pthread_t SQL400Stmt2HdbcAsync ( SQLHSTMT  hstmt, SQLINTEGER * ohnd, void * callback );
 pthread_t SQL400ConnectAsync ( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
 pthread_t SQL400ConnectWAsync ( SQLWCHAR * db, SQLWCHAR * uid, SQLWCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib, void * callback );
@@ -1283,6 +1288,7 @@ void dump_SQLTablePrivilegesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTa
 void dump_SQLTables(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType );
 void dump_SQLTablesW(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType );
 void dump_SQLTransact(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
+void dump_SQL400Version(SQLRETURN sqlrc,  SQLPOINTER  outversion, SQLINTEGER  outlen );
 void dump_SQLOverrideCCSID400(SQLRETURN sqlrc,  SQLINTEGER  newCCSID );
 void dump_SQL400Stmt2Hdbc(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLINTEGER * ohnd );
 void dump_SQL400Connect(SQLRETURN sqlrc,  SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );
@@ -1314,6 +1320,7 @@ void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEG
  * ===================================================
  */
 
+SQLRETURN custom_SQL400Version( SQLPOINTER  outversion, SQLINTEGER  outlen );
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID );
 SQLRETURN custom_SQL400Stmt2Hdbc( SQLHSTMT  hstmt, SQLINTEGER * ohnd );
 SQLRETURN custom_SQL400Connect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER * ohnd, SQLINTEGER  acommit, SQLCHAR * alibl, SQLCHAR * acurlib );

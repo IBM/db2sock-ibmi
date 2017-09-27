@@ -587,6 +587,9 @@ SQLTransact
 SQLTransactAsync
 SQLTransactJoin
 ILE_SQLTransact
+SQL400Version
+SQL400VersionAsync
+SQL400VersionJoin
 SQLOverrideCCSID400
 SQL400Stmt2Hdbc
 SQL400Stmt2HdbcAsync

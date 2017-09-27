@@ -14,7 +14,7 @@ INSTALLDIR   = /QOpenSys/usr/lib
 CCC          = crtrpgmod
 CCPGM        = crtpgm
 CCSRVPGM     = crtsrvpgm
-CCSQL		 = db2script
+CCSQL		     = db2script
 
 ### *PGM CGI
 HELLOPGM     = hello.pgm
@@ -23,6 +23,8 @@ HELLOSRVPGM  = hellosrv.srvpgm
 HELLOSRVOBJS = hellosrv.mod
 RAINBOWPGM   = rainbow.pgm
 RAINBOWOBJS  = rainbow.mod
+HAMELA01PGM  = hamela01.pgm
+HAMELA01OBJS = hamela01.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -42,7 +44,7 @@ rpg:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) 
+go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) $(HAMELA01PGM)
 
 .SUFFIXES: .mod .rpgle
 ### CRTRPGMOD
@@ -57,6 +59,9 @@ $(HELLOSRVPGM): $(HELLOSRVOBJS)
 ### -- RAINBOWPGM (ILE RPG)
 $(RAINBOWPGM): $(RAINBOWOBJS)
 	$(CCPGM) --pgm $(RAINBOWPGM) --lib $(ILELIB) --mod $(RAINBOWOBJS)
+### -- HAMELA01PGM (ILE RPG)
+$(HAMELA01PGM): $(HAMELA01OBJS)
+	$(CCPGM) --pgm $(HAMELA01PGM) --lib $(ILELIB) --mod $(HAMELA01OBJS)
 
 removeo:
 	rm -f *.mod

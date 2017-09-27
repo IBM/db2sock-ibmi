@@ -2535,6 +2535,7 @@ SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t 
       layout = ile_pgm_grow(playout, ds_spill_len);
       /* copy additional ds */
       memcpy(where,ds_where,ds_spill_len);
+      ile_pgm_next_spill_pos(layout, ds_spill_len);
     }
   }
 
@@ -2663,7 +2664,8 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
     }
   }
   /* where start here */
-  sqlrc = tool_dcl_ds(pgm_ds_name, pgm_ds_by, pgm_ds_dim, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
+  sqlrc = tool_dcl_ds(pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
+  *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tk->tool, tk->outarea, pgm_ds_name, pgm_ds_dim_cnt);
   }
@@ -2686,14 +2688,13 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
     switch (key) {
     case TOOL400_KEY_DCL_S:
       sqlrc = tool_key_pgm_data_run(tk, tpgm, isDs, isOut, &node);
-      *isDs = 1; /* if pass by ref, was the first argv->data element */
       break;
     case TOOL400_KEY_DCL_DS:
       sqlrc = tool_key_pgm_ds_run(tk, tpgm, isDs, isOut, &node);
       break;
     case TOOL400_KEY_END_DS:
       if (!isOut) {
-        sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, pgm_ds_by_flag, &tpgm->layout);
+        sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, ILE_PGM_BY_IN_DS, &tpgm->layout);
         go = 0;
       } else {
         /* dim replay ds (from pgm_ds_idx) */

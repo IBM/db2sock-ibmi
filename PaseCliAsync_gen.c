@@ -8592,6 +8592,55 @@ SQLTransactStruct * SQLTransactJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400Version( SQLPOINTER  outversion, SQLINTEGER  outlen )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  sqlrc = custom_SQL400Version( outversion, outlen );
+  if (init_cli_trace()) {
+    dump_SQL400Version(sqlrc,  outversion, outlen );
+  }
+  return sqlrc;
+}
+void * SQL400VersionThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400VersionStruct * myptr = (SQL400VersionStruct *) ptr;
+  myptr->sqlrc = custom_SQL400Version( myptr->outversion, myptr->outlen );
+  if (init_cli_trace()) {
+    dump_SQL400Version(myptr->sqlrc,  myptr->outversion, myptr->outlen );
+  }
+  /* void SQL400VersionCallback(SQL400VersionStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400VersionStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400VersionAsync ( SQLPOINTER  outversion, SQLINTEGER  outlen, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400VersionStruct * myptr = (SQL400VersionStruct *) malloc(sizeof(SQL400VersionStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->outversion = outversion;
+  myptr->outlen = outlen;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400VersionThread, (void *)myptr);
+  return tid;
+}
+SQL400VersionStruct * SQL400VersionJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400VersionStruct * myptr = (SQL400VersionStruct *) NULL;
+  int active = 0;
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400VersionStruct *) NULL;
+  }
+  return myptr;
+}
 int SQLOverrideCCSID400(int newCCSID)
 {
   SQLRETURN sqlrc = SQL_SUCCESS;

@@ -2876,6 +2876,24 @@ void dump_SQLTransact(SQLRETURN sqlrc,  SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLIN
     }
   }
 }
+void dump_SQL400Version(SQLRETURN sqlrc,  SQLPOINTER  outversion, SQLINTEGER  outlen ) {
+  if (dev_go(sqlrc,"sql400version")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400Version");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outversion",outversion,outversion);
+    printf_hexdump(mykey,outversion,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
 void dump_SQLOverrideCCSID400(SQLRETURN sqlrc,  SQLINTEGER  newCCSID ) {
   if (dev_go(sqlrc,"sqloverrideccsid400")) {
     char mykey[256];

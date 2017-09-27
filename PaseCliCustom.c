@@ -47,6 +47,25 @@ int custom_trim_CVAR(SQL400ParamStruct * prm) {
 }
 
 /*
+ * version
+ */
+SQLRETURN custom_SQL400Version(SQLPOINTER outversion, SQLINTEGER outlen) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  char buf[128];
+  int len = 0;
+
+  memset(buf,0,sizeof(buf));
+  strcpy(buf,DB2_CLI_VERSION);
+  len = strlen(buf);
+  if (outlen > len) {
+    strcpy(outversion,buf);
+  } else {
+    sqlrc = SQL_ERROR;
+  }
+  return sqlrc;
+}
+
+/*
  * conversion
  */
 SQLRETURN custom_SQL400ToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid ) {
