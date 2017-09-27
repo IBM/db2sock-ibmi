@@ -24,6 +24,13 @@ int main(int argc, char * argv[]) {
   char * fp_prefix = argv[1];
   char * bad = "_bad.";
 
+  /* bad */
+  if (argc < 2) {
+    printf("%s j0000_parm_required (none specified)\n",argv[0]);
+    printf("success (%d)\n",sqlrc);
+    return;
+  }
+
   /* json test file */
   sprintf(fp_file_json,"%s.json",fp_prefix);
   fp_json = fopen(fp_file_json,"r");
