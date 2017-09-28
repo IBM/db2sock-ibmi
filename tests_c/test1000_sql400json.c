@@ -8,11 +8,13 @@
 #include "test.h"
 #include "PaseCliAsync.h"
 
+#define MAX_TEST_BUFFER 512000
+
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  char injson[4096];
+  char injson[MAX_TEST_BUFFER];
   int inlen = sizeof(injson);
-  char outjson[4096];
+  char outjson[MAX_TEST_BUFFER];
   int outlen = sizeof(outjson);
   char * ptr = NULL;
   int len = 0;

@@ -25,6 +25,8 @@ RAINBOWPGM   = rainbow.pgm
 RAINBOWOBJS  = rainbow.mod
 HAMELA01PGM  = hamela01.pgm
 HAMELA01OBJS = hamela01.mod
+HAMELA02PGM  = hamela02.pgm
+HAMELA02OBJS = hamela02.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -44,7 +46,8 @@ rpg:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) $(HAMELA01PGM)
+go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) \
+  $(HAMELA01PGM) $(HAMELA02PGM)
 
 .SUFFIXES: .mod .rpgle
 ### CRTRPGMOD
@@ -62,6 +65,9 @@ $(RAINBOWPGM): $(RAINBOWOBJS)
 ### -- HAMELA01PGM (ILE RPG)
 $(HAMELA01PGM): $(HAMELA01OBJS)
 	$(CCPGM) --pgm $(HAMELA01PGM) --lib $(ILELIB) --mod $(HAMELA01OBJS)
+### -- HAMELA02PGM (ILE RPG)
+$(HAMELA02PGM): $(HAMELA02OBJS)
+	$(CCPGM) --pgm $(HAMELA02PGM) --lib $(ILELIB) --mod $(HAMELA02OBJS)
 
 removeo:
 	rm -f *.mod

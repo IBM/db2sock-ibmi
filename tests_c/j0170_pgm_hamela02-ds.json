@@ -1,0 +1,20 @@
+{"pgm":[
+    {"name":"HAMELA02",  "lib":"DB2JSON"},
+    {"s": {"name":"inCount", "type":"10i0", "value":5}},
+    {"ds": [{"name":"inputDS","dim":20},
+        {"s":[
+            {"name":"in1", "type":"5av2", "value":"i1"},
+            {"name":"in2", "type":"5av2", "value":"i2"}
+        ]}
+    ]},
+    {"s": {"name":"outCount", "type":"10i0", "value":5}},
+    {"ds": [{"name":"outDS","dim":20},
+        {"s":[
+            {"name":"out1", "type":"5av2", "value":"o1"},
+            {"name":"out2", "type":"5av2", "value":"o2"},
+            {"name":"out3", "type":"10av2", "value":"o3"}
+        ]}
+    ]},
+    {"s": {"name":"last", "type":"10a", "value":"ll"}}
+]}
+

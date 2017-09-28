@@ -438,7 +438,7 @@ tool_node_t * tool_node_end(tool_struct_t * tool, tool_node_t *node, int key, in
   }
   if (node_beg) {
     node_beg->fin = node->ord;
-    node_cur = tool_node_add(tool, key, NULL, node->ord);
+    node_cur = tool_node_add(tool, key, NULL, node_beg->ord); /* was node->ord */
     return node_cur;
   /* not found (replication of last?) */
   } else {
@@ -2475,6 +2475,7 @@ ile_pgm_call_t **playout) {
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
 SQLRETURN tool_dcl_ds(
+int isDs,
 char * in_name,
 char * in_dim,
 char * in_by,
@@ -2503,7 +2504,7 @@ ile_pgm_call_t **playout) {
   }
 
   /* parse in|out|both|value|const|return */
-  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, 0, &spill_len);
+  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len);
   if (spill_len) {
     /* grow template (if need) */
     layout = ile_pgm_grow(playout, spill_len);
@@ -2674,7 +2675,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
     }
   }
   /* where start here */
-  sqlrc = tool_dcl_ds(pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
+  sqlrc = tool_dcl_ds(*isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tk->tool, tk->outarea, pgm_ds_name, pgm_ds_dim_cnt);
