@@ -1,0 +1,61 @@
+{"pgm":[
+    {"name":"HAMELA03",  "lib":"DB2JSON"},
+    {"s": [
+        {"name":"Parm1", "type":"1a", "value":""},
+        {"name":"Parm2", "type":"18a", "value":"äöÄÖåÅáÁàÀ"},
+        {"name":"Parm3", "type":"2a", "value":""},
+        {"name":"Parm4", "type":"10a", "value":""},
+        {"name":"Arr1Count", "type":"3s0", "value":0}
+    ]},
+    {"ds": [{"name":"Arr1", "dim":10},
+        {"s":[
+            {"name":"Arr1P1", "type":"7a", "value":""},
+            {"name":"Arr1P2", "type":"132a", "value":""},
+            {"name":"Arr1P3", "type":"30a", "value":""},
+            {"name":"Arr1P4", "type":"1s0", "value":0}
+        ]}
+    ]},
+    {"s": [
+        {"name":"Parm5", "type":"1a", "value":""},
+        {"name":"Parm6", "type":"4a", "value":""},
+        {"name":"Parm7", "type":"18a", "value":""},
+        {"name":"Parm8", "type":"100a", "value":"!#¤%&/()=?+*^_-:;@£${[]}\\€<>"},
+        {"name":"Parm9", "type":"3s0", "value":0},
+        {"name":"Parm10", "type":"3s0", "value":0}
+    ]},
+    {"s": {"name":"Arr2Count", "type":"5s0", "value":3}},
+    {"ds": [{"name":"Arr2"},
+        {"s":[
+            {"name":"Arr2P1", "type":"1a", "value":"a"},
+            {"name":"Arr2P2", "type":"30a", "value":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"},
+            {"name":"Arr2P3", "type":"4a", "value":"ap3"},
+            {"name":"Arr2P4", "type":"18a", "value":""},
+            {"name":"Arr2P5", "type":"100a", "value":""}
+        ]},
+        {"s":[
+            {"name":"Arr2P1", "type":"1a", "value":"b"},
+            {"name":"Arr2P2", "type":"30a", "value":"BBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"},
+            {"name":"Arr2P3", "type":"4a", "value":"bp3"},
+            {"name":"Arr2P4", "type":"18a", "value":""},
+            {"name":"Arr2P5", "type":"100a", "value":""}
+        ]},
+        {"s":[
+            {"name":"Arr2P1", "type":"1a", "value":"c"},
+            {"name":"Arr2P2", "type":"30a", "value":"CCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"},
+            {"name":"Arr2P3", "type":"4a", "value":"cp3"},
+            {"name":"Arr2P4", "type":"18a", "value":""},
+            {"name":"Arr2P5", "type":"100a", "value":""}
+        ]},
+        {"ds": [{"name":"Arr2Empty", "dim": 7},
+            {"s":[
+                {"name":"Arr2P1", "type":"1a", "value":""},
+                {"name":"Arr2P2", "type":"30a", "value":""},
+                {"name":"Arr2P3", "type":"4a", "value":""},
+                {"name":"Arr2P4", "type":"18a", "value":""},
+                {"name":"Arr2P5", "type":"100a", "value":""}
+            ]}
+        ]}
+    ]},
+    {"s": {"name":"Parm11", "type":"30a", "value":""}}
+]}
+

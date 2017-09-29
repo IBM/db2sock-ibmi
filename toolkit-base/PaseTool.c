@@ -786,6 +786,7 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
       printf_format("%s.parm %s %s\n",mykey,"pgm_ile_lib",tpgm->pgm_ile_lib);
       printf_format("%s.parm %s %s\n",mykey,"pgm_ile_func",tpgm->pgm_ile_func);
     }
+    dev_dump();
     if (layout) {
       printf_format("%s.parm %s %d\n",mykey,"argc",layout->argc);
       printf_format("%s.parm %s %d\n",mykey,"parmc",layout->parmc);
@@ -800,6 +801,7 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
       spill_area = ile_pgm_spill_top_buf(layout);
       spill_len = ile_pgm_spill_length(layout);
       printf_format("%s.parm %s 0x%p - 0x%p (0x%p)\n",mykey,"spill_area", spill_area, spill_area + spill_len, spill_len);
+      dev_dump();
       tool_dump_hex_chunks(mykey, spill_area, spill_len);
     }
     printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
@@ -2735,7 +2737,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
     default:
       break;
     }
-    tool_dump_end(sqlrc, "pgm_ds_run2", i, lvl, key, val);
+    if (sqlrc == SQL_ERROR) {
+      tool_dump_end(sqlrc, "pgm_ds_error", i, lvl, key, val);
+    }
   }
   return sqlrc;
 }
@@ -2783,7 +2787,9 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
     default:
       break;
     }
-    tool_dump_end(sqlrc, "pgm_params_run2", i, lvl, key, val);
+    if (sqlrc == SQL_ERROR) {
+      tool_dump_end(sqlrc, "pgm_params_error", i, lvl, key, val);
+    }
   }
   return sqlrc;
 }
@@ -2932,7 +2938,9 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
     default:
       break;
     }
-    tool_pgm_dump(sqlrc, "pgm_run", step, tpgm);
+    if (sqlrc == SQL_ERROR) {
+      tool_pgm_dump(sqlrc, "pgm_error", step, tpgm);
+    }
   }
   if (tpgm->pgm_ile_name && sqlrc != SQL_SUCCESS) {
     tool_output_pgm_end(tk->tool, tk->outarea);
@@ -3194,7 +3202,6 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
     default:
       break;
     }
-    tool_dump_end(sqlrc, "query_run2(a)", i, lvl, key, val);
   }
   /* no query */
   if (!query) {
@@ -3590,7 +3597,9 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     default:
       break;
     }
-    tool_dump_end(sqlrc, "conn_run2", i, lvl, key, val);
+    if (sqlrc == SQL_ERROR) {
+      tool_dump_end(sqlrc, "conn_error", i, lvl, key, val);
+    }
     /* joblog info */
     if (sqlrc == SQL_ERROR) {
       tool_key_conn_joblog(tk, tconn->hdbc);
@@ -3644,7 +3653,9 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool)
     default:
       break;
     }
-    tool_dump_end(sqlrc, "tool_run2", i, lvl, key, val);
+    if (sqlrc == SQL_ERROR) {
+      tool_dump_end(sqlrc, "tool_error", i, lvl, key, val);
+    }
   }
   /* output end script */
   tool_output_script_end(tk->tool, tk->outarea);

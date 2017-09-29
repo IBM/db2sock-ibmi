@@ -729,8 +729,11 @@ void json_grow_key(json_key_t * k, int i) {
   char * new_key = NULL;
   char * new_val = NULL;
   char * new_lvl = NULL;
-  /* lready big enough */
-  if (k->max > k->count + i + 1) return;
+  /* already big enough (add grow amount i to count) */
+  if (k->max > k->count + i + 1) {
+    k->count += i; /* hamela found bug */
+    return;
+  }
   /* grow by blocks */
   for (g = k->max; k->max < g + i + 1; k->max += JSON400_KEY_BLOCK);
   /* realloc */
