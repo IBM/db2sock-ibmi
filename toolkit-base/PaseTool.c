@@ -1013,18 +1013,17 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   char * tmp = NULL;
   int delta = 0;
   ile_pgm_call_t * layout = *playout;
-  ile_pgm_call_t iamthisbigcompiler;
   /* enough room ? */
   if (layout) {
     /* max length - current position */
-    delta = (layout->max - layout->pos) - sizeof(iamthisbigcompiler);
+    delta = (layout->max - layout->pos) - sizeof(ile_pgm_call_t);
     if (delta > size) {
       return *playout;
     }
     orig_len = layout->max;
     total_len = layout->max + size;
   } else {
-    total_len =  size + sizeof(iamthisbigcompiler);
+    total_len =  size + sizeof(ile_pgm_call_t);
   }
   /* need more space (block size alloc) */
   for (i=0; new_len < total_len; i++) {
