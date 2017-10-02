@@ -19,7 +19,7 @@
         {"name":"Parm5", "type":"1a", "value":""},
         {"name":"Parm6", "type":"4a", "value":""},
         {"name":"Parm7", "type":"18a", "value":""},
-        {"name":"Parm8", "type":"100a", "value":"!#¤%&/()=?+*^_-:;@£${[]}\\€<>"},
+        {"name":"Parm8", "type":"100a", "value":"!#¤%&/()=?+*^_-:;@£${[]}\\<>"},
         {"name":"Parm9", "type":"3s0", "value":0},
         {"name":"Parm10", "type":"3s0", "value":0}
     ]},
@@ -31,7 +31,7 @@
             {"name":"Arr2P3", "type":"4a", "value":"ap3"},
             {"name":"Arr2P4", "type":"18a", "value":""},
             {"name":"Arr2P5", "type":"100a", "value":""}
-        ]},
+        ]}
     ]},
     {"s": {"name":"Parm11", "type":"30a", "value":""}}
 ]}

@@ -1009,21 +1009,25 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   int i = 0;
   int new_len = 0;
   int orig_len = 0;
+  int total_len = 0;
   char * tmp = NULL;
   int delta = 0;
   ile_pgm_call_t * layout = *playout;
+  ile_pgm_call_t iamthisbigcompiler;
   /* enough room ? */
   if (layout) {
     /* max length - current position */
-    delta = layout->max - layout->pos;
+    delta = (layout->max - layout->pos) - sizeof(iamthisbigcompiler);
     if (delta > size) {
       return *playout;
     }
-    new_len = layout->max;
-    orig_len = new_len;
+    orig_len = layout->max;
+    total_len = layout->max + size;
+  } else {
+    total_len =  size + sizeof(iamthisbigcompiler);
   }
   /* need more space (block size alloc) */
-  for (i=0; new_len < size + sizeof(ile_pgm_call_t); i++) {
+  for (i=0; new_len < total_len; i++) {
     new_len += ILE_PGM_ALLOC_BLOCK;
   }
   /* expanded layout template */
@@ -2262,7 +2266,7 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) 
   int rc = 0;
 
   /* grow template (if need) */
-  layout = ile_pgm_grow(playout, sizeof(ile_pgm_call_t));
+  layout = ile_pgm_grow(playout, ILE_PGM_ALLOC_BLOCK);
 
   /* copy ebcdic */
   rc = ile_pgm_str_2_char((char *)&layout->pgm, pgm, 1, sizeof(layout->pgm), 0, 0);
