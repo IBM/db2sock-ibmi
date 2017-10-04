@@ -8,7 +8,7 @@
 #include "test.h"
 #include "PaseCliAsync.h"
 
-#define MAX_TEST_BUFFER 1000000
+#define MAX_TEST_BUFFER 5000000
 
 int main(int argc, char * argv[]) {
   SQLRETURN sqlrc = SQL_SUCCESS;
