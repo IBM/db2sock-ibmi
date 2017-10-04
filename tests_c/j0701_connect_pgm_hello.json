@@ -1,0 +1,6 @@
+{"connect":[{"db":"*LOCAL","uid":"DB2","pwd":"YIKES"},
+  {"pgm":[{"name":"HELLO","lib":"DB2JSON"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}
+]}
+
