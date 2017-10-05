@@ -1,22 +1,22 @@
 {"pgm":[
     {"name":"HAMELA05", "lib":"DB2JSON"},
     {"s": {"name":"val", "type":"10i0", "value":10}},
-    {"s": {"name":"outCount", "type":"10i0", "value":0}},
+    {"s": {"name":"outCount", "type":"10i0", "value":11}},
     {"ds": [{"name":"output", "dim":200},
         {"s":[
-            {"name":"out1", "type":"10i0", "value":0},
-            {"name":"out2", "type":"5av2", "value":""}
+            {"name":"out1", "type":"10i0", "value":12},
+            {"name":"out2", "type":"5av2", "value":"x"}
         ]},
         {"ds": [{"name": "innerDS", "dim":30},
             {"s":[
-                {"name":"field1", "type":"10a", "value":""},
-                {"name":"field2", "type":"15a", "value":""},
-                {"name":"field2", "type":"25a", "value":""},
-                {"name":"field2", "type":"5a", "value":""}
+                {"name":"field1", "type":"10a", "value":"j"},
+                {"name":"field2", "type":"15a", "value":"k"},
+                {"name":"field2", "type":"25a", "value":"l"},
+                {"name":"field2", "type":"5a", "value":"z"}
             ]}
         ]},
-        {"s": {"name":"out3", "type":"10av2", "value":""}}
+        {"s": {"name":"out3", "type":"10av2", "value":"y"}}
     ]},
-    {"s": {"name":"last", "type":"10a", "value":""}}
+    {"s": {"name":"last", "type":"10a", "value":"Bob"}}
 ]}
 

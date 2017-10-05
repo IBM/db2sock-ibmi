@@ -1046,7 +1046,7 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   if (tmp) {
     tool_free(tmp);
   }
-  /* rest layout template pointer */
+  /* layout template pointer */
   *playout = layout;
   /* return new location (tmp ptrs) */
   return *playout;
@@ -2484,7 +2484,7 @@ char * in_dim,
 char * in_by,
 int * ds_dim, 
 int * ds_by, 
-char ** ds_where,
+int * ds_start_offset,
 ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
@@ -2522,7 +2522,7 @@ ile_pgm_call_t **playout) {
   /* parse data */
   *ds_dim = tdim;
   *ds_by = by;
-  *ds_where = where;
+  *ds_start_offset = where - (char *)layout;
 
   /* layout return */
   *playout = layout;
@@ -2537,16 +2537,22 @@ SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t 
   int j = 0;
   int ds_spill_len = 0;
   char * where = NULL;
+  int offset_orig = 0;
+  int offset_curr = 0;
 
   /* multiple dim DS */
   if (ds_dim > 1) {
     where = ile_pgm_parm_location(0, ds_by, 0, layout);
     ds_spill_len = where - ds_where;
+    offset_orig = ds_where - (char *)layout;
     for (j = 1; j < ds_dim; j++) {
       /* where now */
       where = ile_pgm_parm_location(0, ds_by, 0, layout);
+      offset_curr = where - (char *)layout;
       /* grow template (if need) */
       layout = ile_pgm_grow(playout, ds_spill_len);
+      ds_where = (char *)layout + offset_orig; /* hamela05 bug */
+      where = (char *)layout + offset_curr;  /* hamela05 bug */
       /* copy additional ds */
       memcpy(where,ds_where,ds_spill_len);
       ile_pgm_next_spill_pos(layout, ds_spill_len);
@@ -2650,10 +2656,15 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   int pgm_ds_dim_cnt = 0;
   int pgm_ds_dim_max = 0;
   int pgm_ds_by_flag = 0;
+  int ds_start_offset = 0;
   char * pgm_ds_where_start = NULL;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_node_t * pgm_ds_idx = node;
+  int j = 0;
+  int ds_spill_len = 0;
+  char * where = NULL;
+  char * where_copy = NULL;
   /* current node (output) */
   tool->curr = node;
   /* pgm ds attributes (parser order 1st) */
@@ -2677,7 +2688,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     }
   }
   /* where start here */
-  sqlrc = tool_dcl_ds(*isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
+  sqlrc = tool_dcl_ds(*isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &ds_start_offset, &tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
@@ -2710,7 +2721,28 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
       break;
     case TOOL400_KEY_END_DS:
       if (!isOut) {
-        sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, ILE_PGM_BY_IN_DS, &tpgm->layout);
+        /* sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, ILE_PGM_BY_IN_DS, &tpgm->layout); */
+        /* multiple dim DS */
+        pgm_ds_where_start = (char *)tpgm->layout + ds_start_offset;
+        if (pgm_ds_dim_cnt > 1) {
+          where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
+          ds_spill_len = where - pgm_ds_where_start;
+          where_copy = tool_new(ds_spill_len);
+          memcpy(where_copy,pgm_ds_where_start,ds_spill_len);
+          for (j = 1; j < pgm_ds_dim_cnt; j++) {
+            /* where now */
+            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
+            /* grow template (if need) */
+            tpgm->layout = ile_pgm_grow(&tpgm->layout, ds_spill_len);
+            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);  /* hamela05 bug */
+            /* copy additional ds */
+            memcpy(where,where_copy,ds_spill_len);
+            ile_pgm_next_spill_pos(tpgm->layout, ds_spill_len);
+          }
+          tool_free(where_copy);
+          where_copy = NULL;
+          where = NULL;
+        }
         go = 0;
       } else {
         /* dim replay ds (from pgm_ds_idx) */
