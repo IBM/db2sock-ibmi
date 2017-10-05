@@ -33,6 +33,8 @@ HAMELA04PGM  = hamela04.pgm
 HAMELA04OBJS = hamela04.mod
 HAMELA05PGM  = hamela05.pgm
 HAMELA05OBJS = hamela05.mod
+HAMELA06PGM  = hamela06.pgm
+HAMELA06OBJS = hamela06.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -54,7 +56,7 @@ mylib:
 	@$(MAKE) go
 go: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) \
   $(HAMELA01PGM) $(HAMELA02PGM) $(HAMELA03PGM) $(HAMELA04PGM) \
-  $(HAMELA05PGM)
+  $(HAMELA05PGM) $(HAMELA06PGM)
 
 .SUFFIXES: .mod .rpgle
 ### CRTRPGMOD
@@ -84,6 +86,9 @@ $(HAMELA04PGM): $(HAMELA04OBJS)
 ### -- HAMELA04PGM (ILE RPG)
 $(HAMELA05PGM): $(HAMELA05OBJS)
 	$(CCPGM) --pgm $(HAMELA05PGM) --lib $(ILELIB) --mod $(HAMELA05OBJS)
+### -- HAMELA06PGM (ILE RPG)
+$(HAMELA06PGM): $(HAMELA06OBJS)
+	$(CCPGM) --pgm $(HAMELA06PGM) --lib $(ILELIB) --mod $(HAMELA06OBJS)
 
 removeo:
 	rm -f *.mod

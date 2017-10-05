@@ -52,19 +52,11 @@ typedef struct tool_key_pgm_struct {
   SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
 } tool_key_pgm_struct_t;
 
-typedef struct tool_key_struct {
-  int hdbc;
-  tool_key_conn_struct_t * tconn;
-  char * outarea;
-  int outlen;
-  tool_struct_t *tool;
-} tool_key_t;
-
 /*=================================================
  * toolkit prototypes
  */
-SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
-SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
+SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
+SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
 
 char * ile_pgm_spill_top_buf(ile_pgm_call_t * layout);
 int ile_pgm_spill_top_offset(ile_pgm_call_t * layout);
@@ -176,6 +168,12 @@ tool_struct_t * tool_ctor(
   tool->first = NULL;
   tool->curr = NULL;
   tool->last = NULL;
+  tool->tconn = NULL;
+  tool->outarea = NULL;
+  tool->outmax = 0;
+  tool->outlen = 0;
+  tool->hdbc = 0;
+  tool->sqlCode = 0;
   return tool;
 }
 
@@ -693,7 +691,7 @@ void tool_dump_lvl_key_val(char * mykey, int idx, int lvl, int key, char * val) 
   tool_dump_key(mykey, idx, lvl, key, val);
 }
 
-void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
+void tool_graph(SQLRETURN sqlrc, char *func, tool_struct_t * tool) {
   char mykey[256];
   int i = 0;
   int j = 0;
@@ -708,7 +706,7 @@ void tool_graph(SQLRETURN sqlrc, char *func, tool_key_t * tk) {
     /* printf_stack(mykey); */
     printf_sqlrc_status((char *)&mykey, sqlrc);
     dev_dump();
-    for (i=0, node = tk->tool->first; node; node = node->next, i++) {
+    for (i=0, node = tool->first; node; node = node->next, i++) {
       tool_dump_lvl_key_val(mykey, i, node->ord, node->key, node->val);
       dev_dump();
       for (j=0; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
@@ -817,31 +815,31 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
  * toolkit callback output format
  */
 
-void tool_output_script_beg(tool_struct_t *tool, char *out_caller) {
-  tool->output_script_beg(tool->curr, out_caller);
+void tool_output_script_beg(tool_struct_t *tool) {
+  tool->output_script_beg(tool->curr, tool->outarea);
 }
-void tool_output_script_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_script_end(tool->curr, out_caller);
+void tool_output_script_end(tool_struct_t *tool) {
+  tool->output_script_end(tool->curr, tool->outarea);
 }
-void tool_output_query_beg(tool_struct_t *tool, char *out_caller, char *query) {
-  tool->output_query_beg(tool->curr, out_caller, query);
+void tool_output_query_beg(tool_struct_t *tool, char *query) {
+  tool->output_query_beg(tool->curr, tool->outarea, query);
 }
-void tool_output_query_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_query_end(tool->curr, out_caller);
+void tool_output_query_end(tool_struct_t *tool) {
+  tool->output_query_end(tool->curr, tool->outarea);
 }
-void tool_output_record_array_beg(tool_struct_t *tool, char *out_caller) {
-  tool->output_record_array_beg(tool->curr, out_caller);
+void tool_output_record_array_beg(tool_struct_t *tool) {
+  tool->output_record_array_beg(tool->curr, tool->outarea);
 }
-void tool_output_record_array_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_record_array_end(tool->curr, out_caller);
+void tool_output_record_array_end(tool_struct_t *tool) {
+  tool->output_record_array_end(tool->curr, tool->outarea);
 }
-void tool_output_record_no_data_found(tool_struct_t *tool, char *out_caller) {
-  tool->output_record_no_data_found(tool->curr, out_caller);
+void tool_output_record_no_data_found(tool_struct_t *tool) {
+  tool->output_record_no_data_found(tool->curr, tool->outarea);
 }
-void tool_output_record_row_beg(tool_struct_t *tool, char *out_caller) {
-  tool->output_record_row_beg(tool->curr, out_caller);
+void tool_output_record_row_beg(tool_struct_t *tool) {
+  tool->output_record_row_beg(tool->curr, tool->outarea);
 }
-void tool_output_record_name_value(tool_struct_t *tool, char *out_caller, char *name, char *value, int type, int fStrLen) {
+void tool_output_record_name_value(tool_struct_t *tool, char *name, char *value, int type, int fStrLen) {
   if (fStrLen == SQL_NULL_DATA) {
     fStrLen = TOOL400_DATA_IS_NULL;
   }
@@ -861,57 +859,57 @@ void tool_output_record_name_value(tool_struct_t *tool, char *out_caller, char *
     type = TOOL400_DATA_TYPE_CHAR;
     break;
   }
-  tool->output_record_name_value(tool->curr, out_caller, name, value, type, fStrLen);
+  tool->output_record_name_value(tool->curr, tool->outarea, name, value, type, fStrLen);
 }
-void tool_output_record_row_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_record_row_end(tool->curr, out_caller);
+void tool_output_record_row_end(tool_struct_t *tool) {
+  tool->output_record_row_end(tool->curr, tool->outarea);
 }
-void tool_output_sql_errors(tool_struct_t *tool, char *out_caller, int rc, int sqlCode, char * sqlState, char *sqlMsg)
+void tool_output_sql_errors(tool_struct_t *tool, int rc, int sqlCode, char * sqlState, char *sqlMsg)
 {
-  tool->output_sql_errors(tool->curr, out_caller, rc, sqlCode, sqlState, sqlMsg);
+  tool->output_sql_errors(tool->curr, tool->outarea, rc, sqlCode, sqlState, sqlMsg);
 }
-void tool_output_pgm_beg(tool_struct_t *tool, char *out_caller, char * name, char * lib, char * func) {
-  tool->output_pgm_beg(tool->curr, out_caller, name, lib, func);
+void tool_output_pgm_beg(tool_struct_t *tool, char * name, char * lib, char * func) {
+  tool->output_pgm_beg(tool->curr, tool->outarea, name, lib, func);
 }
-void tool_output_pgm_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_pgm_end(tool->curr, out_caller);
+void tool_output_pgm_end(tool_struct_t *tool) {
+  tool->output_pgm_end(tool->curr, tool->outarea);
 }
-void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char *out_caller, char * name, int tdim) {
-  tool->output_pgm_dcl_s_beg(tool->curr, out_caller, name, tdim);
+void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char * name, int tdim) {
+  tool->output_pgm_dcl_s_beg(tool->curr, tool->outarea, name, tdim);
 }
-void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *out_caller, char *value, int numFlag) {
-  tool->output_pgm_dcl_s_data(tool->curr, out_caller, value, numFlag);
+void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
+  tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, value, numFlag);
 }
-void tool_output_pgm_dcl_s_end(tool_struct_t *tool, char *out_caller, int tdim) {
-  tool->output_pgm_dcl_s_end(tool->curr, out_caller, tdim);
+void tool_output_pgm_dcl_s_end(tool_struct_t *tool, int tdim) {
+  tool->output_pgm_dcl_s_end(tool->curr, tool->outarea, tdim);
 }
-void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char *out_caller, char * name, int tdim) {
-  tool->output_pgm_dcl_ds_beg(tool->curr, out_caller, name, tdim);
+void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char * name, int tdim) {
+  tool->output_pgm_dcl_ds_beg(tool->curr, tool->outarea, name, tdim);
 }
-void tool_output_pgm_dcl_ds_rec_beg(tool_struct_t *tool, char *out_caller) {
-  tool->output_pgm_dcl_ds_rec_beg(tool->curr, out_caller);
+void tool_output_pgm_dcl_ds_rec_beg(tool_struct_t *tool) {
+  tool->output_pgm_dcl_ds_rec_beg(tool->curr, tool->outarea);
 }
-void tool_output_pgm_dcl_ds_rec_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_pgm_dcl_ds_rec_end(tool->curr, out_caller);
+void tool_output_pgm_dcl_ds_rec_end(tool_struct_t *tool) {
+  tool->output_pgm_dcl_ds_rec_end(tool->curr, tool->outarea);
 }
-void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, char *out_caller, int tdim) {
-  tool->output_pgm_dcl_ds_end(tool->curr, out_caller, tdim);
+void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, int tdim) {
+  tool->output_pgm_dcl_ds_end(tool->curr, tool->outarea, tdim);
 }
-void tool_output_cmd_beg(tool_struct_t *tool, char *out_caller, char * cmd) {
-  tool->output_cmd_beg(tool->curr, out_caller, cmd);
+void tool_output_cmd_beg(tool_struct_t *tool, char * cmd) {
+  tool->output_cmd_beg(tool->curr, tool->outarea, cmd);
 }
-void tool_output_cmd_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_cmd_end(tool->curr, out_caller);
+void tool_output_cmd_end(tool_struct_t *tool) {
+  tool->output_cmd_end(tool->curr, tool->outarea);
 }
 
-void tool_output_joblog_beg(tool_struct_t *tool, char *out_caller) {
-  tool->output_joblog_beg(tool->curr, out_caller);
+void tool_output_joblog_beg(tool_struct_t *tool) {
+  tool->output_joblog_beg(tool->curr, tool->outarea);
 }
-void tool_output_joblog_rec(tool_struct_t *tool, char *out_caller, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) {
-  tool->output_joblog_rec(tool->curr, out_caller,msgid,msgtype,msgsub,msgsev,msgstamp,msgtolib,msgtopgm,msgtomod,msgtoproc,msgtoinst,msgtxt);
+void tool_output_joblog_rec(tool_struct_t *tool, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) {
+  tool->output_joblog_rec(tool->curr, tool->outarea, msgid,msgtype,msgsub, msgsev, msgstamp, msgtolib, msgtopgm, msgtomod, msgtoproc, msgtoinst, msgtxt);
 }
-void tool_output_joblog_end(tool_struct_t *tool, char *out_caller) {
-  tool->output_joblog_end(tool->curr, out_caller);
+void tool_output_joblog_end(tool_struct_t *tool) {
+  tool->output_joblog_end(tool->curr, tool->outarea);
 }
 
 
@@ -1092,7 +1090,7 @@ SQLRETURN ile_pgm_str_2_int8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int8_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int8_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   int8 * wherev = (int8 *) where;
   int8 value = 0;
@@ -1101,7 +1099,7 @@ SQLRETURN ile_pgm_int8_2_output(tool_struct_t *tool, char *out_caller, char * wh
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1119,7 +1117,7 @@ SQLRETURN ile_pgm_str_2_int16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int16_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int16_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   int16 * wherev = (int16 *) where;
   int16 value = 0;
@@ -1128,7 +1126,7 @@ SQLRETURN ile_pgm_int16_2_output(tool_struct_t *tool, char *out_caller, char * w
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1146,7 +1144,7 @@ SQLRETURN ile_pgm_str_2_int32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int32_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int32_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   int32 * wherev = (int32 *) where;
   int32 value = 0;
@@ -1155,7 +1153,7 @@ SQLRETURN ile_pgm_int32_2_output(tool_struct_t *tool, char *out_caller, char * w
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%d",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1173,7 +1171,7 @@ SQLRETURN ile_pgm_str_2_int64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_int64_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_int64_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   int64 * wherev = (int64 *) where;
   int64 value = 0;
@@ -1182,7 +1180,7 @@ SQLRETURN ile_pgm_int64_2_output(tool_struct_t *tool, char *out_caller, char * w
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%lld",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1200,7 +1198,7 @@ SQLRETURN ile_pgm_str_2_uint8(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint8_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint8_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   uint8 * wherev = (uint8 *) where;
   uint8 value = 0;
@@ -1209,7 +1207,7 @@ SQLRETURN ile_pgm_uint8_2_output(tool_struct_t *tool, char *out_caller, char * w
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%u",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1227,7 +1225,7 @@ SQLRETURN ile_pgm_str_2_uint16(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint16_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint16_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   uint16 * wherev = (uint16 *) where;
   uint16 value = 0;
@@ -1236,7 +1234,7 @@ SQLRETURN ile_pgm_uint16_2_output(tool_struct_t *tool, char *out_caller, char * 
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%u",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1254,7 +1252,7 @@ SQLRETURN ile_pgm_str_2_uint32(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint32_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint32_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   uint32 * wherev = (uint32 *) where;
   uint32 value = 0;
@@ -1263,7 +1261,7 @@ SQLRETURN ile_pgm_uint32_2_output(tool_struct_t *tool, char *out_caller, char * 
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%u",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1281,7 +1279,7 @@ SQLRETURN ile_pgm_str_2_uint64(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_uint64_2_output(tool_struct_t *tool, char *out_caller, char * where, int tdim) {
+SQLRETURN ile_pgm_uint64_2_output(tool_struct_t *tool, char * where, int tdim) {
   int i = 0;
   uint64 * wherev = (uint64 *) where;
   uint64 value = 0;
@@ -1290,7 +1288,7 @@ SQLRETURN ile_pgm_uint64_2_output(tool_struct_t *tool, char *out_caller, char * 
     value = *wherev;
     memset(str,0,sizeof(str));
     sprintf(str,"%llu",value);
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1307,7 +1305,7 @@ SQLRETURN ile_pgm_str_2_float(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_float_2_output(tool_struct_t *tool, char *out_caller, char * where, int tscale, int tdim) {
+SQLRETURN ile_pgm_float_2_output(tool_struct_t *tool, char * where, int tscale, int tdim) {
   int i = 0;
   float * wherev = (float *) where;
   float value = 0;
@@ -1323,7 +1321,7 @@ SQLRETURN ile_pgm_float_2_output(tool_struct_t *tool, char *out_caller, char * w
     } else {
       sprintf(str,"%f",value);
     }
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1340,7 +1338,7 @@ SQLRETURN ile_pgm_str_2_double(char * where, const char *str, int tdim) {
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_double_2_output(tool_struct_t *tool, char *out_caller, char * where, int tscale, int tdim) {
+SQLRETURN ile_pgm_double_2_output(tool_struct_t *tool, char * where, int tscale, int tdim) {
   int i = 0;
   double * wherev = (double *) where;
   double value = 0;
@@ -1356,7 +1354,7 @@ SQLRETURN ile_pgm_double_2_output(tool_struct_t *tool, char *out_caller, char * 
     } else {
       sprintf(str,"%f",value);
     }
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1443,7 +1441,7 @@ SQLRETURN ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int 
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tscale, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1518,7 +1516,7 @@ SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char *out_caller, char * 
     if (isDot && !isScale) {
       str[j++] = (char) 0x30;
     }
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1577,7 +1575,7 @@ SQLRETURN ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int t
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_zoned_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tscale, int tdim) {
+SQLRETURN ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tscale, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1635,7 +1633,7 @@ SQLRETURN ile_pgm_zoned_2_output(tool_struct_t *tool, char *out_caller, char * w
     if (isDot && !isScale) {
       str[j++] = (char) 0x30;
     }
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 1);
+    tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return SQL_SUCCESS;
 }
@@ -1710,7 +1708,7 @@ SQLRETURN ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tv
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_char_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tvary, int tccsid, int tdim) {
+SQLRETURN ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim) {
   int rc = 0;
   int i = 0;
   int j = 0;
@@ -1755,9 +1753,9 @@ SQLRETURN ile_pgm_char_2_output(tool_struct_t *tool, char *out_caller, char * wh
     } /* j loop (trim) */
     /* output processing */
     if (len) {
-      tool_output_pgm_dcl_s_data(tool, out_caller, utf8, 0);
+      tool_output_pgm_dcl_s_data(tool, utf8, 0);
     } else {
-      tool_output_pgm_dcl_s_data(tool, out_caller, str_tool_empty, 1);
+      tool_output_pgm_dcl_s_data(tool, str_tool_empty, 1);
     }
   } /* i loop (tdim) */
   /* free temp storage */
@@ -1880,7 +1878,7 @@ SQLRETURN ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tva
   }
   return SQL_SUCCESS;
 }
-SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char *out_caller, char * where, int tlen, int tvary, int tdim) {
+SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tdim) {
   int i = 0;
   int j = 0;
   int k = 0;
@@ -1992,7 +1990,7 @@ SQLRETURN ile_pgm_bin_2_output(tool_struct_t *tool, char *out_caller, char * whe
           str[j++] = '0';
       }
     } /* k loop (outLength) */
-    tool_output_pgm_dcl_s_data(tool, out_caller, str, 0);
+    tool_output_pgm_dcl_s_data(tool, str, 0);
   } /* i loop (tdim) */
   /* free temp storage */
   if (str) {
@@ -2281,7 +2279,7 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) 
 
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
 SQLRETURN tool_dcl_s(tool_struct_t *tool, 
-char *out_caller, int isOut, 
+int isOut, 
 char * in_name,
 char * in_type,
 char * in_value,
@@ -2338,7 +2336,7 @@ ile_pgm_call_t **playout) {
 
   /* output processing */
   if (isOut) {
-    tool_output_pgm_dcl_s_beg(tool, out_caller, in_name, tdim);
+    tool_output_pgm_dcl_s_beg(tool, in_name, tdim);
   }
 
   /* dcl-s type */
@@ -2347,28 +2345,28 @@ ile_pgm_call_t **playout) {
     switch (tlen) {
     case 3:
       if (isOut) {
-        rc = ile_pgm_int8_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_int8_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_int8(where, in_value, tdim);
       }
       break;
     case 5:
       if (isOut) {
-        rc = ile_pgm_int16_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_int16_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_int16(where, in_value, tdim);
       }
       break;
     case 10:
       if (isOut) {
-        rc = ile_pgm_int32_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_int32_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_int32(where, in_value, tdim);
       }
       break;
     case 20:
       if (isOut) {
-        rc = ile_pgm_int64_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_int64_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_int64(where, in_value, tdim);
       }
@@ -2382,28 +2380,28 @@ ile_pgm_call_t **playout) {
     switch (tlen) {
     case 3:
       if (isOut) {
-        rc = ile_pgm_uint8_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_uint8_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint8(where, in_value, tdim);
       }
       break;
     case 5:
       if (isOut) {
-        rc = ile_pgm_uint16_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_uint16_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint16(where, in_value, tdim);
       }
       break;
     case 10:
       if (isOut) {
-        rc = ile_pgm_uint32_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_uint32_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint32(where, in_value, tdim);
       }
       break;
     case 20:
       if (isOut) {
-        rc = ile_pgm_uint64_2_output(tool, out_caller, where, tdim);
+        rc = ile_pgm_uint64_2_output(tool, where, tdim);
       } else {
         rc = ile_pgm_str_2_uint64(where, in_value, tdim);
       }
@@ -2417,14 +2415,14 @@ ile_pgm_call_t **playout) {
     switch (tlen) {
     case 4:
       if (isOut) {
-        rc = ile_pgm_float_2_output(tool, out_caller, where, tscale, tdim);
+        rc = ile_pgm_float_2_output(tool, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_float(where, in_value, tdim);
       }
       break;
     case 8:
       if (isOut) {
-        rc = ile_pgm_double_2_output(tool, out_caller, where, tscale, tdim);
+        rc = ile_pgm_double_2_output(tool, where, tscale, tdim);
       } else {
         rc = ile_pgm_str_2_double(where, in_value, tdim);
       }
@@ -2436,28 +2434,28 @@ ile_pgm_call_t **playout) {
     break;
   case 'p':
     if (isOut) {
-      ile_pgm_packed_2_output(tool, out_caller, where, tlen, tscale, tdim);
+      ile_pgm_packed_2_output(tool, where, tlen, tscale, tdim);
     } else {
       rc = ile_pgm_str_2_packed(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 's':
     if (isOut) {
-      ile_pgm_zoned_2_output(tool, out_caller, where, tlen, tscale, tdim);
+      ile_pgm_zoned_2_output(tool, where, tlen, tscale, tdim);
     } else {
       rc = ile_pgm_str_2_zoned(where, in_value, tdim, tlen, tscale);
     }
     break;
   case 'a':
     if (isOut) {
-      ile_pgm_char_2_output(tool, out_caller, where, tlen, tvary, tccsid, tdim);
+      ile_pgm_char_2_output(tool, where, tlen, tvary, tccsid, tdim);
     } else {
       rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid);
     }
     break;
   case 'b':
     if (isOut) {
-      ile_pgm_bin_2_output(tool, out_caller, where, tlen, tvary, tdim);
+      ile_pgm_bin_2_output(tool, where, tlen, tvary, tdim);
     } else {
       rc = ile_pgm_str_2_bin(where, in_value, tdim, tlen, tvary);
     }
@@ -2473,7 +2471,7 @@ ile_pgm_call_t **playout) {
   }
   /* output processing */
   if (isOut) {
-    tool_output_pgm_dcl_s_end(tool, out_caller, tdim);
+    tool_output_pgm_dcl_s_end(tool, tdim);
   }
   return rc;
 }
@@ -2565,12 +2563,11 @@ SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t 
  * toolkit run parsed key, val, lvl
  */
 
-int tool_sql_errors(tool_key_t * tk, SQLHANDLE handle, SQLSMALLINT hType, int rc)
+int tool_sql_errors(tool_struct_t * tool, SQLHANDLE handle, SQLSMALLINT hType, int rc)
 {
   SQLSMALLINT length = 0;
   SQLCHAR *p = NULL;
   SQLSMALLINT recno = 1;
-  tool_struct_t *tool = tk->tool;
   tool->sqlCode = 0;
   if (rc == SQL_ERROR) {
     memset(tool->sqlMsg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
@@ -2580,7 +2577,7 @@ int tool_sql_errors(tool_key_t * tk, SQLHANDLE handle, SQLSMALLINT hType, int rc
         p = &tool->sqlMsg[length-1];
         *p = '\0';
       }
-      tool_output_sql_errors(tk->tool, tk->outarea, rc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
+      tool_output_sql_errors(tool, rc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
       return SQL_ERROR;
     }
   }
@@ -2589,7 +2586,7 @@ int tool_sql_errors(tool_key_t * tk, SQLHANDLE handle, SQLSMALLINT hType, int rc
 
 
 /* program */
-SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
+SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int key = 0;
@@ -2603,10 +2600,10 @@ SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, i
   char * pgm_s_dim = NULL;
   char * pgm_s_by = NULL;
   char * pgm_s_ccsid = NULL;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   /* pgm data attributes (parser order 1st) */
   for (i=0; i < TOOL400_ATTR_MAX && node->akey[i]; i++) {
     key = node->akey[i];
@@ -2634,11 +2631,11 @@ SQLRETURN tool_key_pgm_data_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, i
     }
   }
   /* write or read data */
-  sqlrc = tool_dcl_s(tk->tool, tk->outarea, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, *isDs, &tpgm->layout);
+  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, *isDs, &tpgm->layout);
   return sqlrc;
 }
 
-SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
+SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int key = 0;
@@ -2654,11 +2651,11 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
   int pgm_ds_dim_max = 0;
   int pgm_ds_by_flag = 0;
   char * pgm_ds_where_start = NULL;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_node_t * pgm_ds_idx = node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   /* pgm ds attributes (parser order 1st) */
   for (i=0; i < TOOL400_ATTR_MAX && node->akey[i]; i++) {
     key = node->akey[i];
@@ -2683,9 +2680,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
   sqlrc = tool_dcl_ds(*isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_where_start, &tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
-    tool_output_pgm_dcl_ds_beg(tk->tool, tk->outarea, pgm_ds_name, pgm_ds_dim_cnt);
+    tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
     if (pgm_ds_dim_cnt) {
-      tool_output_pgm_dcl_ds_rec_beg(tk->tool, tk->outarea);
+      tool_output_pgm_dcl_ds_rec_beg(tool);
     }
   }
   /* pgm ds children (parser order next) */
@@ -2701,15 +2698,15 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
     }
     *curr_node = node;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     /* ds */
     tool_dump_beg(sqlrc, "pgm_ds_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_DCL_S:
-      sqlrc = tool_key_pgm_data_run(tk, tpgm, isDs, isOut, &node);
+      sqlrc = tool_key_pgm_data_run(tool, tpgm, isDs, isOut, &node);
       break;
     case TOOL400_KEY_DCL_DS:
-      sqlrc = tool_key_pgm_ds_run(tk, tpgm, isDs, isOut, &node);
+      sqlrc = tool_key_pgm_ds_run(tool, tpgm, isDs, isOut, &node);
       break;
     case TOOL400_KEY_END_DS:
       if (!isOut) {
@@ -2723,15 +2720,15 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
         pgm_ds_dim_cnt--;
         if (pgm_ds_dim_cnt > 0) {
           if (pgm_ds_dim_max) {
-            tool_output_pgm_dcl_ds_rec_end(tk->tool, tk->outarea);
-            tool_output_pgm_dcl_ds_rec_beg(tk->tool, tk->outarea);
+            tool_output_pgm_dcl_ds_rec_end(tool);
+            tool_output_pgm_dcl_ds_rec_beg(tool);
           }
           node = pgm_ds_idx;
         } else {
           if (pgm_ds_dim_max) {
-            tool_output_pgm_dcl_ds_rec_end(tk->tool, tk->outarea);
+            tool_output_pgm_dcl_ds_rec_end(tool);
           }
-          tool_output_pgm_dcl_ds_end(tk->tool, tk->outarea, pgm_ds_dim_max);
+          tool_output_pgm_dcl_ds_end(tool, pgm_ds_dim_max);
           pgm_ds_dim_max = 0;
           go = 0;
         }
@@ -2748,7 +2745,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int
 }
 
 
-SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm, int isOut, tool_node_t ** curr_node) {
+SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int isOut, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int i_end = 0;
@@ -2758,10 +2755,10 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
   int max = 0;
   int go = 1;
   int isDs = 0;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
     key = node->key;
     val = node->val;
@@ -2774,16 +2771,16 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
     }
     *curr_node = node;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     tool_dump_beg(sqlrc, "pgm_params_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_DCL_S:
       isDs = 0;
-      sqlrc = tool_key_pgm_data_run(tk, tpgm, &isDs, isOut, &node);
+      sqlrc = tool_key_pgm_data_run(tool, tpgm, &isDs, isOut, &node);
       break;
     case TOOL400_KEY_DCL_DS:
       isDs = 0;
-      sqlrc = tool_key_pgm_ds_run(tk, tpgm, &isDs, isOut, &node);
+      sqlrc = tool_key_pgm_ds_run(tool, tpgm, &isDs, isOut, &node);
       break;
     case TOOL400_KEY_END_PGM:
       go = 0;
@@ -2797,7 +2794,7 @@ SQLRETURN tool_key_pgm_params_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm,
   return sqlrc;
 }
 
-SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
+SQLRETURN tool_key_pgm_call_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   char * pgm_shift_ile = NULL;
   char * pgm_shift_pase = NULL;
@@ -2839,7 +2836,7 @@ SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tpgm->hstmt);
   }
-  sqlrc = tool_sql_errors(tk, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* shift to pase alignment
    * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
    *                                           .
@@ -2851,7 +2848,7 @@ SQLRETURN tool_key_pgm_call_run(tool_key_t * tk, tool_key_pgm_struct_t * tpgm) {
   return sqlrc;
 }
 
-SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
+SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sqlrc1 = SQL_SUCCESS;
   int i = 0;
@@ -2861,12 +2858,12 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
   int max = 0;
   int go = 1;
   int step = 0;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_pgm_struct_t * tpgm = (tool_key_pgm_struct_t *) node;
   tool_node_t * pgm_out_idx = node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   /* ctor */
   tpgm->hstmt = 0;
   tpgm->layout = NULL;
@@ -2913,29 +2910,29 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_sql_errors(tk, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* call program (step 1-input, step 2-output)*/
   for (step=1; step < 4 && sqlrc == SQL_SUCCESS; step++) {
     node = pgm_out_idx;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     tool_pgm_dump(sqlrc, "pgm_run", step, tpgm);
     switch(step) {
     case 1:
       if (tpgm->pgm_ile_name) {
-        tool_output_pgm_beg(tk->tool, tk->outarea, tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func);
+        tool_output_pgm_beg(tool, tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func);
       }
-      sqlrc = tool_key_pgm_params_run(tk, tpgm, 0, &node);
+      sqlrc = tool_key_pgm_params_run(tool, tpgm, 0, &node);
       break;
     case 2:
-      sqlrc = tool_key_pgm_call_run(tk, tpgm);
+      sqlrc = tool_key_pgm_call_run(tool, tpgm);
       break;
     case 3:
       /* reset top of parms */
       ile_pgm_reset_pos(tpgm->layout);
-      sqlrc = tool_key_pgm_params_run(tk, tpgm, 1, &node);
+      sqlrc = tool_key_pgm_params_run(tool, tpgm, 1, &node);
       if (tpgm->pgm_ile_name) {
-        tool_output_pgm_end(tk->tool, tk->outarea);
+        tool_output_pgm_end(tool);
       }
       break;
     default:
@@ -2946,7 +2943,7 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
   }
   if (tpgm->pgm_ile_name && sqlrc != SQL_SUCCESS) {
-    tool_output_pgm_end(tk->tool, tk->outarea);
+    tool_output_pgm_end(tool);
   }
   /* close */
   if (tpgm->hstmt) {
@@ -2957,7 +2954,7 @@ SQLRETURN tool_key_pgm_run(tool_key_t * tk, tool_node_t ** curr_node) {
 }
 
 /* cmd */
-SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
+SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sqlrc1 = SQL_SUCCESS;
   int i = 0;
@@ -2967,11 +2964,11 @@ SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
   int max = 0;
   int go = 1;
   char * cmd = NULL;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_cmd_struct_t * tcmd = (tool_key_cmd_struct_t *) node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
 
   /* ctor */
   tcmd->hstmt = 0;
@@ -2994,7 +2991,7 @@ SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
   }
   /* output */
-  tool_output_cmd_beg(tk->tool, tk->outarea, cmd);
+  tool_output_cmd_beg(tool, cmd);
   /* sql */
   tcmd->cmd_len = strlen(cmd);
   memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
@@ -3005,14 +3002,14 @@ SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_sql_errors(tk, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* execute */
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
   }
-  sqlrc = tool_sql_errors(tk, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* output */
-  tool_output_cmd_end(tk->tool, tk->outarea);
+  tool_output_cmd_end(tool);
   /* close */
   if (tcmd->hstmt) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, tcmd->hstmt);
@@ -3022,9 +3019,9 @@ SQLRETURN tool_key_cmd_run(tool_key_t * tk, tool_node_t ** curr_node) {
 }
 
 /* query */
-SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
+SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqry) {
   SQLRETURN sqlrc = SQL_SUCCESS;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   int i = 0;
   /* fetch */
   int fetch_recs = 0;
@@ -3045,12 +3042,12 @@ SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
   memset(fetch_col_len, 0, sizeof(fetch_col_len));
   sqlrc = SQLNumResultCols((SQLHSTMT)tqry->hstmt, 
                            &fetch_cols);
-  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* no records */
   if (fetch_cols < 1) {
-    tool_output_record_array_beg(tk->tool, tk->outarea);
-    tool_output_record_no_data_found(tk->tool, tk->outarea);
-    tool_output_record_array_end(tk->tool, tk->outarea);
+    tool_output_record_array_beg(tool);
+    tool_output_record_no_data_found(tool);
+    tool_output_record_array_end(tool);
     return sqlrc;
   }
   /* SQLDescribeCol */
@@ -3129,27 +3126,27 @@ SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
   } /* SQLDescribeCol loop */
   /* fetch */
   sqlrc = SQL_SUCCESS;
-  tool_output_record_array_beg(tk->tool, tk->outarea);
+  tool_output_record_array_beg(tool);
   while (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLFetch(tqry->hstmt);
     if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
       if (!fetch_recs) {
-        tool_output_record_no_data_found(tk->tool, tk->outarea);
+        tool_output_record_no_data_found(tool);
       } else {
         sqlrc = SQL_SUCCESS;
       }
       break;
     }
-    tool_output_record_row_beg(tk->tool, tk->outarea);
+    tool_output_record_row_beg(tool);
     fetch_recs += 1;
     for (i = 0 ; i < fetch_cols; i++) {
       if (fetch_col_value[i]) {
-        tool_output_record_name_value(tk->tool, tk->outarea, fetch_col_name[i], fetch_col_value[i], fetch_col_sql_type[i], fetch_col_len[i]);
+        tool_output_record_name_value(tool, fetch_col_name[i], fetch_col_value[i], fetch_col_sql_type[i], fetch_col_len[i]);
       }
     }
-    tool_output_record_row_end(tk->tool, tk->outarea);
+    tool_output_record_row_end(tool);
   } /* fetch loop */
-  tool_output_record_array_end(tk->tool, tk->outarea);
+  tool_output_record_array_end(tool);
   /* clean up col names */
   for (i = 0 ; i < fetch_cols; i++) {
     if (fetch_col_value[i]) {
@@ -3164,7 +3161,7 @@ SQLRETURN tool_key_fetch_run(tool_key_t * tk, tool_key_query_struct_t * tqry) {
   return sqlrc;
 }
 
-SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
+SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sqlrc1 = SQL_SUCCESS;
   int i = 0;
@@ -3174,12 +3171,12 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
   int lvl = 0;
   int max = 0;
   int go = 1;
-  tool_key_conn_struct_t * tconn = tk->tconn;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_query_struct_t * tqry = (tool_key_query_struct_t *) node;
   tool_node_t * node_next = NULL;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   /* query */
   SQLCHAR * query = NULL;
   SQLCHAR * query_val = NULL;
@@ -3211,21 +3208,21 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
     return sqlrc;
   }
   /* output */
-  tool_output_query_beg(tk->tool, tk->outarea, query);  
+  tool_output_query_beg(tool, query);  
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
   /* prepare */
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
   }
-  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
 
   /* parms? */
   memset(parm_len, 0, sizeof(parm_len));
   if (tqry->hstmt) {
     sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
   }
-  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* query parms */
   if (!node_next) {
     node_next = node->next;
@@ -3242,7 +3239,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
     *curr_node = node;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     tool_dump_beg(sqlrc, "query_parm", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_PARM:
@@ -3297,7 +3294,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
   /* parms error */
   if (sqlrc == SQL_ERROR) {
     /* output */
-    tool_output_query_end(tk->tool, tk->outarea);  
+    tool_output_query_end(tool);  
     return sqlrc;
   }
 
@@ -3305,11 +3302,11 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
   if (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
   }
-  sqlrc = tool_sql_errors(tk, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* execute error */
   if (sqlrc == SQL_ERROR) {
     /* output */
-    tool_output_query_end(tk->tool, tk->outarea);  
+    tool_output_query_end(tool);  
     return sqlrc;
   }
 
@@ -3329,7 +3326,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
     *curr_node = node;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     tool_dump_beg(sqlrc, "query_fetch", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_FETCH:
@@ -3350,7 +3347,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
       }
       /* fetch not complete */
       if (query_fetch) {
-        sqlrc = tool_key_fetch_run(tk, tqry);
+        sqlrc = tool_key_fetch_run(tool, tqry);
       }
       break;
     case TOOL400_KEY_END_FETCH:
@@ -3365,7 +3362,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
     tool_dump_end(sqlrc, "query_fetch_end", i, lvl, key, val);
   }
   /* output */
-  tool_output_query_end(tk->tool, tk->outarea);  
+  tool_output_query_end(tool);  
   /* close */
   if (tqry->hstmt) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, tqry->hstmt);
@@ -3375,7 +3372,7 @@ SQLRETURN tool_key_query_run(tool_key_t * tk, tool_node_t ** curr_node) {
 }
 
 /* connection */
-SQLRETURN tool_key_conn_joblog(tool_key_t * tk, SQLHANDLE hdbc) {
+SQLRETURN tool_key_conn_joblog(tool_struct_t * tool, SQLHANDLE hdbc) {
   /*
   *sort time descend (new entries first)
   */
@@ -3411,7 +3408,7 @@ SQLRETURN tool_key_conn_joblog(tool_key_t * tk, SQLHANDLE hdbc) {
   SQLSMALLINT nullable = 0;
 
   /* output */
-  tool_output_joblog_beg(tk->tool, tk->outarea);
+  tool_output_joblog_beg(tool);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
   /* prepare */
@@ -3437,7 +3434,7 @@ SQLRETURN tool_key_conn_joblog(tool_key_t * tk, SQLHANDLE hdbc) {
       if ( sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
         break;
       }
-      tool_output_joblog_rec(tk->tool, tk->outarea,
+      tool_output_joblog_rec(tool,
         buff_value[0],
         buff_value[1],
         buff_value[2],
@@ -3460,12 +3457,12 @@ SQLRETURN tool_key_conn_joblog(tool_key_t * tk, SQLHANDLE hdbc) {
   /* close */
   sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
   /* output */
-  tool_output_joblog_end(tk->tool, tk->outarea);
+  tool_output_joblog_end(tool);
 
  return sql_exec_rc;
 }
 
-SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
+SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int key = 0;
@@ -3476,10 +3473,10 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
   tool_node_t * node = *curr_node;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) node;
   /* current node (output) */
-  tk->tool->curr = node;
+  tool->curr = node;
   /* ctor */
   if (!tconn->conn_type) {
-    tconn->hdbc = tk->hdbc;
+    tconn->hdbc = tool->hdbc;
     if (tconn->hdbc) {
       tconn->presistent = 1;
     } else {
@@ -3503,7 +3500,7 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     tconn->conn_curlib = NULL;
   }
   /* connection in toolkit */
-  tk->tconn = tconn;
+  tool->tconn = tconn;
   /* user request connection? */
   if (!tconn->hdbc) {
     /* connect attributes (parser order 1st) */
@@ -3556,7 +3553,7 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
         go = 0;
         *curr_node = node;
         /* current node (output) */
-        tk->tool->curr = node;
+        tool->curr = node;
         break;
       }
     }
@@ -3566,7 +3563,7 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     } else {
       sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
     }
-    sqlrc = tool_sql_errors(tk, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
+    sqlrc = tool_sql_errors(tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
   } /* !tconn->hdbc */
   /* connect children (parser order next) */
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
@@ -3581,18 +3578,18 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
     *curr_node = node;
     /* current node (output) */
-    tk->tool->curr = node;
+    tool->curr = node;
     /* top level */
     tool_dump_beg(sqlrc, "conn_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_QUERY:
-      sqlrc = tool_key_query_run(tk, &node);
+      sqlrc = tool_key_query_run(tool, &node);
       break;
     case TOOL400_KEY_CMD:
-      sqlrc = tool_key_cmd_run(tk, &node);
+      sqlrc = tool_key_cmd_run(tool, &node);
       break;
     case TOOL400_KEY_PGM:
-      sqlrc = tool_key_pgm_run(tk, &node);
+      sqlrc = tool_key_pgm_run(tool, &node);
       break;
     case TOOL400_KEY_END_CONN:
       go = 0;
@@ -3605,7 +3602,7 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
     }
     /* joblog info */
     if (sqlrc == SQL_ERROR) {
-      tool_key_conn_joblog(tk, tconn->hdbc);
+      tool_key_conn_joblog(tool, tconn->hdbc);
     }
   }
   /* hdbc external (caller?) or pool (pConnect) */
@@ -3615,19 +3612,6 @@ SQLRETURN tool_key_conn_run(tool_key_t * tk, tool_node_t ** curr_node) {
   return sqlrc;
 }
 
-/* toolkit */
-tool_key_t * tk_ctor(int hdbc, char * outarea, int outlen, tool_struct_t *tool) {
-  tool_key_t * tk = (tool_key_t *) tool_new(sizeof(tool_key_t));
-  tk->hdbc = hdbc;
-  tk->outarea = outarea;
-  tk->outlen = outlen;
-  tk->tool = tool;
-  tk->tconn = (tool_key_conn_struct_t *) tool_node_first(tool);
-  return tk;
-} 
-void tk_dtor(tool_key_t * tk) {
-  tool_free((char *)tk);
-}
 int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool) 
 {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -3636,13 +3620,16 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool)
   char * val = NULL;
   int lvl = 0;
   int max = 0;
-  tool_key_t * tk = NULL;
   tool_node_t * node = NULL;
   /* ctor */
-  tk = tk_ctor(hdbc, outarea, outlen, tool);
-  tool_graph(sqlrc, "tool_graph", tk);
+  tool->hdbc = hdbc;
+  tool->outarea = outarea;
+  tool->outmax = outlen;
+  tool->outlen = 0;
+  tool->tconn = (tool_key_conn_struct_t *) tool_node_first(tool);
+  tool_graph(sqlrc, "tool_graph", tool);
   /* output start script */
-  tool_output_script_beg(tk->tool, tk->outarea);
+  tool_output_script_beg(tool);
   /* top level */
   for (i=0, node = tool->first; node && sqlrc == SQL_SUCCESS; node = node->next, i++) {
     key = node->key;
@@ -3651,7 +3638,7 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool)
     tool_dump_beg(sqlrc, "tool_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_CONN:
-      sqlrc = tool_key_conn_run(tk, &node);
+      sqlrc = tool_key_conn_run(tool, &node);
       break;
     default:
       break;
@@ -3661,9 +3648,8 @@ int tool_run(int hdbc, char * outarea, int outlen, tool_struct_t *tool)
     }
   }
   /* output end script */
-  tool_output_script_end(tk->tool, tk->outarea);
-  /* dtor */
-  tk_dtor(tk);
+  tool_output_script_end(tool);
+
   return sqlrc;
 }
 

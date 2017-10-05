@@ -174,7 +174,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define ILE_PGM_BY_RETURN 5
 #define ILE_PGM_BY_IN_DS 6
 
-#define ILE_PGM_MAX_ARGS 128
+#define ILE_PGM_MAX_ARGS 159
 #define ILE_PGM_ALLOC_BLOCK 4096
 typedef struct ile_pgm_call_struct {
 #ifdef __IBMC__
@@ -261,6 +261,7 @@ typedef void (*output_joblog_rec_t)(tool_node_t *, char *, char *, char *, char 
 typedef void (*output_joblog_end_t)(tool_node_t *, char *);
 
 typedef struct tool_struct {
+  /* user callback data */
   output_script_beg_t output_script_beg;
   output_script_end_t output_script_end;
   output_query_beg_t output_query_beg;
@@ -286,9 +287,15 @@ typedef struct tool_struct {
   output_joblog_beg_t output_joblog_beg;
   output_joblog_rec_t output_joblog_rec;
   output_joblog_end_t output_joblog_end;
+  /* private data */
   tool_node_t * first;
   tool_node_t * curr;
   tool_node_t * last;
+  void * tconn;
+  char * outarea;
+  int outmax;
+  int outlen;
+  int hdbc;
   SQLINTEGER sqlCode;
   SQLCHAR sqlState[SQL_SQLSTATE_SIZE + 1];
   SQLCHAR sqlMsg[SQL_MAX_MESSAGE_LENGTH + 1];

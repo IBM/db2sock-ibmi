@@ -1,0 +1,8 @@
+{"pgm":[
+    {"name":"HAMELA06", "lib":"DB2JSON"},
+    {"s": [
+        {"name":"paramCount", "type":"10i0", "value":0},
+        {"name":"p1", "type":"5a", "value":""}
+    ]}
+]}
+

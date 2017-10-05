@@ -1,6 +1,6 @@
 ### Compile (Makefile)
 ### > export CHROOT=/path/chroot
-### > make cgi
+### > make proc
 ### > make ILELIB=ANYLIB mylib
 ### Assumes borgi command and utilities
 ### https://bitbucket.org/litmis/borgi
@@ -14,11 +14,11 @@ INSTALLDIR   = /QOpenSys/usr/lib
 CCC         = crtcmod
 CCPGM       = crtpgm
 CCSRVPGM    = crtsrvpgm
-CCSQL		= db2script
+CCSQL		    = db2script
 
-### *PGM CGI
+### *PGM proc
 SP400SRVPGM  = db2proc.srvpgm
-SP400OBJS    = db2proc.mod
+SP400OBJS    = db2proc.mod ibyrefp1.mod ibyrefp2.mod ibyrefp3.mod ibyrefp4.mod ibyrefp5.mod ibyrefs1.mod ibyrefs2.mod ibyrefs3.mod ibyrefs4.mod ibyrefs5.mod
 SQLTPL       = crtsql.cmd
 SQLRPL       = DB2JSON $(ILELIB)
 
@@ -30,7 +30,7 @@ help:
 	@echo "------------------------------------------------------------"
 	@echo "'$(MAKE) xxx' where xxx = proc, mylib"
 	@echo "'> export CHROOT=/path/chroot'"
-	@echo "'> make cgi'  where ILELIB=DB2JSON"
+	@echo "'> make proc'  where ILELIB=DB2JSON"
 	@echo "'-- or --"
 	@echo "'> export CHROOT=/path/chroot'"
 	@echo "'> make ILELIB=ANYLIB mylib'"
