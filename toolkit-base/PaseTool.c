@@ -2530,40 +2530,6 @@ ile_pgm_call_t **playout) {
   return rc;
 }
 
-SQLRETURN ile_pgm_copy_ds(char *ds_where, int ds_dim, int ds_by, ile_pgm_call_t **playout) {
-
-  ile_pgm_call_t * layout = *playout;
-
-  int j = 0;
-  int ds_spill_len = 0;
-  char * where = NULL;
-  int offset_orig = 0;
-  int offset_curr = 0;
-
-  /* multiple dim DS */
-  if (ds_dim > 1) {
-    where = ile_pgm_parm_location(0, ds_by, 0, layout);
-    ds_spill_len = where - ds_where;
-    offset_orig = ds_where - (char *)layout;
-    for (j = 1; j < ds_dim; j++) {
-      /* where now */
-      where = ile_pgm_parm_location(0, ds_by, 0, layout);
-      offset_curr = where - (char *)layout;
-      /* grow template (if need) */
-      layout = ile_pgm_grow(playout, ds_spill_len);
-      ds_where = (char *)layout + offset_orig; /* hamela05 bug */
-      where = (char *)layout + offset_curr;  /* hamela05 bug */
-      /* copy additional ds */
-      memcpy(where,ds_where,ds_spill_len);
-      ile_pgm_next_spill_pos(layout, ds_spill_len);
-    }
-  }
-
-  /* layout return */
-  *playout = layout;
-
-  return SQL_SUCCESS;
-}
 
 /*=================================================
  * toolkit run parsed key, val, lvl
@@ -2657,7 +2623,6 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   int pgm_ds_dim_max = 0;
   int pgm_ds_by_flag = 0;
   int ds_start_offset = 0;
-  char * pgm_ds_where_start = NULL;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_node_t * pgm_ds_idx = node;
@@ -2721,31 +2686,39 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
       break;
     case TOOL400_KEY_END_DS:
       if (!isOut) {
-        /* sqlrc = ile_pgm_copy_ds(pgm_ds_where_start, pgm_ds_dim_cnt, ILE_PGM_BY_IN_DS, &tpgm->layout); */
         /* multiple dim DS */
-        pgm_ds_where_start = (char *)tpgm->layout + ds_start_offset;
         if (pgm_ds_dim_cnt > 1) {
+          /* ds_spill_len calculate full size of 'ds' including all fully initialized 
+           * nested/arrayed 'ds', 's' children, then use as 1st 'element' pattern
+           * to initialize all the remaining array elements with memcpy.
+           * This avoids the need to reprocess json in the recursive 'run' functions.
+           * (To wit, nature of compiler initialization of 'ds' array 'nested' is simply
+           * replicate 1st full initialize element into remain array elements.)
+           */
+          where_copy = (char *)tpgm->layout + ds_start_offset; /* hamela05 bug - will move on grow */
           where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
-          ds_spill_len = where - pgm_ds_where_start;
-          where_copy = tool_new(ds_spill_len);
-          memcpy(where_copy,pgm_ds_where_start,ds_spill_len);
+          ds_spill_len = where - where_copy;
           for (j = 1; j < pgm_ds_dim_cnt; j++) {
-            /* where now */
-            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
             /* grow template (if need) */
             tpgm->layout = ile_pgm_grow(&tpgm->layout, ds_spill_len);
-            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);  /* hamela05 bug */
-            /* copy additional ds */
+            /* where now */
+            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
+            where_copy = (char *)tpgm->layout + ds_start_offset; /* hamela05 bug */
+            /* copy additional ds element */
             memcpy(where,where_copy,ds_spill_len);
             ile_pgm_next_spill_pos(tpgm->layout, ds_spill_len);
           }
-          tool_free(where_copy);
-          where_copy = NULL;
           where = NULL;
+          where_copy = NULL;
         }
         go = 0;
       } else {
-        /* dim replay ds (from pgm_ds_idx) */
+        /* dim replay ds (from pgm_ds_idx)
+         * Unfortunately, output can not just copy image like input (init above).
+         * Instead we must 're-play' the entire parse for each element. The
+         * reason is obvious (probably), but to complete the thought, 
+         * output data is likely completely different each array element. 
+         */
         if (!pgm_ds_dim_max) {
           pgm_ds_dim_max = pgm_ds_dim_cnt;
         }
