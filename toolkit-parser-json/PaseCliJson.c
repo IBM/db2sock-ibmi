@@ -72,7 +72,7 @@ int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC};
 /* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return"}} */
 char * json_ds_attr [] = {"name","dim","by",NULL};
 int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY};
-/* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|value|const|return","value":"MYVALUE"}} */
+/* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|val|const|return","value":"MYVALUE"}} */
 char * json_s_attr [] = {"name","dim","type","value","by",NULL};
 int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY};
 /* {"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
@@ -441,12 +441,17 @@ void json_dump_null(char *func, char * val) {
  * output
  * ==========================
  */
-void json_output_printf(int adjust, char *out_caller, const char * format, ...) {
+int json_output_printf(int adjust, char *out_caller, int outLen, const char * format, ...) {
+  int retLen = outLen;
   char *p = (char *) NULL; 
   char *q = (char *) NULL; 
   int l = 0;
   int w = 0;
-  l = strlen(out_caller);
+  int printLen = 0;
+  if(retLen == 0){
+    retLen = strlen(out_caller);
+  }
+  l = retLen;
   p = out_caller + l;
   if (l) {
     w = l - 1;
@@ -483,47 +488,66 @@ void json_output_printf(int adjust, char *out_caller, const char * format, ...) 
   }
   va_list args;
   va_start(args, format);
-  vsprintf(p, format, args);
+  printLen = vsprintf(p, format, args);
   va_end(args);
+  retLen = l + printLen;
+  return retLen;
 }
 
-void json_output_script_beg(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_NDA, out_caller, 
+int json_output_script_beg(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_NDA, out_caller, retLen, 
     "{\"script\":[");
+  return retLen;
 }
-void json_output_script_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_script_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
 
-void json_output_query_beg(tool_node_t *tool, char *out_caller, char * query) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_query_beg(tool_node_t *tool, char *out_caller, int outLen, char * query) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"query\":[\"%s\"", query);
+  return retLen;
 }
-void json_output_query_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_query_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
-void json_output_record_array_beg(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_record_array_beg(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
     "{\"records\":[");
+  return retLen;
 }
-void json_output_record_array_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_record_array_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
 
-void json_output_record_no_data_found(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_NDA, out_caller, 
+int json_output_record_no_data_found(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_NDA, out_caller, retLen, 
     "\"SQL_NO_DATA_FOUND\"");
+  return retLen;
 }
 
 
-void json_output_record_row_beg(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_record_row_beg(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
     "{");
+  return retLen;
 }
-void json_output_record_name_value(tool_node_t *tool, char *out_caller, char *name, char *value, int type, int fStrLen) {
+int json_output_record_name_value(tool_node_t *tool, char *out_caller, int outLen, char *name, char *value, int type, int fStrLen) {
+  int retLen = outLen;
   int i = 0;
   int len = 0;
   char * fmt_val_char = "\"%s\"";
@@ -566,146 +590,179 @@ void json_output_record_name_value(tool_node_t *tool, char *out_caller, char *na
       break;
     }
   }
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, fmt_key_val, name, value);
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, fmt_key_val, name, value);
+  return retLen;
 }
-void json_output_record_row_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_record_row_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "}");
+  return retLen;
 }
 
-void json_output_sql_errors(tool_node_t *tool, char *out_caller, int rc, int sqlCode, char * sqlState, char *sqlMsg)
+int json_output_sql_errors(tool_node_t *tool, char *out_caller, int outLen, int rc, int sqlCode, char * sqlState, char *sqlMsg)
 {
+  int retLen = outLen;
   if (rc == SQL_ERROR) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
         "\n{\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"}", sqlCode, sqlState, sqlMsg);
   }
+  return retLen;
 }
 
 /* pgm call */
-void json_output_pgm_beg(tool_node_t *tool, char *out_caller, char * name, char * lib, char * func) {
+int json_output_pgm_beg(tool_node_t *tool, char *out_caller, int outLen, char * name, char * lib, char * func) {
+  int retLen = outLen;
   if (!lib) {
     lib = "*LIBL";
   }
   if (!func) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"pgm\":[\"%s\",\"%s\"", name, lib);
   } else {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
   }
+  return retLen;
 }
-void json_output_pgm_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_pgm_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
 
-void json_output_pgm_dcl_ds_beg(tool_node_t *tool, char *out_caller, char * name, int tdim) {
+int json_output_pgm_dcl_ds_beg(tool_node_t *tool, char *out_caller, int outLen, char * name, int tdim) {
+  int retLen = outLen;
   if (tdim > 1) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"%s\":[", name);
   } else {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"%s\":", name);
   }
+  return retLen;
 }
-void json_output_pgm_dcl_ds_rec_beg(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_pgm_dcl_ds_rec_beg(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "[");
+  return retLen;
 }
-void json_output_pgm_dcl_ds_rec_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
+int json_output_pgm_dcl_ds_rec_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
       "]");
+  return retLen;
 }
-void json_output_pgm_dcl_ds_end(tool_node_t *tool, char *out_caller, int tdim) {
+int json_output_pgm_dcl_ds_end(tool_node_t *tool, char *out_caller, int outLen, int tdim) {
+  int retLen = outLen;
   if (tdim > 1) {
-    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
+    retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
       "]}");
   } else {
-    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
       "}");
   }
+  return retLen;
 }
 
-void json_output_pgm_dcl_s_beg(tool_node_t *tool, char *out_caller, char * name, int tdim) {
+int json_output_pgm_dcl_s_beg(tool_node_t *tool, char *out_caller, int outLen, char * name, int tdim) {
+  int retLen = outLen;
   if (tdim > 1) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"%s\":[", name);
   } else {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"%s\":", name);
   }
+  return retLen;
 }
-void json_output_pgm_dcl_s_data(tool_node_t *tool, char *out_caller, char *value, int numFlag) {
+int json_output_pgm_dcl_s_data(tool_node_t *tool, char *out_caller, int outLen, char *value, int numFlag) {
+  int retLen = outLen;
   if (numFlag == 1) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "%s", value);
   } else {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"%s\"", value);
   }
+  return retLen;
 }
-void json_output_pgm_dcl_s_end(tool_node_t *tool, char *out_caller, int tdim) {
+int json_output_pgm_dcl_s_end(tool_node_t *tool, char *out_caller, int outLen, int tdim) {
+  int retLen = outLen;
   if (tdim > 1) {
-    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller,
+    retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
       "]}");
   } else {
-    json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
       "}");
   }
+  return retLen;
 }
 
 /* cmd call */
-void json_output_cmd_beg(tool_node_t *tool, char *out_caller, char * cmd) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_cmd_beg(tool_node_t *tool, char *out_caller, int outLen, char * cmd) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"cmd\":[\"%s\"", cmd);
+  return retLen;
 }
-void json_output_cmd_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_cmd_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
 
 /* joblog */
-void json_output_joblog_beg(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+int json_output_joblog_beg(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{\"joblog\":[");
+  return retLen;
 }
-void json_output_joblog_rec(tool_node_t *tool, char *out_caller, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) 
+int json_output_joblog_rec(tool_node_t *tool, char *out_caller, int outLen, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) 
 {
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "{");
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgid\":\"%s\"",msgid);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtype\":\"%s\"",msgtype);
   if (strlen(msgsub)) {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgsub\":\"na\"");
   } else {
-    json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgsub\":\"%s\"",msgsub);
   }
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgsev\":\"%s\"",msgsev);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgstamp\":\"%s\"",msgstamp);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtolib\":\"%s\"",msgtolib);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtopgm\":\"%s\"",msgtopgm);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtomod\":\"%s\"",msgtomod);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtoproc\":\"%s\"",msgtoproc);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtoinst\":\"%s\"",msgtoinst);
-  json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtxt\":\"%s\"",msgtxt);
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
       "}");
+  return retLen;
 }
-void json_output_joblog_end(tool_node_t *tool, char *out_caller) {
-  json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, 
+int json_output_joblog_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
     "]}");
+  return retLen;
 }
 
 /* ==========================

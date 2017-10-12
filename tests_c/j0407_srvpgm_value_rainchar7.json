@@ -1,0 +1,12 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"RAINCHAR7"},
+        {"s":[{"name":"a1", "type":"7a",  "value":"1111111", "by":"val"},
+              {"name":"a2", "type":"7a",  "value":"2222222", "by":"val"},
+              {"name":"a3", "type":"7a",  "value":"3333333", "by":"val"},
+              {"name":"a4", "type":"7a",  "value":"4444444", "by":"val"},
+              {"name":"o1", "type":"7a",  "value":"5555555"},
+              {"name":"o2", "type":"7a",  "value":"6666666"},
+              {"name":"o3", "type":"7a",  "value":"7777777"},
+              {"name":"o4", "type":"7a",  "value":"8888888"}
+             ]}
+       ]}
+

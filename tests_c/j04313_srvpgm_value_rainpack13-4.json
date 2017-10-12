@@ -1,0 +1,12 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"RAINPACK11"},
+        {"s":[{"name":"a1", "type":"11p4", "value":11.1111, "by":"val"},
+              {"name":"a2", "type":"11p4", "value":22.2222, "by":"val"},
+              {"name":"a3", "type":"11p4", "value":33.3333, "by":"val"},
+              {"name":"a4", "type":"11p4", "value":44.4444, "by":"val"},
+              {"name":"o1", "type":"11p4", "value":55.5555},
+              {"name":"o2", "type":"11p4", "value":66.6666},
+              {"name":"o3", "type":"11p4", "value":77.7777},
+              {"name":"o4", "type":"11p4", "value":88.8888}
+             ]}
+       ]}
+

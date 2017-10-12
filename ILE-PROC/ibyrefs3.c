@@ -1350,106 +1350,104 @@ bighole_t iCallFctByRef95(ile_pgm_call_t* layout, char * myPgm, char * myLib, ch
 
 bighole_t iCallFctByRefSub3(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  bighole_t bighole;
   switch(layout->argc) {
   case 64:
-    bighole = iCallFctByRef64(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef64(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 65:
-    bighole = iCallFctByRef65(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef65(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 66:
-    bighole = iCallFctByRef66(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef66(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 67:
-    bighole = iCallFctByRef67(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef67(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 68:
-    bighole = iCallFctByRef68(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef68(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 69:
-    bighole = iCallFctByRef69(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef69(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 70:
-    bighole = iCallFctByRef70(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef70(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 71:
-    bighole = iCallFctByRef71(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef71(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 72:
-    bighole = iCallFctByRef72(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef72(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 73:
-    bighole = iCallFctByRef73(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef73(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 74:
-    bighole = iCallFctByRef74(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef74(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 75:
-    bighole = iCallFctByRef75(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef75(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 76:
-    bighole = iCallFctByRef76(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef76(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 77:
-    bighole = iCallFctByRef77(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef77(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 78:
-    bighole = iCallFctByRef78(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef78(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 79:
-    bighole = iCallFctByRef79(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef79(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 80:
-    bighole = iCallFctByRef80(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef80(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 81:
-    bighole = iCallFctByRef81(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef81(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 82:
-    bighole = iCallFctByRef82(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef82(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 83:
-    bighole = iCallFctByRef83(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef83(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 84:
-    bighole = iCallFctByRef84(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef84(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 85:
-    bighole = iCallFctByRef85(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef85(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 86:
-    bighole = iCallFctByRef86(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef86(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 87:
-    bighole = iCallFctByRef87(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef87(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 88:
-    bighole = iCallFctByRef88(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef88(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 89:
-    bighole = iCallFctByRef89(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef89(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 90:
-    bighole = iCallFctByRef90(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef90(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 91:
-    bighole = iCallFctByRef91(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef91(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 92:
-    bighole = iCallFctByRef92(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef92(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 93:
-    bighole = iCallFctByRef93(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef93(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 94:
-    bighole = iCallFctByRef94(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef94(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   case 95:
-    bighole = iCallFctByRef95(layout, myPgm, myLib, myFunc, lenFunc);
+    return iCallFctByRef95(layout, myPgm, myLib, myFunc, lenFunc);
     break;
   default:
     break;
   }
-  return bighole;
 }

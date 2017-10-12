@@ -1,0 +1,12 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"RAININT"},
+        {"s":[{"name":"aint8",      "type":"3i0",   "value":1, "by":"val"},
+              {"name":"aint16",     "type":"5i0",   "value":2, "by":"val"},
+              {"name":"aint32",     "type":"10i0",  "value":3, "by":"val"},
+              {"name":"aint64",     "type":"20i0",  "value":4, "by":"val"},
+              {"name":"oint8",      "type":"3i0",   "value":5, "by":"val"},
+              {"name":"oint16",     "type":"5i0",   "value":6, "by":"val"},
+              {"name":"oint32",     "type":"10i0",  "value":7, "by":"val"},
+              {"name":"oint64",     "type":"20i0",  "value":8, "by":"val"}
+             ]}
+       ]}
+

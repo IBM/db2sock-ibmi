@@ -1,0 +1,12 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"RAININT4"},
+        {"s":[{"name":"a1", "type":"10i0", "value":1111, "by":"val"},
+              {"name":"a2", "type":"10i0", "value":2222, "by":"val"},
+              {"name":"a3", "type":"10i0", "value":3333, "by":"val"},
+              {"name":"a4", "type":"10i0", "value":4444, "by":"val"},
+              {"name":"o1", "type":"10i0", "value":5555},
+              {"name":"o2", "type":"10i0", "value":6666},
+              {"name":"o3", "type":"10i0", "value":7777},
+              {"name":"o4", "type":"10i0", "value":8888}
+             ]}
+       ]}
+

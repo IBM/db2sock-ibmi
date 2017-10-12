@@ -37,9 +37,16 @@ void iCall400(char * blob)
   char * myLibl = "*LIBL";
   char * myRet = NULL;
   bighole_t bighole;
+  int i = 0;
+  char pattern[ILE_PGM_MAX_ARGS+1];
+  int isRef = 1;
+  ile_pgm_call_t layout_tmp;
+  int layout_size = 0;
 
   /* hey adc debug */
   /* sleep(30); */
+  layout_size = (char *)&layout->buf - (char *)layout;
+  memcpy(&layout_tmp,layout,layout_size);
   layout->step = 1;
 
   /* set ILE addresses based memory spill location offset */
@@ -52,6 +59,8 @@ void iCall400(char * blob)
         offset = layout->arg_pos[parmc];
         /* set ILE address to data */
         layout->argv[argc] = (char *)layout + offset;
+      } else {
+        isRef = 0;
       }
     } else {
       layout->argv[argc] = NULL;
@@ -73,8 +82,8 @@ void iCall400(char * blob)
   layout->step = 3;
 
   if (!lenFunc) {
-    /* call by ref */
-    if (layout->argc == layout->parmc) {
+    /* pgm call by ref */
+    if (isRef) {
       if (layout->argc < 32) {
         iCallPgmByRefSub1(layout, myPgm, myLib);
       } else if (layout->argc < 64) {
@@ -86,12 +95,10 @@ void iCall400(char * blob)
       } else if (layout->argc < 160) {
         iCallPgmByRefSub5(layout, myPgm, myLib);
       }
-    } else {
-      /* next work */
     }
   } else {
-    /* call by ref */
-    if (layout->argc == layout->parmc) {
+    /* srvpgm call by ref */
+    if (isRef) {
       if (layout->argc < 32) {
         bighole = iCallFctByRefSub1(layout, myPgm, myLib, myFunc, lenFunc);
       } else if (layout->argc < 64) {
@@ -103,8 +110,45 @@ void iCall400(char * blob)
       } else if (layout->argc < 160) {
         bighole = iCallFctByRefSub5(layout, myPgm, myLib, myFunc, lenFunc);
       }
+    /* srvpgm call by val */
     } else {
-      /* next work */
+      memset(pattern,0,sizeof(pattern));
+      for (i=0; i < layout->parmc; i++) {
+        if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
+          pattern[i] = '1';
+        } else {
+          pattern[i] = '0';
+        }
+      }
+      switch(layout->parmc) {
+      case 1:
+        bighole = iCallFctByValSub1(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 2:
+        bighole = iCallFctByValSub2(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 3:
+        bighole = iCallFctByValSub3(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 4:
+        bighole = iCallFctByValSub4(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 5:
+        bighole = iCallFctByValSub5(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 6:
+        bighole = iCallFctByValSub6(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 7:
+        bighole = iCallFctByValSub7(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      case 8:
+        bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        break;
+      default:
+        break;
+      }
+      memcpy(layout,&layout_tmp,layout_size);
     }
   }
   layout->step = 4;

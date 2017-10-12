@@ -18,7 +18,10 @@ CCSQL		    = db2script
 
 ### *PGM proc
 SP400SRVPGM  = db2proc.srvpgm
-SP400OBJS    = db2proc.mod ibyrefp1.mod ibyrefp2.mod ibyrefp3.mod ibyrefp4.mod ibyrefp5.mod ibyrefs1.mod ibyrefs2.mod ibyrefs3.mod ibyrefs4.mod ibyrefs5.mod
+SP400OBJS    = db2proc.mod \
+	ibyrefp1.mod ibyrefp2.mod ibyrefp3.mod ibyrefp4.mod ibyrefp5.mod \
+	ibyrefs1.mod ibyrefs2.mod ibyrefs3.mod ibyrefs4.mod ibyrefs5.mod \
+	ibyvals1.mod ibyvals2.mod ibyvals3.mod ibyvals4.mod ibyvals5.mod ibyvals6.mod ibyvals7.mod ibyvals8.mod
 SQLTPL       = crtsql.cmd
 SQLRPL       = DB2JSON $(ILELIB)
 

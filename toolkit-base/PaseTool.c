@@ -170,6 +170,7 @@ tool_struct_t * tool_ctor(
   tool->last = NULL;
   tool->tconn = NULL;
   tool->outarea = NULL;
+  tool->outareaLen = 0;
   tool->outmax = 0;
   tool->outlen = 0;
   tool->hdbc = 0;
@@ -816,28 +817,28 @@ void tool_pgm_dump(SQLRETURN sqlrc, char *func, int step, tool_key_pgm_struct_t 
  */
 
 void tool_output_script_beg(tool_struct_t *tool) {
-  tool->output_script_beg(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_script_beg(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_script_end(tool_struct_t *tool) {
-  tool->output_script_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_script_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_query_beg(tool_struct_t *tool, char *query) {
-  tool->output_query_beg(tool->curr, tool->outarea, query);
+  tool->outareaLen = tool->output_query_beg(tool->curr, tool->outarea, tool->outareaLen, query);
 }
 void tool_output_query_end(tool_struct_t *tool) {
-  tool->output_query_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_query_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_record_array_beg(tool_struct_t *tool) {
-  tool->output_record_array_beg(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_record_array_beg(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_record_array_end(tool_struct_t *tool) {
-  tool->output_record_array_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_record_array_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_record_no_data_found(tool_struct_t *tool) {
-  tool->output_record_no_data_found(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_record_no_data_found(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_record_row_beg(tool_struct_t *tool) {
-  tool->output_record_row_beg(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_record_row_beg(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_record_name_value(tool_struct_t *tool, char *name, char *value, int type, int fStrLen) {
   if (fStrLen == SQL_NULL_DATA) {
@@ -859,57 +860,57 @@ void tool_output_record_name_value(tool_struct_t *tool, char *name, char *value,
     type = TOOL400_DATA_TYPE_CHAR;
     break;
   }
-  tool->output_record_name_value(tool->curr, tool->outarea, name, value, type, fStrLen);
+  tool->outareaLen = tool->output_record_name_value(tool->curr, tool->outarea, tool->outareaLen, name, value, type, fStrLen);
 }
 void tool_output_record_row_end(tool_struct_t *tool) {
-  tool->output_record_row_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_record_row_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_sql_errors(tool_struct_t *tool, int rc, int sqlCode, char * sqlState, char *sqlMsg)
 {
-  tool->output_sql_errors(tool->curr, tool->outarea, rc, sqlCode, sqlState, sqlMsg);
+  tool->outareaLen = tool->output_sql_errors(tool->curr, tool->outarea, tool->outareaLen, rc, sqlCode, sqlState, sqlMsg);
 }
 void tool_output_pgm_beg(tool_struct_t *tool, char * name, char * lib, char * func) {
-  tool->output_pgm_beg(tool->curr, tool->outarea, name, lib, func);
+  tool->outareaLen = tool->output_pgm_beg(tool->curr, tool->outarea, tool->outareaLen, name, lib, func);
 }
 void tool_output_pgm_end(tool_struct_t *tool) {
-  tool->output_pgm_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_pgm_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char * name, int tdim) {
-  tool->output_pgm_dcl_s_beg(tool->curr, tool->outarea, name, tdim);
+  tool->outareaLen = tool->output_pgm_dcl_s_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
 }
 void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
-  tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, value, numFlag);
+  tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
 }
 void tool_output_pgm_dcl_s_end(tool_struct_t *tool, int tdim) {
-  tool->output_pgm_dcl_s_end(tool->curr, tool->outarea, tdim);
+  tool->outareaLen = tool->output_pgm_dcl_s_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
 }
 void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char * name, int tdim) {
-  tool->output_pgm_dcl_ds_beg(tool->curr, tool->outarea, name, tdim);
+  tool->outareaLen = tool->output_pgm_dcl_ds_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
 }
 void tool_output_pgm_dcl_ds_rec_beg(tool_struct_t *tool) {
-  tool->output_pgm_dcl_ds_rec_beg(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_pgm_dcl_ds_rec_beg(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_pgm_dcl_ds_rec_end(tool_struct_t *tool) {
-  tool->output_pgm_dcl_ds_rec_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_pgm_dcl_ds_rec_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, int tdim) {
-  tool->output_pgm_dcl_ds_end(tool->curr, tool->outarea, tdim);
+  tool->outareaLen = tool->output_pgm_dcl_ds_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
 }
 void tool_output_cmd_beg(tool_struct_t *tool, char * cmd) {
-  tool->output_cmd_beg(tool->curr, tool->outarea, cmd);
+  tool->outareaLen = tool->output_cmd_beg(tool->curr, tool->outarea, tool->outareaLen, cmd);
 }
 void tool_output_cmd_end(tool_struct_t *tool) {
-  tool->output_cmd_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_cmd_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 
 void tool_output_joblog_beg(tool_struct_t *tool) {
-  tool->output_joblog_beg(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_joblog_beg(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_joblog_rec(tool_struct_t *tool, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) {
-  tool->output_joblog_rec(tool->curr, tool->outarea, msgid,msgtype,msgsub, msgsev, msgstamp, msgtolib, msgtopgm, msgtomod, msgtoproc, msgtoinst, msgtxt);
+  tool->outareaLen = tool->output_joblog_rec(tool->curr, tool->outarea, tool->outareaLen, msgid,msgtype,msgsub, msgsev, msgstamp, msgtolib, msgtopgm, msgtomod, msgtoproc, msgtoinst, msgtxt);
 }
 void tool_output_joblog_end(tool_struct_t *tool) {
-  tool->output_joblog_end(tool->curr, tool->outarea);
+  tool->outareaLen = tool->output_joblog_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 
 
@@ -982,8 +983,10 @@ char * ile_pgm_curr_argv_ptr_align(ile_pgm_call_t * layout, int tlen) {
     layout->vpos = ile_pgm_round_up(layout->vpos, 2);
   } else if (tlen <= 4) {
     layout->vpos = ile_pgm_round_up(layout->vpos, 4);
-  } else if (tlen <= 8) {
+  } else if (tlen <= 8) { /* PASE _ILECALL max by value is 8 */
     layout->vpos = ile_pgm_round_up(layout->vpos, 8);
+  } else if (tlen <= 16) { /* ILE max value is 16 */
+    layout->vpos = ile_pgm_round_up(layout->vpos, 16);
   }
   /* beyond register (use another register location) */
   if (layout->vpos + tlen > end_reg) {
@@ -1452,6 +1455,7 @@ SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, i
   char * wherev = (char *) where;
   int outDigits = tlen;
   int outLength = outDigits/2+1;
+  int actLen = outLength * 2;
   int leftDigitValue = 0;
   int rightDigitValue = 0;
   char * c = NULL;
@@ -1467,7 +1471,7 @@ SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, i
     for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
       /* decimal point */
       l++;
-      if (!isDot && tscale && l >= tlen) {
+      if (!isDot && tscale && l >= actLen - tscale) {
         if (!isOk) {
           str[j++] = (char) 0x30;
         }
@@ -1486,7 +1490,7 @@ SQLRETURN ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, i
       }
       /* decimal point */
       l++;
-      if (!isDot && tscale && l >= tlen) {
+      if (!isDot && tscale && l >= actLen - tscale) {
         if (!isOk) {
           str[j++] = (char) 0x30;
         }
@@ -2171,7 +2175,7 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
       by = ILE_PGM_BY_REF_BOTH;
     } else if (str[0] == 'v' || str[0] == 'c') {
       /* not fit in register (not by value) */
-      if (*spill_len > 8) {
+      if (*spill_len > ILE_VALUE_MAX_LEN) {
         by = ILE_PGM_BY_REF_IN;
       /* ok, fit in register (by value/const) */
       } else {

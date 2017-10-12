@@ -1,0 +1,12 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"RAINCHAR1"},
+        {"s":[{"name":"a1", "type":"1a",  "value":"1", "by":"val"},
+              {"name":"a2", "type":"1a",  "value":"2", "by":"val"},
+              {"name":"a3", "type":"1a",  "value":"3", "by":"val"},
+              {"name":"a4", "type":"1a",  "value":"4", "by":"val"},
+              {"name":"o1", "type":"1a",  "value":"5"},
+              {"name":"o2", "type":"1a",  "value":"6"},
+              {"name":"o3", "type":"1a",  "value":"7"},
+              {"name":"o4", "type":"1a",  "value":"8"}
+             ]}
+       ]}
+

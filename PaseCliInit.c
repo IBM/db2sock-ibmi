@@ -100,6 +100,8 @@ int custom_iconv_open(int myccsid, int utfccsid) {
       IBMiCCSID[i].charset_Utf = (char *) ccsidtocs(utfccsid);
       IBMiCCSID[i].AsciiToUtf = iconv_open(IBMiCCSID[i].charset_Utf, IBMiCCSID[i].charset_Ascii);
       IBMiCCSID[i].UtfToAscii = iconv_open(IBMiCCSID[i].charset_Ascii, IBMiCCSID[i].charset_Utf);
+      IBMiCCSID[i].cssid_Ascii = myccsid; /* hamela iconv speed up */
+      IBMiCCSID[i].ccsid_Utf = utfccsid; /* hamela iconv speed up */
       pthread_mutexattr_init(&IBMiCCSID[i].threadMutexAttr);
       pthread_mutexattr_settype(&IBMiCCSID[i].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
       pthread_mutex_init(&IBMiCCSID[i].threadMutexLock, &IBMiCCSID[i].threadMutexAttr);

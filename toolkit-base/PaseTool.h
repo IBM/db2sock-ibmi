@@ -174,6 +174,8 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define ILE_PGM_BY_RETURN 5
 #define ILE_PGM_BY_IN_DS 6
 
+#define ILE_VALUE_MAX_LEN 16
+
 #define ILE_PGM_MAX_ARGS 159
 #define ILE_PGM_ALLOC_BLOCK 4096
 typedef struct ile_pgm_call_struct {
@@ -231,34 +233,34 @@ typedef struct tool_node {
   void * next;
 } tool_node_t;
 
-typedef void (*output_script_beg_t)(tool_node_t *, char *);
-typedef void (*output_script_end_t)(tool_node_t *, char *);
-typedef void (*output_query_beg_t)(tool_node_t *, char *,char *);
-typedef void (*output_record_array_beg_t)(tool_node_t *, char *);
-typedef void (*output_record_array_end_t)(tool_node_t *, char *);
-typedef void (*output_record_no_data_found_t)(tool_node_t *, char *);
-typedef void (*output_record_row_beg_t)(tool_node_t *, char *);
+typedef int (*output_script_beg_t)(tool_node_t *, char *, int);
+typedef int (*output_script_end_t)(tool_node_t *, char *, int);
+typedef int (*output_query_beg_t)(tool_node_t *, char *, int, char *);
+typedef int (*output_record_array_beg_t)(tool_node_t *, char *, int);
+typedef int (*output_record_array_end_t)(tool_node_t *, char *, int);
+typedef int (*output_record_no_data_found_t)(tool_node_t *, char *, int);
+typedef int (*output_record_row_beg_t)(tool_node_t *, char *, int);
 #define TOOL400_DATA_TYPE_NBR 1
 #define TOOL400_DATA_TYPE_CHAR 2
 #define TOOL400_DATA_IS_NULL SQL_NULL_DATA
-typedef void (*output_record_name_value_t)(tool_node_t *, char *, char *, char *, int, int);
-typedef void (*output_record_row_end_t)(tool_node_t *, char *);
-typedef void (*output_query_end_t)(tool_node_t *, char *);
-typedef void (*output_sql_errors_t)(tool_node_t *, char *, int, int, char *, char *);
-typedef void (*output_pgm_beg_t)(tool_node_t *, char *, char *, char *, char *);
-typedef void (*output_pgm_end_t)(tool_node_t *, char *);
-typedef void (*output_pgm_dcl_ds_beg_t)(tool_node_t *, char *, char *, int);
-typedef void (*output_pgm_dcl_ds_end_t)(tool_node_t *, char *, int);
-typedef void (*output_pgm_dcl_ds_rec_beg_t)(tool_node_t *, char *);
-typedef void (*output_pgm_dcl_ds_rec_end_t)(tool_node_t *, char *);
-typedef void (*output_pgm_dcl_s_beg_t)(tool_node_t *, char *, char *, int);
-typedef void (*output_pgm_dcl_s_data_t)(tool_node_t *, char *, char *, int);
-typedef void (*output_pgm_dcl_s_end_t)(tool_node_t *, char *, int);
-typedef void (*output_cmd_beg_t)(tool_node_t *, char *, char *);
-typedef void (*output_cmd_end_t)(tool_node_t *, char *);
-typedef void (*output_joblog_beg_t)(tool_node_t *, char *);
-typedef void (*output_joblog_rec_t)(tool_node_t *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
-typedef void (*output_joblog_end_t)(tool_node_t *, char *);
+typedef int (*output_record_name_value_t)(tool_node_t *, char *, int, char *, char *, int, int);
+typedef int (*output_record_row_end_t)(tool_node_t *, char *, int);
+typedef int (*output_query_end_t)(tool_node_t *, char *, int);
+typedef int (*output_sql_errors_t)(tool_node_t *, char *, int, int, int, char *, char *);
+typedef int (*output_pgm_beg_t)(tool_node_t *, char *, int, char *, char *, char *);
+typedef int (*output_pgm_end_t)(tool_node_t *, char *, int);
+typedef int (*output_pgm_dcl_ds_beg_t)(tool_node_t *, char *, int, char *, int);
+typedef int (*output_pgm_dcl_ds_end_t)(tool_node_t *, char *, int, int);
+typedef int (*output_pgm_dcl_ds_rec_beg_t)(tool_node_t *, char *, int);
+typedef int (*output_pgm_dcl_ds_rec_end_t)(tool_node_t *, char *, int);
+typedef int (*output_pgm_dcl_s_beg_t)(tool_node_t *, char *, int, char *, int);
+typedef int (*output_pgm_dcl_s_data_t)(tool_node_t *, char *, int, char *, int);
+typedef int (*output_pgm_dcl_s_end_t)(tool_node_t *, char *, int, int);
+typedef int (*output_cmd_beg_t)(tool_node_t *, char *, int, char *);
+typedef int (*output_cmd_end_t)(tool_node_t *, char *, int);
+typedef int (*output_joblog_beg_t)(tool_node_t *, char *, int);
+typedef int (*output_joblog_rec_t)(tool_node_t *, char *, int, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
+typedef int (*output_joblog_end_t)(tool_node_t *, char *, int);
 
 typedef struct tool_struct {
   /* user callback data */
@@ -293,6 +295,7 @@ typedef struct tool_struct {
   tool_node_t * last;
   void * tconn;
   char * outarea;
+  int outareaLen; /* hamela speed up output */
   int outmax;
   int outlen;
   int hdbc;
