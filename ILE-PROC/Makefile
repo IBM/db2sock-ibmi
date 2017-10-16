@@ -22,6 +22,8 @@ SP400OBJS    = db2proc.mod \
 	ibyrefp1.mod ibyrefp2.mod ibyrefp3.mod ibyrefp4.mod ibyrefp5.mod \
 	ibyrefs1.mod ibyrefs2.mod ibyrefs3.mod ibyrefs4.mod ibyrefs5.mod \
 	ibyvals1.mod ibyvals2.mod ibyvals3.mod ibyvals4.mod ibyvals5.mod ibyvals6.mod ibyvals7.mod ibyvals8.mod
+SP400USRVPGM = db2user.srvpgm
+SP400UOBJS   = db2user.mod
 SQLTPL       = crtsql.cmd
 SQLRPL       = DB2JSON $(ILELIB)
 
@@ -43,7 +45,7 @@ proc:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: mkinc removeo $(SP400SRVPGM) crtsqlproc
+go: mkinc removeo $(SP400USRVPGM) $(SP400SRVPGM) crtsqlproc
 
 .SUFFIXES: .mod .c
 ### CRTCMOD
@@ -52,6 +54,8 @@ go: mkinc removeo $(SP400SRVPGM) crtsqlproc
 ### -- SP400SRVPGM (ILE c)
 $(SP400SRVPGM): $(SP400OBJS)
 	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
+$(SP400USRVPGM): $(SP400UOBJS)
+	$(CCSRVPGM) --pgm $(SP400USRVPGM) --lib $(ILELIB) --mod $(SP400UOBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
 
 
 mkinc:
@@ -64,6 +68,7 @@ crtsqlproc:
 	$(CCSQL) -f $(SQLTPL) -r $(SQLRPL)
 clean:
 	rm -f $(SP400SRVPGM)
+	rm -f $(SP400USRVPGM)
 	rm -f *.mod
 removeo:
 	rm -f *.mod

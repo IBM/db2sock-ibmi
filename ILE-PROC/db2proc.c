@@ -19,6 +19,94 @@
 #include "iconf.h" /* see Makefile */
 #include "ibyref.h" /* see gen.py */
 
+#define ILEPROC "DB2USER"
+#define ILEFUNC "UserFctCallByVal"
+#define ILEFUNCSIZE 16
+
+bighole_t iCallFctByValUsr(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, int * isDone)
+{
+  void *os_pfct_ptr = NULL;
+  typedef bighole_t (os_fct_000_t)();
+  os_fct_000_t *os_fct_ptr = NULL;
+  _SYSPTR os_pgm_ptr = NULL;
+  unsigned long long os_act_mark = 0;
+  int os_obj_type = 0;
+  int argc = 0;
+  char * userPgm = ILEPROC;
+  char * userLib = ILELIB;
+  char * userFunc = ILEFUNC;
+  int userLenFunc = ILEFUNCSIZE;
+  int i = 0;
+  char pattern[ILE_PGM_MAX_ARGS+1];
+
+  /* load user handle by val call module */
+  os_pgm_ptr = rslvsp(WLI_SRVPGM, userPgm, userLib, _AUTH_OBJ_MGMT);
+  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
+  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &userLenFunc, userFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+
+  memset(pattern,0,sizeof(pattern));
+  for (i=0; i < layout->parmc; i++) {
+    if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
+      switch(layout->arg_len[i]) {
+      case 1:
+        pattern[i] = '1';
+        break;
+      case 2:
+        pattern[i] = '2';
+        break;
+      case 3:
+        pattern[i] = '3';
+        break;
+      case 4:
+        pattern[i] = '4';
+        break;
+      case 5:
+        pattern[i] = '5';
+        break;
+      case 6:
+        pattern[i] = '6';
+        break;
+      case 7:
+        pattern[i] = '7';
+        break;
+      case 8:
+        pattern[i] = '8';
+        break;
+      case 9:
+        pattern[i] = '9';
+        break;
+      case 10:
+        pattern[i] = 'A';
+        break;
+      case 11:
+        pattern[i] = 'B';
+        break;
+      case 12:
+        pattern[i] = 'C';
+        break;
+      case 13:
+        pattern[i] = 'D';
+        break;
+      case 14:
+        pattern[i] = 'E';
+        break;
+      case 15:
+        pattern[i] = 'F';
+        break;
+      case 16:
+        pattern[i] = 'G';
+        break;
+      }
+    } else {
+      pattern[i] = '0';
+    }
+  }
+
+  *isDone = 0;
+  return os_fct_ptr(layout, myPgm, myLib, myFunc, lenFunc, pattern, isDone);
+
+}
+
 void iCall400(char * blob) 
 {
   /* blob -> |4-byte length|pad|data...| */
@@ -31,6 +119,9 @@ void iCall400(char * blob)
   int lenLib = 0;
   int lenFunc = 0;
   int lenRet = 0;
+  int isDone = 0;
+  int isOneLen = 0;
+  int one_len = 0;
   char * myPgm = NULL;
   char * myLib = NULL;
   char * myFunc = NULL;
@@ -112,44 +203,59 @@ void iCall400(char * blob)
       }
     /* srvpgm call by val */
     } else {
-      memset(pattern,0,sizeof(pattern));
-      for (i=0; i < layout->parmc; i++) {
-        if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
-          pattern[i] = '1';
-        } else {
-          pattern[i] = '0';
+      /* high speed user handled */
+      bighole = iCallFctByValUsr(layout, myPgm, myLib, myFunc, lenFunc, &isDone);
+      if (!isDone) {
+        memset(pattern,0,sizeof(pattern));
+        for (i=0; i < layout->parmc; i++) {
+          if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
+            pattern[i] = '1';
+            if (!one_len && layout->arg_len[i]) {
+              one_len = layout->arg_len[i];
+              isOneLen = 1;
+            } else if (one_len != layout->arg_len[i]) {
+              isOneLen = 0;
+            }
+          } else {
+            pattern[i] = '0';
+          }
         }
-      }
-      switch(layout->parmc) {
-      case 1:
-        bighole = iCallFctByValSub1(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 2:
-        bighole = iCallFctByValSub2(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 3:
-        bighole = iCallFctByValSub3(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 4:
-        bighole = iCallFctByValSub4(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 5:
-        bighole = iCallFctByValSub5(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 6:
-        bighole = iCallFctByValSub6(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 7:
-        bighole = iCallFctByValSub7(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      case 8:
-        bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
-        break;
-      default:
-        break;
-      }
+        /* high speed call one size value arguments */
+        if (isOneLen) {
+          switch(layout->parmc) {
+          case 1:
+            bighole = iCallFctByValSub1(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 2:
+            bighole = iCallFctByValSub2(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 3:
+            bighole = iCallFctByValSub3(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 4:
+            bighole = iCallFctByValSub4(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 5:
+            bighole = iCallFctByValSub5(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 6:
+            bighole = iCallFctByValSub6(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 7:
+            bighole = iCallFctByValSub7(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          case 8:
+            bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+            break;
+          default:
+            break;
+          }
+        } else {
+          bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+        }
+      } /* ! isDone */
       memcpy(layout,&layout_tmp,layout_size);
-    }
+    } /* srvpgm call by val */
   }
   layout->step = 4;
 
