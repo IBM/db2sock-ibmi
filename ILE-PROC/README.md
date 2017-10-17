@@ -14,6 +14,45 @@ That is, both toolkit operations and DB2 operations will run in QSQSRVR proxy, t
 Also, same single QTEMP rules will apply when folks call this stored procedure remote 
 from LUW (db2, rest, odbc, ssl/ssh, etc.).
 
+The following discussion of pass by ref and pass by value, may confuse many. So, for simplicity, calling 
+PGM is always by ref. The pass by ref works in toolkit "as is" up to 255 parameters.
+
+```
+       dcl-pi Main;
+         paramCount int(10);
+         p1 char(5);
+         p2 char(5) options(*nopass);
+         p3 char(5) options(*nopass);
+       end-pi;
+         paramCount = %parms();
+       return;
+```
+
+
+Only SRVPGM have concern about pass by value. 
+First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
+In fact, for toolkit calls you will be much better served to NOT use 'value' to
+eliminate complexity (see 'value' below). 
+
+Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
+for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  
+However, 'by value' toolkit can be done, and, here is a method that works.
+
+
+```
+       dcl-pr rainpack31;
+         a1 packed(31:2) value; <- pass by value (rare - not recommended)
+         a2 packed(31:2) value;
+         a3 packed(31:2) value;
+         a4 packed(31:2) value;
+         o1 packed(31:2); <- pass by ref (most)
+         o2 packed(31:2);
+         o3 packed(31:2);
+         o4 packed(31:2);
+       end-pr;
+```
+
+
 The toolkit stored procedure will be both conventional (yet another) and unconventional (creative). 
 
 ## conventional toolkit 
@@ -48,7 +87,7 @@ Great! Instant performance boost for your IBM i scripting languages at levels co
 RPG-2-RPG compiled calls (because it is compiled). This is a good thing! Don't let unconventional
 stop you from thinking this idea through (see WIP). 
 
-WIP -- (not done yet)
+Work In Progress -- (not done yet)
 
 1) I will create a new subdirectory in db2sock for ILE-PROC-USER, so that you may isolate your custom additions (custom calls).
 
@@ -73,43 +112,7 @@ Note (gen.py): We are not using MI CALLPGM, CALLPGMV, etc., because these fall s
 mark for a full toolkit (without using blocked MI instructions).
 
 
-# technical (look if you dare)
-
-The following discussion of pass by ref and pass by value, may confuse many. So, for simplicity, calling 
-PGM is always by ref. The pass by ref works in toolkit "as is" up to 255 parameters.
-
-```
-       dcl-pi Main;
-         paramCount int(10);
-         p1 char(5);
-         p2 char(5) options(*nopass);
-         p3 char(5) options(*nopass);
-       end-pi;
-         paramCount = %parms();
-       return;
-```
-
-
-Only SRVPGM have concern about pass by value. Most of the following 'confusing' 
-discussion deals with working around restrictions in MI instructions
-for pass by value. Aka, most readers can simply ignore remaining of this discussion.  
-
-```
-       dcl-pr rainpack31;
-         a1 packed(31:2) value; <- pass by value (rare)
-         a2 packed(31:2) value;
-         a3 packed(31:2) value;
-         a4 packed(31:2) value;
-         o1 packed(31:2); <- pass by ref (most)
-         o2 packed(31:2);
-         o3 packed(31:2);
-         o4 packed(31:2);
-       end-pr;
-```
-
-Note: First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
-In fact, for toolkit calls you will be much better served to not use 'value' to
-eliminate complexity (see 'value' below). 
+# technical (pass by value)
 
 Technically, anything 16 bytes or less marked as 'value' will be placed in up to two 8 byte registers. 
 Therefore, we need only get the correct size 'hole' and you can pass any type through the 'value'
@@ -118,12 +121,11 @@ so on), with exception of floating point registers (4f, 8f, etc.).
 So few people really understand pass by value 16 bytes rules, that
 as author, I almost decided not to support at all. Made even worse,
 no un-blocked instructions are available to really do this right (gen code needed).
-However, 'by value' toolkit can be done, and, here is a method that works.
 
-BTW -- For those wondering about any pass by value 17+ bytes (ds, etc.). Greater 17+ 'value' is actually accomplished by copy argument/parameter,
-and 'value' is promoted to pass by reference. Basically, Uf Da, for those thinking they were improving performance for aggregates 17+ bytes by 'value', 
+For those wondering about any pass by value 17+ bytes (ds, etc.). Greater 17+ 'value' is actually accomplished by copy argument/parameter,
+and 'value' is promoted to pass by reference. Basically, those thinking they were improving performance for aggregates 17+ bytes by 'value', 
 they are actually making things perform worse via compiler copy (ILE c, C++, RPG, etc.). Good side, 'spill memory' copy does not reflect 
-changes in caller made by callee (meaning of copy), but most folks did not even know a copy occurred and slowed things down (now you know).
+changes in caller made by callee (meaning copy), but most folks did not even know a copy occurred and slowed things down (now you know).
 
 
 ##db2user - user special add handler module (dynamic loaded ILE SRVPGM).
