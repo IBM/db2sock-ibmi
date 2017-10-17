@@ -20,18 +20,19 @@ The toolkit stored procedure will be both conventional (yet another) and unconve
 
 The conventional toolkit interface will support arguments/parameters pass by reference "as is".
 The conventional dynamic or runtime resolve and activation of PGM, SRVPGM programs typical
-of many toolkits is also included in this interface.
-In addition, "some" of the pass by value arguments/parameters patterns are also supported "as is".
+of many toolkits is included in this interface.
+In addition, "some" of pass by value arguments/parameters patterns are also supported "as is".
 These will follow Call Service Program Procedure (QZRUCLSP) API. That is, if value arguments
-are all the same size, default toolkit can handle the task by simple 16 possible lengths 'pattern'.
-(Note: QZRUCLSP limits to only bin(4) for pass by value. This toolkit will take most other non-floating point sizes.).
+are all the same size, default toolkit can handle call task by simple 16 possible lengths 'pattern'.
+(Note: QZRUCLSP limits to only bin(4) for pass by value. 
+This toolkit will take most other non-floating point size.).
 
 
 ## unconventional toolkit
 
 This is an Open Source project. As such we are no bound by the constraints of everything comes from Rochester IBM.
 To wit, the unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
-A supplemental module to 'db2proc' stored procedure named 'db2user' is included to allow you to handle any sort of
+A supplemental module named 'db2user' is included to allow you to handle any sort of
 call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above).
 However, you may also include your own custom calls directly compiled into "the stored procedure driver".
 
@@ -40,9 +41,21 @@ toolkit interface will exist, and, will probably be fine for 80% of all calls, t
 give you ultimate control over performance. That is, everyone complains about speed and/or limitations of
 every toolkit ever written for IBM i. This unconventional interface can directly link your RPG programs 
 into the stored procedure, so they will be loaded immediately when the toolkit call occurs. 
-Great! Instant performance boast for your IBM i scripting languages at levels comparable with 
-RPG-2-RPG compiled calls (because it is compiled).
+Great! Instant performance boost for your IBM i scripting languages at levels comparable with 
+RPG-2-RPG compiled calls (because it is compiled). This is a good thing! Don't let unconventional
+stop you from thinking this idea (see WIP). 
 
+WIP -- (not done yet)
+
+1) I will create a new subdirectory in db2sock for ILE-PROC-USER, so that you may isolate your custom additions (custom calls).
+
+2) The additional user compiled module 'db2user' MAY be dynamically loaded if users reject the idea of included. 
+Or it may also be it's own stored procedure. This is still under consideration.
+
+3) The 'db2user' is a c module, possibly difficult for some to understand. I will likely add another 'db2rpg'
+to allow RPGers to participate within the framework of 'everything RPG'.
+
+# modules (incomplete)
 
 ILE modules:
 ```
@@ -130,6 +143,8 @@ you may dierctly control the performance of your call from PASE.
 
 Pattern:
 ```
+'I' - float(8), 8f, floating point
+'H' - float(4), 4f, floating point
 'G' - typedef struct fool16 {char hole[16]; } fool16_t;
 'F' - typedef struct fool15 {char hole[15]; } fool15_t;
 'E' - typedef struct fool14 {char hole[14]; } fool14_t;
@@ -146,6 +161,7 @@ Pattern:
 '3' - typedef struct fool3 {char hole[3]; } fool3_t;
 '2' - typedef struct fool2 {char hole[2]; } fool2_t;
 '1' - typedef struct fool1 {char hole[1]; } fool1_t;
+'0' - pointer (pass by ref)
 ```
 
 BTW -- There were/are alternatives starting PASE in db2proc and using _ILECALL.
