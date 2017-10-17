@@ -72,7 +72,7 @@ default toolkit can handle call task by simple 16 possible lengths 'pattern'.
 Note: SRVPGM interface 'by value' QZRUCLSP limits to only bin(4) for pass by value 8 arguments/parameters. 
 This toolkit will take most other non-floating point sizes for pass by value 8 arguments/parameters (length 1-16).
 
-## unconventional toolkit
+## unconventional toolkit (ILE-PROC-USER)
 
 This is an Open Source project. As such we are not bound by constraints of everything comes from Rochester IBM.
 To wit, unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
@@ -92,12 +92,7 @@ stop you from thinking this idea through (see WIP).
 
 Work In Progress -- (not done yet)
 
-1) I will create a new subdirectory in db2sock for ILE-PROC-USER, so that you may isolate your custom additions (custom calls).
-
-2) The additional user compiled module 'db2user' MAY be dynamically loaded if users reject the idea of included. 
-Or it may also be it's own stored procedure. This is still under consideration.
-
-3) The 'db2user' is a c module, possibly difficult for some to understand. I will likely add another 'db2rpg'
+User 'db2user' is a c module, possibly difficult for some to understand. I will likely add another 'db2rpg'
 to allow RPGers to participate within the framework of 'everything RPG'.
 
 # modules (incomplete)

@@ -14,16 +14,10 @@ INSTALLDIR   = /QOpenSys/usr/lib
 CCC         = crtcmod
 CCPGM       = crtpgm
 CCSRVPGM    = crtsrvpgm
-CCSQL		    = db2script
 
 ### *PGM proc
-SP400SRVPGM  = db2proc.srvpgm
-SP400OBJS    = db2proc.mod \
-	ibyrefp1.mod ibyrefp2.mod ibyrefp3.mod ibyrefp4.mod ibyrefp5.mod \
-	ibyrefs1.mod ibyrefs2.mod ibyrefs3.mod ibyrefs4.mod ibyrefs5.mod \
-	ibyvals1.mod ibyvals2.mod ibyvals3.mod ibyvals4.mod ibyvals5.mod ibyvals6.mod ibyvals7.mod ibyvals8.mod
-SQLTPL       = crtsql.cmd
-SQLRPL       = DB2JSON $(ILELIB)
+SP400USRVPGM = db2user.srvpgm
+SP400UOBJS   = db2user.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -43,15 +37,15 @@ proc:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: mkinc removeo $(SP400SRVPGM) crtsqlproc
+go: mkinc removeo $(SP400USRVPGM)
 
 .SUFFIXES: .mod .c
 ### CRTCMOD
 .c.mod:
 	$(CCC) --lib $(ILELIB) -g --src $<
 ### -- SP400SRVPGM (ILE c)
-$(SP400SRVPGM): $(SP400OBJS)
-	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
+$(SP400USRVPGM): $(SP400UOBJS)
+	$(CCSRVPGM) --pgm $(SP400USRVPGM) --lib $(ILELIB) --mod $(SP400UOBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
 
 
 mkinc:
@@ -59,11 +53,9 @@ mkinc:
 	@echo "#define _ICONF_H" >> iconf.h
 	@echo "#define ILELIB \"$(ILELIB)\"" >> iconf.h
 	@echo "#endif /* _ICONF_HH */" >> iconf.h
-### -- create stored procedures (iPLUG512K, etc.)
-crtsqlproc:
-	$(CCSQL) -f $(SQLTPL) -r $(SQLRPL)
+### -- create
 clean:
-	rm -f $(SP400SRVPGM)
+	rm -f $(SP400USRVPGM)
 	rm -f *.mod
 removeo:
 	rm -f *.mod

@@ -986,7 +986,8 @@ char * ile_pgm_curr_argv_ptr_align(ile_pgm_call_t * layout, int tlen) {
   } else if (tlen <= 8) { /* PASE _ILECALL max by value is 8 */
     layout->vpos = ile_pgm_round_up(layout->vpos, 8);
   } else if (tlen <= 16) { /* ILE max value is 16 */
-    layout->vpos = ile_pgm_round_up(layout->vpos, 16);
+    /* alignment really only 8 byte for two register load */
+    layout->vpos = ile_pgm_round_up(layout->vpos, 8);
   }
   /* beyond register (use another register location) */
   if (layout->vpos + tlen > end_reg) {

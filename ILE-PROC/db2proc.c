@@ -20,10 +20,12 @@
 #include "ibyref.h" /* see gen.py */
 
 #define ILEPROC "DB2USER"
-#define ILEFUNC "UserFctCallByVal"
-#define ILEFUNCSIZE 16
+#define ILEFUNC "UserCallSrvPgm"
+#define ILEFUNCSIZE 14
+#define ILEPGM "UserCallPgm"
+#define ILEPGMSIZE 11
 
-bighole_t iCallFctByValUsr(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, int * isDone)
+bighole_t iCallSrvPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, int * isDone)
 {
   void *os_pfct_ptr = NULL;
   typedef bighole_t (os_fct_000_t)();
@@ -38,12 +40,11 @@ bighole_t iCallFctByValUsr(ile_pgm_call_t* layout, char * myPgm, char * myLib, c
   int userLenFunc = ILEFUNCSIZE;
   int i = 0;
   char pattern[ILE_PGM_MAX_ARGS+1];
-
   /* load user handle by val call module */
   os_pgm_ptr = rslvsp(WLI_SRVPGM, userPgm, userLib, _AUTH_OBJ_MGMT);
   os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
   os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &userLenFunc, userFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
-
+  /* srvprm pattern */
   memset(pattern,0,sizeof(pattern));
   for (i=0; i < layout->parmc; i++) {
     if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
@@ -101,11 +102,35 @@ bighole_t iCallFctByValUsr(ile_pgm_call_t* layout, char * myPgm, char * myLib, c
       pattern[i] = '0';
     }
   }
-
+  /* user handle (if wanted) */
   *isDone = 0;
   return os_fct_ptr(layout, myPgm, myLib, myFunc, lenFunc, pattern, isDone);
 
 }
+
+void iCallPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDone)
+{
+  void *os_pfct_ptr = NULL;
+  typedef void (os_fct_000_t)();
+  os_fct_000_t *os_fct_ptr = NULL;
+  _SYSPTR os_pgm_ptr = NULL;
+  unsigned long long os_act_mark = 0;
+  int os_obj_type = 0;
+  int argc = 0;
+  char * userPgm = ILEPROC;
+  char * userLib = ILELIB;
+  char * userFunc = ILEPGM;
+  int userLenFunc = ILEPGMSIZE;
+  /* load user handle by val call module */
+  os_pgm_ptr = rslvsp(WLI_SRVPGM, userPgm, userLib, _AUTH_OBJ_MGMT);
+  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
+  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &userLenFunc, userFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  /* user handle (if wanted) */
+  *isDone = 0;
+  os_fct_ptr(layout, myPgm, myLib, isDone);
+
+}
+
 
 void iCall400(char * blob) 
 {
@@ -131,13 +156,9 @@ void iCall400(char * blob)
   int i = 0;
   char pattern[ILE_PGM_MAX_ARGS+1];
   int isRef = 1;
-  ile_pgm_call_t layout_tmp;
-  int layout_size = 0;
 
   /* hey adc debug */
   /* sleep(30); */
-  layout_size = (char *)&layout->buf - (char *)layout;
-  memcpy(&layout_tmp,layout,layout_size);
   layout->step = 1;
 
   /* set ILE addresses based memory spill location offset */
@@ -173,39 +194,44 @@ void iCall400(char * blob)
   layout->step = 3;
 
   if (!lenFunc) {
-    /* pgm call by ref */
-    if (isRef) {
-      if (layout->argc < 32) {
-        iCallPgmByRefSub1(layout, myPgm, myLib);
-      } else if (layout->argc < 64) {
-        iCallPgmByRefSub2(layout, myPgm, myLib);
-      } else if (layout->argc < 96) {
-        iCallPgmByRefSub3(layout, myPgm, myLib);
-      } else if (layout->argc < 128) {
-        iCallPgmByRefSub4(layout, myPgm, myLib);
-      } else if (layout->argc < 160) {
-        iCallPgmByRefSub5(layout, myPgm, myLib);
+    /* high speed user handled */
+    iCallPgm(layout, myPgm, myLib, &isDone);
+    if (!isDone) {
+      /* pgm call by ref */
+      if (isRef) {
+        if (layout->argc < 32) {
+          iCallPgmByRefSub1(layout, myPgm, myLib);
+        } else if (layout->argc < 64) {
+          iCallPgmByRefSub2(layout, myPgm, myLib);
+        } else if (layout->argc < 96) {
+          iCallPgmByRefSub3(layout, myPgm, myLib);
+        } else if (layout->argc < 128) {
+          iCallPgmByRefSub4(layout, myPgm, myLib);
+        } else if (layout->argc < 160) {
+          iCallPgmByRefSub5(layout, myPgm, myLib);
+        }
       }
-    }
+    } /* pgm user handle (optional) */
   } else {
-    /* srvpgm call by ref */
-    if (isRef) {
-      if (layout->argc < 32) {
-        bighole = iCallFctByRefSub1(layout, myPgm, myLib, myFunc, lenFunc);
-      } else if (layout->argc < 64) {
-        bighole = iCallFctByRefSub2(layout, myPgm, myLib, myFunc, lenFunc);
-      } else if (layout->argc < 96) {
-        bighole = iCallFctByRefSub3(layout, myPgm, myLib, myFunc, lenFunc);
-      } else if (layout->argc < 128) {
-        bighole = iCallFctByRefSub4(layout, myPgm, myLib, myFunc, lenFunc);
-      } else if (layout->argc < 160) {
-        bighole = iCallFctByRefSub5(layout, myPgm, myLib, myFunc, lenFunc);
-      }
-    /* srvpgm call by val */
-    } else {
-      /* high speed user handled */
-      bighole = iCallFctByValUsr(layout, myPgm, myLib, myFunc, lenFunc, &isDone);
-      if (!isDone) {
+    /* high speed user handled */
+    bighole = iCallSrvPgm(layout, myPgm, myLib, myFunc, lenFunc, &isDone);
+    if (!isDone) {
+      /* srvpgm call by ref */
+      if (isRef) {
+        if (layout->argc < 32) {
+          bighole = iCallFctByRefSub1(layout, myPgm, myLib, myFunc, lenFunc);
+        } else if (layout->argc < 64) {
+          bighole = iCallFctByRefSub2(layout, myPgm, myLib, myFunc, lenFunc);
+        } else if (layout->argc < 96) {
+          bighole = iCallFctByRefSub3(layout, myPgm, myLib, myFunc, lenFunc);
+        } else if (layout->argc < 128) {
+          bighole = iCallFctByRefSub4(layout, myPgm, myLib, myFunc, lenFunc);
+        } else if (layout->argc < 160) {
+          bighole = iCallFctByRefSub5(layout, myPgm, myLib, myFunc, lenFunc);
+        }
+      /* srvpgm call by val */
+      } else {
+        /* single size by val defaults (QZRUCLSP(ish) style API) */
         memset(pattern,0,sizeof(pattern));
         for (i=0; i < layout->parmc; i++) {
           if (layout->arg_by[i] == ILE_PGM_BY_VALUE) {
@@ -251,11 +277,12 @@ void iCall400(char * blob)
             break;
           }
         } else {
+          /* no signature match */
+          memset(pattern,'0',8);
           bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
         }
       } /* ! isDone */
-      memcpy(layout,&layout_tmp,layout_size);
-    } /* srvpgm call by val */
+    } /* srvpgm user handle (optional) */
   }
   layout->step = 4;
 
@@ -266,6 +293,5 @@ void iCall400(char * blob)
     memcpy(myRet,(char *)&bighole,lenRet);
   }
   layout->step = 5;
-
 }
 
