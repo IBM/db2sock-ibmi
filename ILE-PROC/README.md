@@ -14,8 +14,8 @@ That is, both toolkit operations and DB2 operations will run in QSQSRVR proxy, t
 Also, same single QTEMP rules will apply when folks call this stored procedure remote 
 from LUW (db2, rest, odbc, ssl/ssh, etc.).
 
-The following discussion of pass by ref and pass by value, may confuse many. So, for simplicity, calling 
-PGM is always by ref. The pass by ref works in toolkit "as is" up to 255 parameters.
+The following discussion of pass by ref and pass by value, may confuse many. So, simplicity, calling 
+PGM is always by ref. Any PGM pass by ref works in toolkit "as is" up to 255 parameters.
 
 ```
        dcl-pi Main;
@@ -29,14 +29,10 @@ PGM is always by ref. The pass by ref works in toolkit "as is" up to 255 paramet
 ```
 
 
-Only SRVPGM have concern about pass by value. 
+Only SRVPGM have concern about pass by value.
 First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
 In fact, for toolkit calls you will be much better served to NOT use 'value' to
 eliminate complexity (see 'value' below). 
-
-Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
-for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  
-However, 'by value' toolkit can be done, and, here is a method that works.
 
 
 ```
@@ -53,21 +49,28 @@ However, 'by value' toolkit can be done, and, here is a method that works.
 ```
 
 
-The toolkit stored procedure will be both conventional (yet another) and unconventional (creative). 
+# full toolkit
+
+The toolkit stored procedure will be both conventional (yet another) and unconventional (creative).
+
+Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
+for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  
+However, 'by value' toolkit can be done, and, here is a method that works.
 
 ## conventional toolkit 
 
 The conventional toolkit interface will support arguments/parameters pass by reference "as is".
 The conventional dynamic or runtime resolve and activation of PGM, SRVPGM programs typical
-of many toolkits is included in this interface.
-In addition, "some" of pass by value arguments/parameters patterns are also supported "as is".
+of many toolkits is included in this interface. This will fill 80-90% of toolkit needs
+at good performance.
+
+Addition, "some" pass by value arguments/parameters patterns are also supported "as is".
 These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/parameters. 
-That is, as with QZRUCLSP, if value arguments are all the same size, 
+As with QZRUCLSP, if value arguments are all the same size, 
 default toolkit can handle call task by simple 16 possible lengths 'pattern'.
 
 Note: SRVPGM interface 'by value' QZRUCLSP limits to only bin(4) for pass by value 8 arguments/parameters. 
 This toolkit will take most other non-floating point sizes for pass by value 8 arguments/parameters (length 1-16).
-
 
 ## unconventional toolkit
 
@@ -129,7 +132,6 @@ changes in caller made by callee (meaning copy), but most folks did not even kno
 
 
 ##db2user - user special add handler module (dynamic loaded ILE SRVPGM).
-
 
 Technically, pass 'by value' is all about size. You need to match for call to work.
 Note: If all your pass by value arguments are same size, the
@@ -217,3 +219,15 @@ BTW -- There were/are alternatives starting PASE in db2proc and using _ILECALL.
 In fact, XMLSERVICE uses _ILECALL from the ILE RPG code.
 While _ILECALL is appealing for simplicity (do it all), 'staring PASE' will
 slow down performance experienced with XMLSERVICE (nobody likes slow).
+
+
+## Last word
+
+Ultimately we may require something better than QZRUCLSP(ish) style API out of IBM i OS (above). 
+Something new, to avoid pass by value 'mess'caused by blocked MI instructions (limiting). 
+Aka, perhaps something like _ILECALL for PASE, but ILE API. Anyway, by changing IBM i OS, 
+of course, we would set a stake in version supported. However, at moment, protocol is not clear, 
+therefore experimentation has value. Also, unlikely a fast path "add yourself' 
+compile interface would be supported. All in all, much left unexplored to really jump to conclusion.
+
+ 
