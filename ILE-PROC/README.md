@@ -25,6 +25,40 @@ PGM is always by ref. Any PGM pass by ref works in toolkit "as is" up to 255 par
        end-pi;
          paramCount = %parms();
        return;
+
+       dcl-ds innerDS qualified;
+          field1 char(10);
+          field2 char(15);
+          field3 char(25);
+          field4 char(5);
+       end-ds;
+```
+
+PGM pass complex nested DS structures 'by ref' is also supported.
+
+```
+
+       dcl-ds outDS qualified;
+          out1 int(10);
+          out2 varchar(5:2);
+          outTable likeds(innerDS) dim(30);
+          out3 varchar(10:2);
+       end-ds;
+
+       dcl-pr Main extpgm;
+         val int(10);
+         outCount int(10);
+         output likeds(outDS) dim(200);
+         last char(10);
+       end-pr;
+
+       dcl-pi Main;
+         val int(10);
+         outCount int(10);
+         output likeds(outDS) dim(200);
+         last char(10);
+       end-pi;
+
 ```
 
 SRVPGM pass by ref works in toolkit "as is" up to 255 parameters.
