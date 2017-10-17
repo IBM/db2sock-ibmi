@@ -77,8 +77,8 @@ This toolkit will take most other non-floating point sizes for pass by value 8 a
 This is an Open Source project. As such we are not bound by constraints of everything comes from Rochester IBM.
 To wit, unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
 A supplemental module named 'db2user' is included to allow you to handle any sort of
-call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above).
-However, you may also include your own custom calls directly compiled into "the stored procedure driver".
+call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above),
+or, you may also include your own custom calls directly compiled into "the stored procedure driver".
 
 Why? Speed. The fastest load time for any call is a compile time set 'load/activate'. Conventional
 toolkit interface will exist, and, will probably be fine for 80% of all calls (above). 
@@ -215,10 +215,10 @@ Pattern:
 
 ## PASE _ILECALL
 
-BTW -- There were/are alternatives starting PASE in db2proc and using _ILECALL.
-In fact, XMLSERVICE uses _ILECALL from the ILE RPG code.
+There were/are alternatives starting PASE in db2proc and using _ILECALL.
+In fact, XMLSERVICE uses _ILECALL from ILE RPG code.
 While _ILECALL is appealing for simplicity (do it all), 'staring PASE' will
-slow down performance experienced with XMLSERVICE (nobody likes slow).
+slow down performance as experienced with XMLSERVICE (nobody likes slow).
 
 
 ## Last word
