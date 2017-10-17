@@ -7,6 +7,43 @@ When this warning disappears, APIs will be considered stable.
 This stored procedure is called when using toolkit (libtk400.a). 
 The stored procedure argument is a blob that contains the 'layout' of an ILE PGM or SRVPGM call.
 
+# overview 
+
+This stored procedure interface enables IBM i scripting languages using the driver to share QTEMP in QSQSRVR job proxy. 
+That is, both toolkit operations and DB2 operations will run in QSQSRVR proxy, therefore QTEMP is 'shared'.
+Also, same single QTEMP rules will apply when folks call this stored procedure remote 
+from LUW (db2, rest, odbc, ssl/ssh, etc.).
+
+The toolkit stored procedure will be both conventional (yet another) and unconventional (creative). 
+
+## conventional toolkit 
+
+The conventional toolkit interface will support arguments/parameters pass by reference "as is".
+The conventional dynamic or runtime resolve and activation of PGM, SRVPGM programs typical
+of many toolkits is also included in this interface.
+In addition, "some" of the pass by value arguments/parameters patterns are also supported "as is".
+These will follow Call Service Program Procedure (QZRUCLSP) API. That is, if value arguments
+are all the same size, default toolkit can handle the task by simple 16 possible lengths 'pattern'.
+(Note: QZRUCLSP limits to only bin(4) for pass by value. This toolkit will take most other non-floating point sizes.).
+
+
+## unconventional toolkit
+
+This is an Open Source project. As such we are no bound by the constraints of everything comes from Rochester IBM.
+To wit, the unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
+A supplemental module to 'db2proc' stored procedure named 'db2user' is included to allow you to handle any sort of
+call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above).
+However, you may also include your own custom calls directly compiled into "the stored procedure driver".
+
+Why? Speed. The fastest load time for any call is a compile time 'load/activate'. So, while the conventional
+toolkit interface will exist, and, will probably be fine for 80% of all calls, this do it yourself compile will really
+give you ultimate control over performance. That is, everyone complains about speed and/or limitations of
+every toolkit ever written for IBM i. This unconventional interface can directly link your RPG programs 
+into the stored procedure, so they will be loaded immediately when the toolkit call occurs. 
+Great! Instant performance boast for your IBM i scripting languages at levels comparable with 
+RPG-2-RPG compiled calls (because it is compiled).
+
+
 ILE modules:
 ```
 db2proc - SRVPGM main stored procedure iCall400(blob)
@@ -86,6 +123,10 @@ default toolkit will handle (ibyval*.c). You may have many different types
 The db2user module is provided to add other user custom call SRVRPGM by value.
 The pattern can be seen in example in db2user iCallFctByVal2048F0.
 Simply add you own signatures following the pattern up to ILE_PGM_MAX_ARGS (259 args).
+
+You may follow the dynamic/runtime load/activate, or, you may simply code
+your call into db2user using conventional ILE call techniques. Aka,
+you may dierctly control the performance of your call from PASE. 
 
 Pattern:
 ```
