@@ -133,7 +133,7 @@ This toolkit will take most other non-floating point sizes for pass by value 8 a
 ## warning (by value zoned)
 
 Passing 'by value' zoned may not work (4s2, 12s2, etc.). That is, most other types 'by value' seem to work fine, but zone 'by value' has issues.
-I recoomend stay away from 'by value' zone until the problem can be understood.
+I recomend stay away from 'by value' zone until the problem can be understood.
 
 ## unconventional toolkit (ILE-PROC-USER)
 
@@ -180,7 +180,7 @@ changes in caller made by callee (meaning copy), but most folks did not even kno
 ##db2user - user special add handler module (dynamic loaded ILE SRVPGM).
 
 The db2user module is provided to add other user custom call SRVRPGM by value.
-The pattern can be seen in example in db2user iCallFctByVal2048F0.
+The pattern can be seen in example in db2user sample_crazy9.
 Simply add you own signatures following the pattern up to ILE_PGM_MAX_ARGS (259 args).
 
 You may follow the dynamic/runtime load/activate, or, you may simply code
