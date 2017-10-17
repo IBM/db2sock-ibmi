@@ -22,28 +22,31 @@ The conventional toolkit interface will support arguments/parameters pass by ref
 The conventional dynamic or runtime resolve and activation of PGM, SRVPGM programs typical
 of many toolkits is included in this interface.
 In addition, "some" of pass by value arguments/parameters patterns are also supported "as is".
-These will follow Call Service Program Procedure (QZRUCLSP) API. That is, if value arguments
-are all the same size, default toolkit can handle call task by simple 16 possible lengths 'pattern'.
-(Note: QZRUCLSP limits to only bin(4) for pass by value. 
-This toolkit will take most other non-floating point size.).
+These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/paramters. 
+That is, as with QZRUCLSP, if value arguments are all the same size, 
+default toolkit can handle call task by simple 16 possible lengths 'pattern'.
+
+Note: SRVPGM interface 'by value' QZRUCLSP limits to only bin(4) for pass by value 8 arguments/parameters. 
+This toolkit will take most other non-floating point sizes for pass by value 8 arguments/parameters (length 1-16).
 
 
 ## unconventional toolkit
 
-This is an Open Source project. As such we are no bound by the constraints of everything comes from Rochester IBM.
-To wit, the unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
+This is an Open Source project. As such we are not bound by onstraints of everything comes from Rochester IBM.
+To wit, unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
 A supplemental module named 'db2user' is included to allow you to handle any sort of
 call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above).
 However, you may also include your own custom calls directly compiled into "the stored procedure driver".
 
-Why? Speed. The fastest load time for any call is a compile time 'load/activate'. So, while the conventional
-toolkit interface will exist, and, will probably be fine for 80% of all calls, this do it yourself compile will really
+Why? Speed. The fastest load time for any call is a compile time set 'load/activate'. Conventional
+toolkit interface will exist, and, will probably be fine for 80% of all calls (above). 
+This unconventional do it yourself compile interface will really
 give you ultimate control over performance. That is, everyone complains about speed and/or limitations of
 every toolkit ever written for IBM i. This unconventional interface can directly link your RPG programs 
 into the stored procedure, so they will be loaded immediately when the toolkit call occurs. 
 Great! Instant performance boost for your IBM i scripting languages at levels comparable with 
 RPG-2-RPG compiled calls (because it is compiled). This is a good thing! Don't let unconventional
-stop you from thinking this idea (see WIP). 
+stop you from thinking this idea through (see WIP). 
 
 WIP -- (not done yet)
 
@@ -84,7 +87,7 @@ no un-blocked instructions are available to really do this right (gen code neede
 However, 'by value' toolkit can be done, and, here is a method that works.
 
 
-Pass 'by value' is all about size. You need to match for call to work.
+Technically, pass 'by value' is all about size. You need to match for call to work.
 Note: If all your pass by value arguments are same size, the
 default toolkit will handle (ibyval*.c). You may have many different types
 (int, packed, char 'value), but they must be same length (all fool16_t, etc.).
