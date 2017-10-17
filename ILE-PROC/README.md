@@ -7,6 +7,53 @@ When this warning disappears, APIs will be considered stable.
 This stored procedure is called when using toolkit (libtk400.a). 
 The stored procedure argument is a blob that contains the 'layout' of an ILE PGM or SRVPGM call.
 
+# preamble
+
+The following discussion of pass by ref and pass by value, may confuse many. So, for simplicity, calling 
+PGM is always by ref. The pass by ref works in toolkit "as is" up to 255 parameters.
+
+```
+       dcl-pi Main;
+         paramCount int(10);
+         p1 char(5);
+         p2 char(5) options(*nopass);
+         p3 char(5) options(*nopass);
+       end-pi;
+         paramCount = %parms();
+       return;
+```
+
+
+Only SRVPGM have concern about pass by value. Most of the following 'confusing' 
+discussion deals with working around restrictions in MI instructions
+for pass by value. Aka, most readers can simply ignore remaining of this discussion.  
+
+```
+       dcl-pr rainpack31;
+         a1 packed(31:2) value; <- pass by value (rare)
+         a2 packed(31:2) value;
+         a3 packed(31:2) value;
+         a4 packed(31:2) value;
+         o1 packed(31:2); <- pass by ref (most)
+         o2 packed(31:2);
+         o3 packed(31:2);
+         o4 packed(31:2);
+       end-pr;
+```
+
+Note: First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
+In fact, for toolkit calls you will be much better served to not use 'value' to
+eliminate complexity (see 'value' below). 
+
+Technically, anything 16 bytes or less marked as 'value' will be placed in up to two 8 byte registers. 
+Therefore, we need only get the correct size 'hole' and you can pass any type through the 'value'
+(int - fool4_t, packed - fool1_t to fool16_t, char - fool1_t to fool16_t, ds -  fool1_t to fool16_t,
+so on). So few people really understand pass by value 16 bytes rules, that
+as author, I almost decided not to support at all. Made even worse,
+no un-blocked instructions are available to really do this right (gen code needed).
+However, 'by value' toolkit can be done, and, here is a method that works.
+
+
 # overview 
 
 This stored procedure interface enables IBM i scripting languages using the driver to share QTEMP in QSQSRVR job proxy. 
@@ -22,7 +69,7 @@ The conventional toolkit interface will support arguments/parameters pass by ref
 The conventional dynamic or runtime resolve and activation of PGM, SRVPGM programs typical
 of many toolkits is included in this interface.
 In addition, "some" of pass by value arguments/parameters patterns are also supported "as is".
-These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/paramters. 
+These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/parameters. 
 That is, as with QZRUCLSP, if value arguments are all the same size, 
 default toolkit can handle call task by simple 16 possible lengths 'pattern'.
 
@@ -32,7 +79,7 @@ This toolkit will take most other non-floating point sizes for pass by value 8 a
 
 ## unconventional toolkit
 
-This is an Open Source project. As such we are not bound by onstraints of everything comes from Rochester IBM.
+This is an Open Source project. As such we are not bound by constraints of everything comes from Rochester IBM.
 To wit, unconventional toolkit interface will allow you to compile your specific call into this stored procedure. 
 A supplemental module named 'db2user' is included to allow you to handle any sort of
 call to your existing code. Specifically, you can use techniques copied from the conventional toolkit (above).
@@ -74,17 +121,6 @@ mark for a full toolkit (without using blocked MI instructions).
 
 
 #db2user - user special add handler module (dynamic loaded ILE SRVPGM).
-
-First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
-In fact, for this toolkit you will be much better served to not use 'value' to
-eliminate complexity (see 'value' below). Technically, anything 16 bytes or less 
-marked as 'value' will be placed in up to two 8 byte registers. Therefore,
-we need only get the correct size 'hole' and you can pass any type through the 'value'
-(int - fool4_t, packed - fool1_t to fool16_t, char - fool1_t to fool16_t, ds - fool4_t, 
-so on). So few people really understand pass by value 16 bytes rules, that
-as author, I almost decided not to support at all. Made even worse,
-no un-blocked instructions are available to really do this right (gen code needed).
-However, 'by value' toolkit can be done, and, here is a method that works.
 
 
 Technically, pass 'by value' is all about size. You need to match for call to work.
@@ -171,4 +207,3 @@ BTW -- There were/are alternatives starting PASE in db2proc and using _ILECALL.
 In fact, XMLSERVICE uses _ILECALL from the ILE RPG code.
 While _ILECALL is appealing for simplicity (do it all), 'staring PASE' will
 slow down performance experienced with XMLSERVICE (nobody likes slow).
-
