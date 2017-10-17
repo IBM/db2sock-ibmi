@@ -14,7 +14,6 @@ That is, both toolkit operations and DB2 operations will run in QSQSRVR proxy, t
 Also, same single QTEMP rules will apply when folks call this stored procedure remote 
 from LUW (db2, rest, odbc, ssl/ssh, etc.).
 
-The following discussion of pass by ref and pass by value, may confuse many. So, simplicity, calling 
 PGM is always by ref. Any PGM pass by ref works in toolkit "as is" up to 255 parameters.
 
 ```
@@ -28,16 +27,37 @@ PGM is always by ref. Any PGM pass by ref works in toolkit "as is" up to 255 par
        return;
 ```
 
-
-Only SRVPGM have concern about pass by value.
-First, recall, SRVPGM with pass by 'value' arguments is not overly popular on IBM i.
+SRVPGM pass by ref works in toolkit "as is" up to 255 parameters.
 In fact, for toolkit calls you will be much better served to NOT use 'value' to
-eliminate complexity (see 'value' below). 
+eliminate complexity (see 'value' below). SRVPGM with pass by 'value' 
+arguments is not overly popular on IBM i (rarely used).
+
+
+```
+       dcl-proc happy9 export;
+       dcl-pi  *N;
+         o1 packed(16:2);
+         o2 packed(15:2);
+         o3 int(5);
+         o4 char(7);
+         o5 char(16);
+         o6 packed(4:2);
+         o7 char(8);
+         o8 packed(12:2);
+         o9 packed(4:2);
+       end-pi;
+```
+
+# SRVPGM pass by value (MI workaround -- not for everyone)
+
+The following discussion of pass by ref vs. pass by value, may confuse many.
+However, some SRVPGMs are recently using 'const' correctness (aka, by 'value').
+Only SRVPGM have concern about pass by value. 
 
 
 ```
        dcl-pr rainpack31;
-         a1 packed(31:2) value; <- pass by value (rare - not recommended)
+         a1 packed(31:2) value; <- pass by value (not recommended)
          a2 packed(31:2) value;
          a3 packed(31:2) value;
          a4 packed(31:2) value;
@@ -54,8 +74,8 @@ eliminate complexity (see 'value' below).
 The toolkit stored procedure will be both conventional (yet another) and unconventional (creative).
 
 Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
-for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  
-However, 'by value' toolkit can be done, and, here is a method that works.
+for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  However, 
+'by value' toolkit can be done, and, here is a method that works.
 
 ## conventional toolkit 
 
@@ -170,6 +190,7 @@ default toolkit will handle (ibyval*.c). You may have many different types
          o4 char(16);
        end-pr;
 ```
+## beyond same by value sizes (not recommended)
 
 The db2user module is provided to add other user custom call SRVRPGM by value.
 The pattern can be seen in example in db2user iCallFctByVal2048F0.
@@ -200,6 +221,31 @@ Pattern:
 '2' - typedef struct fool2 {char hole[2]; } fool2_t;
 '1' - typedef struct fool1 {char hole[1]; } fool1_t;
 '0' - pointer (pass by ref)
+
+Sample of many different by value arguments with by ref output
+(see ILE-PROC-USER)
+
+mask
+       dcl-pr crazy9;
+9         a1 packed(16:2) value;
+8         a2 packed(15:2) value;
+2         a3 int(5) value;
+7         a4 char(7) value;
+G         a5 char(16) value;
+3         a6 packed(4:2) value;
+8         a7 char(8) value;
+7         a8 packed(12:2) value;
+3         a9 packed(4:2) value;
+0         o1 packed(16:2);
+0         o2 packed(15:2);
+0         o3 int(5);
+0         o4 char(7);
+0         o5 char(16);
+0         o6 packed(4:2);
+0         o7 char(8);
+0         o8 packed(12:2);
+0         o9 packed(4:2);
+       end-pr;
 ```
 
 ## PASE _ILECALL
