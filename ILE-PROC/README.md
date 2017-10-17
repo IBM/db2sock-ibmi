@@ -48,11 +48,16 @@ eliminate complexity (see 'value' below).
 Technically, anything 16 bytes or less marked as 'value' will be placed in up to two 8 byte registers. 
 Therefore, we need only get the correct size 'hole' and you can pass any type through the 'value'
 (int - fool4_t, packed - fool1_t to fool16_t, char - fool1_t to fool16_t, ds -  fool1_t to fool16_t,
-so on). So few people really understand pass by value 16 bytes rules, that
+so on), with exception of floating point registers (4f, 8f, etc.).
+So few people really understand pass by value 16 bytes rules, that
 as author, I almost decided not to support at all. Made even worse,
 no un-blocked instructions are available to really do this right (gen code needed).
 However, 'by value' toolkit can be done, and, here is a method that works.
 
+BTW -- For those wondering about any pass by value 17+ bytes (ds, etc.). Greater 17+ 'value' is actually accomplished by copy argument/parameter,
+and 'value' is promoted to pass by reference. Basically, Uf Da, for those thinking they were improving performance for aggregates 17+ bytes by 'value', 
+they are actually making things perform worse via compiler copy (ILE c, C++, RPG, etc.). Good side, 'spill memory' copy does not reflect 
+changes in caller made by callee (meaning of copy), but most folks did not even know a copy occurred and slowed things down (now you know).
 
 # overview 
 
