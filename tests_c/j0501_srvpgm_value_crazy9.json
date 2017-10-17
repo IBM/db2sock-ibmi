@@ -1,0 +1,22 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"CRAZY9"},
+        {"s":[{"name":"a1", "type":"16p2", "value":11.11, "by":"val"},
+              {"name":"a2", "type":"15p2", "value":22.22, "by":"val"},
+              {"name":"a3", "type":"5i0",  "value":3, "by":"val"},
+              {"name":"a4", "type":"7a",   "value":"4", "by":"val"},
+              {"name":"a5", "type":"16a",  "value":"5", "by":"val"},
+              {"name":"a6", "type":"4p2",  "value":66.66, "by":"val"},
+              {"name":"a7", "type":"8a",   "value":"7", "by":"val"},
+              {"name":"a8", "type":"12p2", "value":88.88, "by":"val"},
+              {"name":"a9", "type":"4p2",  "value":99.99, "by":"val"},
+              {"name":"o1", "type":"16p2", "value":0},
+              {"name":"o2", "type":"15p2", "value":0},
+              {"name":"o3", "type":"5i0",  "value":0},
+              {"name":"o4", "type":"7a",   "value":""},
+              {"name":"o5", "type":"16a",  "value":""},
+              {"name":"o6", "type":"4p2",  "value":0},
+              {"name":"o7", "type":"8a",   "value":""},
+              {"name":"o8", "type":"12p2", "value":0},
+              {"name":"o9", "type":"4p2",  "value":0}
+             ]}
+       ]}
+

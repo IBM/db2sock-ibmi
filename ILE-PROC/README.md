@@ -125,6 +125,10 @@ and 'value' is promoted to pass by reference. Basically, those thinking they wer
 they are actually making things perform worse via compiler copy (ILE c, C++, RPG, etc.). Good side, 'spill memory' copy does not reflect 
 changes in caller made by callee (meaning copy), but most folks did not even know a copy occurred and slowed things down (now you know).
 
+# warning (by value zoned)
+
+Passing 'by value' zoned may not work (4s2, 12s2, etc.). That is, most other types 'by value' seem to work fine, but zone 'by value' has issues.
+I recoomend stay away from 'by value' zone until the problem can be understood.
 
 ##db2user - user special add handler module (dynamic loaded ILE SRVPGM).
 
@@ -154,16 +158,6 @@ default toolkit will handle (ibyval*.c). You may have many different types
          o2 packed(31:2);
          o3 packed(31:2);
          o4 packed(31:2);
-       end-pr;
-       dcl-pr rainzone16;
-         a1 zoned(16:2) value; <-- fool16_t
-         a2 zoned(16:2) value;
-         a3 zoned(16:2) value;
-         a4 zoned(16:2) value;
-         o1 zoned(16:2);
-         o2 zoned(16:2);
-         o3 zoned(16:2);
-         o4 zoned(16:2);
        end-pr;
        dcl-pr rainchar16;
          a1 char(16) value; <-- fool16_t

@@ -295,6 +295,30 @@
        end-pr;
 
        // ****************************************************          
+       // prototypes crazy
+       // ****************************************************
+       dcl-pr crazy9;
+         a1 packed(16:2) value;
+         a2 packed(15:2) value;
+         a3 int(5) value;
+         a4 char(7) value;
+         a5 char(16) value;
+         a6 packed(4:2) value;
+         a7 char(8) value;
+         a8 packed(12:2) value;
+         a9 packed(4:2) value;
+         o1 packed(16:2);
+         o2 packed(15:2);
+         o3 int(5);
+         o4 char(7);
+         o5 char(16);
+         o6 packed(4:2);
+         o7 char(8);
+         o8 packed(12:2);
+         o9 packed(4:2);
+       end-pr;
+
+       // ****************************************************          
        // rainchar
        // ****************************************************          
        dcl-proc rainchar1 export;
@@ -751,6 +775,41 @@
          o2 = a2;
          o3 = a3;
          o4 = a4;
+       end-proc;
+
+       // ****************************************************          
+       // prototypes crazy
+       // ****************************************************
+       dcl-proc crazy9 export;
+       dcl-pi  *N;
+         a1 packed(16:2) value;
+         a2 packed(15:2) value;
+         a3 int(5) value;
+         a4 char(7) value;
+         a5 char(16) value;
+         a6 packed(4:2) value;
+         a7 char(8) value;
+         a8 packed(12:2) value;
+         a9 packed(4:2) value;
+         o1 packed(16:2);
+         o2 packed(15:2);
+         o3 int(5);
+         o4 char(7);
+         o5 char(16);
+         o6 packed(4:2);
+         o7 char(8);
+         o8 packed(12:2);
+         o9 packed(4:2);
+       end-pi;
+         o1 = a1;
+         o2 = a2;
+         o3 = a3;
+         o4 = a4;
+         o5 = a5;
+         o6 = a6;
+         o7 = a7;
+         o8 = a8;
+         o9 = a9;
        end-proc;
 
 
