@@ -243,8 +243,10 @@ Pattern:
 '1' - typedef struct fool1 {char hole[1]; } fool1_t;
 '0' - pointer (pass by ref)
 
+(cut/paste from ILE-PROC-USER/db2user.c)
+
+/*
 Sample of many different by value arguments with by ref output
-(see ILE-PROC-USER)
 
 mask
        dcl-pr crazy9;
@@ -267,6 +269,51 @@ G         a5 char(16) value;
 0         o8 packed(12:2);
 0         o9 packed(4:2);
        end-pr;
+*/
+bighole_t sample_crazy9(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, char * pattern, int * isDone)
+{
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
+  *isDone = 1;
+  return os_fct_ptr(
+    *(fool9_t *)  iNextVal(layout, 0),
+    *(fool8_t *)  iNextVal(layout, 1),
+    *(fool2_t *)  iNextVal(layout, 2),
+    *(fool7_t *)  iNextVal(layout, 3),
+    *(fool16_t *) iNextVal(layout, 4),
+    *(fool3_t *)  iNextVal(layout, 5),
+    *(fool8_t *)  iNextVal(layout, 6),
+    *(fool7_t *)  iNextVal(layout, 7),
+    *(fool3_t *)  iNextVal(layout, 8),
+    iNextPtr(layout, 9),
+    iNextPtr(layout, 10),
+    iNextPtr(layout, 11),
+    iNextPtr(layout, 12),
+    iNextPtr(layout, 13),
+    iNextPtr(layout, 14),
+    iNextPtr(layout, 15),
+    iNextPtr(layout, 16),
+    iNextPtr(layout, 17)
+    );
+
+}
+
+
+bighole_t UserCallSrvPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, char * pattern, int * isDone)
+{
+  // add your own custom iCallFctByValxxxxx pattern
+  if (!strcmp(myPgm,"RAINSRV") && !strcmp(myFunc,"CRAZY9")) {
+    return sample_crazy9(layout, myPgm, myLib, myFunc, lenFunc, pattern, isDone);
+  }
+  return;
+}
+
+void UserCallPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDone)
+{
+  // add your own custom iCallPgmByRefxxxxx
+  return;
+}
+
+
 ```
 
 ## modules (incomplete)
