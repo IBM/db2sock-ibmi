@@ -84,13 +84,7 @@ Only SRVPGM have concern about pass by value.
 
 SRVPGM with pass by 'value' arguments is not popular on IBM i (rarely used). 
 In fact, for toolkit calls you should not use pass by value to
-eliminate toolkit complexity (below). However, some SRVPGMs are recently 
-using 'const' correctness, aka, by 'value' arguments/parameters.
-
-Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
-for 'dynamic' pass by value. Most readers can simply ignore remaining of this discussion.  However, 
-'by value' toolkit can be done, and, following method works.
-
+eliminate toolkit complexity (below).
 
 ```
        dcl-pr rainpack31;
@@ -104,6 +98,11 @@ for 'dynamic' pass by value. Most readers can simply ignore remaining of this di
          o4 packed(31:2);
        end-pr;
 ```
+
+However, some SRVPGMs are recently using 'const' correctness, aka, by 'value' arguments/parameters.
+Most of the following 'confusing' discussion deals with working around restrictions 
+due to blocked MI instructions for 'dynamic' pass by value. Most readers can simply ignore 
+remaining of this discussion.  However, 'by value' toolkit can be done, and, following method works.
 
 
 ## full toolkit
