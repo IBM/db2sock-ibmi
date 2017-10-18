@@ -242,9 +242,19 @@ Pattern:
 '2' - typedef struct fool2 {char hole[2]; } fool2_t;
 '1' - typedef struct fool1 {char hole[1]; } fool1_t;
 '0' - pointer (pass by ref)
+```
 
-(cut/paste from ILE-PROC-USER/db2user.c)
+ILE-PROC-USER/db2user.c (see source)
 
+Faily easy to add you own SRVPGM custom call (below).
+As mentioned, you can directly control performance using a custom call in db2user.c.
+That is, UserCallPgm and UserCallSrvPgm are called before generic toolkit (you first).
+Only trick to adding to db2user.c is understanding 'size' of your program 
+pass by value arguments/parameters to select correct size fool(n)_t (iNextVal).
+The typical pass by reference arguments/parameters (pointer), are, well, trival (iNextPtr).
+BTW -- You can also custom call a PGM by ref using UserCallPgm (again, you first).
+
+```
 /*
 Sample of many different by value arguments with by ref output
 
@@ -312,7 +322,6 @@ void UserCallPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDon
   // add your own custom iCallPgmByRefxxxxx
   return;
 }
-
 
 ```
 
