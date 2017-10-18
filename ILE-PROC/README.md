@@ -254,6 +254,17 @@ pass by value arguments/parameters to select correct size fool(n)_t (iNextVal).
 The typical pass by reference arguments/parameters (pointer), are, well, trival (iNextPtr).
 You can also custom call a PGM by ref using UserCallPgm (again, you first).
 
+Hint:
+
+The size pattern of call is passed in 'pattern' UserCallSrvPgm argument (mask/pattern).
+Practical technique, simply mess up first code addition, set a stop in UserCallSrvPgm,
+look at pattern argument (crazy9 pattern is "9827G3873000000000").
+The arguments are zero based, not 1 based like RPG, so start parm 0 (not parm 1).
+Up to 255 arguments will be in pattern, just match mask/pattern
+to correct correct size fool(n)_t (iNextVal). Don't forget to deref iNextVal
+pointer to the value content (follow sample).
+ 
+
 ```
 /*
 Sample of many different by value arguments with by ref output
