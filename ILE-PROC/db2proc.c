@@ -277,7 +277,7 @@ void iCall400(char * blob)
             break;
           }
         } else {
-          /* no signature match */
+          /* no signature match, maybe use PASE _ILECALL for slow path (TBD)???*/
           memset(pattern,'0',8);
           bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
         }

@@ -19,6 +19,10 @@ byref_proto_h += '#define ICALL_MAX_RETURN 3000000' + "\n"
 byref_proto_h += 'typedef struct bighole_struct {' + "\n"
 byref_proto_h += '  char hole[ICALL_MAX_RETURN];' + "\n"
 byref_proto_h += '} bighole_t;' + "\n"
+byref_proto_h += '#pragma datamodel(p128)' + "\n"
+byref_proto_h += 'typedef void (os_pgm_pattern_t)();' + "\n"
+byref_proto_h += '#pragma linkage(os_pgm_pattern_t,OS)' + "\n"
+byref_proto_h += '#pragma datamodel(pop)' + "\n"
 
 # ===============================================
 # pgm c includes
@@ -52,38 +56,17 @@ for z in range(1, byref_max_files):
   for x in range(x_beg, x_end):
     strx = str(x)
     pgm_c_byref += "\n"
-    pgm_c_byref += '#pragma datamodel(p128)'  + "\n"
-    pgm_c_byref += 'typedef void (os_pgm_'+strx+'_t)'  + "\n" 
-    pgm_c_byref += '('  + "\n"
-    isSpace = 1
-    for i in range(1, x+1):
-      isSpace = 0
-      stri = str(i)
-      pgm_c_byref += 'char * p'+stri
-      if i < x:
-        pgm_c_byref += ', '
-      if i % 7 == 0:
-        isSpace = 1
-        pgm_c_byref += "\n"
-    if isSpace == 0:
-      pgm_c_byref += "\n"
-    pgm_c_byref += ');'  + "\n"
-    pgm_c_byref += '#pragma linkage(os_pgm_'+strx+'_t,OS)'  + "\n"
-    pgm_c_byref += '#pragma datamodel(pop)'  + "\n"
-    pgm_c_byref += 'void iCallPgmByRef'+strx+'(ile_pgm_call_t* layout, char * myPgm, char * myLib);'  + "\n"
-  for x in range(x_beg, x_end):
-    strx = str(x)
-    pgm_c_byref += "\n"
     pgm_c_byref += 'void iCallPgmByRef'+strx+'(ile_pgm_call_t* layout, char * myPgm, char * myLib)'  + "\n"
     pgm_c_byref += '{'  + "\n"
-    pgm_c_byref += '  os_pgm_'+strx+'_t *os_pfct_ptr = rslvsp(_Program, myPgm, myLib, _AUTH_OBJ_MGMT);'  + "\n"
+    # pgm_c_byref += '  os_pgm_'+strx+'_t *os_pfct_ptr = rslvsp(_Program, myPgm, myLib, _AUTH_OBJ_MGMT);'  + "\n"
+    pgm_c_byref += '  os_pgm_pattern_t *os_pfct_ptr = iNextPgm(layout, myPgm, myLib);'  + "\n"
     pgm_c_byref += '  os_pfct_ptr('  + "\n"
     pgm_c_byref += '    '
     isSpace = 1
     for i in range(1, x+1):
       isSpace = 0
       stri = str(i-1)
-      pgm_c_byref += 'layout->argv['+stri+']'
+      pgm_c_byref += 'iNextPtr(layout, '+stri+')'
       if i < x:
         pgm_c_byref += ', '
       if i % 7 == 0:
@@ -130,41 +113,16 @@ for z in range(1, byref_max_files):
   for x in range(x_beg, x_end):
     strx = str(x)
     srvpgm_c_byref += "\n"
-    srvpgm_c_byref += 'typedef bighole_t (os_fct_'+strx+'_t)' + "\n"
-    srvpgm_c_byref += '(' + "\n"
-    isSpace = 1
-    for i in range(1, x+1):
-      isSpace = 0
-      stri = str(i)
-      srvpgm_c_byref += 'char * p'+stri
-      if i < x:
-        srvpgm_c_byref += ', '
-      if i % 7 == 0:
-        isSpace = 1
-        srvpgm_c_byref += "\n"
-    if isSpace == 0:
-      srvpgm_c_byref += "\n"
-    srvpgm_c_byref += ');' + "\n"
-  for x in range(x_beg, x_end):
-    strx = str(x)
-    srvpgm_c_byref += "\n"
     srvpgm_c_byref += 'bighole_t iCallFctByRef'+strx+'(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)' + "\n"
     srvpgm_c_byref += '{' + "\n"
-    srvpgm_c_byref += '  void *os_pfct_ptr = NULL;' + "\n"
-    srvpgm_c_byref += '  os_fct_'+strx+'_t *os_fct_ptr = NULL;' + "\n"
-    srvpgm_c_byref += '  _SYSPTR os_pgm_ptr = NULL;' + "\n"
-    srvpgm_c_byref += '  unsigned long long os_act_mark = 0;' + "\n"
-    srvpgm_c_byref += '  int os_obj_type = 0;' + "\n"
-    srvpgm_c_byref += '  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);' + "\n"
-    srvpgm_c_byref += '  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);' + "\n"
-    srvpgm_c_byref += '  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);' + "\n"
+    srvpgm_c_byref += '  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);' + "\n"
     srvpgm_c_byref += '  return os_fct_ptr(' + "\n"
     srvpgm_c_byref += '    '
     isSpace = 1
     for i in range(1, x+1):
       isSpace = 0
       stri = str(i-1)
-      srvpgm_c_byref += 'layout->argv['+stri+']'
+      srvpgm_c_byref += 'iNextPtr(layout, '+stri+')'
       if i < x:
         srvpgm_c_byref += ', '
       if i % 7 == 0:
@@ -207,74 +165,17 @@ def func_by_val(pattern):
   srvpgm_c_byval += "\n"
   srvpgm_c_byval += 'bighole_t iCallFctByVal'+pattern+'(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)' + "\n"
   srvpgm_c_byval += '{' + "\n"
-  srvpgm_c_byval += '  void *os_pfct_ptr = NULL;' + "\n"
-  # proto
-  srvpgm_c_byval += '  typedef bighole_t (os_fct_'+pattern+'_t)();' + "\n"
-  # end proto
-  srvpgm_c_byval += '  os_fct_'+pattern+'_t *os_fct_ptr = NULL;' + "\n"
-  srvpgm_c_byval += '  _SYSPTR os_pgm_ptr = NULL;' + "\n"
-  srvpgm_c_byval += '  unsigned long long os_act_mark = 0;' + "\n"
-  srvpgm_c_byval += '  int os_obj_type = 0;' + "\n"
-  srvpgm_c_byval += '  int argc = 0;' + "\n"
-  srvpgm_c_byval += '  int one_len = 0; /* all value elements must be same size (yuck) */' + "\n"
   # variable
   isVal = 0
   i = 0
   for c in list(pattern):
     strp = str(i)
-    if c == '0':
-      srvpgm_c_byval += '  char * ptr'+strp+' = NULL;' + "\n"
-    else:
-      srvpgm_c_byval += '  fool16_t * val16t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool15_t * val15t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool14_t * val14t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool13_t * val13t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool12_t * val12t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool11_t * val11t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool10_t * val10t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool9_t * val9t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool8_t * val8t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool7_t * val7t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool6_t * val6t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool5_t * val5t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool4_t * val4t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool3_t * val3t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool2_t * val2t'+strp+' = NULL;' + "\n"
-      srvpgm_c_byval += '  fool1_t * val1t'+strp+' = NULL;' + "\n"
+    if c != '0':
       isVal = 1
+      srvpgm_c_byval += '  int one_len = layout->arg_len['+strp+']; /* all value elements must be same size (yuck) */' + "\n"
+      break
     i += 1
-  srvpgm_c_byval += '  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);' + "\n"
-  srvpgm_c_byval += '  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);' + "\n"
-  srvpgm_c_byval += '  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);' + "\n"
-  # assign
-  argc = 0
-  i = 0
-  for c in list(pattern):
-    strp = str(i)
-    if c == '0':
-      strc = str(argc)
-      srvpgm_c_byval += '  ptr'+strp+' = layout->argv[iNextArgv(layout, '+strc+')];' + "\n"
-      argc += 1
-    else:
-      srvpgm_c_byval += '  one_len = layout->arg_len['+strp+'];' + "\n"
-      srvpgm_c_byval += '  val1t'+strp+'  = (fool1_t *) ((char *)layout + layout->arg_pos['+strp+']);' + "\n"
-      srvpgm_c_byval += '  val2t'+strp+'  = (fool2_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val3t'+strp+'  = (fool3_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val4t'+strp+'  = (fool4_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val9t'+strp+'  = (fool9_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val5t'+strp+'  = (fool5_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val6t'+strp+'  = (fool6_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val7t'+strp+'  = (fool7_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val8t'+strp+'  = (fool8_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val9t'+strp+'  = (fool9_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val10t'+strp+' = (fool10_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val11t'+strp+' = (fool11_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val12t'+strp+' = (fool12_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val13t'+strp+' = (fool13_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val14t'+strp+' = (fool14_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val15t'+strp+' = (fool15_t *) val1t'+strp+';' + "\n"
-      srvpgm_c_byval += '  val16t'+strp+' = (fool16_t *) val1t'+strp+';' + "\n"
-    i += 1
+  srvpgm_c_byval += '  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);' + "\n"
   # function call (all by ref)
   if isVal == 0:
     srvpgm_c_byval += '  return os_fct_ptr(' + "\n"
@@ -286,9 +187,9 @@ def func_by_val(pattern):
       isSpace = 0
       stri = str(i-1)
       if c == '0':
-        srvpgm_c_byval += 'ptr'+stri
+        srvpgm_c_byval += 'iNextPtr(layout, '+stri+')'
       else:
-        srvpgm_c_byval += '*val'+strw+'t'+stri
+        srvpgm_c_byval += '*(fool'+strw+'_t *)iNextVal(layout, '+stri+')'
       if i < x:
         srvpgm_c_byval += ', '
       if i % 7 == 0:
@@ -316,9 +217,9 @@ def func_by_val(pattern):
       isSpace = 0
       stri = str(i-1)
       if c == '0':
-        srvpgm_c_byval += 'ptr'+stri
+        srvpgm_c_byval += 'iNextPtr(layout, '+stri+')'
       else:
-        srvpgm_c_byval += '*val'+strw+'t'+stri
+        srvpgm_c_byval += '*(fool'+strw+'_t *)iNextVal(layout, '+stri+')'
       if i < x:
         srvpgm_c_byval += ', '
       if i % 7 == 0:
@@ -376,20 +277,42 @@ byval_proto_h += 'typedef struct fool4 {char hole[4]; } fool4_t;' + "\n"
 byval_proto_h += 'typedef struct fool3 {char hole[3]; } fool3_t;' + "\n"
 byval_proto_h += 'typedef struct fool2 {char hole[2]; } fool2_t;' + "\n"
 byval_proto_h += 'typedef struct fool1 {char hole[1]; } fool1_t;' + "\n"
-byval_proto_h += 'static int iNextArgv(ile_pgm_call_t* layout, int argc)'  + "\n"
+byval_proto_h += 'static char * iNextVal(ile_pgm_call_t* layout, int argc)'  + "\n"
+byval_proto_h += '{'  + "\n"
+byval_proto_h += '  return (char *)layout + layout->arg_pos[argc];'  + "\n"
+byval_proto_h += '}'  + "\n"
+byval_proto_h += 'static char * iNextPtr(ile_pgm_call_t* layout, int argc)'  + "\n"
 byval_proto_h += '{'  + "\n"
 byval_proto_h += '  int i = 0;'  + "\n"
-byval_proto_h += '  int j = 0;'  + "\n"
 byval_proto_h += '  for (i=0; i < ILE_PGM_MAX_ARGS; i++) {'  + "\n"
-byval_proto_h += '    if (layout->argv[i]) {'  + "\n"
-byval_proto_h += '      if (j == argc) {'  + "\n"
-byval_proto_h += '        return i;'  + "\n"
-byval_proto_h += '      }'  + "\n"
-byval_proto_h += '      j++;'  + "\n"
+byval_proto_h += '    if (layout->argv_parm[i] == argc) {'  + "\n"
+byval_proto_h += '      return layout->argv[i];'  + "\n"
 byval_proto_h += '    }'  + "\n"
 byval_proto_h += '  }'  + "\n"
-byval_proto_h += '  return 0;'  + "\n"
+byval_proto_h += '  return NULL;'  + "\n"
 byval_proto_h += '}'  + "\n"
+
+
+byval_proto_h += 'typedef bighole_t (os_fct_pattern_t)();'  + "\n"
+byval_proto_h += 'static os_fct_pattern_t * iNextFunc(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)'  + "\n"
+byval_proto_h += '{'  + "\n"
+byval_proto_h += '  void *os_pfct_ptr = NULL;'  + "\n"
+byval_proto_h += '  os_fct_pattern_t *os_fct_ptr = NULL;'  + "\n"
+byval_proto_h += '  _SYSPTR os_pgm_ptr = NULL;'  + "\n"
+byval_proto_h += '  unsigned long long os_act_mark = 0;'  + "\n"
+byval_proto_h += '  int os_obj_type = 0;'  + "\n"
+byval_proto_h += '  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);'  + "\n"
+byval_proto_h += '  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);'  + "\n"
+byval_proto_h += '  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);'  + "\n"
+byval_proto_h += '  return os_fct_ptr;'  + "\n"
+byval_proto_h += '}'  + "\n"
+
+byval_proto_h += 'static os_pgm_pattern_t * iNextPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib)'  + "\n"
+byval_proto_h += '{'  + "\n"
+byval_proto_h += '  os_pgm_pattern_t *os_pfct_ptr = rslvsp(_Program, myPgm, myLib, _AUTH_OBJ_MGMT);'  + "\n"
+byval_proto_h += '  return os_pfct_ptr;'  + "\n"
+byval_proto_h += '}'  + "\n"
+
 for z in range(1,byval_max_args+1):
   strz = str(z)
   myfile = byval_prefix_srvpgm + strz + ".c"

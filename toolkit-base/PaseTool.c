@@ -917,6 +917,29 @@ void tool_output_joblog_end(tool_struct_t *tool) {
 /*=================================================
  * toolkit copy in/out ILE parm layout
  */
+int ile_pgm_round_up(int num, int factor) {
+  return num + factor - 1 - (num - 1) % factor;
+}
+int ile_pgm_isnum_decorated(char c) {
+  if (c >= '0' && c <= '9') {
+    return 1;
+  }
+  switch(c){
+  case '-':
+  case '.':
+    return 1;
+  default:
+    break;
+  }
+  return 0;
+}
+int ile_pgm_isnum_digit(char c) {
+  if (c >= '0' && c <= '9') {
+    return 1;
+  }
+  return 0;
+}
+
 char * ile_pgm_spill_top_buf(ile_pgm_call_t * layout) {
   return (char *)&layout->buf;
 }
@@ -979,14 +1002,18 @@ char * ile_pgm_curr_argv_ptr_align(ile_pgm_call_t * layout, int tlen) {
   int beg_reg  = (char *)&layout->argv[layout->argc] - (char *)layout;
   int end_reg  = beg_reg + sizeof(ILEpointer);
   /* natural alignment (by value) */
-  if (tlen == 2) {
+  if (tlen <= 1) {
+    /* already at vpos */
+  } else if (tlen <= 2) {
     layout->vpos = ile_pgm_round_up(layout->vpos, 2);
   } else if (tlen <= 4) {
     layout->vpos = ile_pgm_round_up(layout->vpos, 4);
   } else if (tlen <= 8) { /* PASE _ILECALL max by value is 8 */
     layout->vpos = ile_pgm_round_up(layout->vpos, 8);
   } else if (tlen <= 16) { /* ILE max value is 16 */
-    /* alignment really only 8 byte for two register load */
+    /* alignment really only 8 byte for two register load
+     * we can get PASE _ILECALL to work using two DWORD 'by value' 
+     */
     layout->vpos = ile_pgm_round_up(layout->vpos, 8);
   }
   /* beyond register (use another register location) */
@@ -1054,31 +1081,6 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   *playout = layout;
   /* return new location (tmp ptrs) */
   return *playout;
-}
-
-int ile_pgm_isnum_decorated(char c) {
-  if (c >= '0' && c <= '9') {
-    return 1;
-  }
-  switch(c){
-  case '-':
-  case '.':
-    return 1;
-  default:
-    break;
-  }
-  return 0;
-}
-int ile_pgm_isnum_digit(char c) {
-  if (c >= '0' && c <= '9') {
-    return 1;
-  }
-  return 0;
-}
-
-
-int ile_pgm_round_up(int num, int factor) {
-  return num + factor - 1 - (num - 1) % factor;
 }
 
 SQLRETURN ile_pgm_str_2_int8(char * where, const char *str, int tdim) {

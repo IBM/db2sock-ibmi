@@ -16,749 +16,312 @@
 #include "iconf.h" /* see Makefile */
 #include "ibyref.h"
 
-typedef bighole_t (os_fct_0_t)
-(
-);
-
-typedef bighole_t (os_fct_1_t)
-(
-char * p1
-);
-
-typedef bighole_t (os_fct_2_t)
-(
-char * p1, char * p2
-);
-
-typedef bighole_t (os_fct_3_t)
-(
-char * p1, char * p2, char * p3
-);
-
-typedef bighole_t (os_fct_4_t)
-(
-char * p1, char * p2, char * p3, char * p4
-);
-
-typedef bighole_t (os_fct_5_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5
-);
-
-typedef bighole_t (os_fct_6_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6
-);
-
-typedef bighole_t (os_fct_7_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7
-);
-
-typedef bighole_t (os_fct_8_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8
-);
-
-typedef bighole_t (os_fct_9_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9
-);
-
-typedef bighole_t (os_fct_10_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10
-);
-
-typedef bighole_t (os_fct_11_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11
-);
-
-typedef bighole_t (os_fct_12_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12
-);
-
-typedef bighole_t (os_fct_13_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13
-);
-
-typedef bighole_t (os_fct_14_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14
-);
-
-typedef bighole_t (os_fct_15_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15
-);
-
-typedef bighole_t (os_fct_16_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16
-);
-
-typedef bighole_t (os_fct_17_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17
-);
-
-typedef bighole_t (os_fct_18_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18
-);
-
-typedef bighole_t (os_fct_19_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19
-);
-
-typedef bighole_t (os_fct_20_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20
-);
-
-typedef bighole_t (os_fct_21_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21
-);
-
-typedef bighole_t (os_fct_22_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22
-);
-
-typedef bighole_t (os_fct_23_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23
-);
-
-typedef bighole_t (os_fct_24_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24
-);
-
-typedef bighole_t (os_fct_25_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25
-);
-
-typedef bighole_t (os_fct_26_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26
-);
-
-typedef bighole_t (os_fct_27_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26, char * p27
-);
-
-typedef bighole_t (os_fct_28_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26, char * p27, char * p28
-);
-
-typedef bighole_t (os_fct_29_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26, char * p27, char * p28, 
-char * p29
-);
-
-typedef bighole_t (os_fct_30_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26, char * p27, char * p28, 
-char * p29, char * p30
-);
-
-typedef bighole_t (os_fct_31_t)
-(
-char * p1, char * p2, char * p3, char * p4, char * p5, char * p6, char * p7, 
-char * p8, char * p9, char * p10, char * p11, char * p12, char * p13, char * p14, 
-char * p15, char * p16, char * p17, char * p18, char * p19, char * p20, char * p21, 
-char * p22, char * p23, char * p24, char * p25, char * p26, char * p27, char * p28, 
-char * p29, char * p30, char * p31
-);
-
 bighole_t iCallFctByRef0(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_0_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
     );
 }
 
 bighole_t iCallFctByRef1(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_1_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0]
+    iNextPtr(layout, 0)
     );
 }
 
 bighole_t iCallFctByRef2(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_2_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1]
+    iNextPtr(layout, 0), iNextPtr(layout, 1)
     );
 }
 
 bighole_t iCallFctByRef3(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_3_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2)
     );
 }
 
 bighole_t iCallFctByRef4(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_4_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3)
     );
 }
 
 bighole_t iCallFctByRef5(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_5_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4)
     );
 }
 
 bighole_t iCallFctByRef6(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_6_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5)
     );
 }
 
 bighole_t iCallFctByRef7(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_7_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6)
     );
 }
 
 bighole_t iCallFctByRef8(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_8_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7)
     );
 }
 
 bighole_t iCallFctByRef9(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_9_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8)
     );
 }
 
 bighole_t iCallFctByRef10(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_10_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9)
     );
 }
 
 bighole_t iCallFctByRef11(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_11_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10)
     );
 }
 
 bighole_t iCallFctByRef12(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_12_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11)
     );
 }
 
 bighole_t iCallFctByRef13(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_13_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12)
     );
 }
 
 bighole_t iCallFctByRef14(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_14_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13)
     );
 }
 
 bighole_t iCallFctByRef15(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_15_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14)
     );
 }
 
 bighole_t iCallFctByRef16(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_16_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15)
     );
 }
 
 bighole_t iCallFctByRef17(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_17_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16)
     );
 }
 
 bighole_t iCallFctByRef18(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_18_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17)
     );
 }
 
 bighole_t iCallFctByRef19(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_19_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18)
     );
 }
 
 bighole_t iCallFctByRef20(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_20_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19)
     );
 }
 
 bighole_t iCallFctByRef21(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_21_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20)
     );
 }
 
 bighole_t iCallFctByRef22(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_22_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21)
     );
 }
 
 bighole_t iCallFctByRef23(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_23_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22)
     );
 }
 
 bighole_t iCallFctByRef24(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_24_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23)
     );
 }
 
 bighole_t iCallFctByRef25(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_25_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24)
     );
 }
 
 bighole_t iCallFctByRef26(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_26_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25)
     );
 }
 
 bighole_t iCallFctByRef27(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_27_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25], layout->argv[26]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25), iNextPtr(layout, 26)
     );
 }
 
 bighole_t iCallFctByRef28(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_28_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25], layout->argv[26], layout->argv[27]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25), iNextPtr(layout, 26), iNextPtr(layout, 27)
     );
 }
 
 bighole_t iCallFctByRef29(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_29_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25], layout->argv[26], layout->argv[27], 
-    layout->argv[28]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25), iNextPtr(layout, 26), iNextPtr(layout, 27), 
+    iNextPtr(layout, 28)
     );
 }
 
 bighole_t iCallFctByRef30(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_30_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25], layout->argv[26], layout->argv[27], 
-    layout->argv[28], layout->argv[29]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25), iNextPtr(layout, 26), iNextPtr(layout, 27), 
+    iNextPtr(layout, 28), iNextPtr(layout, 29)
     );
 }
 
 bighole_t iCallFctByRef31(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc)
 {
-  void *os_pfct_ptr = NULL;
-  os_fct_31_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
   return os_fct_ptr(
-    layout->argv[0], layout->argv[1], layout->argv[2], layout->argv[3], layout->argv[4], layout->argv[5], layout->argv[6], 
-    layout->argv[7], layout->argv[8], layout->argv[9], layout->argv[10], layout->argv[11], layout->argv[12], layout->argv[13], 
-    layout->argv[14], layout->argv[15], layout->argv[16], layout->argv[17], layout->argv[18], layout->argv[19], layout->argv[20], 
-    layout->argv[21], layout->argv[22], layout->argv[23], layout->argv[24], layout->argv[25], layout->argv[26], layout->argv[27], 
-    layout->argv[28], layout->argv[29], layout->argv[30]
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2), iNextPtr(layout, 3), iNextPtr(layout, 4), iNextPtr(layout, 5), iNextPtr(layout, 6), 
+    iNextPtr(layout, 7), iNextPtr(layout, 8), iNextPtr(layout, 9), iNextPtr(layout, 10), iNextPtr(layout, 11), iNextPtr(layout, 12), iNextPtr(layout, 13), 
+    iNextPtr(layout, 14), iNextPtr(layout, 15), iNextPtr(layout, 16), iNextPtr(layout, 17), iNextPtr(layout, 18), iNextPtr(layout, 19), iNextPtr(layout, 20), 
+    iNextPtr(layout, 21), iNextPtr(layout, 22), iNextPtr(layout, 23), iNextPtr(layout, 24), iNextPtr(layout, 25), iNextPtr(layout, 26), iNextPtr(layout, 27), 
+    iNextPtr(layout, 28), iNextPtr(layout, 29), iNextPtr(layout, 30)
     );
 }
 
