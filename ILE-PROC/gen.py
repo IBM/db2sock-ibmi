@@ -236,9 +236,12 @@ def func_by_val(pattern):
   srvpgm_c_byval += '}' + "\n"
   return srvpgm_c_byval
 
-def case_by_val(pattern):
+def case_by_val(pattern, firstOne):
   srvpgm_c_byval = ""
-  srvpgm_c_byval += '  if (!strcmp(pattern,"'+pattern+'")) {'  + "\n"
+  if firstOne == 1:
+    srvpgm_c_byval += '  if (!strcmp(pattern,"'+pattern+'")) {'  + "\n"
+  else:
+    srvpgm_c_byval += '  else if (!strcmp(pattern,"'+pattern+'")) {'  + "\n"
   srvpgm_c_byval += '    return iCallFctByVal'+pattern+'(layout, myPgm, myLib, myFunc, lenFunc);' + "\n"
   srvpgm_c_byval += '  }'  + "\n"
   return srvpgm_c_byval
@@ -246,6 +249,7 @@ def case_by_val(pattern):
 
 # pattern generator
 def perms(n, what):
+  firstOne = 1
   p = ""
   if not n:
     return p
@@ -256,7 +260,8 @@ def perms(n, what):
     if "func" in what:
       p += func_by_val(s)
     elif "case" in what:
-      p += case_by_val(s)
+      p += case_by_val(s, firstOne)
+      firstOne = 0
   return p
 
 # call

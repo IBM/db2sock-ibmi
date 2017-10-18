@@ -197,13 +197,13 @@ bighole_t iCallFctByValSub2(ile_pgm_call_t* layout, char * myPgm, char * myLib, 
   if (!strcmp(pattern,"00")) {
     return iCallFctByVal00(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01")) {
+  else if (!strcmp(pattern,"01")) {
     return iCallFctByVal01(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10")) {
+  else if (!strcmp(pattern,"10")) {
     return iCallFctByVal10(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11")) {
+  else if (!strcmp(pattern,"11")) {
     return iCallFctByVal11(layout, myPgm, myLib, myFunc, lenFunc);
   }
 }

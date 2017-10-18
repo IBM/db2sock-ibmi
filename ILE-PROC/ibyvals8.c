@@ -18390,769 +18390,769 @@ bighole_t iCallFctByValSub8(ile_pgm_call_t* layout, char * myPgm, char * myLib, 
   if (!strcmp(pattern,"00000000")) {
     return iCallFctByVal00000000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000001")) {
+  else if (!strcmp(pattern,"00000001")) {
     return iCallFctByVal00000001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000010")) {
+  else if (!strcmp(pattern,"00000010")) {
     return iCallFctByVal00000010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000011")) {
+  else if (!strcmp(pattern,"00000011")) {
     return iCallFctByVal00000011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000100")) {
+  else if (!strcmp(pattern,"00000100")) {
     return iCallFctByVal00000100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000101")) {
+  else if (!strcmp(pattern,"00000101")) {
     return iCallFctByVal00000101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000110")) {
+  else if (!strcmp(pattern,"00000110")) {
     return iCallFctByVal00000110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00000111")) {
+  else if (!strcmp(pattern,"00000111")) {
     return iCallFctByVal00000111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001000")) {
+  else if (!strcmp(pattern,"00001000")) {
     return iCallFctByVal00001000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001001")) {
+  else if (!strcmp(pattern,"00001001")) {
     return iCallFctByVal00001001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001010")) {
+  else if (!strcmp(pattern,"00001010")) {
     return iCallFctByVal00001010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001011")) {
+  else if (!strcmp(pattern,"00001011")) {
     return iCallFctByVal00001011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001100")) {
+  else if (!strcmp(pattern,"00001100")) {
     return iCallFctByVal00001100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001101")) {
+  else if (!strcmp(pattern,"00001101")) {
     return iCallFctByVal00001101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001110")) {
+  else if (!strcmp(pattern,"00001110")) {
     return iCallFctByVal00001110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00001111")) {
+  else if (!strcmp(pattern,"00001111")) {
     return iCallFctByVal00001111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010000")) {
+  else if (!strcmp(pattern,"00010000")) {
     return iCallFctByVal00010000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010001")) {
+  else if (!strcmp(pattern,"00010001")) {
     return iCallFctByVal00010001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010010")) {
+  else if (!strcmp(pattern,"00010010")) {
     return iCallFctByVal00010010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010011")) {
+  else if (!strcmp(pattern,"00010011")) {
     return iCallFctByVal00010011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010100")) {
+  else if (!strcmp(pattern,"00010100")) {
     return iCallFctByVal00010100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010101")) {
+  else if (!strcmp(pattern,"00010101")) {
     return iCallFctByVal00010101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010110")) {
+  else if (!strcmp(pattern,"00010110")) {
     return iCallFctByVal00010110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00010111")) {
+  else if (!strcmp(pattern,"00010111")) {
     return iCallFctByVal00010111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011000")) {
+  else if (!strcmp(pattern,"00011000")) {
     return iCallFctByVal00011000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011001")) {
+  else if (!strcmp(pattern,"00011001")) {
     return iCallFctByVal00011001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011010")) {
+  else if (!strcmp(pattern,"00011010")) {
     return iCallFctByVal00011010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011011")) {
+  else if (!strcmp(pattern,"00011011")) {
     return iCallFctByVal00011011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011100")) {
+  else if (!strcmp(pattern,"00011100")) {
     return iCallFctByVal00011100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011101")) {
+  else if (!strcmp(pattern,"00011101")) {
     return iCallFctByVal00011101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011110")) {
+  else if (!strcmp(pattern,"00011110")) {
     return iCallFctByVal00011110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00011111")) {
+  else if (!strcmp(pattern,"00011111")) {
     return iCallFctByVal00011111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100000")) {
+  else if (!strcmp(pattern,"00100000")) {
     return iCallFctByVal00100000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100001")) {
+  else if (!strcmp(pattern,"00100001")) {
     return iCallFctByVal00100001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100010")) {
+  else if (!strcmp(pattern,"00100010")) {
     return iCallFctByVal00100010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100011")) {
+  else if (!strcmp(pattern,"00100011")) {
     return iCallFctByVal00100011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100100")) {
+  else if (!strcmp(pattern,"00100100")) {
     return iCallFctByVal00100100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100101")) {
+  else if (!strcmp(pattern,"00100101")) {
     return iCallFctByVal00100101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100110")) {
+  else if (!strcmp(pattern,"00100110")) {
     return iCallFctByVal00100110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00100111")) {
+  else if (!strcmp(pattern,"00100111")) {
     return iCallFctByVal00100111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101000")) {
+  else if (!strcmp(pattern,"00101000")) {
     return iCallFctByVal00101000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101001")) {
+  else if (!strcmp(pattern,"00101001")) {
     return iCallFctByVal00101001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101010")) {
+  else if (!strcmp(pattern,"00101010")) {
     return iCallFctByVal00101010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101011")) {
+  else if (!strcmp(pattern,"00101011")) {
     return iCallFctByVal00101011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101100")) {
+  else if (!strcmp(pattern,"00101100")) {
     return iCallFctByVal00101100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101101")) {
+  else if (!strcmp(pattern,"00101101")) {
     return iCallFctByVal00101101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101110")) {
+  else if (!strcmp(pattern,"00101110")) {
     return iCallFctByVal00101110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00101111")) {
+  else if (!strcmp(pattern,"00101111")) {
     return iCallFctByVal00101111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110000")) {
+  else if (!strcmp(pattern,"00110000")) {
     return iCallFctByVal00110000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110001")) {
+  else if (!strcmp(pattern,"00110001")) {
     return iCallFctByVal00110001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110010")) {
+  else if (!strcmp(pattern,"00110010")) {
     return iCallFctByVal00110010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110011")) {
+  else if (!strcmp(pattern,"00110011")) {
     return iCallFctByVal00110011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110100")) {
+  else if (!strcmp(pattern,"00110100")) {
     return iCallFctByVal00110100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110101")) {
+  else if (!strcmp(pattern,"00110101")) {
     return iCallFctByVal00110101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110110")) {
+  else if (!strcmp(pattern,"00110110")) {
     return iCallFctByVal00110110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00110111")) {
+  else if (!strcmp(pattern,"00110111")) {
     return iCallFctByVal00110111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111000")) {
+  else if (!strcmp(pattern,"00111000")) {
     return iCallFctByVal00111000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111001")) {
+  else if (!strcmp(pattern,"00111001")) {
     return iCallFctByVal00111001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111010")) {
+  else if (!strcmp(pattern,"00111010")) {
     return iCallFctByVal00111010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111011")) {
+  else if (!strcmp(pattern,"00111011")) {
     return iCallFctByVal00111011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111100")) {
+  else if (!strcmp(pattern,"00111100")) {
     return iCallFctByVal00111100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111101")) {
+  else if (!strcmp(pattern,"00111101")) {
     return iCallFctByVal00111101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111110")) {
+  else if (!strcmp(pattern,"00111110")) {
     return iCallFctByVal00111110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"00111111")) {
+  else if (!strcmp(pattern,"00111111")) {
     return iCallFctByVal00111111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000000")) {
+  else if (!strcmp(pattern,"01000000")) {
     return iCallFctByVal01000000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000001")) {
+  else if (!strcmp(pattern,"01000001")) {
     return iCallFctByVal01000001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000010")) {
+  else if (!strcmp(pattern,"01000010")) {
     return iCallFctByVal01000010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000011")) {
+  else if (!strcmp(pattern,"01000011")) {
     return iCallFctByVal01000011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000100")) {
+  else if (!strcmp(pattern,"01000100")) {
     return iCallFctByVal01000100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000101")) {
+  else if (!strcmp(pattern,"01000101")) {
     return iCallFctByVal01000101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000110")) {
+  else if (!strcmp(pattern,"01000110")) {
     return iCallFctByVal01000110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01000111")) {
+  else if (!strcmp(pattern,"01000111")) {
     return iCallFctByVal01000111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001000")) {
+  else if (!strcmp(pattern,"01001000")) {
     return iCallFctByVal01001000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001001")) {
+  else if (!strcmp(pattern,"01001001")) {
     return iCallFctByVal01001001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001010")) {
+  else if (!strcmp(pattern,"01001010")) {
     return iCallFctByVal01001010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001011")) {
+  else if (!strcmp(pattern,"01001011")) {
     return iCallFctByVal01001011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001100")) {
+  else if (!strcmp(pattern,"01001100")) {
     return iCallFctByVal01001100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001101")) {
+  else if (!strcmp(pattern,"01001101")) {
     return iCallFctByVal01001101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001110")) {
+  else if (!strcmp(pattern,"01001110")) {
     return iCallFctByVal01001110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01001111")) {
+  else if (!strcmp(pattern,"01001111")) {
     return iCallFctByVal01001111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010000")) {
+  else if (!strcmp(pattern,"01010000")) {
     return iCallFctByVal01010000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010001")) {
+  else if (!strcmp(pattern,"01010001")) {
     return iCallFctByVal01010001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010010")) {
+  else if (!strcmp(pattern,"01010010")) {
     return iCallFctByVal01010010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010011")) {
+  else if (!strcmp(pattern,"01010011")) {
     return iCallFctByVal01010011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010100")) {
+  else if (!strcmp(pattern,"01010100")) {
     return iCallFctByVal01010100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010101")) {
+  else if (!strcmp(pattern,"01010101")) {
     return iCallFctByVal01010101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010110")) {
+  else if (!strcmp(pattern,"01010110")) {
     return iCallFctByVal01010110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01010111")) {
+  else if (!strcmp(pattern,"01010111")) {
     return iCallFctByVal01010111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011000")) {
+  else if (!strcmp(pattern,"01011000")) {
     return iCallFctByVal01011000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011001")) {
+  else if (!strcmp(pattern,"01011001")) {
     return iCallFctByVal01011001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011010")) {
+  else if (!strcmp(pattern,"01011010")) {
     return iCallFctByVal01011010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011011")) {
+  else if (!strcmp(pattern,"01011011")) {
     return iCallFctByVal01011011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011100")) {
+  else if (!strcmp(pattern,"01011100")) {
     return iCallFctByVal01011100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011101")) {
+  else if (!strcmp(pattern,"01011101")) {
     return iCallFctByVal01011101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011110")) {
+  else if (!strcmp(pattern,"01011110")) {
     return iCallFctByVal01011110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01011111")) {
+  else if (!strcmp(pattern,"01011111")) {
     return iCallFctByVal01011111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100000")) {
+  else if (!strcmp(pattern,"01100000")) {
     return iCallFctByVal01100000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100001")) {
+  else if (!strcmp(pattern,"01100001")) {
     return iCallFctByVal01100001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100010")) {
+  else if (!strcmp(pattern,"01100010")) {
     return iCallFctByVal01100010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100011")) {
+  else if (!strcmp(pattern,"01100011")) {
     return iCallFctByVal01100011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100100")) {
+  else if (!strcmp(pattern,"01100100")) {
     return iCallFctByVal01100100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100101")) {
+  else if (!strcmp(pattern,"01100101")) {
     return iCallFctByVal01100101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100110")) {
+  else if (!strcmp(pattern,"01100110")) {
     return iCallFctByVal01100110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01100111")) {
+  else if (!strcmp(pattern,"01100111")) {
     return iCallFctByVal01100111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101000")) {
+  else if (!strcmp(pattern,"01101000")) {
     return iCallFctByVal01101000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101001")) {
+  else if (!strcmp(pattern,"01101001")) {
     return iCallFctByVal01101001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101010")) {
+  else if (!strcmp(pattern,"01101010")) {
     return iCallFctByVal01101010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101011")) {
+  else if (!strcmp(pattern,"01101011")) {
     return iCallFctByVal01101011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101100")) {
+  else if (!strcmp(pattern,"01101100")) {
     return iCallFctByVal01101100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101101")) {
+  else if (!strcmp(pattern,"01101101")) {
     return iCallFctByVal01101101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101110")) {
+  else if (!strcmp(pattern,"01101110")) {
     return iCallFctByVal01101110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01101111")) {
+  else if (!strcmp(pattern,"01101111")) {
     return iCallFctByVal01101111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110000")) {
+  else if (!strcmp(pattern,"01110000")) {
     return iCallFctByVal01110000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110001")) {
+  else if (!strcmp(pattern,"01110001")) {
     return iCallFctByVal01110001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110010")) {
+  else if (!strcmp(pattern,"01110010")) {
     return iCallFctByVal01110010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110011")) {
+  else if (!strcmp(pattern,"01110011")) {
     return iCallFctByVal01110011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110100")) {
+  else if (!strcmp(pattern,"01110100")) {
     return iCallFctByVal01110100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110101")) {
+  else if (!strcmp(pattern,"01110101")) {
     return iCallFctByVal01110101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110110")) {
+  else if (!strcmp(pattern,"01110110")) {
     return iCallFctByVal01110110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01110111")) {
+  else if (!strcmp(pattern,"01110111")) {
     return iCallFctByVal01110111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111000")) {
+  else if (!strcmp(pattern,"01111000")) {
     return iCallFctByVal01111000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111001")) {
+  else if (!strcmp(pattern,"01111001")) {
     return iCallFctByVal01111001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111010")) {
+  else if (!strcmp(pattern,"01111010")) {
     return iCallFctByVal01111010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111011")) {
+  else if (!strcmp(pattern,"01111011")) {
     return iCallFctByVal01111011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111100")) {
+  else if (!strcmp(pattern,"01111100")) {
     return iCallFctByVal01111100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111101")) {
+  else if (!strcmp(pattern,"01111101")) {
     return iCallFctByVal01111101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111110")) {
+  else if (!strcmp(pattern,"01111110")) {
     return iCallFctByVal01111110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"01111111")) {
+  else if (!strcmp(pattern,"01111111")) {
     return iCallFctByVal01111111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000000")) {
+  else if (!strcmp(pattern,"10000000")) {
     return iCallFctByVal10000000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000001")) {
+  else if (!strcmp(pattern,"10000001")) {
     return iCallFctByVal10000001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000010")) {
+  else if (!strcmp(pattern,"10000010")) {
     return iCallFctByVal10000010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000011")) {
+  else if (!strcmp(pattern,"10000011")) {
     return iCallFctByVal10000011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000100")) {
+  else if (!strcmp(pattern,"10000100")) {
     return iCallFctByVal10000100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000101")) {
+  else if (!strcmp(pattern,"10000101")) {
     return iCallFctByVal10000101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000110")) {
+  else if (!strcmp(pattern,"10000110")) {
     return iCallFctByVal10000110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10000111")) {
+  else if (!strcmp(pattern,"10000111")) {
     return iCallFctByVal10000111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001000")) {
+  else if (!strcmp(pattern,"10001000")) {
     return iCallFctByVal10001000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001001")) {
+  else if (!strcmp(pattern,"10001001")) {
     return iCallFctByVal10001001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001010")) {
+  else if (!strcmp(pattern,"10001010")) {
     return iCallFctByVal10001010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001011")) {
+  else if (!strcmp(pattern,"10001011")) {
     return iCallFctByVal10001011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001100")) {
+  else if (!strcmp(pattern,"10001100")) {
     return iCallFctByVal10001100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001101")) {
+  else if (!strcmp(pattern,"10001101")) {
     return iCallFctByVal10001101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001110")) {
+  else if (!strcmp(pattern,"10001110")) {
     return iCallFctByVal10001110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10001111")) {
+  else if (!strcmp(pattern,"10001111")) {
     return iCallFctByVal10001111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010000")) {
+  else if (!strcmp(pattern,"10010000")) {
     return iCallFctByVal10010000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010001")) {
+  else if (!strcmp(pattern,"10010001")) {
     return iCallFctByVal10010001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010010")) {
+  else if (!strcmp(pattern,"10010010")) {
     return iCallFctByVal10010010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010011")) {
+  else if (!strcmp(pattern,"10010011")) {
     return iCallFctByVal10010011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010100")) {
+  else if (!strcmp(pattern,"10010100")) {
     return iCallFctByVal10010100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010101")) {
+  else if (!strcmp(pattern,"10010101")) {
     return iCallFctByVal10010101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010110")) {
+  else if (!strcmp(pattern,"10010110")) {
     return iCallFctByVal10010110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10010111")) {
+  else if (!strcmp(pattern,"10010111")) {
     return iCallFctByVal10010111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011000")) {
+  else if (!strcmp(pattern,"10011000")) {
     return iCallFctByVal10011000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011001")) {
+  else if (!strcmp(pattern,"10011001")) {
     return iCallFctByVal10011001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011010")) {
+  else if (!strcmp(pattern,"10011010")) {
     return iCallFctByVal10011010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011011")) {
+  else if (!strcmp(pattern,"10011011")) {
     return iCallFctByVal10011011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011100")) {
+  else if (!strcmp(pattern,"10011100")) {
     return iCallFctByVal10011100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011101")) {
+  else if (!strcmp(pattern,"10011101")) {
     return iCallFctByVal10011101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011110")) {
+  else if (!strcmp(pattern,"10011110")) {
     return iCallFctByVal10011110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10011111")) {
+  else if (!strcmp(pattern,"10011111")) {
     return iCallFctByVal10011111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100000")) {
+  else if (!strcmp(pattern,"10100000")) {
     return iCallFctByVal10100000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100001")) {
+  else if (!strcmp(pattern,"10100001")) {
     return iCallFctByVal10100001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100010")) {
+  else if (!strcmp(pattern,"10100010")) {
     return iCallFctByVal10100010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100011")) {
+  else if (!strcmp(pattern,"10100011")) {
     return iCallFctByVal10100011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100100")) {
+  else if (!strcmp(pattern,"10100100")) {
     return iCallFctByVal10100100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100101")) {
+  else if (!strcmp(pattern,"10100101")) {
     return iCallFctByVal10100101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100110")) {
+  else if (!strcmp(pattern,"10100110")) {
     return iCallFctByVal10100110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10100111")) {
+  else if (!strcmp(pattern,"10100111")) {
     return iCallFctByVal10100111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101000")) {
+  else if (!strcmp(pattern,"10101000")) {
     return iCallFctByVal10101000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101001")) {
+  else if (!strcmp(pattern,"10101001")) {
     return iCallFctByVal10101001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101010")) {
+  else if (!strcmp(pattern,"10101010")) {
     return iCallFctByVal10101010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101011")) {
+  else if (!strcmp(pattern,"10101011")) {
     return iCallFctByVal10101011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101100")) {
+  else if (!strcmp(pattern,"10101100")) {
     return iCallFctByVal10101100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101101")) {
+  else if (!strcmp(pattern,"10101101")) {
     return iCallFctByVal10101101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101110")) {
+  else if (!strcmp(pattern,"10101110")) {
     return iCallFctByVal10101110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10101111")) {
+  else if (!strcmp(pattern,"10101111")) {
     return iCallFctByVal10101111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110000")) {
+  else if (!strcmp(pattern,"10110000")) {
     return iCallFctByVal10110000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110001")) {
+  else if (!strcmp(pattern,"10110001")) {
     return iCallFctByVal10110001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110010")) {
+  else if (!strcmp(pattern,"10110010")) {
     return iCallFctByVal10110010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110011")) {
+  else if (!strcmp(pattern,"10110011")) {
     return iCallFctByVal10110011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110100")) {
+  else if (!strcmp(pattern,"10110100")) {
     return iCallFctByVal10110100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110101")) {
+  else if (!strcmp(pattern,"10110101")) {
     return iCallFctByVal10110101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110110")) {
+  else if (!strcmp(pattern,"10110110")) {
     return iCallFctByVal10110110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10110111")) {
+  else if (!strcmp(pattern,"10110111")) {
     return iCallFctByVal10110111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111000")) {
+  else if (!strcmp(pattern,"10111000")) {
     return iCallFctByVal10111000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111001")) {
+  else if (!strcmp(pattern,"10111001")) {
     return iCallFctByVal10111001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111010")) {
+  else if (!strcmp(pattern,"10111010")) {
     return iCallFctByVal10111010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111011")) {
+  else if (!strcmp(pattern,"10111011")) {
     return iCallFctByVal10111011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111100")) {
+  else if (!strcmp(pattern,"10111100")) {
     return iCallFctByVal10111100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111101")) {
+  else if (!strcmp(pattern,"10111101")) {
     return iCallFctByVal10111101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111110")) {
+  else if (!strcmp(pattern,"10111110")) {
     return iCallFctByVal10111110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"10111111")) {
+  else if (!strcmp(pattern,"10111111")) {
     return iCallFctByVal10111111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000000")) {
+  else if (!strcmp(pattern,"11000000")) {
     return iCallFctByVal11000000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000001")) {
+  else if (!strcmp(pattern,"11000001")) {
     return iCallFctByVal11000001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000010")) {
+  else if (!strcmp(pattern,"11000010")) {
     return iCallFctByVal11000010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000011")) {
+  else if (!strcmp(pattern,"11000011")) {
     return iCallFctByVal11000011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000100")) {
+  else if (!strcmp(pattern,"11000100")) {
     return iCallFctByVal11000100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000101")) {
+  else if (!strcmp(pattern,"11000101")) {
     return iCallFctByVal11000101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000110")) {
+  else if (!strcmp(pattern,"11000110")) {
     return iCallFctByVal11000110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11000111")) {
+  else if (!strcmp(pattern,"11000111")) {
     return iCallFctByVal11000111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001000")) {
+  else if (!strcmp(pattern,"11001000")) {
     return iCallFctByVal11001000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001001")) {
+  else if (!strcmp(pattern,"11001001")) {
     return iCallFctByVal11001001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001010")) {
+  else if (!strcmp(pattern,"11001010")) {
     return iCallFctByVal11001010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001011")) {
+  else if (!strcmp(pattern,"11001011")) {
     return iCallFctByVal11001011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001100")) {
+  else if (!strcmp(pattern,"11001100")) {
     return iCallFctByVal11001100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001101")) {
+  else if (!strcmp(pattern,"11001101")) {
     return iCallFctByVal11001101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001110")) {
+  else if (!strcmp(pattern,"11001110")) {
     return iCallFctByVal11001110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11001111")) {
+  else if (!strcmp(pattern,"11001111")) {
     return iCallFctByVal11001111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010000")) {
+  else if (!strcmp(pattern,"11010000")) {
     return iCallFctByVal11010000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010001")) {
+  else if (!strcmp(pattern,"11010001")) {
     return iCallFctByVal11010001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010010")) {
+  else if (!strcmp(pattern,"11010010")) {
     return iCallFctByVal11010010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010011")) {
+  else if (!strcmp(pattern,"11010011")) {
     return iCallFctByVal11010011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010100")) {
+  else if (!strcmp(pattern,"11010100")) {
     return iCallFctByVal11010100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010101")) {
+  else if (!strcmp(pattern,"11010101")) {
     return iCallFctByVal11010101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010110")) {
+  else if (!strcmp(pattern,"11010110")) {
     return iCallFctByVal11010110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11010111")) {
+  else if (!strcmp(pattern,"11010111")) {
     return iCallFctByVal11010111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011000")) {
+  else if (!strcmp(pattern,"11011000")) {
     return iCallFctByVal11011000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011001")) {
+  else if (!strcmp(pattern,"11011001")) {
     return iCallFctByVal11011001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011010")) {
+  else if (!strcmp(pattern,"11011010")) {
     return iCallFctByVal11011010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011011")) {
+  else if (!strcmp(pattern,"11011011")) {
     return iCallFctByVal11011011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011100")) {
+  else if (!strcmp(pattern,"11011100")) {
     return iCallFctByVal11011100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011101")) {
+  else if (!strcmp(pattern,"11011101")) {
     return iCallFctByVal11011101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011110")) {
+  else if (!strcmp(pattern,"11011110")) {
     return iCallFctByVal11011110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11011111")) {
+  else if (!strcmp(pattern,"11011111")) {
     return iCallFctByVal11011111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100000")) {
+  else if (!strcmp(pattern,"11100000")) {
     return iCallFctByVal11100000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100001")) {
+  else if (!strcmp(pattern,"11100001")) {
     return iCallFctByVal11100001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100010")) {
+  else if (!strcmp(pattern,"11100010")) {
     return iCallFctByVal11100010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100011")) {
+  else if (!strcmp(pattern,"11100011")) {
     return iCallFctByVal11100011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100100")) {
+  else if (!strcmp(pattern,"11100100")) {
     return iCallFctByVal11100100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100101")) {
+  else if (!strcmp(pattern,"11100101")) {
     return iCallFctByVal11100101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100110")) {
+  else if (!strcmp(pattern,"11100110")) {
     return iCallFctByVal11100110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11100111")) {
+  else if (!strcmp(pattern,"11100111")) {
     return iCallFctByVal11100111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101000")) {
+  else if (!strcmp(pattern,"11101000")) {
     return iCallFctByVal11101000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101001")) {
+  else if (!strcmp(pattern,"11101001")) {
     return iCallFctByVal11101001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101010")) {
+  else if (!strcmp(pattern,"11101010")) {
     return iCallFctByVal11101010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101011")) {
+  else if (!strcmp(pattern,"11101011")) {
     return iCallFctByVal11101011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101100")) {
+  else if (!strcmp(pattern,"11101100")) {
     return iCallFctByVal11101100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101101")) {
+  else if (!strcmp(pattern,"11101101")) {
     return iCallFctByVal11101101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101110")) {
+  else if (!strcmp(pattern,"11101110")) {
     return iCallFctByVal11101110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11101111")) {
+  else if (!strcmp(pattern,"11101111")) {
     return iCallFctByVal11101111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110000")) {
+  else if (!strcmp(pattern,"11110000")) {
     return iCallFctByVal11110000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110001")) {
+  else if (!strcmp(pattern,"11110001")) {
     return iCallFctByVal11110001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110010")) {
+  else if (!strcmp(pattern,"11110010")) {
     return iCallFctByVal11110010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110011")) {
+  else if (!strcmp(pattern,"11110011")) {
     return iCallFctByVal11110011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110100")) {
+  else if (!strcmp(pattern,"11110100")) {
     return iCallFctByVal11110100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110101")) {
+  else if (!strcmp(pattern,"11110101")) {
     return iCallFctByVal11110101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110110")) {
+  else if (!strcmp(pattern,"11110110")) {
     return iCallFctByVal11110110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11110111")) {
+  else if (!strcmp(pattern,"11110111")) {
     return iCallFctByVal11110111(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111000")) {
+  else if (!strcmp(pattern,"11111000")) {
     return iCallFctByVal11111000(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111001")) {
+  else if (!strcmp(pattern,"11111001")) {
     return iCallFctByVal11111001(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111010")) {
+  else if (!strcmp(pattern,"11111010")) {
     return iCallFctByVal11111010(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111011")) {
+  else if (!strcmp(pattern,"11111011")) {
     return iCallFctByVal11111011(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111100")) {
+  else if (!strcmp(pattern,"11111100")) {
     return iCallFctByVal11111100(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111101")) {
+  else if (!strcmp(pattern,"11111101")) {
     return iCallFctByVal11111101(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111110")) {
+  else if (!strcmp(pattern,"11111110")) {
     return iCallFctByVal11111110(layout, myPgm, myLib, myFunc, lenFunc);
   }
-  if (!strcmp(pattern,"11111111")) {
+  else if (!strcmp(pattern,"11111111")) {
     return iCallFctByVal11111111(layout, myPgm, myLib, myFunc, lenFunc);
   }
 }
