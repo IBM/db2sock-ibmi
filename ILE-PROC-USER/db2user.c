@@ -20,7 +20,7 @@
 #include "../ILE-PROC/ibyref.h" /* see gen.py */
 
 /*
-Sample of many different by value arguments with by ref output
+SRVPGM sample of many different by value arguments with by ref output
 
 mask
        dcl-pr crazy9;
@@ -71,10 +71,46 @@ bighole_t sample_crazy9(ile_pgm_call_t* layout, char * myPgm, char * myLib, char
 
 }
 
+/*
+PGM sample of few arguments.
+Note: 
+Toolkit already handles any PGM by ref call,
+this is simple example using db2user.c
+
+       dcl-ds money qualified;
+          my varchar(20:2);
+          lot packed(5:2);
+          sof packed(18:2);
+          dough packed(31:2);
+       end-ds;
+
+       dcl-ds bio qualified;
+          mr varchar(10:2);
+          first varchar(15:2);
+          last varchar(25:2);
+          bank likeds(money) dim(2);
+       end-ds;
+
+       dcl-pr Main extpgm;
+         maxCount int(10);
+         outCount int(10);
+         output likeds(bio) dim(10);
+       end-pr;
+*/
+void sample_rainbank(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDone)
+{
+  os_pgm_pattern_t *os_pfct_ptr = iNextPgm(layout, myPgm, myLib);
+  *isDone = 1;
+  os_pfct_ptr(
+    iNextPtr(layout, 0), iNextPtr(layout, 1), iNextPtr(layout, 2)
+    );
+}
+
+
 
 bighole_t UserCallSrvPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, char * pattern, int * isDone)
 {
-  // add your own custom iCallFctByValxxxxx pattern
+  // SRVPGM add your own custom iCallFctByValxxxxx pattern
   if (!strcmp(myPgm,"RAINSRV") && !strcmp(myFunc,"CRAZY9")) {
     return sample_crazy9(layout, myPgm, myLib, myFunc, lenFunc, pattern, isDone);
   }
@@ -83,7 +119,11 @@ bighole_t UserCallSrvPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, cha
 
 void UserCallPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDone)
 {
-  // add your own custom iCallPgmByRefxxxxx
+  // PGM add your own custom iCallPgmByRefxxxxx
+  if (!strcmp(myPgm,"RAINBANK")) {
+    sample_rainbank(layout, myPgm, myLib, isDone);
+    return;
+  }
   return;
 }
 

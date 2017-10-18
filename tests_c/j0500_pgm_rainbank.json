@@ -1,0 +1,21 @@
+{"pgm":[
+    {"name":"RAINBANK", "lib":"DB2JSON"},
+    {"s": {"name":"maxCount", "type":"10i0", "value":5}},
+    {"s": {"name":"outCount", "type":"10i0", "value":0}},
+    {"ds": [{"name":"output", "dim":10},
+        {"s":[
+            {"name":"mr", "type":"10av2", "value":""},
+            {"name":"first", "type":"15av2", "value":""},
+            {"name":"last", "type":"25av2", "value":""}
+        ]},
+        {"ds": [{"name": "bank", "dim":2},
+            {"s":[
+                {"name":"my", "type":"20av2", "value":""},
+                {"name":"lot", "type":"5p2", "value":0},
+                {"name":"sof", "type":"18p2", "value":0},
+                {"name":"dough", "type":"31p2", "value":0}
+            ]}
+        ]}
+    ]}
+]}
+
