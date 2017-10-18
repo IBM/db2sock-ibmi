@@ -81,15 +81,14 @@ SRVPGM pass by ref works in toolkit "as is" up to 255 parameters.
 # SRVPGM pass by value (MI workaround)
 
 Only SRVPGM have concern about pass by value.
-The following discussion of pass by ref vs. pass by value, may confuse many.
 
 SRVPGM with pass by 'value' arguments is not popular on IBM i (rarely used). 
-In fact, for toolkit calls you will be much better served AVOID use 'value' to
-eliminate toolkit complexity (not recommended). However, some SRVPGMs are recently 
-using 'const' correctness (aka, by 'value').
+In fact, for toolkit calls you should not use pass by value to
+eliminate toolkit complexity (below). However, some SRVPGMs are recently 
+using 'const' correctness, aka, by 'value' arguments/parameters.
 
 Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
-for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  However, 
+for 'dynamic' pass by value. Most readers can simply ignore remaining of this discussion.  However, 
 'by value' toolkit can be done, and, following method works.
 
 
@@ -126,9 +125,12 @@ default toolkit can handle call task by simple 16 possible lengths 'pattern'.
 Technically, pass 'by value' is all about size. You need to match size for default call to work.
 If all your pass by value arguments are same size, default toolkit will handle (ibyval*.c). 
 You may have many different types (char and packed below), but they must be same length (all fool16_t, etc.).
+SRVPGM interface 'by value' QZRUCLSP limits to only bin(4) for pass by value 8 arguments/parameters. 
+This toolkit will take most other non-floating point sizes for pass by value 8 arguments/parameters (length 1-16).
+
 
 ```
-=== match basic Call Service Program Procedure (QZRUCLSP) API ===
+=== match basic Call Service Program Procedure (QZRUCLSP) API (bin(4) only) ===
        dcl-pr rainint4;
          a1 int(10) value; <-- fool4_t
          a2 int(10) value;
@@ -139,7 +141,7 @@ You may have many different types (char and packed below), but they must be same
          o3 int(10);
          o4 int(10);
        end-pr;
-== also works default any combination fool16_t ===
+== also works default any combination fool16_t (any type, but same size) ===
        dcl-pr rainpack31;
          a1 packed(31:2) value; <-- fool16_t
          a2 packed(31:2) value;
@@ -162,13 +164,10 @@ You may have many different types (char and packed below), but they must be same
        end-pr;
 ```
 
-Note: SRVPGM interface 'by value' QZRUCLSP limits to only bin(4) for pass by value 8 arguments/parameters. 
-This toolkit will take most other non-floating point sizes for pass by value 8 arguments/parameters (length 1-16).
-
 ## warning (by value zoned)
 
 Passing 'by value' zoned may not work (4s2, 12s2, etc.). That is, most other types 'by value' seem to work fine, but zone 'by value' has issues.
-I recomend stay away from 'by value' zone until the problem can be understood.
+I recommend stay away from 'by value' zone until the problem can be understood.
 
 ## unconventional toolkit (ILE-PROC-USER)
 
@@ -192,9 +191,6 @@ Work In Progress -- (not done yet)
 
 User 'db2user' is a c module, possibly difficult for some to understand. I will likely add another 'db2rpg'
 to allow RPGers to participate within the framework of 'everything RPG'.
-
-Note (gen.py): We are not using MI CALLPGM, CALLPGMV, etc., because these fall short of 
-mark for a full toolkit (without using blocked MI instructions).
 
 
 # technical (pass by value)
@@ -280,6 +276,9 @@ db2user - user edit special add handler module (dynamic loaded ILE SRVPGM).
 ibyref*.c - call PGM and SRVPGM by reference (80% case)
 ibyval*.c - call SRVPGM by value all by value arguments same size (up to 8 argumanets)
 ```
+Note (gen.py): We are not using MI CALLPGM, CALLPGMV, etc., because these fall short of 
+mark for a full toolkit (without using blocked MI instructions).
+
 
 ## PASE _ILECALL
 
