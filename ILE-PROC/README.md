@@ -106,7 +106,7 @@ for 'dynamic' pass by value. Most readers can simply ignore remaining of this di
 ```
 
 
-# full toolkit
+## full toolkit
 
 The toolkit stored procedure will be both conventional (yet another) and unconventional (creative).
 
@@ -121,7 +121,8 @@ at good performance.
 Addition, "some" pass by value arguments/parameters patterns are also supported "as is".
 These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/parameters. 
 As with QZRUCLSP, if value arguments are all the same size, 
-default toolkit can handle call task by simple 16 possible lengths 'pattern'.
+default toolkit can handle call task by simple 16 possible length 'pattern'.
+
 Technically, pass 'by value' is all about size. You need to match size for default call to work.
 If all your pass by value arguments are same size, default toolkit will handle (ibyval*.c). 
 You may have many different types (char and packed below), but they must be same length (all fool16_t, etc.).
@@ -193,7 +194,7 @@ User 'db2user' is a c module, possibly difficult for some to understand. I will 
 to allow RPGers to participate within the framework of 'everything RPG'.
 
 
-# technical (pass by value)
+## technical (pass by value)
 
 Technically, anything 16 bytes or less marked as 'value' will be placed in up to two 8 byte registers. 
 Therefore, we need only get the correct size 'hole' and you can pass any type through the 'value'
@@ -294,10 +295,10 @@ ditch 'slower' call path (TBD).
 ## Last word
 
 Ultimately we may require something better than QZRUCLSP(ish) style API out of IBM i OS (above). 
-Something new, to avoid pass by value 'mess'caused by blocked MI instructions (limiting). 
+Something new, to avoid pass by value 'mess' caused by blocked MI instructions (limiting). 
 Aka, perhaps something like _ILECALL for PASE, but ILE API. Anyway, by changing IBM i OS, 
-of course, we would set a stake in version supported. However, at moment, protocol is not clear, 
-therefore experimentation has value. Also, unlikely a fast path "add yourself' 
-compile interface would be supported. All in all, much left unexplored to really jump to conclusion.
-
+we would set a stake in version supported (undesirable for a driver 'toolkit').
+ 
+Note: Do not expect any action IBM i OS. 
+This is my personal observation, and, bit of frustration with blocked MI instructions.
  
