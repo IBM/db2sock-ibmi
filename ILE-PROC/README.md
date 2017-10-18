@@ -62,10 +62,6 @@ PGM pass complex nested DS structures 'by ref' is also supported.
 ```
 
 SRVPGM pass by ref works in toolkit "as is" up to 255 parameters.
-In fact, for toolkit calls you will be much better served to NOT use 'value' to
-eliminate complexity (see 'value' below). SRVPGM with pass by 'value' 
-arguments is not overly popular on IBM i (rarely used).
-
 
 ```
        dcl-proc happy9 export;
@@ -82,11 +78,19 @@ arguments is not overly popular on IBM i (rarely used).
        end-pi;
 ```
 
-# SRVPGM pass by value (MI workaround -- not for everyone)
+# SRVPGM pass by value (MI workaround)
 
+Only SRVPGM have concern about pass by value.
 The following discussion of pass by ref vs. pass by value, may confuse many.
-However, some SRVPGMs are recently using 'const' correctness (aka, by 'value').
-Only SRVPGM have concern about pass by value. 
+
+SRVPGM with pass by 'value' arguments is not popular on IBM i (rarely used). 
+In fact, for toolkit calls you will be much better served AVOID use 'value' to
+eliminate toolkit complexity (not recommended). However, some SRVPGMs are recently 
+using 'const' correctness (aka, by 'value').
+
+Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
+for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  However, 
+'by value' toolkit can be done, and, following method works.
 
 
 ```
@@ -107,9 +111,6 @@ Only SRVPGM have concern about pass by value.
 
 The toolkit stored procedure will be both conventional (yet another) and unconventional (creative).
 
-Most of the following 'confusing' discussion deals with working around restrictions in MI instructions
-for 'dynamic' pass by value. Aka, most readers can simply ignore remaining of this discussion.  However, 
-'by value' toolkit can be done, and, here is a method that works.
 
 ## conventional toolkit 
 
@@ -122,10 +123,10 @@ Addition, "some" pass by value arguments/parameters patterns are also supported 
 These will follow Call Service Program Procedure (QZRUCLSP) API of max 8 arguments/parameters. 
 As with QZRUCLSP, if value arguments are all the same size, 
 default toolkit can handle call task by simple 16 possible lengths 'pattern'.
-
 Technically, pass 'by value' is all about size. You need to match size for default call to work.
 If all your pass by value arguments are same size, default toolkit will handle (ibyval*.c). 
 You may have many different types (char and packed below), but they must be same length (all fool16_t, etc.).
+
 ```
 === match basic Call Service Program Procedure (QZRUCLSP) API ===
        dcl-pr rainint4;
@@ -286,6 +287,9 @@ There were/are alternatives starting PASE in db2proc and using _ILECALL.
 In fact, XMLSERVICE uses _ILECALL from ILE RPG code.
 While _ILECALL is appealing for simplicity (do it all), 'staring PASE' will
 slow down performance as experienced with XMLSERVICE (nobody likes slow).
+However, to complete toolkiit 'call anything' including SRVPGM with
+pass by value, this option may be implemented in db2proc as the last 
+ditch 'slower' call path (TBD).
 
 
 ## Last word
