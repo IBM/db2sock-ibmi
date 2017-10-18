@@ -80,7 +80,8 @@ SRVPGM pass by ref works in toolkit "as is" up to 255 parameters.
 
 # SRVPGM pass by value (MI workaround)
 
-Only SRVPGM have concern about pass by value.
+Only SRVPGM have concern about pass by value. Most readers can simply ignore 
+remaining of 'by value' discussion.
 
 SRVPGM with pass by 'value' arguments is not popular on IBM i (rarely used). 
 In fact, for toolkit calls you should not use pass by value to
@@ -99,10 +100,14 @@ eliminate toolkit complexity (below).
        end-pr;
 ```
 
-However, some SRVPGMs are recently using 'const' correctness, aka, by 'value' arguments/parameters.
+Recently, some SRVPGMs started using 'const' correctness, aka, by 'value' arguments/parameters.
 Most of the following 'confusing' discussion deals with working around restrictions 
-due to blocked MI instructions for 'dynamic' pass by value. Most readers can simply ignore 
-remaining of this discussion.  However, 'by value' toolkit can be done, and, following method works.
+due to blocked MI instructions for 'dynamic' pass by value. 
+
+Few people really understand pass by value rules. As toolkit author, 
+I almost decided not to support at all. Made worse, no un-blocked instructions are 
+available to really do 'toolkit' right (generated code needed).
+However, 'by value' toolkit can be done, and, following method works.
 
 
 ## full toolkit
@@ -192,21 +197,19 @@ Work In Progress -- (not done yet)
 User 'db2user' is a c module, possibly difficult for some to understand. I will likely add another 'db2rpg'
 to allow RPGers to participate within the framework of 'everything RPG'.
 
-
-## technical (pass by value)
+## technical registers (pass by value)
 
 Technically, anything 16 bytes or less marked as 'value' will be placed in up to two 8 byte registers. 
-Therefore, we need only get the correct size 'hole' and you can pass any type through the 'value'
+Therefore, toolkit, we need only get the correct size 'hole' and you can pass any type through the 'value'
 (int - fool4_t, packed - fool1_t to fool16_t, char - fool1_t to fool16_t, ds -  fool1_t to fool16_t,
 so on), with exception of floating point registers (4f, 8f, etc.).
-So few people really understand pass by value 16 bytes rules, that
-as author, I almost decided not to support at all. Made even worse,
-no un-blocked instructions are available to really do this right (gen code needed).
 
-For those wondering about any pass by value 17+ bytes (ds, etc.). Greater 17+ 'value' is actually accomplished by copy argument/parameter,
-and 'value' is promoted to pass by reference. Basically, those thinking they were improving performance for aggregates 17+ bytes by 'value', 
-they are actually making things perform worse via compiler copy (ILE c, C++, RPG, etc.). Good side, 'spill memory' copy does not reflect 
-changes in caller made by callee (meaning copy), but most folks did not even know a copy occurred and slowed things down (now you know).
+For those wondering about any pass by value 17+ bytes (ds, etc.). Greater 17+ 'value' is actually accomplished by 
+compiler copy argument/parameter, where 'value' is promoted to pass by reference to the copy. Basically, 
+folks thinking they were improving performance using aggregates 17+ bytes by 'value', 
+are actually making things perform worse via compiler 'temp' copy (ILE c, C++, RPG, etc.). 
+However, good side, 'temp' copy does not reflect changes in caller object made by callee (meaning copy), 
+but most folks did not even know a copy occurred ( ... and slowed things down ... now you know).
 
 ##db2user - user special add handler module (dynamic loaded ILE SRVPGM).
 
