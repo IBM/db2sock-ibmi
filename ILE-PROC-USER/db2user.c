@@ -46,35 +46,29 @@ G         a5 char(16) value;
 */
 bighole_t sample_crazy9(ile_pgm_call_t* layout, char * myPgm, char * myLib, char * myFunc, int lenFunc, char * pattern, int * isDone)
 {
-  void *os_pfct_ptr = NULL;
-  typedef bighole_t (os_fct_001_t)();
-  os_fct_001_t *os_fct_ptr = NULL;
-  _SYSPTR os_pgm_ptr = NULL;
-  unsigned long long os_act_mark = 0;
-  int os_obj_type = 0;
-  /* "9827G3873000000000" - pattern */
-  fool9_t  * a1 = (fool9_t *) iNextVal(layout, 0);
-  fool8_t  * a2 = (fool8_t *) iNextVal(layout, 1);
-  fool2_t  * a3 = (fool2_t *) iNextVal(layout, 2);
-  fool7_t  * a4 = (fool7_t *) iNextVal(layout, 3);
-  fool16_t * a5 = (fool16_t *)iNextVal(layout, 4);
-  fool3_t  * a6 = (fool3_t *) iNextVal(layout, 5);
-  fool8_t  * a7 = (fool8_t *) iNextVal(layout, 6);
-  fool7_t  * a8 = (fool7_t *) iNextVal(layout, 7);
-  fool3_t  * a9 = (fool3_t *) iNextVal(layout, 8);
-  char * o1 = iNextPtr(layout, 9);
-  char * o2 = iNextPtr(layout, 10);
-  char * o3 = iNextPtr(layout, 11);
-  char * o4 = iNextPtr(layout, 12);
-  char * o5 = iNextPtr(layout, 13);
-  char * o6 = iNextPtr(layout, 14);
-  char * o7 = iNextPtr(layout, 15);
-  char * o8 = iNextPtr(layout, 16);
-  char * o9 = iNextPtr(layout, 17);
-  os_pgm_ptr = rslvsp(WLI_SRVPGM, myPgm, myLib, _AUTH_OBJ_MGMT);
-  os_act_mark = QleActBndPgmLong(&os_pgm_ptr, NULL, NULL, NULL, NULL);
-  os_fct_ptr = QleGetExpLong(&os_act_mark, 0, &lenFunc, myFunc, (void **)&os_pfct_ptr, &os_obj_type, NULL);
-  return os_fct_ptr(*a1,*a2,*a3,*a4,*a5,*a6,*a7,*a8, *a9, o1, o2, o3, o4, o5, o6, o7, o8, o9);
+  os_fct_pattern_t * os_fct_ptr = iNextFunc(layout, myPgm, myLib, myFunc, lenFunc);
+  *isDone = 1;
+  return os_fct_ptr(
+    *(fool9_t *)  iNextVal(layout, 0),
+    *(fool8_t *)  iNextVal(layout, 1),
+    *(fool2_t *)  iNextVal(layout, 2),
+    *(fool7_t *)  iNextVal(layout, 3),
+    *(fool16_t *) iNextVal(layout, 4),
+    *(fool3_t *)  iNextVal(layout, 5),
+    *(fool8_t *)  iNextVal(layout, 6),
+    *(fool7_t *)  iNextVal(layout, 7),
+    *(fool3_t *)  iNextVal(layout, 8),
+    iNextPtr(layout, 9),
+    iNextPtr(layout, 10),
+    iNextPtr(layout, 11),
+    iNextPtr(layout, 12),
+    iNextPtr(layout, 13),
+    iNextPtr(layout, 14),
+    iNextPtr(layout, 15),
+    iNextPtr(layout, 16),
+    iNextPtr(layout, 17)
+    );
+
 }
 
 
