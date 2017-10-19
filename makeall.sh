@@ -15,6 +15,11 @@ cd ILE-PROC-USER
 make proc
 cd ..
 
+echo "== db2procj.srvpgm (optional) ==="
+cd ILE-TOOLKIT-JSON
+make proc
+cd ..
+
 echo "== libtkit400.a (optional) ==="
 cd toolkit-base
 make tgt32 tgt64 install

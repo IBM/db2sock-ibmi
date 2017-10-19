@@ -1129,6 +1129,9 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   tool_struct_t *tool = NULL;
   json_key_t * bigkey = NULL;
 
+  /* debug me */
+  /* sleep(30); */
+
   /* nothing input */
   if (!inlen) {
     return SQL_ERROR;
