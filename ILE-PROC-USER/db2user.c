@@ -21,6 +21,10 @@
 
 /*
 SRVPGM sample of many different by value arguments with by ref output
+Note:
+Toolkit only handles pass by value of 'same size' up to 8 paramters.
+Toolkit does not handle pass by 'value' of different sizes.
+Toolkit does not handle pass by 'value' beyond 8 paramters.
 
 mask
        dcl-pr crazy9;
@@ -68,7 +72,6 @@ bighole_t sample_crazy9(ile_pgm_call_t* layout, char * myPgm, char * myLib, char
     iNextPtr(layout, 16),
     iNextPtr(layout, 17)
     );
-
 }
 
 /*

@@ -15,6 +15,9 @@
 #include <qtqiconv.h>
 #include <qp2user.h>
 #include <except.h>
+#include <qmhchgem.h>
+#include <qmhrcvpm.h>
+#include <qmhsndm.h>
 #include "../toolkit-base/PaseTool.h"
 #include "iconf.h" /* see Makefile */
 #include "ibyref.h" /* see gen.py */
@@ -131,6 +134,86 @@ void iCallPgm(ile_pgm_call_t* layout, char * myPgm, char * myLib, int * isDone)
 
 }
 
+void iDebugMe(char * msg) {
+  typedef struct qual_name_t
+  {
+    char  name[10];
+    char  libr[10];
+  } qual_name_t;
+  typedef struct error_code_struct {
+    Qus_EC_t   ec_fields;
+    char       Exception_Data[100];
+  } error_code_t;
+  typedef struct msg_info_struct {
+    Qmh_Rcvpm_RCVM0100_t   F;
+    char                   V[1200];
+  } msg_info_t;
+
+  qual_name_t  MsgFile;
+  char MsgId[7];
+  char MsgText[512];
+  int  MsgTextLen;
+  char MsgType[10];
+  qual_name_t MsgQList[1];
+  int  NumMsgQ;
+  qual_name_t RpyMsgQ;
+  char MsgKey[4];
+
+  error_code_t ErrorCode;
+
+  msg_info_t MsgInfo;
+  int  MsgInfoLen;
+  char Format[8];
+  char PgmMsgQ[10];
+  int  PgmCount;
+  int  WaitTime;
+  char MsgAction[10];
+
+  /* send message QSYSOPR */
+  memcpy(MsgId,"       ",7);
+  memcpy(MsgFile.name,"          ",10);
+  memcpy(MsgFile.libr,"          ",10);
+  strncpy(MsgText, msg, sizeof(MsgText));
+  MsgTextLen = strlen(MsgText);
+  memcpy(MsgQList[0].name,"*SYSOPR   ",10);
+  memcpy(MsgQList[0].libr,"          ",10);
+  NumMsgQ = 1;
+  memcpy(MsgType,"*INQ      ",10);
+  memcpy(MsgKey,"    ",4);
+  memcpy(RpyMsgQ.name,"*PGMQ     ",10);
+  memcpy(RpyMsgQ.libr,"          ",10);
+  memcpy(ErrorCode.ec_fields.Exception_Id,"       ",7);
+  ErrorCode.ec_fields.Bytes_Provided = 0;
+  QMHSNDM( MsgId,
+          &MsgFile,
+           MsgText,
+           MsgTextLen,
+           MsgType,
+          &MsgQList,
+           NumMsgQ,
+          &RpyMsgQ,
+          &MsgKey,
+          &ErrorCode);
+  /* receive message */
+  MsgInfoLen = sizeof(MsgInfo);
+  memcpy(Format,"RCVM0100",8);
+  memcpy(PgmMsgQ,"*         ",10);
+  PgmCount = 0;
+  memcpy(MsgType,"*RPY      ",10);
+  WaitTime = 3600;
+  memcpy(MsgKey,"    ",4);
+  memcpy(MsgAction,"*REMOVE   ",10);
+  QMHRCVPM(&MsgInfo,
+            MsgInfoLen,
+            Format,
+            PgmMsgQ,
+            PgmCount,
+            MsgType,
+            MsgKey,
+            WaitTime,
+            MsgAction,
+           &ErrorCode);
+}
 
 void iCall400(char * blob) 
 {
@@ -159,6 +242,7 @@ void iCall400(char * blob)
 
   /* hey adc debug */
   /* sleep(30); */
+  /* iDebugMe("oh hum, waiting in db2proc"); */
   layout->step = 1;
 
   /* set ILE addresses based memory spill location offset */
@@ -247,7 +331,7 @@ void iCall400(char * blob)
           }
         }
         /* high speed call one size value arguments */
-        if (isOneLen) {
+        if (isOneLen && layout->argc < 9) {
           switch(layout->parmc) {
           case 1:
             bighole = iCallFctByValSub1(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
@@ -278,8 +362,8 @@ void iCall400(char * blob)
           }
         } else {
           /* no signature match, maybe use PASE _ILECALL for slow path (TBD)???*/
-          memset(pattern,'0',8);
-          bighole = iCallFctByValSub8(layout, myPgm, myLib, myFunc, lenFunc, (char*)&pattern);
+          memset(pattern,'1',8);
+          bighole = iCallFctByValSub8(layout, "UNSUPPORT", "UNSUPPORT", "UNSUPPORT", 9, (char*)&pattern);
         }
       } /* ! isDone */
     } /* srvpgm user handle (optional) */

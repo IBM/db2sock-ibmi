@@ -2080,7 +2080,7 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
 }
 
 /* in|out|both|value|const|return */
-int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len) {
+int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig) {
   int by = ILE_PGM_BY_REF_IN;
   /* default length input */
   switch (typ) {
@@ -2088,18 +2088,23 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     switch (tlen) {
     case 3:
       *spill_len = sizeof(int8) * tdim;
+      *pase_sig = ARG_INT8;
       break;
     case 5:
       *spill_len = sizeof(int16) * tdim;
+      *pase_sig = ARG_INT16;
       break;
     case 10:
       *spill_len = sizeof(int32) * tdim;
+      *pase_sig = ARG_INT32;
       break;
     case 20:
       *spill_len = sizeof(int64) * tdim;
+      *pase_sig = ARG_INT64;
       break;
     default:
       *spill_len = sizeof(int32) * tdim;
+      *pase_sig = ARG_INT32;
       break;
     }
     break;
@@ -2107,18 +2112,23 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     switch (tlen) {
     case 3:
       *spill_len = sizeof(uint8) * tdim;
+      *pase_sig = ARG_UINT8;
       break;
     case 5:
       *spill_len = sizeof(uint16) * tdim;
+      *pase_sig = ARG_UINT16;
       break;
     case 10:
       *spill_len = sizeof(uint32) * tdim;
+      *pase_sig = ARG_UINT32;
       break;
     case 20:
       *spill_len = sizeof(uint64) * tdim;
+      *pase_sig = ARG_UINT64;
       break;
     default:
       *spill_len = sizeof(uint32) * tdim;
+      *pase_sig = ARG_UINT32;
       break;
     }
     break;
@@ -2126,12 +2136,15 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
     switch (tlen) {
     case 4:
       *spill_len = sizeof(float) * tdim;
+      *pase_sig = ARG_FLOAT32;
       break;
     case 8:
       *spill_len = sizeof(double) * tdim;
+      *pase_sig = ARG_FLOAT64;
       break;
     default:
       *spill_len = sizeof(double) * tdim;
+      *pase_sig = ARG_FLOAT64;
       break;
     }
     break;
@@ -2188,12 +2201,33 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
       by = ILE_PGM_BY_RETURN;
     }
   }
+  /* PASE type */
+  switch (by) {
+  case ILE_PGM_BY_REF_IN:
+  case ILE_PGM_BY_REF_OUT:
+  case ILE_PGM_BY_REF_BOTH:
+    *pase_sig = ARG_SPCPTR; /* by ref pointer */
+    break;
+  case ILE_PGM_BY_VALUE:
+    if (*pase_sig == 0) {
+      if (*spill_len > 32767) {
+        *pase_sig = 32767; /* aggregate */
+      } else {
+        *pase_sig = *spill_len; /* aggregate */
+      }
+    }
+    break;
+  case ILE_PGM_BY_IN_DS:
+  case ILE_PGM_BY_RETURN:
+  default:
+    break;
+  }
   /* return by */
   return by;
 }
 
 /* dcl-s parms */
-char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layout) {
+char * ile_pgm_parm_location(int isOut, int by, short sig, int tlen, ile_pgm_call_t * layout) {
 
   char * where = NULL;
 
@@ -2208,6 +2242,7 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
     if (!isOut) {
       layout->argv_parm[layout->argc] = layout->parmc;
       layout->arg_by[layout->parmc] = by;
+      layout->arg_sig[layout->parmc] = sig;
       layout->arg_pos[layout->parmc] = ile_pgm_curr_spill_pos(layout);
       layout->arg_len[layout->parmc] = tlen;
     }
@@ -2222,6 +2257,7 @@ char * ile_pgm_parm_location(int isOut, int by, int tlen, ile_pgm_call_t * layou
     if (!isOut) {
       layout->argv_parm[layout->argc] = -1;
       layout->arg_by[layout->parmc] = by;
+      layout->arg_sig[layout->parmc] = sig;
       layout->arg_pos[layout->parmc] = ile_pgm_curr_argv_pos(layout);
       layout->arg_len[layout->parmc] = tlen;
     }
@@ -2310,6 +2346,8 @@ ile_pgm_call_t **playout) {
   int by = 0;
   char * where = NULL;
 
+  int pase_sig = 0;
+
   /* parse "12p2", "5a", "5av2", ... */
   typ = ile_pgm_type(in_type, &tlen, &tscale, &tvary);
   if (tlen < 1) {
@@ -2329,14 +2367,14 @@ ile_pgm_call_t **playout) {
   }
 
   /* parse in|out|both|value|const|return */
-  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len);
+  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len, &pase_sig);
   if (!isOut && spill_len) {
     /* grow template (if need) */
     layout = ile_pgm_grow(playout, spill_len);
   }
 
   /* location of parm or ds data */
-  where = ile_pgm_parm_location(isOut, by, spill_len, layout);
+  where = ile_pgm_parm_location(isOut, by, pase_sig, spill_len, layout);
   if (!where) {
     return SQL_ERROR;
   }
@@ -2507,6 +2545,8 @@ ile_pgm_call_t **playout) {
   int by = 0;
   char * where = NULL;
 
+  int pase_sig = 0;
+
   /* parse dimension */
   rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
   if (tdim < 1) {
@@ -2514,14 +2554,14 @@ ile_pgm_call_t **playout) {
   }
 
   /* parse in|out|both|value|const|return */
-  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len);
+  by = ile_pgm_by(in_by, typ, tlen, tdim, tvary, isDs, &spill_len, &pase_sig);
   if (spill_len) {
     /* grow template (if need) */
     layout = ile_pgm_grow(playout, spill_len);
   }
 
   /* location of parm or ds data */
-  where = ile_pgm_parm_location(0, by, spill_len, layout);
+  where = ile_pgm_parm_location(0, by, pase_sig, spill_len, layout);
   if (!where) {
     return SQL_ERROR;
   }
@@ -2703,13 +2743,13 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
            * replicate 1st full initialize element into remain array elements.)
            */
           where_copy = (char *)tpgm->layout + ds_start_offset; /* hamela05 bug - will move on grow */
-          where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
+          where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, 0, tpgm->layout);
           ds_spill_len = where - where_copy;
           for (j = 1; j < pgm_ds_dim_cnt; j++) {
             /* grow template (if need) */
             tpgm->layout = ile_pgm_grow(&tpgm->layout, ds_spill_len);
             /* where now */
-            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, tpgm->layout);
+            where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, 0, tpgm->layout);
             where_copy = (char *)tpgm->layout + ds_start_offset; /* hamela05 bug */
             /* copy additional ds element */
             memcpy(where,where_copy,ds_spill_len);

@@ -15,7 +15,7 @@ byval_prefix_srvpgm = "ibyvals"
 # header by ref
 # ===============================================
 byref_proto_h = ""
-byref_proto_h += '#define ICALL_MAX_RETURN 3000000' + "\n"
+byref_proto_h += '#define ICALL_MAX_RETURN 2000000' + "\n"
 byref_proto_h += 'typedef struct bighole_struct {' + "\n"
 byref_proto_h += '  char hole[ICALL_MAX_RETURN];' + "\n"
 byref_proto_h += '} bighole_t;' + "\n"

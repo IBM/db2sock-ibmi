@@ -192,6 +192,7 @@ typedef struct ile_pgm_call_struct {
 #endif
   int argv_parm[ILE_PGM_MAX_ARGS];
   int arg_by[ILE_PGM_MAX_ARGS];
+  short arg_sig[ILE_PGM_MAX_ARGS];
   int arg_pos[ILE_PGM_MAX_ARGS];
   int arg_len[ILE_PGM_MAX_ARGS];
   char pgm[16];

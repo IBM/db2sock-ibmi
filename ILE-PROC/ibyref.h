@@ -1,6 +1,6 @@
 #ifndef _I_BY_REF_H
 #define _I_BY_REF_H
-#define ICALL_MAX_RETURN 3000000
+#define ICALL_MAX_RETURN 2000000
 typedef struct bighole_struct {
   char hole[ICALL_MAX_RETURN];
 } bighole_t;
