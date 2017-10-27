@@ -12,7 +12,6 @@
 #include <except.h>
 #include "iconf.h" /* see Makefile (see iconf.h) */
 
-
 #ifndef int16
 #define int16 short
 #endif

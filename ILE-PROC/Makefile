@@ -48,7 +48,7 @@ go: mkinc removeo $(SP400SRVPGM) crtsqlproc
 .SUFFIXES: .mod .c
 ### CRTCMOD
 .c.mod:
-	$(CCC) --lib $(ILELIB) -g --src $<
+	$(CCC) --lib $(ILELIB) -g --option "OPTION(*SHOWINC)" --src $<
 ### -- SP400SRVPGM (ILE c)
 $(SP400SRVPGM): $(SP400OBJS)
 	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"

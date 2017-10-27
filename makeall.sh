@@ -15,19 +15,21 @@ cd ILE-PROC-USER
 make proc
 cd ..
 
-echo "== db2procj.srvpgm (optional) ==="
-cd ILE-TOOLKIT-JSON
-make proc
-cd ..
-
 echo "== libtkit400.a (optional) ==="
 cd toolkit-base
 make tgt32 tgt64 install
+make proc
 cd ..
 
 echo "== libjson400.a (optional) ==="
 cd toolkit-parser-json
 make tgt32 tgt64 install
+make proc
+cd ..
+
+echo "== db2procj.srvpgm (optional) ==="
+cd ILE-TOOLKIT-JSON
+make proc
 cd ..
 
 echo "== db2jsonfcgi (optional) ==="
@@ -49,4 +51,5 @@ echo "== tests_ILE-RPG (optional) ==="
 cd tests_ILE-RPG
 make rpg
 cd ..
+
 

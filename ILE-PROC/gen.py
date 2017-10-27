@@ -342,6 +342,7 @@ for z in range(1,byval_max_args+1):
 # ===============================================
 file_ibref_h = '#ifndef _I_BY_REF_H' + "\n"
 file_ibref_h += '#define _I_BY_REF_H' + "\n"
+file_ibref_h += '#include "../toolkit-base/PaseToIle.h"' + "\n"
 file_ibref_h += byref_proto_h
 file_ibref_h += byval_proto_h
 file_ibref_h += '#endif /*_I_BY_REF_H*/' + "\n"

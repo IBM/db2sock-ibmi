@@ -2,20 +2,15 @@
 #define _PASETOOL_H
 
 
-#ifdef __IBMC__
-/* nothing ILE compiler */
-#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <dlfcn.h>
 #include <iconv.h>
 #include <stdarg.h>
+#ifdef __IBMC__
+#include <sqlcli.h>
+#else
 #include <sqlcli1.h>
-#include <as400_types.h>
-#include <as400_protos.h>
-#include "PaseCliInit.h"
-#include "PaseCliAsync.h"
 #endif
 
 /* === experimental (not finished) ===
@@ -166,48 +161,6 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 
 #define TOOL400_MAX_CMD_BUFF 4096
 
-/* ILE mapping defines */
-#define ILE_PGM_BY_REF_IN 1
-#define ILE_PGM_BY_REF_OUT 2
-#define ILE_PGM_BY_REF_BOTH 3
-#define ILE_PGM_BY_VALUE 4
-#define ILE_PGM_BY_RETURN 5
-#define ILE_PGM_BY_IN_DS 6
-
-#define ILE_VALUE_MAX_LEN 16
-
-#define ILE_PGM_MAX_ARGS 159
-#define ILE_PGM_ALLOC_BLOCK 4096
-typedef struct ile_pgm_call_struct {
-#ifdef __IBMC__
-  /* pad blob alignment */
-  int blob_pad[3];
-  /* ILE address (set ILE side) */
-  char * argv[ILE_PGM_MAX_ARGS];
-#else
-  /* pad pase alignment */
-  int blob_pad[4];
-  /* ILE address (untouched PASE side) */
-  ILEpointer argv[ILE_PGM_MAX_ARGS];
-#endif
-  int argv_parm[ILE_PGM_MAX_ARGS];
-  int arg_by[ILE_PGM_MAX_ARGS];
-  short arg_sig[ILE_PGM_MAX_ARGS];
-  int arg_pos[ILE_PGM_MAX_ARGS];
-  int arg_len[ILE_PGM_MAX_ARGS];
-  char pgm[16];
-  char lib[16];
-  char func[128];
-  int step;
-  int max;
-  int pos;
-  int vpos;
-  int argc;
-  int parmc;
-  int return_start;
-  int return_end;
-  char * buf;
-} ile_pgm_call_t;
 
 /* error */
 #define TOOL400_JOBLOG_MAX_COLS 15
@@ -218,9 +171,6 @@ typedef struct ile_pgm_call_struct {
 /*
  * Callbacks provided by parser (any json, xml, csv, etc. parser)
  */
-#ifdef __IBMC__
-/* nothing ILE compiler */
-#else
 
 typedef struct tool_node {
   int ord;
@@ -233,6 +183,7 @@ typedef struct tool_node {
   void * prev;
   void * next;
 } tool_node_t;
+
 
 typedef int (*output_script_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_script_end_t)(tool_node_t *, char *, int);
@@ -336,6 +287,45 @@ tool_struct_t * tool_ctor(
   output_joblog_end_t output_joblog_end
 );
 
+
+typedef struct tool_key_conn_struct {
+  tool_struct_t node;
+  int presistent;
+  int conn_type;
+  SQLHANDLE hdbc;
+  SQLCHAR * conn_db;
+  SQLCHAR * conn_uid;
+  SQLCHAR * conn_pwd;
+  SQLCHAR * conn_qual;
+  SQLINTEGER conn_commit;
+  SQLCHAR * conn_libl;
+  SQLCHAR * conn_curlib;
+} tool_key_conn_struct_t;
+
+typedef struct tool_key_query_struct {
+  tool_struct_t node;
+  SQLHANDLE hstmt;
+} tool_key_query_struct_t;
+
+typedef struct tool_key_cmd_struct {
+  tool_struct_t node;
+  SQLHANDLE hstmt;
+  SQLINTEGER cmd_len;
+  SQLCHAR cmd_buff[TOOL400_MAX_CMD_BUFF];
+} tool_key_cmd_struct_t;
+
+typedef struct tool_key_pgm_struct {
+  tool_struct_t node;
+  SQLHANDLE hstmt;
+  void * layout;
+  char * pgm_proc_lib;
+  char * pgm_ile_name;
+  char * pgm_ile_lib;
+  char * pgm_ile_func;
+  SQLINTEGER pgm_len;
+  SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
+} tool_key_pgm_struct_t;
+
 /*
  * toolkit node by parser (any json parser)
  */
@@ -343,6 +333,7 @@ tool_node_t * tool_node_beg(tool_struct_t * tool, int key, int ord);
 tool_node_t * tool_node_sep(tool_struct_t * tool, tool_node_t * node, int key, int ord);
 tool_node_t * tool_node_end(tool_struct_t * tool, tool_node_t * node, int key, int ord);
 tool_node_t * tool_node_attr(tool_struct_t * tool, tool_node_t * node, int key, char *val, int ord);
+
 
 int tool_key_range(int key);
 int tool_key_match_beg_2_end(int key);
@@ -357,7 +348,10 @@ void tool_dtor(tool_struct_t *tool);
  * toolkit run name/value operations by parser (any json parser)
  */
 int tool_run(int ihdbc, char * outarea, int outlen, tool_struct_t *tool);
-#endif
+
+
+void * tool_new(int size);
+void tool_free(char *buffer);
 
 #endif /* _PASETOOL_H */
 

@@ -12,6 +12,8 @@ INSTALLDIR   = /QOpenSys/usr/lib
 
 ### ILE
 CCC         = crtcmod
+CCCSQL      = crtsqlci
+CCRPGSQL	  = crtsqlrpgi
 CCPGM       = crtpgm
 CCSRVPGM    = crtsrvpgm
 CCSQL		    = db2script
@@ -19,6 +21,8 @@ CCSQL		    = db2script
 ### *PGM proc
 SP400SRVPGM  = db2procj.srvpgm
 SP400OBJS    = db2procj.mod
+SP400SRVPGM1 = db2procjr.srvpgm
+SP400OBJS1   = db2procjr.modsql
 SQLTPL       = crtsql.cmd
 SQLRPL       = DB2JSON $(ILELIB)
 
@@ -40,16 +44,21 @@ proc:
 	@$(MAKE) ILELIB=DB2JSON go
 mylib:
 	@$(MAKE) go
-go: mkinc removeo $(SP400SRVPGM) crtsqlproc
+go: mkinc removeo $(SP400SRVPGM1) $(SP400SRVPGM) crtsqlproc
 
-.SUFFIXES: .mod .c
+.SUFFIXES: .mod .c .modsql .rpglesql
 ### CRTCMOD
 .c.mod:
 	$(CCC) --lib $(ILELIB) -g --src $<
 ### -- SP400SRVPGM (ILE c)
 $(SP400SRVPGM): $(SP400OBJS)
-	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "EXPORT(*ALL) ACTGRP(*CALLER)"
-
+	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "BNDSRVPGM($(ILELIB)/JSON400) EXPORT(*ALL) ACTGRP(*CALLER)"
+### CRTSQLRPGI
+.rpglesql.modsql:
+	$(CCRPGSQL) --lib $(ILELIB) --option "DBGVIEW(*SOURCE)" --src $<
+### -- SP400SRVPGM1 (ILE rpg)
+$(SP400SRVPGM1): $(SP400OBJS1)
+	$(CCSRVPGM) --pgm $(SP400SRVPGM1) --lib $(ILELIB) --mod $(SP400OBJS1) --option "BNDSRVPGM($(ILELIB)/JSON400) EXPORT(*ALL) ACTGRP(*CALLER)"
 
 mkinc:
 	@echo "#ifndef _ICONF_H" > iconf.h
@@ -62,6 +71,8 @@ crtsqlproc:
 clean:
 	rm -f $(SP400SRVPGM)
 	rm -f *.mod
+	rm -f *.modsql
 removeo:
 	rm -f *.mod
+	rm -f *.modsql
 

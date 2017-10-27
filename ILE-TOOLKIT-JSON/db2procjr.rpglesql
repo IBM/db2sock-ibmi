@@ -1,0 +1,129 @@
+     H NOMAIN
+     H AlwNull(*UsrCtl)
+     H BNDDIR('QC2LE')
+
+       dcl-pr cpybytes  extproc('_CPYBYTES');
+         pTarget pointer Value;
+         pSource pointer Value;
+         nLength uns(10) Value;
+       end-pr;
+
+       dcl-pr memset pointer extproc('__memset');
+         pTarget pointer Value;
+         nChar int(10) Value;
+         nBufLen uns(10) Value;
+       end-pr;
+
+       dcl-pr strlen int(10) extproc('strlen');
+         pVal pointer Value options(*string);
+       end-pr;
+
+       dcl-pr custom_SQL400Json int(10) extproc('custom_SQL400Json');
+         hdbc int(10) Value;
+         injson pointer Value;
+         inlen int(10) Value;
+         outjson pointer Value;
+         outlen int(10) Value;
+       end-pr;
+
+       dcl-s sLast151 int(10) inz(0);
+       dcl-s Occurs151 packed(5:0) inz(5001);
+       dcl-ds Output151 occurs(5001);
+         Out151 char(3000);
+       end-ds;
+
+       dcl-pr iJson400R  ind extproc(*CL:'iJson400R');
+         clob pointer value;
+       end-pr;
+
+       dcl-ds over_t qualified based(Template);
+         ubufx char(32);
+         bytex char(1) overlay(ubufx);
+         boolx ind overlay(ubufx);
+         twox char(2) overlay(ubufx);
+         chrx int(3) overlay(ubufx);
+         uchrx uns(3) overlay(ubufx);
+         shortx int(5) overlay(ubufx);
+         ushortx uns(5) overlay(ubufx);
+         intx int(10) overlay(ubufx);
+         uintx uns(10) overlay(ubufx);
+         longlongx int(20) overlay(ubufx);
+         ulonglongx uns(20) overlay(ubufx);
+         floatx float(4) overlay(ubufx);
+         doublex float(8) overlay(ubufx);
+         ptrx pointer overlay(ubufx);
+         char1 char(1) overlay(ubufx);
+         char2 char(2) overlay(ubufx);
+         char3 char(3) overlay(ubufx);
+         char4 char(4) overlay(ubufx);
+         char5 char(5) overlay(ubufx);
+         char6 char(6) overlay(ubufx);
+         char7 char(7) overlay(ubufx);
+         char8 char(8) overlay(ubufx);
+         char9 char(9) overlay(ubufx);
+         char10 char(10) overlay(ubufx);
+         char11 char(11) overlay(ubufx);
+         chardim char(1) dim(32) overlay(ubufx);
+       end-ds;
+
+       dcl-proc iJson400R export;
+       dcl-pi  *N ind;
+         clob pointer value;
+       end-pi;
+
+       //  vars          
+       dcl-s rc ind inz(*OFF);
+       dcl-s clobData pointer inz(*NULL);
+       dcl-s clobLen int(10) inz(0);
+       dcl-s outData pointer inz(*NULL);
+       dcl-s outLen int(10) inz(0);
+       dcl-s i int(10) inz(0);
+       dcl-s sqlrc int(10) inz(0);
+       dcl-s nest int(10) inz(0);
+       dcl-s pCopy pointer inz(*NULL);
+       dcl-ds myCopy likeds(over_t) based(pCopy);
+
+       // process input
+       pCopy = clob; 
+       clobLen = myCopy.intx;
+       clobData = clob + 4;
+       for i = 1 to clobLen;
+         pCopy = clobData + (i - 1);
+         if myCopy.bytex = '{';
+           nest += 1;
+         elseif myCopy.bytex = '}';
+           nest -= 1;
+           if nest = 0;
+             leave;
+           endif;
+         endif;
+       endfor;
+       memset(clobData + i: 0: clobLen - i);
+       clobLen = i + 1;
+
+       // make call
+       outData = %addr(Output151);
+       outLen = %size(Output151);
+       memset(outData:0:outLen);
+       sqlrc = custom_SQL400Json(0:
+                 clobData:
+                 clobLen:
+                 outData:
+                 outLen);
+
+       // output sql result set for rows 
+       outLen = strlen(outData);
+       cpybytes(clobData:outData:outLen + 1);         
+       Occurs151 = outLen / 3000 + 1;          
+       exec sql          
+         Set Result Sets Array :Output151 For :Occurs151 Rows;
+
+       if sqlrc < 0;
+         rc = *OFF;
+       else;
+         rc = *ON;
+       endif;          
+
+       return rc;          
+       end-proc;
+

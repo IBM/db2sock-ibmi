@@ -1,5 +1,6 @@
 #ifndef _I_BY_REF_H
 #define _I_BY_REF_H
+#include "../toolkit-base/PaseToIle.h"
 #define ICALL_MAX_RETURN 2000000
 typedef struct bighole_struct {
   char hole[ICALL_MAX_RETURN];

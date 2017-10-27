@@ -21,10 +21,10 @@ CCFLAGS32   = -g -Wno-int-to-pointer-cast -Wno-pointer-to-int-cast
 CCFLAGS64   = $(CCFLAGS32) -maix64 -DTGT64
 AR          = ar
 AROPT       = -X32_64
-INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I.. -I../toolkit-base
+INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I..
 
 ###  shared lib
-LIBOBJSALL   =  PaseCliJson.o
+LIBOBJSALL   = PaseJsDmp.o PaseJson.o
 LIBEXPS      = -Wl,-bE:libjson400.exp
 LIBOBJS32    = $(LIBOBJSALL)
 SHRLIB32     = libjson400.a
@@ -35,6 +35,15 @@ SHRLIB64     = libjson400_64.a
 LIBOBJS64    = $(LIBOBJSALL)
 SHROBJ64     = shr_64.o
 LIBDEPS64    = -maix64 $(LIBDEPALL)
+
+### ILE
+CCC         = crtcmod
+CCPGM       = crtpgm
+CCSRVPGM    = crtsrvpgm
+
+### *PGM proc
+SP400SRVPGM  = json400.srvpgm
+SP400OBJS    = PaseJsDmp.mod PaseJson.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -56,12 +65,22 @@ tgt32:
 	@$(MAKE) CCFLAGS="$(CCFLAGS32)" SHRLIB="$(SHRLIB32)" SHROBJ="$(SHROBJ32)" LIBDEPS="$(LIBDEPS32)" LIBOBJS="$(LIBOBJS32)" go
 go: removeo $(SHRLIB)
 
+proc:
+	@$(MAKE) ILELIB=DB2JSON go2
+go2: removeo $(SP400SRVPGM)
+
 ### PASE
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
-.SUFFIXES: .o .c
+.SUFFIXES: .mod .o .c
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
+### CRTCMOD
+.c.mod:
+	$(CCC) --lib $(ILELIB) -g --option "OPTION(*SHOWINC)" --src $<
+### -- SP400SRVPGM (ILE c)
+$(SP400SRVPGM): $(SP400OBJS)
+	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "BNDSRVPGM($(ILELIB)/TKIT400) EXPORT(*ALL) ACTGRP(*CALLER)"
 
 ### -- Build the shared lib(s).
 $(SHROBJ): $(LIBOBJS)
@@ -74,6 +93,7 @@ clean:
 	rm -f *.o
 removeo:
 	rm -f *.o
+	rm -f *.mod
 install:
 	cp ./$(SHRLIB32) $(INSTALLDIR)/.
 
