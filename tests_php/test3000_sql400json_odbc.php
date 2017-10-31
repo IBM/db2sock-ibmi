@@ -3,8 +3,12 @@ $database   = getenv("PHP_DB");
 $user       = getenv("PHP_UID");
 $password   = getenv("PHP_PWD");
 
+if (!extension_loaded('odbc')) {
+    die('odbc not loaded');
+}
+
 function help() {
-  die("Syntax: php test2000_sql400json_set.php ../tests_c/j0001_pgm_hello");
+  die("Syntax: php est3000_sql400json_odbc.php ../tests_c/j0001_pgm_hello");
 }
 
 if (!isset($argv) || !isset($argv[1])) {
@@ -24,18 +28,17 @@ $clob = $clobjson;
 print("Input:\n");
 var_dump($clob);
 
-$conn = db2_connect($database,$user,$password);
-if (!$conn) die("fail connect: $database,$user\n");
-$stmt = db2_prepare($conn, "call DB2JSON.DB2PROCJR(?)");
-if (!$stmt) die("Bad prepare: ".db2_stmt_errormsg());
-$ret=db2_execute($stmt, array($clob));
-if (!$ret) die("Bad execute: ".db2_stmt_errormsg());
+$conn = odbc_connect($database,$user,$password);
+if (!$conn) die("Bad connect: $database,$user");
+$stmt = odbc_prepare($conn, "call DB2JSON.DB2PROCJR(?)");
+if (!$stmt) die("Bad prepare: ".odbc_errormsg());
+$ret=odbc_execute($stmt,array($clob));
+if (!$ret) die("Bad execute: ".odbc_errormsg());
 $clob = "";
-while ($row = db2_fetch_array($stmt)){
-  $clob .= $row[0];
+while(odbc_fetch_row($stmt)) {
+  $clob .= odbc_result($stmt,1);
 }
 $clob = trim($clob);
-print("Output:\n");
 var_dump($clob);
 
 $sqlrc = 0;
