@@ -74,8 +74,14 @@
          chardim char(1) dim(32) overlay(ubufx);
        end-ds;
 
+       // --------------------------
+       // globals debug
+       // --------------------------
        dcl-pr iDebugMe;
          Message varchar(100) value;
+       end-pr;
+       dcl-pr iDebugMeJson;
+         clobData pointer value;
        end-pr;
        dcl-pr QMHSNDM  ExtPgm('QMHSNDM');
          MsgID char(7) const;
