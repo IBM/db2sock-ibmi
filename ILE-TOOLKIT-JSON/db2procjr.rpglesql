@@ -2,6 +2,14 @@
      H AlwNull(*UsrCtl)
      H BNDDIR('QC2LE')
 
+       // --------------------------
+       // globals
+       // --------------------------
+       dcl-pr strstr pointer extproc('strstr');
+         pVal1 pointer Value options(*string);
+         pVal2 pointer Value options(*string);
+       end-pr;
+
        dcl-pr cpybytes  extproc('_CPYBYTES');
          pTarget pointer Value;
          pSource pointer Value;
@@ -66,11 +74,127 @@
          chardim char(1) dim(32) overlay(ubufx);
        end-ds;
 
+       dcl-pr iDebugMe;
+         Message varchar(100) value;
+       end-pr;
+       dcl-pr QMHSNDM  ExtPgm('QMHSNDM');
+         MsgID char(7) const;
+         QualMsgF char(20) const;
+         MsgTxt char(32767) const options(*varsize);
+         MsgTxtLen int(10) const;
+         MsgType char(10) const;
+         MsgQueues char(20) const dim(50) options(*varsize);
+         NumQueues int(10) const;
+         RpyQueue char(20) const;
+         MsgKey char(4);
+         ErrorCode char(8000) options(*varsize);
+         CCSID int(10) const options(*nopass);
+       end-pr;
+       dcl-pr QMHRCVPM  ExtPgm('QMHRCVPM');
+         MsgInfo char(32767) options(*varsize);
+         MsgInfoLen int(10) const;
+         Format char(8) const;
+         StackEntry char(10) const;
+         StackCount int(10) const;
+         MsgType char(10) const;
+         MsgKey char(4) const;
+         WaitTime int(10) const;
+         MsgAction char(10) const;
+         ErrorCode char(8000) options(*varsize);
+       end-pr;
+
+       // --------------------------
+       // debug message to *QSYSOPR
+       // --------------------------
+       dcl-proc iDebugMe export;
+       dcl-pi  *N;
+         Message varchar(100) value;
+       end-pi;
+       dcl-ds RCVM0100 qualified;
+         BytesRtn int(10);
+         BytesAvail int(10);
+         MsgSev int(10);
+         MsgID char(7);
+         MsgType char(2);
+         MsgKey char(4);
+         vvnam7 char(7);
+         CCSID_status int(10);
+         CCSID int(10);
+         MsgDtaLen int(10);
+         MsgDtaAvail int(10);
+         MsgDta char(8000);
+       end-ds;
+       dcl-ds ErrorCode qualified;
+         BytesProv int(10) inz(0);
+         BytesAvail int(10) inz(0);
+       end-ds;
+       dcl-s MsgKey char(4);
+       dcl-s MsgQ char(20) dim(1) inz('*SYSOPR');
+       dcl-s Reply char(100);
+       dcl-s cmd char(100) inz(*BLANKS);
+       dcl-s rcb ind inz(*OFF);
+       dcl-s rc int(10) inz(0);
+       QMHSNDM( *blanks          
+                   : *blanks          
+                   : Message          
+                   : %len(Message)          
+                   : '*INQ'          
+                   : MsgQ          
+                   : %elem(MsgQ)          
+                   : '*PGMQ'          
+                   : MsgKey          
+                   : ErrorCode );          
+          
+       // Wait up to 1 hour (3600 seconds) for a reply to the          
+       // above message. If you change the value of 3600 below to          
+       // a value of -1, it will wait indefinitely.          
+       QMHRCVPM( RCVM0100          
+                    : %size(RCVM0100)          
+                    : 'RCVM0100'          
+                    : '*'          
+                    : 0          
+                    : '*RPY'          
+                    : MsgKey          
+                    : 3600          
+                    : '*REMOVE'          
+                    : ErrorCode );          
+       Reply = %subst(RCVM0100.MsgDta: 1: RCVM0100.MsgDtaLen);          
+       end-proc;
+
+       // --------------------------
+       // debug message to *QSYSOPR
+       // --------------------------
+       dcl-proc iDebugMeJson export;
+       dcl-pi  *N;
+         clobData pointer value;
+       end-pi;
+       dcl-s lenDebug int(10) inz(0);
+       dcl-s posDebug pointer inz(*NULL);
+       dcl-s posDebugEnd pointer inz(*NULL);
+       dcl-s msg char(100) inz('debug db2procjr');
+       // debug me
+       posDebug = strstr(clobData:'"debug":"');
+       if posDebug <> *NULL;
+         posDebug += 9;
+         posDebugEnd = strstr(posDebug:'"');
+         lenDebug = posDebugEnd - posDebug;
+         if lenDebug > 1;
+           if lenDebug > %size(msg) - 1;
+             lenDebug = %size(msg) - 1;
+           endif;
+           msg = %str(posDebug:lenDebug);
+         endif;
+         iDebugMe(msg);
+       endif;
+       end-proc;
+
+       // --------------------------
+       // db2procjr(clob) -- json interface
+       // --------------------------
        dcl-proc iJson400R export;
        dcl-pi  *N ind;
          clob pointer value;
        end-pi;
-
        //  vars          
        dcl-s rc ind inz(*OFF);
        dcl-s clobData pointer inz(*NULL);
@@ -82,6 +206,9 @@
        dcl-s nest int(10) inz(0);
        dcl-s pCopy pointer inz(*NULL);
        dcl-ds myCopy likeds(over_t) based(pCopy);
+
+       // hey adc debug
+       iDebugMeJson(clob + 4);
 
        // process input
        pCopy = clob; 

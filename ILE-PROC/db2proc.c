@@ -1,7 +1,6 @@
 /*
  * ILE stored procedure interface PASE libdb400.a->SQL400Json
  */
-#include <miptrnam.h> 
 #include <miptrnam.h>
 #include <mih/rslvsp.h>
 #include <mih/miobjtyp.h>
