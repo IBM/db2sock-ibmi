@@ -14,9 +14,9 @@
 /* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"*libl","curlib":"curlib"}} */
 char * json_conn_attr [] = {"db","uid","pwd","qual","iso","libl","curlib", NULL};
 int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL400_CONN_QUAL,TOOL400_CONN_LIBL,TOOL400_CONN_ISOLATION,TOOL400_CONN_CURLIB};
-/* {"pgm":{"name":"MYPGM","lib":"MYLIB","func":"MyFunc"}} */
-char * json_pgm_attr [] = {"name","lib","func",NULL};
-int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC};
+/* {"pgm":{"name":"MYPGM","lib":"MYLIB","func":"MyFunc","debugpgm":"stopped in qsysopr"}} */
+char * json_pgm_attr [] = {"name","lib","func","debugpgm",NULL};
+int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC,TOOL400_PGM_DEBUG};
 /* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return"}} */
 char * json_ds_attr [] = {"name","dim","by",NULL};
 int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY};

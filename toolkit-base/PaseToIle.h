@@ -47,6 +47,7 @@ typedef struct ile_pgm_call_struct {
   char pgm[16];
   char lib[16];
   char func[128];
+  char debug[128];
   int step;
   int max;
   int pos;

@@ -241,7 +241,9 @@ void iCall400(char * blob)
 
   /* hey adc debug */
   /* sleep(30); */
-  /* iDebugMe("oh hum, waiting in db2proc"); */
+  if (layout->debug[0]) {
+    iDebugMe(layout->debug);
+  }
   layout->step = 1;
 
   /* set ILE addresses based memory spill location offset */

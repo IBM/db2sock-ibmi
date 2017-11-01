@@ -98,6 +98,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_PGM_NAME       1051     /*"name":"MYPGM"*/
 #define TOOL400_PGM_LIB        1052     /*"lib":"*LIBL"*/
 #define TOOL400_PGM_FUNC       1053     /*"func":"MYFUNC" (SRVPGM function)*/
+#define TOOL400_PGM_DEBUG      1054     /*"debugpgm":"stopped in qsysopr" (qsysopr message)*/
 #define TOOL400_KEY_END_PGM     450     /*"end"*/
 
 #define TOOL400_KEY_DCL_DS       60     /*"ds"*/
@@ -322,6 +323,7 @@ typedef struct tool_key_pgm_struct {
   char * pgm_ile_name;
   char * pgm_ile_lib;
   char * pgm_ile_func;
+  char * pgm_ile_debug;
   SQLINTEGER pgm_len;
   SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
 } tool_key_pgm_struct_t;

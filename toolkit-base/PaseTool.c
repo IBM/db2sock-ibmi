@@ -570,7 +570,7 @@ void tool_output_joblog_end(tool_struct_t *tool) {
 
 
 /* "pgm":["NAME","LIB","procedure"], */
-SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) {
+SQLRETURN tool_pgm(char *pgm, char *lib, char * func, char * debug, ile_pgm_call_t **playout) {
   ile_pgm_call_t * layout = *playout;
   int rc = 0;
 
@@ -584,6 +584,8 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, ile_pgm_call_t **playout) 
   ile_pgm_trim_ebcdic((char *)&layout->lib, sizeof(layout->lib));
   rc = ile_pgm_str_2_char((char *)&layout->func, func, 1, sizeof(layout->func), 0, 0);
   ile_pgm_trim_ebcdic((char *)&layout->func, sizeof(layout->func));
+  rc = ile_pgm_str_2_char((char *)&layout->debug, debug, 1, sizeof(layout->debug), 0, 0);
+  ile_pgm_trim_ebcdic((char *)&layout->debug, sizeof(layout->debug));
 
   /* layout return */
   *playout = layout;
@@ -1206,6 +1208,7 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   tpgm->pgm_ile_name = NULL;
   tpgm->pgm_ile_lib = NULL;
   tpgm->pgm_ile_func = NULL;
+  tpgm->pgm_ile_debug = NULL;
   tpgm->pgm_len = 0;
   memset(tpgm->pgm_buff,0,TOOL400_MAX_CMD_BUFF);
   sprintf(tpgm->pgm_buff,"CALL %s.DB2PROC(?)", tpgm->pgm_proc_lib);
@@ -1225,12 +1228,15 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     case TOOL400_PGM_FUNC:
       tpgm->pgm_ile_func = val;
       break;
+    case TOOL400_PGM_DEBUG:
+      tpgm->pgm_ile_debug = val;
+      break;
     default:
       break;
     }
   }
   /* init pgm layout (ebcdic, etc) */
-  tool_pgm(tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func, (ile_pgm_call_t **)&tpgm->layout);
+  tool_pgm(tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func, tpgm->pgm_ile_debug, (ile_pgm_call_t **)&tpgm->layout);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
   /* prepare */
