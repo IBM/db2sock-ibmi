@@ -7,6 +7,20 @@
 #include "PaseJsDmp.h"
 #include "PaseJson.h"
 
+static char sbang;
+static char spound;
+static char sdollar;
+static char sat;
+static char sbackslash;
+static char sopen_brace;
+static char sclose_brace;
+static char scaret;
+static char sbacktick;
+static char sopen_bracket;
+static char sclose_bracket;
+static char sbar;
+static char stilde;
+
 /* ==========================
  * json <map> toolkit keys
  * ==========================
@@ -120,7 +134,8 @@ int json_output_printf(int adjust, char *out_caller, int outLen, const char * fo
   }
   switch (adjust) {
   case JSON400_ADJUST_ADD_COMMA:
-    if (q[0] == '{' || q[0] == '[' || q[0] == ':') {
+    /* if (q[0] == '{' || q[0] == '[' || q[0] == ':') { */
+    if (q[0] == sopen_bracket || q[0] == sopen_brace || q[0] == ':') {
       /* do nothing */
     } else  if (q[0] != ',') {
       p[0] = ',';
@@ -155,38 +170,38 @@ int json_output_printf(int adjust, char *out_caller, int outLen, const char * fo
 int json_output_script_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_NDA, out_caller, retLen, 
-    "{\"script\":[");
+    "%c\"script\":%c",sopen_bracket,sopen_brace);
   return retLen;
 }
 int json_output_script_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 
 int json_output_query_beg(tool_node_t *tool, char *out_caller, int outLen, char * query) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"query\":[\"%s\"", query);
+      "%c\"query\":%c\"%s\"",sopen_bracket,sopen_brace, query);
   return retLen;
 }
 int json_output_query_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 int json_output_record_array_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-    "{\"records\":[");
+    "%c\"records\":%c",sopen_bracket,sopen_brace);
   return retLen;
 }
 int json_output_record_array_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 
@@ -201,7 +216,7 @@ int json_output_record_no_data_found(tool_node_t *tool, char *out_caller, int ou
 int json_output_record_row_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-    "{");
+    "%c",sopen_bracket);
   return retLen;
 }
 int json_output_record_name_value(tool_node_t *tool, char *out_caller, int outLen, char *name, char *value, int type, int fStrLen) {
@@ -254,7 +269,7 @@ int json_output_record_name_value(tool_node_t *tool, char *out_caller, int outLe
 int json_output_record_row_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "}");
+    "%c",sclose_bracket);
   return retLen;
 }
 
@@ -263,7 +278,7 @@ int json_output_sql_errors(tool_node_t *tool, char *out_caller, int outLen, int 
   int retLen = outLen;
   if (rc == SQL_ERROR) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-        "\n{\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"}", sqlCode, sqlState, sqlMsg);
+        "\n%c\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"%c", sopen_bracket, sqlCode, sqlState, sqlMsg, sclose_bracket);
   }
   return retLen;
 }
@@ -276,17 +291,17 @@ int json_output_pgm_beg(tool_node_t *tool, char *out_caller, int outLen, char * 
   }
   if (!func) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"pgm\":[\"%s\",\"%s\"", name, lib);
+      "%c\"pgm\":%c\"%s\",\"%s\"",sopen_bracket,sopen_brace, name, lib);
   } else {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"pgm\":[\"%s\",\"%s\",\"%s\"", name, lib, func);
+      "%c\"pgm\":%c\"%s\",\"%s\",\"%s\"",sopen_bracket,sopen_brace, name, lib, func);
   }
   return retLen;
 }
 int json_output_pgm_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 
@@ -294,33 +309,33 @@ int json_output_pgm_dcl_ds_beg(tool_node_t *tool, char *out_caller, int outLen, 
   int retLen = outLen;
   if (tdim > 1) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"%s\":[", name);
+      "%c\"%s\":%c",sopen_bracket,name,sopen_brace);
   } else {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"%s\":", name);
+      "%c\"%s\":",sopen_bracket, name);
   }
   return retLen;
 }
 int json_output_pgm_dcl_ds_rec_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "[");
+      "%c",sopen_brace);
   return retLen;
 }
 int json_output_pgm_dcl_ds_rec_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
-      "]");
+      "%c",sclose_brace);
   return retLen;
 }
 int json_output_pgm_dcl_ds_end(tool_node_t *tool, char *out_caller, int outLen, int tdim) {
   int retLen = outLen;
   if (tdim > 1) {
     retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
-      "]}");
+      "%c%c",sclose_brace,sclose_bracket);
   } else {
     retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-      "}");
+      "%c",sclose_bracket);
   }
   return retLen;
 }
@@ -329,10 +344,10 @@ int json_output_pgm_dcl_s_beg(tool_node_t *tool, char *out_caller, int outLen, c
   int retLen = outLen;
   if (tdim > 1) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"%s\":[", name);
+      "%c\"%s\":%c",sopen_bracket,name,sopen_brace);
   } else {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"%s\":", name);
+      "%c\"%s\":",sopen_bracket, name);
   }
   return retLen;
 }
@@ -351,10 +366,10 @@ int json_output_pgm_dcl_s_end(tool_node_t *tool, char *out_caller, int outLen, i
   int retLen = outLen;
   if (tdim > 1) {
     retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen,
-      "]}");
+      "%c%c",sclose_brace,sclose_bracket);
   } else {
     retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-      "}");
+      "%c",sclose_bracket);
   }
   return retLen;
 }
@@ -363,13 +378,13 @@ int json_output_pgm_dcl_s_end(tool_node_t *tool, char *out_caller, int outLen, i
 int json_output_cmd_beg(tool_node_t *tool, char *out_caller, int outLen, char * cmd) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"cmd\":[\"%s\"", cmd);
+      "%c\"cmd\":%c\"%s\"",sopen_bracket,sopen_brace, cmd);
   return retLen;
 }
 int json_output_cmd_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 
@@ -377,14 +392,14 @@ int json_output_cmd_end(tool_node_t *tool, char *out_caller, int outLen) {
 int json_output_joblog_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{\"joblog\":[");
+      "%c\"joblog\":%c",sopen_bracket,sopen_brace);
   return retLen;
 }
 int json_output_joblog_rec(tool_node_t *tool, char *out_caller, int outLen, char * msgid, char * msgtype, char * msgsub, char * msgsev, char * msgstamp, char * msgtolib, char * msgtopgm, char * msgtomod, char * msgtoproc, char * msgtoinst, char * msgtxt) 
 {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "{");
+      "%c",sopen_bracket);
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgid\":\"%s\"",msgid);
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
@@ -413,13 +428,13 @@ int json_output_joblog_rec(tool_node_t *tool, char *out_caller, int outLen, char
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"msgtxt\":\"%s\"",msgtxt);
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-      "}");
+      "%c",sclose_bracket);
   return retLen;
 }
 int json_output_joblog_end(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
-    "]}");
+    "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
 
@@ -647,31 +662,29 @@ int json_parse(char * json, json_key_t * bigkey) {
     key = bigkey->key;
     val = bigkey->val;
     lvl = bigkey->lvl;
-    switch(*c) {
-    case '{':
+    /* ILE variant chars (argh) */
+    if (*c == sopen_bracket) { /* '{' */
       isColon = 0;
       key[k++] = JSON400_OBJ_BEG;
       lvl[k-1] = ++nest;
       *c = '\0';
-      break;
-    case '}':
+    } else if (*c == sclose_bracket) { /* '}' */
       isColon = 0;
       key[k++] = JSON400_OBJ_END;
       lvl[k-1] = nest--;
       *c = '\0';
-      break;
-    case '[':
+    } else if (*c == sopen_brace) { /* '[' */
       isColon = 0;
       key[k++] = JSON400_ARY_BEG;
       lvl[k-1] = ++nest;
       *c = '\0';
-      break;
-    case ']':
+    } else if (*c == sclose_brace) { /* ']' */
       isColon = 0;
       key[k++] = JSON400_ARY_END;
       lvl[k-1] = nest--;
       *c = '\0';
-      break;
+    } else {
+    switch(*c) {
     case ',':
       isColon = 0;
       key[k++] = JSON400_COMMA;
@@ -766,6 +779,7 @@ int json_parse(char * json, json_key_t * bigkey) {
     default:
       break;
     }
+    } /* ILE variant chars (argh) */
   } /* loop c */
   /* max nodes */
   return k;
@@ -786,6 +800,21 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
   char * copyin = NULL;
   tool_struct_t *tool = NULL;
   json_key_t * bigkey = NULL;
+
+  /* Variant EBCDIC characters !#$@\[]^`{}|~ */
+  sbang = ccsid_variant_bang();
+  spound = ccsid_variant_pound();
+  sdollar = ccsid_variant_dollar();
+  sat = ccsid_variant_at();
+  sbackslash = ccsid_variant_backslash();
+  sopen_brace = ccsid_variant_open_brace();
+  sclose_brace = ccsid_variant_close_brace();
+  scaret = ccsid_variant_caret();
+  sbacktick = ccsid_variant_backtick();
+  sopen_bracket = ccsid_variant_open_bracket();
+  sclose_bracket = ccsid_variant_close_bracket();
+  sbar = ccsid_variant_bar();
+  stilde = ccsid_variant_tilde();
 
   /* debug me */
   /* sleep(30); */

@@ -2,6 +2,11 @@
      H AlwNull(*UsrCtl)
      H BNDDIR('QC2LE')
 
+       // ****************************************************          
+       //  includes          
+       // ****************************************************          
+      /copy ../toolkit-base/PaseType_h          
+
        // --------------------------
        // globals
        // --------------------------
@@ -213,6 +218,34 @@
        dcl-s pCopy pointer inz(*NULL);
        dcl-ds myCopy likeds(over_t) based(pCopy);
 
+       dcl-s sbang char(1) inz(*BLANKS);
+       dcl-s spound char(1) inz(*BLANKS);
+       dcl-s sdollar char(1) inz(*BLANKS);
+       dcl-s sat char(1) inz(*BLANKS);
+       dcl-s sbackslash char(1) inz(*BLANKS);
+       dcl-s sopen_brace char(1) inz(*BLANKS);
+       dcl-s sclose_brace char(1) inz(*BLANKS);
+       dcl-s scaret char(1) inz(*BLANKS);
+       dcl-s sbacktick char(1) inz(*BLANKS);
+       dcl-s sopen_bracket char(1) inz(*BLANKS);
+       dcl-s sclose_bracket char(1) inz(*BLANKS);
+       dcl-s sbar char(1) inz(*BLANKS);
+       dcl-s stilde char(1) inz(*BLANKS);
+
+       sbang = ccsid_variant_bang();
+       spound = ccsid_variant_pound();
+       sdollar = ccsid_variant_dollar();
+       sat = ccsid_variant_at();
+       sbackslash = ccsid_variant_backslash();
+       sopen_brace = ccsid_variant_open_brace();
+       sclose_brace = ccsid_variant_close_brace();
+       scaret = ccsid_variant_caret();
+       sbacktick = ccsid_variant_backtick();
+       sopen_bracket = ccsid_variant_open_bracket();
+       sclose_bracket = ccsid_variant_close_bracket();
+       sbar = ccsid_variant_bar();
+       stilde = ccsid_variant_tilde();
+
        // hey adc debug
        iDebugMeJson(clob + 4);
 
@@ -222,9 +255,9 @@
        clobData = clob + 4;
        for i = 1 to clobLen;
          pCopy = clobData + (i - 1);
-         if myCopy.bytex = '{';
+         if myCopy.bytex = sopen_bracket; // '{'
            nest += 1;
-         elseif myCopy.bytex = '}';
+         elseif myCopy.bytex = sclose_bracket; // '}'
            nest -= 1;
            if nest = 0;
              leave;
@@ -236,7 +269,7 @@
 
        // make call
        outData = %addr(Output151);
-       outLen = %size(Output151);
+       outLen = 5001 * 3000;
        memset(outData:0:outLen);
        sqlrc = custom_SQL400Json(0:
                  clobData:
@@ -246,7 +279,7 @@
 
        // output sql result set for rows 
        outLen = strlen(outData);
-       cpybytes(clobData:outData:outLen + 1);         
+       memset(clobData:0:clobLen);         
        Occurs151 = outLen / 3000 + 1;          
        exec sql          
          Set Result Sets Array :Output151 For :Occurs151 Rows;

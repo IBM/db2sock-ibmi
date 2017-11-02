@@ -11,4 +11,18 @@ tool_key_match_beg_2_end
 tool_key_match_end_2_beg
 tool_key_match_attr_2_beg
 tool_run
+ccsid_variant_bang
+ccsid_variant_pound
+ccsid_variant_dollar
+ccsid_variant_at
+ccsid_variant_backslash
+ccsid_variant_open_brace
+ccsid_variant_close_brace
+ccsid_variant_caret
+ccsid_variant_backtick
+ccsid_variant_open_bracket
+ccsid_variant_close_bracket
+ccsid_variant_bar
+ccsid_variant_tilde
+
 

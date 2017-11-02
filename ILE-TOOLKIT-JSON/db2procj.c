@@ -1,5 +1,6 @@
 /*
- * ILE stored procedure interface db2procj(ILE)->libdb400.a->SQL400Json->...
+ * ILE stored procedure interface db2procj(ILE)->libdb400.a->SQL400Json->..
+ * Variant EBCDIC characters !#$@\[]^`{}|~
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -134,6 +135,20 @@ int iJson400(char * clob) {
   int sqlrc = 0;
   int nest = 0;
 
+  char sbang = ccsid_variant_bang();
+  char spound = ccsid_variant_pound();
+  char sdollar = ccsid_variant_dollar();
+  char sat = ccsid_variant_at();
+  char sbackslash = ccsid_variant_backslash();
+  char sopen_brace = ccsid_variant_open_brace();
+  char sclose_brace = ccsid_variant_close_brace();
+  char scaret = ccsid_variant_caret();
+  char sbacktick = ccsid_variant_backtick();
+  char sopen_bracket = ccsid_variant_open_bracket();
+  char sclose_bracket = ccsid_variant_close_bracket();
+  char sbar = ccsid_variant_bar();
+  char stilde = ccsid_variant_tilde();
+
   /* debug message? */
   iDebugMeJson((char *) clob + 4);
  
@@ -143,9 +158,9 @@ int iJson400(char * clob) {
   clobData = (char *) clob + 4;
   /* find true json size (db2 clob anomolies)) */
   for (i=0; i < clobLen; i++) {
-    if (clobData[i] == '{') {
+    if (clobData[i] == sopen_bracket) { /* '{' */
       nest++;
-    } else if (clobData[i] == '}') {
+    } else if (clobData[i] == sclose_bracket) { /* '}' */
       nest--;
       if (!nest) {
         break;

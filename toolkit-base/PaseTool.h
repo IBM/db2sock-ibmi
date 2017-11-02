@@ -355,6 +355,24 @@ int tool_run(int ihdbc, char * outarea, int outlen, tool_struct_t *tool);
 void * tool_new(int size);
 void tool_free(char *buffer);
 
+/*
+ * Variant EBCDIC characters !#$@\[]^`{}|~
+ */
+char ccsid_variant_bang();
+char ccsid_variant_pound();
+char ccsid_variant_dollar();
+char ccsid_variant_at();
+char ccsid_variant_backslash();
+char ccsid_variant_open_brace();
+char ccsid_variant_close_brace();
+char ccsid_variant_caret();
+char ccsid_variant_backtick();
+char ccsid_variant_open_bracket();
+char ccsid_variant_close_bracket();
+char ccsid_variant_bar();
+char ccsid_variant_tilde();
+
+
 #endif /* _PASETOOL_H */
 
 

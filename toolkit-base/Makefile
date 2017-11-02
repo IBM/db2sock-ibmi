@@ -40,10 +40,11 @@ LIBDEPS64    = -maix64 $(LIBDEPALL)
 CCC         = crtcmod
 CCPGM       = crtpgm
 CCSRVPGM    = crtsrvpgm
+CCCRPG	    = crtrpgmod
 
 ### *PGM proc
 SP400SRVPGM  = tkit400.srvpgm
-SP400OBJS    = PaseTo400.mod PaseToDmp.mod PaseToIle.mod PaseTool.mod
+SP400OBJS    = PaseTo400.mod PaseToDmp.mod PaseToIle.mod PaseTool.mod PaseToSid.mod 
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -73,12 +74,15 @@ go2: removeo $(SP400SRVPGM)
 ### PASE
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
-.SUFFIXES: .mod .o .c
+.SUFFIXES: .mod .o .c .rpgle
 .c.o:
 	$(CC) $(CCFLAGS) $(INCLUDEPATH) -c $<
 ### CRTCMOD
 .c.mod:
 	$(CCC) --lib $(ILELIB) -g --option "OPTION(*SHOWINC)" --src $<
+### CRTRPGMOD
+.rpgle.mod:
+	$(CCCRPG) --lib $(ILELIB) --option "DBGVIEW(*SOURCE)" --src $<
 ### -- SP400SRVPGM (ILE c)
 $(SP400SRVPGM): $(SP400OBJS)
 	$(CCSRVPGM) --pgm $(SP400SRVPGM) --lib $(ILELIB) --mod $(SP400OBJS) --option "BNDSRVPGM($(ILELIB)/DB2PROC) EXPORT(*ALL) ACTGRP(*CALLER)"

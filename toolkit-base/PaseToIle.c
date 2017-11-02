@@ -6,6 +6,9 @@
 #include "../ILE-PROC/iconf.h" /* see ILE-PROC/Makefile */
 #include "PaseToIle.h"
 
+/*=================================================
+ * ebcdic char ccsid mess
+ */
 #ifdef __IBMC__
 #define hex_space 0x40
 #define hex_nbr 0xF0

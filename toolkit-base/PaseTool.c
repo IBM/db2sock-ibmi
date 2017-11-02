@@ -26,6 +26,127 @@
 SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
 SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
 
+
+/*=================================================
+ * ebcdic char ccsid mess
+ */
+#ifdef __IBMC__
+char ccsid_variant_bang() {
+  /* '!' */
+  return ccsid_bang();
+}
+char ccsid_variant_pound() {
+  /* '#' */
+  return ccsid_pound();
+}
+
+char ccsid_variant_dollar() {
+  /* '$' */
+  return ccsid_dollar();
+}
+
+char ccsid_variant_at() {
+  /* '@' */
+  return ccsid_at();
+}
+
+char ccsid_variant_backslash() {
+  /* '\' */
+  return ccsid_backslash();
+}
+
+char ccsid_variant_open_brace() {
+  /* '[' */
+  return ccsid_open_brace();
+}
+
+char ccsid_variant_close_brace() {
+  /* ']' */
+  return ccsid_close_brace();
+}
+
+char ccsid_variant_caret() {
+  /* '^' */
+  return ccsid_caret();
+}
+
+char ccsid_variant_backtick() {
+  /* '`' */
+  return ccsid_backtick();
+}
+
+char ccsid_variant_open_bracket() {
+  /* '{' */
+  return ccsid_open_bracket();
+}
+
+char ccsid_variant_close_bracket() {
+  /* '}' */
+  return ccsid_close_bracket();
+}
+
+char ccsid_variant_bar() {
+  /* '|' */
+  return ccsid_bar();
+}
+
+char ccsid_variant_tilde() {
+  /* '~' */
+  return ccsid_tilde();
+}
+#else
+char ccsid_variant_bang() {
+  return '!';
+}
+char ccsid_variant_pound() {
+  return '#';
+}
+
+char ccsid_variant_dollar() {
+  return '$';
+}
+
+char ccsid_variant_at() {
+  return '@';
+}
+
+char ccsid_variant_backslash() {
+  return '\\';
+}
+
+char ccsid_variant_open_brace() {
+  return '[';
+}
+
+char ccsid_variant_close_brace() {
+  return ']';
+}
+
+char ccsid_variant_caret() {
+  return '^';
+}
+
+char ccsid_variant_backtick() {
+  return '`';
+}
+
+char ccsid_variant_open_bracket() {
+  return '{';
+}
+
+char ccsid_variant_close_bracket() {
+  return '}';
+}
+
+char ccsid_variant_bar() {
+  return '|';
+}
+
+char ccsid_variant_tilde() {
+  return '~';
+}
+#endif
+
 /*=================================================
  * toolkit malloc
  */

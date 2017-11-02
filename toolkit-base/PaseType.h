@@ -93,6 +93,23 @@ typedef int16   result_type_t;
 /* special for in proc calls */
 void iCall400(char * blob);
 
+/*
+ * Variant EBCDIC characters !#$@\[]^`{}|~
+ */
+char ccsid_bang();
+char ccsid_pound();
+char ccsid_dollar();
+char ccsid_at();
+char ccsid_backslash();
+char ccsid_open_brace();
+char ccsid_close_brace();
+char ccsid_caret();
+char ccsid_backtick();
+char ccsid_open_bracket();
+char ccsid_close_bracket();
+char ccsid_bar();
+char ccsid_tilde();
+
 
 #endif /* _PASETYPE_H */
 
