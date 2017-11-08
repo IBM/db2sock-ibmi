@@ -105,6 +105,15 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_DS_NAME        1061     /*"name":"my_ds_t"*/
 #define TOOL400_DS_DIM         1062     /*"dim":"4"*/
 #define TOOL400_DS_BY          1063     /*"by":"in|out|both|value|const|return"*/
+#define TOOL400_DS_DOU         1064     /*"dou":"TOOL400_S_NAME" (search count field name)
+                                         *"dou":4 (literal)
+                                         */
+#define TOOL400_DS_DOS         1065     /*"dos":"+-" (optional)
+                                         * '-'  search backward for count field name
+                                         * '+'  search forward for count field name 
+                                         * '+-' search forward, backward
+                                         * '-+' search backward, forward (default)
+                                         */
 #define TOOL400_KEY_END_DS      460     /*"end"*/
 
 #define TOOL400_KEY_DCL_S        70     /*"s"*/
@@ -251,6 +260,7 @@ typedef struct tool_struct {
   int outareaLen; /* hamela speed up output */
   int outmax;
   int outlen;
+  int outhold;
   int hdbc;
   SQLINTEGER sqlCode;
   SQLCHAR sqlState[SQL_SQLSTATE_SIZE + 1];
@@ -290,7 +300,7 @@ tool_struct_t * tool_ctor(
 
 
 typedef struct tool_key_conn_struct {
-  tool_struct_t node;
+  tool_node_t node;
   int presistent;
   int conn_type;
   SQLHANDLE hdbc;
@@ -304,19 +314,19 @@ typedef struct tool_key_conn_struct {
 } tool_key_conn_struct_t;
 
 typedef struct tool_key_query_struct {
-  tool_struct_t node;
+  tool_node_t node;
   SQLHANDLE hstmt;
 } tool_key_query_struct_t;
 
 typedef struct tool_key_cmd_struct {
-  tool_struct_t node;
+  tool_node_t node;
   SQLHANDLE hstmt;
   SQLINTEGER cmd_len;
   SQLCHAR cmd_buff[TOOL400_MAX_CMD_BUFF];
 } tool_key_cmd_struct_t;
 
 typedef struct tool_key_pgm_struct {
-  tool_struct_t node;
+  tool_node_t node;
   SQLHANDLE hstmt;
   void * layout;
   char * pgm_proc_lib;
@@ -327,6 +337,19 @@ typedef struct tool_key_pgm_struct {
   SQLINTEGER pgm_len;
   SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
 } tool_key_pgm_struct_t;
+
+typedef struct tool_key_data_struct {
+  tool_node_t node;
+  char typ;
+  int tlen;
+  int tscale;
+  int tvary;
+  int tdim;
+  int tccsid;
+  int spill_len;
+  int by;
+  int offset;
+} tool_key_data_struct_t;
 
 /*
  * toolkit node by parser (any json parser)

@@ -1,0 +1,40 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"DOUCOUNT"},
+        {"s":[{"name":"max", "type":"10i0", "value":3},
+              {"name":"ci1", "type":"3i0",  "value":0},
+              {"name":"ci2", "type":"5i0",  "value":0},
+              {"name":"ci3", "type":"10i0", "value":0},
+              {"name":"ci4", "type":"20i0", "value":0},
+              {"name":"cu1", "type":"3u0",  "value":0},
+              {"name":"cu2", "type":"5u0",  "value":0},
+              {"name":"cu3", "type":"10u0", "value":0},
+              {"name":"cu4", "type":"20u0", "value":0},
+              {"name":"cf1", "type":"4f0",  "value":0.0},
+              {"name":"cf2", "type":"8f0",  "value":0.0},
+              {"name":"cp1", "type":"8p0",  "value":0.0},
+              {"name":"cz1", "type":"8s0",  "value":0.0},
+              {"name":"cb1", "type":"2b",   "value":"0000"},
+              {"name":"cb2", "type":"4b",   "value":"00000000"},
+              {"name":"cc1", "type":"8a",   "value":""},
+              {"name":"cc2", "type":"8av2",   "value":""},
+              {"name":"cc3", "type":"8av4",   "value":""}
+             ]},
+        {"ds":[{"s":[
+                {"name":"i1", "type":"3i0",  "value":0},
+                {"name":"i2", "type":"5i0",  "value":0},
+                {"name":"i3", "type":"10i0", "value":0},
+                {"name":"i4", "type":"20i0", "value":0},
+                {"name":"u1", "type":"3u0",  "value":0},
+                {"name":"u2", "type":"5u0",  "value":0},
+                {"name":"u3", "type":"10u0", "value":0},
+                {"name":"u4", "type":"20u0", "value":0},
+                {"name":"f1", "type":"4f0",   "value":0.0},
+                {"name":"f2", "type":"8f0",   "value":0.0},
+                {"name":"p1", "type":"8p0",  "value":0.0},
+                {"name":"z1", "type":"8s0",  "value":0.0},
+                {"name":"b1", "type":"2b",   "value":"0000"},
+                {"name":"b2", "type":"4b",   "value":"00000000"}
+              ]},
+              {"name":"retn","dim":999, "dou":"cc3", "dos":"-", "by":"return"}
+             ]}
+       ]}
+

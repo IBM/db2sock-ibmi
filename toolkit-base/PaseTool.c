@@ -397,6 +397,7 @@ tool_node_t * tool_node_add(tool_struct_t * tool, int key, char *val, int ord) {
     break;
 
   case TOOL400_KEY_DCL_S:
+    size = sizeof(tool_key_data_struct_t);
     break;
   case TOOL400_KEY_END_S:
     break;
@@ -587,6 +588,48 @@ tool_node_t * tool_node_attr(tool_struct_t * tool, tool_node_t * node, int key, 
   return node;
 }
 
+tool_node_t * tool_node_find_s_dou_name(tool_struct_t * tool, char * s_dou_name, char * search) {
+  char * search_default = "-+";
+  int i = 0;
+  char * c = NULL;
+  tool_node_t * node = NULL;
+  /* search pattern */
+  if (search) {
+    c = search;
+  } else {
+    c = search_default;
+  }
+  for (;*c; c++) {
+    switch (*c) {
+    /* backward search TOOL400_S_NAME */
+    case '-':
+      for (node = tool->curr; node; node = node->prev) {
+        if (node->key == TOOL400_KEY_DCL_S) {
+          for (i=0;i<TOOL400_ATTR_MAX;i++) {
+            if (node->akey[i] == TOOL400_S_NAME && !strcmp(node->aval[i],s_dou_name)) {
+              return node;
+            }
+          }
+        }
+      }
+      break;
+    /* forward search TOOL400_S_NAME */
+    case '+':
+      for (node = tool->curr; node; node = node->next) {
+        if (node->key == TOOL400_KEY_DCL_S) {
+          for (i=0;i<TOOL400_ATTR_MAX;i++) {
+            if (node->akey[i] == TOOL400_S_NAME && !strcmp(node->aval[i],s_dou_name)) {
+              return node;
+            }
+          }
+        }
+      }
+      break;
+    }
+  }
+  return node;
+}
+
 
 /*=================================================
  * toolkit callback output format
@@ -652,25 +695,39 @@ void tool_output_pgm_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_pgm_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char * name, int tdim) {
-  tool->outareaLen = tool->output_pgm_dcl_s_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_s_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
+  }
 }
 void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
-  tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
+  }
 }
 void tool_output_pgm_dcl_s_end(tool_struct_t *tool, int tdim) {
-  tool->outareaLen = tool->output_pgm_dcl_s_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_s_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
+  }
 }
 void tool_output_pgm_dcl_ds_beg(tool_struct_t *tool, char * name, int tdim) {
-  tool->outareaLen = tool->output_pgm_dcl_ds_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_ds_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
+  }
 }
 void tool_output_pgm_dcl_ds_rec_beg(tool_struct_t *tool) {
-  tool->outareaLen = tool->output_pgm_dcl_ds_rec_beg(tool->curr, tool->outarea, tool->outareaLen);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_ds_rec_beg(tool->curr, tool->outarea, tool->outareaLen);
+  }
 }
 void tool_output_pgm_dcl_ds_rec_end(tool_struct_t *tool) {
-  tool->outareaLen = tool->output_pgm_dcl_ds_rec_end(tool->curr, tool->outarea, tool->outareaLen);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_ds_rec_end(tool->curr, tool->outarea, tool->outareaLen);
+  }
 }
 void tool_output_pgm_dcl_ds_end(tool_struct_t *tool, int tdim) {
-  tool->outareaLen = tool->output_pgm_dcl_ds_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_pgm_dcl_ds_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
+  }
 }
 void tool_output_cmd_beg(tool_struct_t *tool, char * cmd) {
   tool->outareaLen = tool->output_cmd_beg(tool->curr, tool->outarea, tool->outareaLen, cmd);
@@ -739,6 +796,7 @@ ile_pgm_call_t **playout) {
   char * where = NULL;
 
   int pase_sig = 0;
+  tool_key_data_struct_t * node = NULL;
 
   /* parse "12p2", "5a", "5av2", ... */
   typ = ile_pgm_type(in_type, &tlen, &tscale, &tvary);
@@ -906,21 +964,101 @@ ile_pgm_call_t **playout) {
     rc = SQL_ERROR;
     break;
   }
+  if (!isOut) {
+    node = (tool_key_data_struct_t *) tool->curr;
+    node->typ = typ;
+    node->tlen = tlen;
+    node->tscale = tscale;
+    node->tvary = tvary;
+    node->tdim = tdim;
+    node->tccsid = tccsid;
+    node->spill_len = spill_len;
+    node->by = by;
+    node->offset = where - (char *)layout;
   /* output processing */
-  if (isOut) {
+  } else {
     tool_output_pgm_dcl_s_end(tool, tdim);
   }
   return rc;
 }
 
+/* int value from 'anything' */
+int tool_dcl_s_2_int(
+char typ,
+int tlen,
+int tscale,
+int tvary,
+char *where
+) {
+  /* dcl-s type */
+  switch (typ) {
+  case 'i':
+    switch (tlen) {
+    case 3:
+      return ile_pgm_int8_2_int(where);
+    case 5:
+      return ile_pgm_int16_2_int(where);
+    case 10:
+      return ile_pgm_int32_2_int(where);
+    case 20:
+      return ile_pgm_int64_2_int(where);
+    default:
+      return ile_pgm_int32_2_int(where);
+    }
+    break;
+  case 'u':
+    switch (tlen) {
+    case 3:
+      return ile_pgm_uint8_2_int(where);
+    case 5:
+      return ile_pgm_uint16_2_int(where);
+    case 10:
+      return ile_pgm_uint32_2_int(where);
+    case 20:
+      return ile_pgm_uint64_2_int(where);
+    default:
+      return ile_pgm_uint32_2_int(where);
+    }
+    break;
+  case 'f':
+    switch (tlen) {
+    case 4:
+      return ile_pgm_float_2_int(where);
+    case 8:
+      return ile_pgm_double_2_int(where);
+    default:
+      return ile_pgm_double_2_int(where);
+    }
+  case 'p':
+    return ile_pgm_packed_2_int(where, tlen, tscale);
+  case 's':
+    return ile_pgm_zoned_2_int(where, tlen, tscale);
+  case 'a':
+    return ile_pgm_char_2_int(where, tlen, tvary);
+  case 'b':
+    return ile_pgm_bin_2_int(where, tlen);
+  case 'h':
+    return ile_pgm_hole_2_int(where, tlen);
+  default:
+    break;
+  }
+  return 0;
+}
+
+
 /* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
 SQLRETURN tool_dcl_ds(
+tool_struct_t * tool,
+int isOut,
 int isDs,
 char * in_name,
 char * in_dim,
 char * in_by,
+char * in_dou,
+char * in_dou_search,
 int * ds_dim, 
 int * ds_by, 
+int * ds_dou, 
 int * ds_start_offset,
 ile_pgm_call_t **playout) {
 
@@ -938,6 +1076,10 @@ ile_pgm_call_t **playout) {
   char * where = NULL;
 
   int pase_sig = 0;
+
+  int dou = 0;
+  char * where_dou = NULL;
+  tool_key_data_struct_t * node = NULL;
 
   /* parse dimension */
   rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
@@ -958,9 +1100,25 @@ ile_pgm_call_t **playout) {
     return SQL_ERROR;
   }
 
+  /* "dou":? */
+  if (isOut && in_dou) {
+    /* "dou":4 (literal) */
+    dou = ile_pgm_char_2_int_valid(in_dou, strlen(in_dou), 0);
+    /* "dou":"TOOL400_S_NAME" */
+    if (dou < 0) {
+      dou = 0;
+      node = (tool_key_data_struct_t *) tool_node_find_s_dou_name(tool, in_dou, in_dou_search);
+      if (node && node->tlen) {
+        where_dou = (char *)layout + node->offset;
+        dou = tool_dcl_s_2_int(node->typ, node->tlen, node->tscale, node->tvary, where_dou);
+      }
+    }
+  }
+
   /* parse data */
   *ds_dim = tdim;
   *ds_by = by;
+  *ds_dou = dou;
   *ds_start_offset = where - (char *)layout;
 
   /* layout return */
@@ -1058,9 +1216,13 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   char * pgm_ds_name = NULL;
   char * pgm_ds_dim = NULL;
   char * pgm_ds_by = NULL;
+  char * pgm_ds_dou = NULL;
+  char * pgm_ds_dim_dou_search = NULL;
   int pgm_ds_dim_cnt = 0;
+  int pgm_ds_dim_cnt_up = 0;
   int pgm_ds_dim_max = 0;
   int pgm_ds_by_flag = 0;
+  int pgm_ds_dim_dou_cnt = 0;
   int ds_start_offset = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
@@ -1087,12 +1249,18 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     case TOOL400_DS_BY:
       pgm_ds_by = val;
       break;
+    case TOOL400_DS_DOU:
+      pgm_ds_dou = val;
+      break;
+    case TOOL400_DS_DOS:
+      pgm_ds_dim_dou_search = val;
+      break;
     default:
       break;
     }
   }
   /* where start here */
-  sqlrc = tool_dcl_ds(*isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &ds_start_offset, (ile_pgm_call_t **)&tpgm->layout);
+  sqlrc = tool_dcl_ds(tool, isOut, *isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, pgm_ds_dou, pgm_ds_dim_dou_search, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_dim_dou_cnt, &ds_start_offset, (ile_pgm_call_t **)&tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
@@ -1162,13 +1330,18 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
           pgm_ds_dim_max = pgm_ds_dim_cnt;
         }
         pgm_ds_dim_cnt--;
+        pgm_ds_dim_cnt_up++;
         if (pgm_ds_dim_cnt > 0) {
+          if (pgm_ds_dim_dou_cnt > 0 && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
+             tool->outhold = 1;
+          }
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
             tool_output_pgm_dcl_ds_rec_beg(tool);
           }
           node = pgm_ds_idx;
         } else {
+          tool->outhold = 0;
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
           }

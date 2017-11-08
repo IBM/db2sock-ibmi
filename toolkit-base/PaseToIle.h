@@ -89,6 +89,26 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
 int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim);
 int ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary);
 int ile_pgm_bin_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tdim);
+
+int ile_pgm_int8_2_int(char * where);
+int ile_pgm_int16_2_int(char * where);
+int ile_pgm_int32_2_int(char * where);
+int ile_pgm_int64_2_int(char * where);
+int ile_pgm_uint8_2_int(char * where);
+int ile_pgm_uint16_2_int(char * where);
+int ile_pgm_uint32_2_int(char * where);
+int ile_pgm_uint64_2_int(char * where);
+int ile_pgm_float_2_int(char * where);
+int ile_pgm_double_2_int(char * where);
+int ile_pgm_packed_2_int(char * where, int tlen, int tscale);
+int ile_pgm_zoned_2_int(char * where, int tlen, int tscale);
+int ile_pgm_char_2_int(char * where, int tlen, int tvary);
+int ile_pgm_bin_2_int(char * where, int tlen);
+int ile_pgm_hole_2_int(char * where, int tlen);
+
+int ile_pgm_char_2_int_valid(char * where, int tlen, int tvary);
+
+
 char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary);
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig);
 char * ile_pgm_parm_location(int isOut, int by, short sig, int tlen, ile_pgm_call_t * layout);

@@ -319,6 +319,49 @@
        end-pr;
 
        // ****************************************************          
+       // prototypes dou
+       // ****************************************************
+       dcl-ds douStruct qualified;
+         i1 int(3);
+         i2 int(5);
+         i3 int(10);
+         i4 int(20);
+         u1 uns(3);
+         u2 uns(5);
+         u3 uns(10);
+         u4 uns(20);
+         f1 float(4);
+         f2 float(8);
+         p1 packed(8:0);
+         z1 zoned(8:0);
+         b1 bindec(4:0);
+         b2 bindec(9:0);
+       end-ds;
+
+       dcl-pr douCount likeds(douStruct) dim(999);
+         max int(10);
+         ci1 int(3);
+         ci2 int(5);
+         ci3 int(10);
+         ci4 int(20);
+         cu1 uns(3);
+         cu2 uns(5);
+         cu3 uns(10);
+         cu4 uns(20);
+         cf1 float(4);
+         cf2 float(8);
+         cp1 packed(8:0);
+         cz1 zoned(8:0);
+         cb1 bindec(4:0);
+         cb2 bindec(9:0);
+         cc1 char(8);
+         cc2 varchar(8:2);
+         cc3 varchar(8:4);
+       end-pr;
+
+
+
+       // ****************************************************          
        // rainchar
        // ****************************************************          
        dcl-proc rainchar1 export;
@@ -778,7 +821,7 @@
        end-proc;
 
        // ****************************************************          
-       // prototypes crazy
+       // crazy
        // ****************************************************
        dcl-proc crazy9 export;
        dcl-pi  *N;
@@ -810,6 +853,67 @@
          o7 = a7;
          o8 = a8;
          o9 = a9;
+       end-proc;
+
+       // ****************************************************          
+       // dou
+       dcl-proc douCount export;
+       dcl-pi  *N likeds(douStruct) dim(999);
+         max int(10);
+         ci1 int(3);
+         ci2 int(5);
+         ci3 int(10);
+         ci4 int(20);
+         cu1 uns(3);
+         cu2 uns(5);
+         cu3 uns(10);
+         cu4 uns(20);
+         cf1 float(4);
+         cf2 float(8);
+         cp1 packed(8:0);
+         cz1 zoned(8:0);
+         cb1 bindec(4:0);
+         cb2 bindec(9:0);
+         cc1 char(8);
+         cc2 varchar(8:2);
+         cc3 varchar(8:4);
+       end-pi;
+         dcl-ds du likeds(douStruct) dim(999);
+         dcl-s i int(10) inz(0);
+         ci1 = max;
+         ci2 = max;
+         ci3 = max;
+         ci4 = max;
+         cu1 = max;
+         cu2 = max;
+         cu3 = max;
+         cu4 = max;
+         cf1 = max;
+         cf2 = max;
+         cp1 = max;
+         cz1 = max;
+         cb1 = max;
+         cb2 = max;
+         cc1 = %char(max);
+         cc2 = %char(max);
+         cc3 = %char(max);
+         for i = 1 to max;
+           du(i).i1 = ci1 + (i-1);
+           du(i).i2 = ci2 + (i-1);
+           du(i).i3 = ci3 + (i-1);
+           du(i).i4 = ci4 + (i-1);
+           du(i).u1 = cu1 + (i-1);
+           du(i).u2 = cu2 + (i-1);
+           du(i).u3 = cu3 + (i-1);
+           du(i).u4 = cu4 + (i-1);
+           du(i).f1 = cf1 + (i-1);
+           du(i).f2 = cf2 + (i-1);
+           du(i).p1 = cp1 + (i-1);
+           du(i).z1 = cz1 + (i-1);
+           du(i).b1 = cb1 + (i-1);
+           du(i).b2 = cb2 + (i-1);
+         endfor;
+         return du;
        end-proc;
 
 

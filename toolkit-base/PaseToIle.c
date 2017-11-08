@@ -201,6 +201,10 @@ ile_pgm_call_t * ile_pgm_grow(ile_pgm_call_t **playout, int size) {
   return *playout;
 }
 
+/*=================================================
+ * toolkit copy in/out ILE converters
+ */
+
 int ile_pgm_str_2_int8(char * where, const char *str, int tdim) {
   char * endptr = NULL;
   int i = 0;
@@ -227,6 +231,11 @@ int ile_pgm_int8_2_output(tool_struct_t *tool, char * where, int tdim) {
   }
   return 0;
 }
+int ile_pgm_int8_2_int(char * where) {
+  int8 * wherev = (int8 *) where;
+  return (int) *wherev;
+}
+
 
 int ile_pgm_str_2_int16(char * where, const char *str, int tdim) {
   char * endptr = NULL;
@@ -253,6 +262,10 @@ int ile_pgm_int16_2_output(tool_struct_t *tool, char * where, int tdim) {
     tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return 0;
+}
+int ile_pgm_int16_2_int(char * where) {
+  int16 * wherev = (int16 *) where;
+  return (int) *wherev;
 }
 
 int ile_pgm_str_2_int32(char * where, const char *str, int tdim) {
@@ -281,6 +294,10 @@ int ile_pgm_int32_2_output(tool_struct_t *tool, char * where, int tdim) {
   }
   return 0;
 }
+int ile_pgm_int32_2_int(char * where) {
+  int32 * wherev = (int32 *) where;
+  return (int) *wherev;
+}
 
 int ile_pgm_str_2_int64(char * where, const char *str, int tdim) {
   char * endptr = NULL;
@@ -307,6 +324,10 @@ int ile_pgm_int64_2_output(tool_struct_t *tool, char * where, int tdim) {
     tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return 0;
+}
+int ile_pgm_int64_2_int(char * where) {
+  int64 * wherev = (int64 *) where;
+  return (int) *wherev;
 }
 
 int ile_pgm_str_2_uint8(char * where, const char *str, int tdim) {
@@ -335,6 +356,10 @@ int ile_pgm_uint8_2_output(tool_struct_t *tool, char * where, int tdim) {
   }
   return 0;
 }
+int ile_pgm_uint8_2_int(char * where) {
+  uint8 * wherev = (uint8 *) where;
+  return (int) *wherev;
+}
 
 int ile_pgm_str_2_uint16(char * where, const char *str, int tdim) {
   char * endptr = NULL;
@@ -361,6 +386,10 @@ int ile_pgm_uint16_2_output(tool_struct_t *tool, char * where, int tdim) {
     tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return 0;
+}
+int ile_pgm_uint16_2_int(char * where) {
+  uint16 * wherev = (uint16 *) where;
+  return (int) *wherev;
 }
 
 int ile_pgm_str_2_uint32(char * where, const char *str, int tdim) {
@@ -389,6 +418,10 @@ int ile_pgm_uint32_2_output(tool_struct_t *tool, char * where, int tdim) {
   }
   return 0;
 }
+int ile_pgm_uint32_2_int(char * where) {
+  uint32 * wherev = (uint32 *) where;
+  return (int) *wherev;
+}
 
 int ile_pgm_str_2_uint64(char * where, const char *str, int tdim) {
   char * endptr = NULL;
@@ -415,6 +448,10 @@ int ile_pgm_uint64_2_output(tool_struct_t *tool, char * where, int tdim) {
     tool_output_pgm_dcl_s_data(tool, str, 1);
   }
   return 0;
+}
+int ile_pgm_uint64_2_int(char * where) {
+  uint64 * wherev = (uint64 *) where;
+  return (int) *wherev;
 }
 
 int ile_pgm_str_2_float(char * where, const char *str, int tdim) {
@@ -449,6 +486,10 @@ int ile_pgm_float_2_output(tool_struct_t *tool, char * where, int tscale, int td
   }
   return 0;
 }
+int ile_pgm_float_2_int(char * where) {
+  float * wherev = (float *) where;
+  return (int) *wherev;
+}
 
 int ile_pgm_str_2_double(char * where, const char *str, int tdim) {
   int i = 0;
@@ -482,15 +523,9 @@ int ile_pgm_double_2_output(tool_struct_t *tool, char * where, int tscale, int t
   }
   return 0;
 }
-
-int ile_pgm_str_2_hole(char * where, int tlen, int tdim) {
-  int i = 0;
-  char * wherev = where;
-  /* copy in */
-  for (i=0; i < tdim; i++, wherev += tlen) {
-    memset(wherev,0,tlen);
-  }
-  return 0;
+int ile_pgm_double_2_int(char * where) {
+  double * wherev = (double *) where;
+  return (int) *wherev;
 }
 
 
@@ -645,6 +680,88 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
   }
   return 0;
 }
+int ile_pgm_packed_2_int(char * where, int tlen, int tscale) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  int isOk = 0;
+  int isDot = 0;
+  int isScale = 0;
+  char * wherev = (char *) where;
+  int outDigits = tlen;
+  int outLength = outDigits/2+1;
+  int actLen = outLength * 2;
+  int leftDigitValue = 0;
+  int rightDigitValue = 0;
+  char * c = NULL;
+  char str[128];
+
+  int32 value = 0;
+
+  memset(str,0,sizeof(str));
+  /* sign negative */
+  c = wherev;
+  rightDigitValue = (char)(c[outLength-1] & 0x0F);
+  if (rightDigitValue == 0x0D) {
+    str[j++] = '-';
+  }
+  for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+    /* decimal point */
+    l++;
+    if (!isDot && tscale && l >= actLen - tscale) {
+      if (!isOk) {
+        str[j++] = (char) hex_nbr;
+      }
+      str[j++] = '.';
+      isDot = 1;
+      isOk = 1;
+    }
+    /* digits */
+    leftDigitValue = (char)((c[k] >> 4) & 0x0F);
+    if (isOk || leftDigitValue > 0) {
+      str[j++] = (char)(hex_nbr + leftDigitValue);
+      isOk = 1;
+      if (isDot) {
+        isScale++;
+      }
+    }
+    /* decimal point */
+    l++;
+    if (!isDot && tscale && l >= actLen - tscale) {
+      if (!isOk) {
+        str[j++] = (char) hex_nbr;
+      }
+      str[j++] = '.';
+      isDot = 1;
+      isOk = 1;
+    }
+    /* digits */
+    rightDigitValue = (char)(c[k] & 0x0F);
+    if (k < outLength-1 && (isOk || rightDigitValue > 0)) {
+      str[j++] = (char)(hex_nbr + rightDigitValue);
+      isOk = 1;
+      if (isDot) {
+        isScale++;
+      }
+    }
+  }
+  /* zero */
+  if (!isOk) {
+    str[j++] = (char) hex_nbr;
+    str[j++] = '.';
+    isOk = 1;
+    isDot = 1;
+    isScale = 0;
+  }
+  /* one significant decimal */
+  if (isDot && !isScale) {
+    str[j++] = (char) hex_nbr;
+  }
+  /* string to int */
+  value = (int) strtod(str,NULL);
+  return (int) value;
+}
 
 int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
@@ -762,8 +879,70 @@ int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tsca
   }
   return 0;
 }
+int ile_pgm_zoned_2_int(char * where, int tlen, int tscale) {
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int l = 0;
+  int isOk = 0;
+  int isDot = 0;
+  int isScale = 0;
+  char * wherev = (char *) where;
+  int outDigits = tlen;
+  int outLength = outDigits;
+  int leftDigitValue = 0;
+  int rightDigitValue = 0;
+  char * c = NULL;
+  char str[128];
 
+  int32 value = 0;
 
+  memset(str,0,sizeof(str));
+  /* sign negative */
+  c = wherev;
+  leftDigitValue = (char)((c[outLength-1] >> 4) & 0x0F);
+  if (leftDigitValue == 0x0D) {
+    str[j++] = '-';
+  }
+  for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+    /* digits */
+    leftDigitValue = (char)((c[k] >> 4) & 0x0F);
+    /* decimal point */
+    if (!isDot && tscale && l >= tlen - tscale) {
+      if (!isOk) {
+        str[j++] = (char) hex_nbr;
+      }
+      str[j++] = '.';
+      isDot = 1;
+      isOk = 1;
+    }
+    l++;
+    /* digits */
+    rightDigitValue = (char)(c[k] & 0x0F);
+    if (isOk || rightDigitValue > 0) {
+      str[j++] = (char)(hex_nbr + rightDigitValue);
+      isOk = 1;
+      if (isDot) {
+        isScale++;
+      }
+    }
+  }
+  /* zero */
+  if (!isOk) {
+    str[j++] = (char) hex_nbr;
+    str[j++] = '.';
+    isOk = 1;
+    isDot = 1;
+    isScale = 0;
+  }
+  /* one significant decimal */
+  if (isDot && !isScale) {
+    str[j++] = (char) hex_nbr;
+  }
+  /* string to int */
+  value = (int) strtod(str,NULL);
+  return (int) value;
+}
 
 int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
   int rc = 0;
@@ -889,6 +1068,135 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
   }
   return 0;
 }
+int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
+  int32 value = 0;
+  int i = 0, j = 0;
+  char * c = NULL;
+  char v = ' ';
+  char ascii[128];
+  char str[128];
+  int ebcdic = 0;
+  char * wherev = where;
+  int tlen = ilen;
+
+  c = where;
+
+  /* vary */
+  if (tvary == 4) {
+    tlen = *(int *) c;
+    c += 4;
+  } else if (tvary) {
+    tlen = *(short *) c;
+    c += 2;
+  } else {
+    tlen = ilen;
+  }
+
+#ifndef __IBMC__
+  memset(ascii,0,sizeof(ascii));
+  for (i=0, j=0; i<tlen; i++) {
+    switch (*c) {
+    case 0xF0: /* '0' */
+      ebcdic = 1;
+      ascii[j++] = '0';
+      break;
+    case 0xF1: /* '1' */
+      ebcdic = 1;
+      ascii[j++] = '1';
+      break;
+    case 0xF2: /* '2' */
+      ebcdic = 1;
+      ascii[j++] = '2';
+      break;
+    case 0xF3: /* '3' */
+      ebcdic = 1;
+      ascii[j++] = '3';
+      break;
+    case 0xF4: /* '4' */
+      ebcdic = 1;
+      ascii[j++] = '4';
+      break;
+    case 0xF5: /* '5' */
+      ebcdic = 1;
+      ascii[j++] = '5';
+      break;
+    case 0xF6: /* '6' */
+      ebcdic = 1;
+      ascii[j++] = '6';
+      break;
+    case 0xF7: /* '7' */
+      ebcdic = 1;
+      ascii[j++] = '7';
+      break;
+    case 0xF8: /* '8' */
+      ebcdic = 1;
+      ascii[j++] = '8';
+      break;
+    case 0xF9: /* '9' */
+      ebcdic = 1;
+      ascii[j++] = '9';
+      break;
+    case 0x40: /* ' ' */
+      ebcdic = 1;
+      ascii[j++] = ' ';
+      break;
+    case 0x4B: /* '.' */
+      ebcdic = 1;
+      ascii[j++] = '.';
+      break;
+    case 0x60: /* '-' */
+      ebcdic = 1;
+      ascii[j++] = '-';
+      break;
+    default:
+      break;
+    }
+    c++;
+  }
+  if (ebcdic) {
+    c = ascii;
+  }
+#endif
+
+  memset(str,0,sizeof(str));
+  for (i=0, j=0; i<tlen; i++) {
+    switch (*c) {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+    case '-':
+    case '.':
+      str[j++] = *c;
+      break;
+    case ' ':
+      break;
+    default:
+      if (valid) {
+        return -1;
+      }
+      break;
+    }
+    c++;
+  }
+  /* string to int */
+  value = (int) strtod(str,NULL);
+  return (int) value;
+}
+int ile_pgm_char_2_int(char * where, int tlen, int tvary) {
+  return ile_pgm_char_2_int_common(where, tlen, tvary, 0);
+}
+int ile_pgm_char_2_int_valid(char * where, int tlen, int tvary) {
+  return ile_pgm_char_2_int_common(where, tlen, tvary, 1);
+}
+
+
 
 int ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary) {
   int i = 0;
@@ -1123,7 +1431,39 @@ int ile_pgm_bin_2_output(tool_struct_t *tool, char * where, int tlen, int tvary,
   }
   return 0;
 }
+int ile_pgm_bin_2_int(char * where, int tlen) {
+  switch(tlen) {
+  case 1:
+    return (int) (*(int8 *)where);
+  case 2:
+    return (int) (*(int16 *)where);
+  case 4:
+    return (int) (*(int32 *)where);
+  case 8:
+    return (int) (*(int64 *)where);
+  default:
+    break;
+  }
+  return (int) (*(int32 *)where);
+}
 
+
+int ile_pgm_str_2_hole(char * where, int tlen, int tdim) {
+  int i = 0;
+  char * wherev = where;
+  /* copy in */
+  for (i=0; i < tdim; i++, wherev += tlen) {
+    memset(wherev,0,tlen);
+  }
+  return 0;
+}
+int ile_pgm_hole_2_int(char * where, int tlen) {
+  return 0;
+}
+
+/*=================================================
+ * toolkit copy in/out ILE type, by and location
+ */
 
 /* parse "12p2", "5a", "5av2", ... */
 char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
