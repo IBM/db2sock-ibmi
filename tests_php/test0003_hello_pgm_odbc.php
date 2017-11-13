@@ -15,13 +15,15 @@ print("Output:\n");
 
 $conn = odbc_connect($database,$user,$password);
 if (!$conn) die("Bad connect: $database,$user");
-$stmt = odbc_prepare($conn, "call DB2JSON.DB2PROCJR(?)");
+$stmt = odbc_prepare($conn, "call DB2JSON.DB2PROCJH(?)");
 if (!$stmt) die("Bad prepare: ".odbc_errormsg());
 $ret=odbc_execute($stmt,array($clob));
 if (!$ret) die("Bad execute: ".odbc_errormsg());
 $clobOut = "";
 while(odbc_fetch_row($stmt)) {
-  $clobOut .= odbc_result($stmt,1);
+  $row = odbc_result($stmt,1);
+  $chunk = explode("DEADBEEF", $row);
+  $clobOut .= $chunk[0];
 }
 $clobOut = trim($clobOut);
 var_dump($clobOut);

@@ -45,7 +45,16 @@
          Out151 char(3000);
        end-ds;
 
-       dcl-pr iJson400R  ind extproc(*CL:'iJson400R');
+       dcl-pr  iJson400C ind;
+         clob pointer value;
+         flag ind value;
+       end-pr;
+
+       dcl-pr iJson400R ind extproc(*CL:'iJson400R');
+         clob pointer value;
+       end-pr;
+
+       dcl-pr iJson400H ind extproc(*CL:'iJson400H');
          clob pointer value;
        end-pr;
 
@@ -199,12 +208,14 @@
        endif;
        end-proc;
 
+
        // --------------------------
        // db2procjr(clob) -- json interface
        // --------------------------
-       dcl-proc iJson400R export;
+       dcl-proc iJson400C;
        dcl-pi  *N ind;
          clob pointer value;
+         flag ind value;
        end-pi;
        //  vars          
        dcl-s rc ind inz(*OFF);
@@ -231,6 +242,12 @@
        dcl-s sclose_bracket char(1) inz(*BLANKS);
        dcl-s sbar char(1) inz(*BLANKS);
        dcl-s stilde char(1) inz(*BLANKS);
+
+       dcl-s palloc pointer inz(*NULL);
+       dcl-s ptr1 pointer inz(*NULL);
+       dcl-s ptr2 pointer inz(*NULL);
+       dcl-s hack char(8) inz('DEADBEEF');
+       dcl-s ptr2Len int(10) inz(0);
 
        sbang = ccsid_variant_bang();
        spound = ccsid_variant_pound();
@@ -277,10 +294,52 @@
                  outData:
                  outLen);
 
+       // clear input
+       memset(clobData:0:clobLen);         
+
        // output sql result set for rows 
        outLen = strlen(outData);
-       memset(clobData:0:clobLen);         
        Occurs151 = outLen / 3000 + 1;          
+
+       // Parse DEADBEEF end of row
+       // and concat rows for full document
+       // row 1: {{"good":"json"DEADBEEF
+       // row 2: ,"more":"goodDEADBEEF
+       // row 3: json"}DEADBEEF
+       // row n: }DEADEDBEEF
+       if flag = *ON;
+         ptr1 = outData;
+         palloc = %alloc((Occurs151 + 1) * 3000);
+         ptr2 = palloc;
+         memset(ptr2:0:(Occurs151 + 1) * 3000);
+         for i = 1 to Occurs151;
+           if ptr2Len + 3000 < outLen;
+             cpybytes(ptr2:ptr1:3000);
+             ptr2 += 3000;
+             ptr2Len += 3000;
+             cpybytes(ptr2:%addr(hack):%size(hack));
+             ptr2 += %size(hack);
+             ptr2Len += %size(hack);
+           elseif (ptr2Len < outLen);
+             cpybytes(ptr2:ptr1:outLen - ptr2Len);
+             ptr2 += (outLen - ptr2Len);
+             ptr2Len += (outLen - ptr2Len);
+             cpybytes(ptr2:%addr(hack):%size(hack));
+             ptr2 += %size(hack);
+             ptr2Len += %size(hack);
+           endif;
+           ptr1 += 3000;
+         endfor;
+         ptr1 = outData;
+         ptr2 = palloc;
+         cpybytes(ptr1:ptr2:ptr2Len);
+         dealloc(en) palloc;
+         // output sql result set for rows 
+         outLen = strlen(outData);
+         Occurs151 = outLen / 3000 + 1;          
+       endif;
+
+       // result set of row for concat
        exec sql          
          Set Result Sets Array :Output151 For :Occurs151 Rows;
 
@@ -291,5 +350,25 @@
        endif;          
 
        return rc;          
+       end-proc;
+
+       // --------------------------
+       // db2procjr(clob) -- json interface
+       // --------------------------
+       dcl-proc iJson400R export;
+       dcl-pi  *N ind;
+         clob pointer value;
+       end-pi;
+       return iJson400C(clob:*OFF);          
+       end-proc;
+
+       // --------------------------
+       // db2procjh(clob) -- json interface (hack)
+       // --------------------------
+       dcl-proc iJson400H export;
+       dcl-pi  *N ind;
+         clob pointer value;
+       end-pi;
+       return iJson400C(clob:*ON);          
        end-proc;
 

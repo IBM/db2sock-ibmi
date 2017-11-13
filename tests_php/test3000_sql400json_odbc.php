@@ -8,7 +8,7 @@ if (!extension_loaded('odbc')) {
 }
 
 function help() {
-  die("Syntax: php est3000_sql400json_odbc.php ../tests_c/j0001_pgm_hello");
+  die("Syntax: php test3000_sql400json_odbc.php ../tests_c/j0001_pgm_hello");
 }
 
 if (!isset($argv) || !isset($argv[1])) {
@@ -30,13 +30,15 @@ var_dump($clob);
 
 $conn = odbc_connect($database,$user,$password);
 if (!$conn) die("Bad connect: $database,$user");
-$stmt = odbc_prepare($conn, "call DB2JSON.DB2PROCJR(?)");
+$stmt = odbc_prepare($conn, "call DB2JSON.DB2PROCJH(?)");
 if (!$stmt) die("Bad prepare: ".odbc_errormsg());
 $ret=odbc_execute($stmt,array($clob));
 if (!$ret) die("Bad execute: ".odbc_errormsg());
 $clob = "";
 while(odbc_fetch_row($stmt)) {
-  $clob .= odbc_result($stmt,1);
+  $row = odbc_result($stmt,1);
+  $chunk = explode("DEADBEEF", $row);
+  $clob .= $chunk[0];
 }
 $clob = trim($clob);
 var_dump($clob);

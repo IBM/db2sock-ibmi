@@ -32,7 +32,8 @@ var_dump($clobOut);
 
 function myjson() {
 $clob =
-'{"pgm":[{"name":"HELLO",  "lib":"DB2JSON", "debugpgm":"stop pgm HELLO"},
+'{"debug":"json debug DB2PROCJH",
+  "pgm":[{"name":"HELLO",  "lib":"DB2JSON"},
         {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
        ]}';
 return $clob;
