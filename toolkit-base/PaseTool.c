@@ -23,7 +23,7 @@
 /*=================================================
  * toolkit prototypes
  */
-SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
+SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, char * ds_dob, int * dob, tool_node_t ** curr_node);
 SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
 
 
@@ -964,8 +964,8 @@ ile_pgm_call_t **playout) {
     rc = SQL_ERROR;
     break;
   }
+  node = (tool_key_data_struct_t *) tool->curr;
   if (!isOut) {
-    node = (tool_key_data_struct_t *) tool->curr;
     node->typ = typ;
     node->tlen = tlen;
     node->tscale = tscale;
@@ -977,6 +977,7 @@ ile_pgm_call_t **playout) {
     node->offset = where - (char *)layout;
   /* output processing */
   } else {
+    node->offset = where - (char *)layout;
     tool_output_pgm_dcl_s_end(tool, tdim);
   }
   return rc;
@@ -1155,7 +1156,7 @@ int tool_sql_errors(tool_struct_t * tool, SQLHANDLE handle, SQLSMALLINT hType, i
 
 
 /* program */
-SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node) {
+SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, char * ds_dob, int * dob, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
   int key = 0;
@@ -1182,6 +1183,9 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
     switch (key) {
     case TOOL400_S_NAME:
       pgm_s_name = val;
+      if (isOut && ds_dob && !*dob && !strcmp(pgm_s_name,ds_dob)) {
+        *dob = 1;
+      }
       break;
     case TOOL400_S_DIM:
       pgm_s_dim = val;
@@ -1217,12 +1221,16 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   char * pgm_ds_dim = NULL;
   char * pgm_ds_by = NULL;
   char * pgm_ds_dou = NULL;
+  char * pgm_ds_dob = NULL;
   char * pgm_ds_dim_dou_search = NULL;
   int pgm_ds_dim_cnt = 0;
   int pgm_ds_dim_cnt_up = 0;
   int pgm_ds_dim_max = 0;
   int pgm_ds_by_flag = 0;
   int pgm_ds_dim_dou_cnt = 0;
+  int pgm_ds_dim_dob_found = 0;
+  int pgm_ds_dim_dob_cnt = 0;
+  tool_key_data_struct_t * node_dob = NULL;
   int ds_start_offset = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
@@ -1231,6 +1239,8 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   int ds_spill_len = 0;
   char * where = NULL;
   char * where_copy = NULL;
+  int dou = 0;
+  char * where_dob = NULL;
   /* current node (output) */
   tool->curr = node;
   /* pgm ds attributes (parser order 1st) */
@@ -1252,6 +1262,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     case TOOL400_DS_DOU:
       pgm_ds_dou = val;
       break;
+    case TOOL400_DS_DOB:
+      pgm_ds_dob = val;
+      break;
     case TOOL400_DS_DOS:
       pgm_ds_dim_dou_search = val;
       break;
@@ -1260,7 +1273,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     }
   }
   /* where start here */
-  sqlrc = tool_dcl_ds(tool, isOut, *isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, pgm_ds_dou, pgm_ds_dim_dou_search, &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_dim_dou_cnt, &ds_start_offset, (ile_pgm_call_t **)&tpgm->layout);
+  sqlrc = tool_dcl_ds(tool, isOut, *isDs, pgm_ds_name, pgm_ds_dim, pgm_ds_by, pgm_ds_dou, pgm_ds_dim_dou_search, 
+                      &pgm_ds_dim_cnt, &pgm_ds_by_flag, &pgm_ds_dim_dou_cnt, &ds_start_offset, 
+                      (ile_pgm_call_t **)&tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
@@ -1286,7 +1301,19 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     tool_dump_beg(sqlrc, "pgm_ds_run", i, lvl, key, val);
     switch (key) {
     case TOOL400_KEY_DCL_S:
-      sqlrc = tool_key_pgm_data_run(tool, tpgm, isDs, isOut, &node);
+      sqlrc = tool_key_pgm_data_run(tool, tpgm, isDs, isOut, pgm_ds_dob, &pgm_ds_dim_dob_found, &node);
+      if (sqlrc == SQL_SUCCESS && isOut && !pgm_ds_dim_dob_cnt && pgm_ds_dim_dob_found) {
+        node_dob = (tool_key_data_struct_t *) node;
+        if (node_dob && node_dob->tlen) {
+          where_dob = (char *)tpgm->layout + node_dob->offset;
+          dou = tool_dcl_s_2_int(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
+          if (!dou) {
+            pgm_ds_dim_dob_cnt = 1;
+          } else {
+            pgm_ds_dim_dob_found = 0;
+          }
+        }
+      }
       break;
     case TOOL400_KEY_DCL_DS:
       sqlrc = tool_key_pgm_ds_run(tool, tpgm, isDs, isOut, &node);
@@ -1335,6 +1362,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
           if (pgm_ds_dim_dou_cnt > 0 && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
              tool->outhold = 1;
           }
+          if (pgm_ds_dim_dob_cnt > 0) {
+             tool->outhold = 1;
+          }
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
             tool_output_pgm_dcl_ds_rec_beg(tool);
@@ -1372,6 +1402,8 @@ SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * 
   int max = 0;
   int go = 1;
   int isDs = 0;
+  char * pgm_ds_dob = NULL;
+  int pgm_ds_dim_dob_found = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
@@ -1393,7 +1425,7 @@ SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * 
     switch (key) {
     case TOOL400_KEY_DCL_S:
       isDs = 0;
-      sqlrc = tool_key_pgm_data_run(tool, tpgm, &isDs, isOut, &node);
+      sqlrc = tool_key_pgm_data_run(tool, tpgm, &isDs, isOut, pgm_ds_dob, &pgm_ds_dim_dob_found, &node);
       break;
     case TOOL400_KEY_DCL_DS:
       isDs = 0;

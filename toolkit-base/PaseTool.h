@@ -114,6 +114,10 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * '+-' search forward, backward
                                          * '-+' search backward, forward (default)
                                          */
+#define TOOL400_DS_DOB         1066     /*"dob":"TOOL400_S_NAME" (search 'empty' field)
+                                         * character - *blanks end output array elements
+                                         * numeric   - zero end output array elements
+                                         */
 #define TOOL400_KEY_END_DS      460     /*"end"*/
 
 #define TOOL400_KEY_DCL_S        70     /*"s"*/

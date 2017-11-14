@@ -31,9 +31,9 @@ int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL4
 /* {"pgm":{"name":"MYPGM","lib":"MYLIB","func":"MyFunc","debugpgm":"stopped in qsysopr"}} */
 char * json_pgm_attr [] = {"name","lib","func","debugpgm", NULL};
 int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC,TOOL400_PGM_DEBUG};
-/* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return","dou":"name","dos":"-+"}} */
-char * json_ds_attr [] = {"name","dim","by","dou","dos", NULL};
-int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY,TOOL400_DS_DOU,TOOL400_DS_DOS};
+/* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return","dou":"name","dos":"-+","dob":"name"}} */
+char * json_ds_attr [] = {"name","dim","by","dou","dos","dob", NULL};
+int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY,TOOL400_DS_DOU,TOOL400_DS_DOS,TOOL400_DS_DOB};
 /* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|val|const|return","value":"MYVALUE"}} */
 char * json_s_attr [] = {"name","dim","type","value","by", NULL};
 int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY};
