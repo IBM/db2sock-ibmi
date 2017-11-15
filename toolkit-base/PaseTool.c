@@ -1295,6 +1295,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_node_t * pgm_ds_idx_node = node;
+  int pgm_ds_idx_outareaLen = 0;
   int j = 0;
   int ds_spill_len = 0;
   char * where = NULL;
@@ -1340,6 +1341,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   if (isOut) {
     tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
     if (pgm_ds_dim_cnt) {
+      if (!tool->outhold) {
+        pgm_ds_idx_outareaLen = tool->outareaLen;
+      }
       tool_output_pgm_dcl_ds_rec_beg(tool);
     }
   }
@@ -1435,12 +1439,19 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
             tool_output_pgm_dcl_ds_rec_beg(tool);
+            if (!tool->outhold) {
+              pgm_ds_idx_outareaLen = tool->outareaLen;
+            }
           }
           node = pgm_ds_idx_node;
         } else {
           if (tool->outholdord == pgm_ds_idx_node->ord) {
             tool->outholdord = 0;
             tool->outhold = 0;
+            if (pgm_ds_dim_dob_cnt && pgm_ds_idx_outareaLen && pgm_ds_idx_outareaLen < tool->outareaLen) {
+              memset(tool->outarea + pgm_ds_idx_outareaLen,0,tool->outareaLen - pgm_ds_idx_outareaLen);
+              tool->outareaLen = pgm_ds_idx_outareaLen;
+            }
           }
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
