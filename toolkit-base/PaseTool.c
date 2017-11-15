@@ -1068,6 +1068,7 @@ char * search)
   int value = 0;
   int blank = 0;
   char * c = NULL;
+  int len = 0;
   /* search pattern */
   if (search) {
     c = search;
@@ -1094,7 +1095,8 @@ char * search)
       break;
     /* check for blank ds "TOOL400_S_NAME" */
     case '+':
-      blank = ile_pgm_char_is_blank(where, tlen, tvary);
+      len = ile_pgm_type_size(typ,tlen,1,0);
+      blank = ile_pgm_char_is_blank(where, len, tvary);
       break;
     default:
       break;

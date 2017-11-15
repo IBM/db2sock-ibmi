@@ -1577,6 +1577,93 @@ char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary) {
   return t;
 }
 
+int ile_pgm_type_size(char typ, int tlen, int tdim, int tvary) {
+  int spill_len = 0;
+  /* default length input */
+  switch (typ) {
+  case 'i':
+    switch (tlen) {
+    case 3:
+      spill_len = sizeof(int8) * tdim;
+      break;
+    case 5:
+      spill_len = sizeof(int16) * tdim;
+      break;
+    case 10:
+      spill_len = sizeof(int32) * tdim;
+      break;
+    case 20:
+      spill_len = sizeof(int64) * tdim;
+      break;
+    default:
+      spill_len = sizeof(int32) * tdim;
+      break;
+    }
+    break;
+  case 'u':
+    switch (tlen) {
+    case 3:
+      spill_len = sizeof(uint8) * tdim;
+      break;
+    case 5:
+      spill_len = sizeof(uint16) * tdim;
+      break;
+    case 10:
+      spill_len = sizeof(uint32) * tdim;
+      break;
+    case 20:
+      spill_len = sizeof(uint64) * tdim;
+      break;
+    default:
+      spill_len = sizeof(uint32) * tdim;
+      break;
+    }
+    break;
+  case 'f':
+    switch (tlen) {
+    case 4:
+      spill_len = sizeof(float) * tdim;
+      break;
+    case 8:
+      spill_len = sizeof(double) * tdim;
+      break;
+    default:
+      spill_len = sizeof(double) * tdim;
+      break;
+    }
+    break;
+  case 'p':
+    spill_len = (tlen/2+1) * tdim;
+    break;
+  case 's':
+    spill_len = tlen * tdim;
+    break;
+  case 'a':
+    switch(tvary){
+    case 2:
+      spill_len = (tlen+sizeof(uint16)) * tdim;
+      break;
+    case 4:
+      spill_len = (tlen+sizeof(uint32)) * tdim;
+      break;
+    default:
+      spill_len = tlen * tdim;
+      break;
+    }
+    break;
+  case 'b':
+    spill_len = tlen * tdim;
+    break;
+  case 'h':
+    spill_len = tlen * tdim;
+    break;
+  default:
+    spill_len = tlen * tdim;
+    break;
+  }
+  return spill_len;
+}
+
 /* in|out|both|value|const|return */
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig) {
   int by = ILE_PGM_BY_REF_IN;

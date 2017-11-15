@@ -112,6 +112,7 @@ int ile_pgm_char_is_blank(char * where, int tlen, int tvary);
 
 
 char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary);
+int ile_pgm_type_size(char typ, int tlen, int tdim, int tvary);
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig);
 char * ile_pgm_parm_location(int isOut, int by, short sig, int tlen, ile_pgm_call_t * layout);
 void ile_pgm_trim_ebcdic(char *str, int len);
