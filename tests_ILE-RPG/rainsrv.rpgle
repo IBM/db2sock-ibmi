@@ -1,6 +1,7 @@
      H NOMAIN          
      H AlwNull(*UsrCtl)          
 
+
        // ****************************************************          
        // prototypes char
        // ****************************************************
@@ -357,6 +358,33 @@
          cc1 char(8);
          cc2 varchar(8:2);
          cc3 varchar(8:4);
+       end-pr;
+
+       // ****************************************************          
+       // prototypes dou2
+       // ****************************************************
+       dcl-ds douStruct2 qualified;
+         i1 int(3);
+         i2 int(5);
+         i3 int(10);
+         i4 int(20);
+         u1 uns(3);
+         u2 uns(5);
+         u3 uns(10);
+         u4 uns(20);
+         f1 float(4);
+         f2 float(8);
+         p1 packed(8:0);
+         z1 zoned(8:0);
+         b1 bindec(4:0);
+         b2 bindec(9:0);
+         c1 char(8);
+         c2 varchar(8:2);
+         c3 varchar(8:4);
+       end-ds;
+
+       dcl-pr douBlank likeds(douStruct2) dim(999);
+         max int(10);
        end-pr;
 
 
@@ -928,6 +956,39 @@
              du(i).z1 = 0;
              du(i).b1 = 0;
              du(i).b2 = 0;
+           endif;
+         endfor;
+         return du;
+       end-proc;
+
+
+       // ****************************************************          
+       // dou
+       dcl-proc douBlank export;
+       dcl-pi  *N likeds(douStruct2) dim(999);
+         max int(10);
+       end-pi;
+         dcl-ds du likeds(douStruct2) dim(999);
+         dcl-s i int(10) inz(0);
+         for i = 1 to 999;
+           if i <= max;
+             du(i).i1 = i;
+             du(i).i2 = i;
+             du(i).i3 = i;
+             du(i).i4 = i;
+             du(i).u1 = i;
+             du(i).u2 = i;
+             du(i).u3 = i;
+             du(i).u4 = i;
+             du(i).f1 = i;
+             du(i).f2 = i;
+             du(i).p1 = i;
+             du(i).z1 = i;
+             du(i).b1 = i;
+             du(i).b2 = i;
+             du(i).c1 = %char(i);
+             du(i).c2 = %char(i);
+             du(i).c3 = %char(i);
            endif;
          endfor;
          return du;

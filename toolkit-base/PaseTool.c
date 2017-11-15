@@ -829,6 +829,25 @@ ile_pgm_call_t **playout) {
     return SQL_ERROR;
   }
 
+  /* update data node info */
+  node = (tool_key_data_struct_t *) tool->curr;
+  if (!isOut) {
+    node->typ = typ;
+    node->tlen = tlen;
+    node->tscale = tscale;
+    node->tvary = tvary;
+    node->tdim = tdim;
+    node->tccsid = tccsid;
+    node->spill_len = spill_len;
+    node->by = by;
+  }
+  node->offset = where - (char *)layout;
+
+  /* output suspended (no need convert, etc.) */
+  if (isOut && tool->outhold) {
+    return SQL_SUCCESS;
+  }
+
   /* output processing */
   if (isOut) {
     tool_output_pgm_dcl_s_beg(tool, in_name, tdim);
@@ -964,22 +983,12 @@ ile_pgm_call_t **playout) {
     rc = SQL_ERROR;
     break;
   }
-  node = (tool_key_data_struct_t *) tool->curr;
-  if (!isOut) {
-    node->typ = typ;
-    node->tlen = tlen;
-    node->tscale = tscale;
-    node->tvary = tvary;
-    node->tdim = tdim;
-    node->tccsid = tccsid;
-    node->spill_len = spill_len;
-    node->by = by;
-    node->offset = where - (char *)layout;
+
   /* output processing */
-  } else {
-    node->offset = where - (char *)layout;
+  if (isOut) {
     tool_output_pgm_dcl_s_end(tool, tdim);
   }
+
   return rc;
 }
 
@@ -989,8 +998,8 @@ char typ,
 int tlen,
 int tscale,
 int tvary,
-char *where
-) {
+char *where) 
+{
   /* dcl-s type */
   switch (typ) {
   case 'i':
@@ -1045,6 +1054,18 @@ char *where
   }
   return 0;
 }
+
+/* blank value from 'anything' */
+int tool_dcl_s_is_blank(
+char typ,
+int tlen,
+int tscale,
+int tvary,
+char *where) 
+{
+  return ile_pgm_char_is_blank(where, tlen, tvary);
+}
+
 
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
@@ -1306,11 +1327,22 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         node_dob = (tool_key_data_struct_t *) node;
         if (node_dob && node_dob->tlen) {
           where_dob = (char *)tpgm->layout + node_dob->offset;
-          dou = tool_dcl_s_2_int(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
-          if (!dou) {
+          /* RPG ds elements possible default *blanks (even numbers) */  
+          dou = tool_dcl_s_is_blank(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
+          if (dou) {
             pgm_ds_dim_dob_cnt = 1;
           } else {
             pgm_ds_dim_dob_found = 0;
+          }
+          /* if not *blanks, maybe actual number zero */
+          if (!pgm_ds_dim_dob_cnt && node_dob->typ != 'a') {
+            pgm_ds_dim_dob_found = 1;
+            dou = tool_dcl_s_2_int(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
+            if (!dou) {
+              pgm_ds_dim_dob_cnt = 1;
+            } else {
+              pgm_ds_dim_dob_found = 0;
+            }
           }
         }
       }

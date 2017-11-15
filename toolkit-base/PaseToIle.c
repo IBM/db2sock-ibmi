@@ -1040,6 +1040,10 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
     } else {
       len = tlen;
     }
+    /* bad varchar len 0x40404040*/
+    if (len > tlen) {
+       len = tlen;
+    }
     if (len) {
       /* convert ebcdic to utf8 */
       memset(utf8,0,len*4);
@@ -1068,7 +1072,7 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
   }
   return 0;
 }
-int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
+int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid, int *isBlank) {
   int32 value = 0;
   int i = 0, j = 0;
   char * c = NULL;
@@ -1091,6 +1095,13 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
   } else {
     tlen = ilen;
   }
+  /* bad varchar len 0x40404040*/
+  if (tlen > ilen) {
+     tlen = ilen;
+  }
+
+  /* assume all is blank */
+  *isBlank = 1;
 
 #ifndef __IBMC__
   memset(ascii,0,sizeof(ascii));
@@ -1099,56 +1110,70 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
     case 0xF0: /* '0' */
       ebcdic = 1;
       ascii[j++] = '0';
+      *isBlank = 0;
       break;
     case 0xF1: /* '1' */
       ebcdic = 1;
       ascii[j++] = '1';
+      *isBlank = 0;
       break;
     case 0xF2: /* '2' */
       ebcdic = 1;
       ascii[j++] = '2';
+      *isBlank = 0;
       break;
     case 0xF3: /* '3' */
       ebcdic = 1;
       ascii[j++] = '3';
+      *isBlank = 0;
       break;
     case 0xF4: /* '4' */
       ebcdic = 1;
       ascii[j++] = '4';
+      *isBlank = 0;
       break;
     case 0xF5: /* '5' */
       ebcdic = 1;
       ascii[j++] = '5';
+      *isBlank = 0;
       break;
     case 0xF6: /* '6' */
       ebcdic = 1;
       ascii[j++] = '6';
+      *isBlank = 0;
       break;
     case 0xF7: /* '7' */
       ebcdic = 1;
       ascii[j++] = '7';
+      *isBlank = 0;
       break;
     case 0xF8: /* '8' */
       ebcdic = 1;
       ascii[j++] = '8';
+      *isBlank = 0;
       break;
     case 0xF9: /* '9' */
       ebcdic = 1;
       ascii[j++] = '9';
+      *isBlank = 0;
       break;
     case 0x40: /* ' ' */
       ebcdic = 1;
       ascii[j++] = ' ';
+      /* *isBlank = 0; */
       break;
     case 0x4B: /* '.' */
       ebcdic = 1;
       ascii[j++] = '.';
+      *isBlank = 0;
       break;
     case 0x60: /* '-' */
       ebcdic = 1;
       ascii[j++] = '-';
+      *isBlank = 0;
       break;
     default:
+      *isBlank = 0;
       break;
     }
     c++;
@@ -1174,10 +1199,13 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
     case '-':
     case '.':
       str[j++] = *c;
+      *isBlank = 0;
       break;
     case ' ':
+      /* *isBlank = 0; */
       break;
     default:
+      *isBlank = 0;
       if (valid) {
         return -1;
       }
@@ -1190,10 +1218,18 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid) {
   return (int) value;
 }
 int ile_pgm_char_2_int(char * where, int tlen, int tvary) {
-  return ile_pgm_char_2_int_common(where, tlen, tvary, 0);
+  int isBlank = 0;
+  return ile_pgm_char_2_int_common(where, tlen, tvary, 0, &isBlank);
 }
 int ile_pgm_char_2_int_valid(char * where, int tlen, int tvary) {
-  return ile_pgm_char_2_int_common(where, tlen, tvary, 1);
+  int isBlank = 0;
+  return ile_pgm_char_2_int_common(where, tlen, tvary, 1, &isBlank);
+}
+int ile_pgm_char_is_blank(char * where, int tlen, int tvary) {
+  int isBlank = 0;
+  int value = 0;
+  value = ile_pgm_char_2_int_common(where, tlen, tvary, 0, &isBlank);
+  return isBlank;
 }
 
 

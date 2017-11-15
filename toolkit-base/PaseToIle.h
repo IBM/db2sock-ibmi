@@ -108,6 +108,8 @@ int ile_pgm_hole_2_int(char * where, int tlen);
 
 int ile_pgm_char_2_int_valid(char * where, int tlen, int tvary);
 
+int ile_pgm_char_is_blank(char * where, int tlen, int tvary);
+
 
 char ile_pgm_type(char *str, int * tlen, int * tscale, int * tvary);
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig);

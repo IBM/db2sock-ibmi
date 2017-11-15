@@ -34,7 +34,7 @@
                 {"name":"b1", "type":"2b",   "value":"0000"},
                 {"name":"b2", "type":"4b",   "value":"00000000"}
               ]},
-              {"name":"retn","dim":999, "dou":"b2", "by":"return"}
+              {"name":"retn","dim":999, "dob":"b2", "by":"return"}
              ]}
        ]}
 
