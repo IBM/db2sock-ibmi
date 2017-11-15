@@ -113,10 +113,16 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * '+'  search forward for count field name 
                                          * '+-' search forward, backward
                                          * '-+' search backward, forward (default)
+                                         *"dob":"+-" (optional)
+                                         * '-'  check for zero ds "TOOL400_S_NAME"
+                                         * '+'  check for blank ds "TOOL400_S_NAME" 
+                                         * '+-' check blank, then zero
+                                         * '-+' check zero, then blank (default)
+                                         *      Note: 'a' - type only blank (not zero)
                                          */
 #define TOOL400_DS_DOB         1066     /*"dob":"TOOL400_S_NAME" (search 'empty' field)
-                                         * character - *blanks end output array elements
-                                         * numeric   - zero end output array elements
+                                         * character - *blanks end output array element
+                                         * numeric   - zero end output array element
                                          */
 #define TOOL400_KEY_END_DS      460     /*"end"*/
 

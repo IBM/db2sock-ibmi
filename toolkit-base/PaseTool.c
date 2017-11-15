@@ -1061,31 +1061,44 @@ char typ,
 int tlen,
 int tscale,
 int tvary,
-char *where) 
+char *where,
+char * search) 
 {
+  char * search_default = "-+";
   int value = 0;
   int blank = 0;
-  /* dcl-s type */
-  switch (typ) {
-  case 'i':
-  case 'u':
-  case 'f':
-  case 'p':
-  case 's':
-  case 'b':
-  case 'h':
-    /* check numeric zero (first) */
-    value = tool_dcl_s_2_int(typ,tlen,tscale,tvary,where);
-    if (!value) {
-      blank = 1;
-    }
-  case 'a':
-    /* check blank */
-    if (!blank) {
+  char * c = NULL;
+  /* search pattern */
+  if (search) {
+    c = search;
+  } else {
+    c = search_default;
+  }
+  for (;*c && !blank; c++) {
+    switch (*c) {
+    /* check for zero ds "TOOL400_S_NAME" */
+    case '-':
+      switch(typ) {
+      /* exception char (*BLANKS only) */
+      case 'a':
+        blank = ile_pgm_char_is_blank(where, tlen, tvary);
+        break;
+      /* all others numeric (zero) */
+      default:
+        value = tool_dcl_s_2_int(typ,tlen,tscale,tvary,where);
+        if (!value) {
+          blank = 1;
+        }
+        break;
+      }
+      break;
+    /* check for blank ds "TOOL400_S_NAME" */
+    case '+':
       blank = ile_pgm_char_is_blank(where, tlen, tvary);
+      break;
+    default:
+      break;
     }
-  default:
-    break;
   }
   return blank;
 }
@@ -1352,7 +1365,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         if (node_dob && node_dob->tlen) {
           where_dob = (char *)tpgm->layout + node_dob->offset;
           /* RPG ds elements possible default *blanks (even numbers) */  
-          dou = tool_dcl_s_is_blank(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
+          dou = tool_dcl_s_is_blank(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob, pgm_ds_dim_dou_search);
           if (dou) {
             pgm_ds_dim_dob_cnt = 1;
           } else {
