@@ -1080,7 +1080,7 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid, int 
   char ascii[128];
   char str[128];
   int ebcdic = 0;
-  char * wherev = where;
+  char * wherev = NULL;
   int tlen = ilen;
 
   c = where;
@@ -1099,6 +1099,8 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid, int 
   if (tlen > ilen) {
      tlen = ilen;
   }
+  /* save where now */
+  wherev = c;
 
   /* assume all is blank */
   *isBlank = 1;
@@ -1180,6 +1182,8 @@ int ile_pgm_char_2_int_common(char * where, int ilen, int tvary, int valid, int 
   }
   if (ebcdic) {
     c = ascii;
+  } else {
+    c = wherev;
   }
 #endif
 

@@ -265,6 +265,7 @@ typedef struct tool_struct {
   int outmax;
   int outlen;
   int outhold;
+  int outholdord;
   int hdbc;
   SQLINTEGER sqlCode;
   SQLCHAR sqlState[SQL_SQLSTATE_SIZE + 1];

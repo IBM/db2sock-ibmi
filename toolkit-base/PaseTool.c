@@ -1063,7 +1063,31 @@ int tscale,
 int tvary,
 char *where) 
 {
-  return ile_pgm_char_is_blank(where, tlen, tvary);
+  int value = 0;
+  int blank = 0;
+  /* dcl-s type */
+  switch (typ) {
+  case 'i':
+  case 'u':
+  case 'f':
+  case 'p':
+  case 's':
+  case 'b':
+  case 'h':
+    /* check numeric zero (first) */
+    value = tool_dcl_s_2_int(typ,tlen,tscale,tvary,where);
+    if (!value) {
+      blank = 1;
+    }
+  case 'a':
+    /* check blank */
+    if (!blank) {
+      blank = ile_pgm_char_is_blank(where, tlen, tvary);
+    }
+  default:
+    break;
+  }
+  return blank;
 }
 
 
@@ -1255,7 +1279,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   int ds_start_offset = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
-  tool_node_t * pgm_ds_idx = node;
+  tool_node_t * pgm_ds_idx_node = node;
   int j = 0;
   int ds_spill_len = 0;
   char * where = NULL;
@@ -1334,16 +1358,6 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
           } else {
             pgm_ds_dim_dob_found = 0;
           }
-          /* if not *blanks, maybe actual number zero */
-          if (!pgm_ds_dim_dob_cnt && node_dob->typ != 'a') {
-            pgm_ds_dim_dob_found = 1;
-            dou = tool_dcl_s_2_int(node_dob->typ, node_dob->tlen, node_dob->tscale, node_dob->tvary, where_dob);
-            if (!dou) {
-              pgm_ds_dim_dob_cnt = 1;
-            } else {
-              pgm_ds_dim_dob_found = 0;
-            }
-          }
         }
       }
       break;
@@ -1379,7 +1393,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         }
         go = 0;
       } else {
-        /* dim replay ds (from pgm_ds_idx)
+        /* dim replay ds (from pgm_ds_idx_node)
          * Unfortunately, output can not just copy image like input (init above).
          * Instead we must 're-play' the entire parse for each element. The
          * reason is obvious (probably), but to complete the thought, 
@@ -1392,18 +1406,27 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         pgm_ds_dim_cnt_up++;
         if (pgm_ds_dim_cnt > 0) {
           if (pgm_ds_dim_dou_cnt > 0 && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
-             tool->outhold = 1;
+             if (!tool->outholdord) {
+               tool->outholdord = pgm_ds_idx_node->ord;
+               tool->outhold = 1;
+             }
           }
           if (pgm_ds_dim_dob_cnt > 0) {
-             tool->outhold = 1;
+             if (!tool->outholdord) {
+               tool->outholdord = pgm_ds_idx_node->ord;
+               tool->outhold = 1;
+             }
           }
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
             tool_output_pgm_dcl_ds_rec_beg(tool);
           }
-          node = pgm_ds_idx;
+          node = pgm_ds_idx_node;
         } else {
-          tool->outhold = 0;
+          if (tool->outholdord == pgm_ds_idx_node->ord) {
+            tool->outholdord = 0;
+            tool->outhold = 0;
+          }
           if (pgm_ds_dim_max) {
             tool_output_pgm_dcl_ds_rec_end(tool);
           }
@@ -1461,6 +1484,9 @@ SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * 
       break;
     case TOOL400_KEY_DCL_DS:
       isDs = 0;
+      if (isOut) {
+        tool->outholdord = 0;
+      }
       sqlrc = tool_key_pgm_ds_run(tool, tpgm, &isDs, isOut, &node);
       break;
     case TOOL400_KEY_END_PGM:
