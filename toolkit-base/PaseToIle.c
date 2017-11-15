@@ -1668,27 +1668,24 @@ int ile_pgm_type_size(char typ, int tlen, int tdim, int tvary) {
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig) {
   int by = ILE_PGM_BY_REF_IN;
   /* default length input */
+  *spill_len = ile_pgm_type_size(typ, tlen, tdim, tvary);
+  /* map PASE ILECALL type */
   switch (typ) {
   case 'i':
     switch (tlen) {
     case 3:
-      *spill_len = sizeof(int8) * tdim;
       *pase_sig = ARG_INT8;
       break;
     case 5:
-      *spill_len = sizeof(int16) * tdim;
       *pase_sig = ARG_INT16;
       break;
     case 10:
-      *spill_len = sizeof(int32) * tdim;
       *pase_sig = ARG_INT32;
       break;
     case 20:
-      *spill_len = sizeof(int64) * tdim;
       *pase_sig = ARG_INT64;
       break;
     default:
-      *spill_len = sizeof(int32) * tdim;
       *pase_sig = ARG_INT32;
       break;
     }
@@ -1696,23 +1693,18 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
   case 'u':
     switch (tlen) {
     case 3:
-      *spill_len = sizeof(uint8) * tdim;
       *pase_sig = ARG_UINT8;
       break;
     case 5:
-      *spill_len = sizeof(uint16) * tdim;
       *pase_sig = ARG_UINT16;
       break;
     case 10:
-      *spill_len = sizeof(uint32) * tdim;
       *pase_sig = ARG_UINT32;
       break;
     case 20:
-      *spill_len = sizeof(uint64) * tdim;
       *pase_sig = ARG_UINT64;
       break;
     default:
-      *spill_len = sizeof(uint32) * tdim;
       *pase_sig = ARG_UINT32;
       break;
     }
@@ -1720,46 +1712,22 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
   case 'f':
     switch (tlen) {
     case 4:
-      *spill_len = sizeof(float) * tdim;
       *pase_sig = ARG_FLOAT32;
       break;
     case 8:
-      *spill_len = sizeof(double) * tdim;
       *pase_sig = ARG_FLOAT64;
       break;
     default:
-      *spill_len = sizeof(double) * tdim;
       *pase_sig = ARG_FLOAT64;
       break;
     }
     break;
   case 'p':
-    *spill_len = (tlen/2+1) * tdim;
-    break;
   case 's':
-    *spill_len = tlen * tdim;
-    break;
   case 'a':
-    switch(tvary){
-    case 2:
-      *spill_len = (tlen+sizeof(uint16)) * tdim;
-      break;
-    case 4:
-      *spill_len = (tlen+sizeof(uint32)) * tdim;
-      break;
-    default:
-      *spill_len = tlen * tdim;
-      break;
-    }
-    break;
   case 'b':
-    *spill_len = tlen * tdim;
-    break;
   case 'h':
-    *spill_len = tlen * tdim;
-    break;
   default:
-    *spill_len = tlen * tdim;
     break;
   }
   /* pass by ref/val or isDs (val) */
@@ -1796,7 +1764,7 @@ int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int
   case ILE_PGM_BY_VALUE:
     if (*pase_sig == 0) {
       if (*spill_len > 32767) {
-        *pase_sig = 32767; /* aggregate */
+        *pase_sig = 32767; /* aggregate (pase limit - fake to work, not real) */
       } else {
         *pase_sig = *spill_len; /* aggregate */
       }
