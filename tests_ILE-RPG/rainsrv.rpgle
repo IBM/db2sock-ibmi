@@ -388,6 +388,21 @@
        end-pr;
 
        // ****************************************************          
+       // prototypes setlen error
+       // ****************************************************
+       dcl-ds errStruct qualified;
+         bytesprov int(10);
+         bytesavail int(10);
+         expid char(7);
+         rsv char(1);
+         msgdata char(100);
+       end-ds;
+
+       dcl-pr doError;
+         myErr likeds(errStruct);
+       end-pr;
+
+       // ****************************************************          
        // prototypes setlen
        // ****************************************************
        dcl-pr doSetLen likeds(douStruct2);
@@ -1001,9 +1016,19 @@
          return du;
        end-proc;
 
+       // ****************************************************          
+       // do setlen error
+       dcl-proc doError export;
+       dcl-pi  *N;
+         myErr likeds(errStruct);
+       end-pi;
+         myErr.bytesavail = myErr.bytesprov;
+         myErr.expid = 'C123456';
+         myErr.msgdata = 'i made a boo boo';
+       end-proc;
 
        // ****************************************************          
-       // dou
+       // do setlen
        dcl-proc doSetLen export;
        dcl-pi  *N likeds(douStruct2);
          myDS likeds(douStruct2);

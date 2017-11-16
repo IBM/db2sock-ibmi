@@ -1,0 +1,11 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"DOERROR"},
+        {"ds":[{"s":[
+                {"name":"bytesprov", "type":"10i0",  "value":0, "setlen":"errorcode"},
+                {"name":"bytesavail", "type":"10i0", "value":0},
+                {"name":"expid", "type":"7a", "value":""},
+                {"name":"rsv", "type":"1a", "value":""},
+                {"name":"msgdata", "type":"100a", "value":""}
+              ]},{"name":"errorcode"}
+        ]}
+       ]}
+
