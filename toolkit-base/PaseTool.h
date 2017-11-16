@@ -132,7 +132,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_S_TYPE         1073     /*"type":"5av2" (see below)*/
 #define TOOL400_S_BY           1074     /*"by":"in|out|both|value|const|return"*/
 #define TOOL400_S_VALUE        1075     /*"value":"42" */
-#define TOOL400_S_SETLEN       1076     /*"setlen":"TOOL400_KEY_DCL_DS" (search name ds, calc length, setlen) */
+#define TOOL400_S_SETLEN       1076     /*"setlen":"TOOL400_DS_NAME" (search name ds, calc length, setlen) */
 #define TOOL400_KEY_END_S       470     /*"end"*/
                                         /* -- types --
                                          * "5a"    char(5)         char a[5]
