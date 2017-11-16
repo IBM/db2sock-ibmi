@@ -108,12 +108,12 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_DS_DOU         1064     /*"dou":"TOOL400_S_NAME" (search count field name)
                                          *"dou":4 (literal)
                                          */
-#define TOOL400_DS_DOS         1065     /*"dos":"+-" (optional)
+#define TOOL400_DS_DOS         1065     /*"dos":"+-" (optional for dou)
                                          * '-'  search backward for count field name
                                          * '+'  search forward for count field name 
                                          * '+-' search forward, backward
                                          * '-+' search backward, forward (default)
-                                         *"dob":"+-" (optional)
+                                         *"dob":"+-" (optional for dob)
                                          * '-'  check for zero ds "TOOL400_S_NAME"
                                          * '+'  check for blank ds "TOOL400_S_NAME" 
                                          * '+-' check blank, then zero

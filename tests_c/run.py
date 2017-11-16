@@ -2,7 +2,7 @@
 import glob
 import os
 # *.json and *.exp
-test_jsons = glob.glob("*.json")
+test_jsons = glob.glob("../tests_json/*.json")
 test_jsons.sort()
 tests_json = []
 for name in test_jsons:
