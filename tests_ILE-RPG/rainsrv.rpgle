@@ -387,6 +387,13 @@
          max int(10);
        end-pr;
 
+       // ****************************************************          
+       // prototypes setlen
+       // ****************************************************
+       dcl-pr doSetLen likeds(douStruct2);
+         myDS likeds(douStruct2);
+       end-pr;
+
 
 
        // ****************************************************          
@@ -994,5 +1001,32 @@
          return du;
        end-proc;
 
+
+       // ****************************************************          
+       // dou
+       dcl-proc doSetLen export;
+       dcl-pi  *N likeds(douStruct2);
+         myDS likeds(douStruct2);
+       end-pi;
+         dcl-ds du likeds(douStruct2);
+           du.i1 = myDs.i1;
+           du.i2 = myDs.i2;
+           du.i3 = myDs.i3;
+           du.i4 = myDs.i4;
+           du.u1 = myDs.u1;
+           du.u2 = myDs.u2;
+           du.u3 = myDs.u3;
+           du.u4 = myDs.u4;
+           du.f1 = myDs.f1;
+           du.f2 = myDs.f2;
+           du.p1 = myDs.p1;
+           du.z1 = myDs.z1;
+           du.b1 = myDs.b1;
+           du.b2 = myDs.b2;
+           du.c1 = myDs.c1;
+           du.c2 = myDs.c2;
+           du.c3 = myDs.c3;
+         return du;
+       end-proc;
 
 

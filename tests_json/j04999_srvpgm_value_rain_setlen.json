@@ -1,0 +1,44 @@
+{"pgm":[{"name":"RAINSRV", "lib":"DB2JSON", "func":"DOSETLEN"},
+        {"ds":[{"s":[
+                {"name":"i1", "type":"3i0",  "value":0, "setlen":"myds"},
+                {"name":"i2", "type":"5i0",  "value":0, "setlen":"myds"},
+                {"name":"i3", "type":"10i0", "value":0, "setlen":"myds"},
+                {"name":"i4", "type":"20i0", "value":0, "setlen":"myds"},
+                {"name":"u1", "type":"3u0",  "value":0, "setlen":"myds"},
+                {"name":"u2", "type":"5u0",  "value":0, "setlen":"myds"},
+                {"name":"u3", "type":"10u0", "value":0, "setlen":"myds"},
+                {"name":"u4", "type":"20u0", "value":0, "setlen":"myds"},
+                {"name":"f1", "type":"4f0",  "value":0.0, "setlen":"myds"},
+                {"name":"f2", "type":"8f0",  "value":0.0, "setlen":"myds"},
+                {"name":"p1", "type":"8p0",  "value":0.0, "setlen":"myds"},
+                {"name":"z1", "type":"8s0",  "value":0.0, "setlen":"myds"},
+                {"name":"b1", "type":"2b",   "value":"0000", "setlen":"myds"},
+                {"name":"b2", "type":"4b",   "value":"00000000", "setlen":"myds"},
+                {"name":"c1", "type":"8a",   "value":"", "setlen":"myds"},
+                {"name":"c2", "type":"8av2", "value":"", "setlen":"myds"},
+                {"name":"c3", "type":"8av4", "value":"", "setlen":"myds"}
+              ]},{"name":"myds"}
+        ]},
+        {"ds":[{"s":[
+                {"name":"oi1", "type":"3i0",  "value":0},
+                {"name":"oi2", "type":"5i0",  "value":0},
+                {"name":"oi3", "type":"10i0", "value":0},
+                {"name":"oi4", "type":"20i0", "value":0},
+                {"name":"ou1", "type":"3u0",  "value":0},
+                {"name":"ou2", "type":"5u0",  "value":0},
+                {"name":"ou3", "type":"10u0", "value":0},
+                {"name":"ou4", "type":"20u0", "value":0},
+                {"name":"of1", "type":"4f0",  "value":0.0},
+                {"name":"of2", "type":"8f0",  "value":0.0},
+                {"name":"op1", "type":"8p0",  "value":0.0},
+                {"name":"oz1", "type":"8s0",  "value":0.0},
+                {"name":"ob1", "type":"2b",   "value":"0000"},
+                {"name":"ob2", "type":"4b",   "value":"00000000"},
+                {"name":"oc1", "type":"8a",   "value":""},
+                {"name":"oc2", "type":"8av2", "value":""},
+                {"name":"oc3", "type":"8av4", "value":""}
+              ]},
+              {"name":"retn", "by":"return"}
+             ]}
+       ]}
+

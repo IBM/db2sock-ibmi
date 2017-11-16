@@ -132,6 +132,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_S_TYPE         1073     /*"type":"5av2" (see below)*/
 #define TOOL400_S_BY           1074     /*"by":"in|out|both|value|const|return"*/
 #define TOOL400_S_VALUE        1075     /*"value":"42" */
+#define TOOL400_S_SETLEN       1076     /*"setlen":"TOOL400_KEY_DCL_DS" */
 #define TOOL400_KEY_END_S       470     /*"end"*/
                                         /* -- types --
                                          * "5a"    char(5)         char a[5]
@@ -346,8 +347,15 @@ typedef struct tool_key_pgm_struct {
   char * pgm_ile_func;
   char * pgm_ile_debug;
   SQLINTEGER pgm_len;
+  int pgm_any_setlen;
   SQLCHAR pgm_buff[TOOL400_MAX_CMD_BUFF];
 } tool_key_pgm_struct_t;
+
+typedef struct tool_key_ds_struct {
+  tool_node_t node;
+  int offset;
+  char * getlen;
+} tool_key_ds_struct_t;
 
 typedef struct tool_key_data_struct {
   tool_node_t node;
@@ -360,6 +368,8 @@ typedef struct tool_key_data_struct {
   int spill_len;
   int by;
   int offset;
+  char * setlen;
+  int setlenval;
 } tool_key_data_struct_t;
 
 /*

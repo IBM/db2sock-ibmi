@@ -34,9 +34,9 @@ int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC,TOOL40
 /* {"ds":{"name":"MYDS","dim":1,"by":"in|out|both|value|const|return","dou":"name","dos":"-+","dob":"name"}} */
 char * json_ds_attr [] = {"name","dim","by","dou","dos","dob", NULL};
 int json_ds_tool [] = {TOOL400_DS_NAME,TOOL400_DS_DIM,TOOL400_DS_BY,TOOL400_DS_DOU,TOOL400_DS_DOS,TOOL400_DS_DOB};
-/* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|val|const|return","value":"MYVALUE"}} */
-char * json_s_attr [] = {"name","dim","type","value","by", NULL};
-int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY};
+/* {"s":{"name":"MYDATA","dim":1,"type":"5av2","by":"in|out|both|val|const|return","value":"MYVALUE","setlen":"name"}} */
+char * json_s_attr [] = {"name","dim","type","value","by", "setlen", NULL};
+int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALUE,TOOL400_S_BY,TOOL400_S_SETLEN};
 /* {"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
         {"parm":[{"value":"Jones"},{"value":"Vine"}]},
         {"fetch":[{"rec":"all"}]}

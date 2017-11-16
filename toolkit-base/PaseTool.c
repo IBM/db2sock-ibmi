@@ -392,8 +392,10 @@ tool_node_t * tool_node_add(tool_struct_t * tool, int key, char *val, int ord) {
     break;
 
   case TOOL400_KEY_DCL_DS:
+    size = sizeof(tool_key_ds_struct_t);
     break;
   case TOOL400_KEY_END_DS:
+    size = sizeof(tool_key_ds_struct_t);
     break;
 
   case TOOL400_KEY_DCL_S:
@@ -778,6 +780,7 @@ char * in_value,
 char * in_dim,
 char * in_by,
 char * in_ccsid,
+char * in_setlen,
 int isDs,
 ile_pgm_call_t **playout) {
 
@@ -840,6 +843,7 @@ ile_pgm_call_t **playout) {
     node->tccsid = tccsid;
     node->spill_len = spill_len;
     node->by = by;
+    node->setlen = in_setlen;
   }
   node->offset = where - (char *)layout;
 
@@ -1105,7 +1109,129 @@ char * search)
   return blank;
 }
 
+int tool_dcl_int_2_set_len(
+char typ,
+int tlen,
+int tscale,
+int tvary,
+int tccsid,
+int setlenval,
+char *where) 
+{
+  int rc = 0;
+  char str[128];
+  int tdim = 1;
+  /* convert to string (least hassle) */
+  sprintf(str,"%d",setlenval);
+  /* dcl-s type */
+  switch (typ) {
+  case 'i':
+    switch (tlen) {
+    case 3:
+      rc = ile_pgm_str_2_int8(where, str, tdim);
+      break;
+    case 5:
+      rc = ile_pgm_str_2_int16(where, str, tdim);
+      break;
+    case 10:
+      rc = ile_pgm_str_2_int32(where, str, tdim);
+      break;
+    case 20:
+      rc = ile_pgm_str_2_int64(where, str, tdim);
+      break;
+    default:
+      rc = SQL_ERROR;
+      break;
+    }
+    break;
+  case 'u':
+    switch (tlen) {
+    case 3:
+      rc = ile_pgm_str_2_uint8(where, str, tdim);
+      break;
+    case 5:
+      rc = ile_pgm_str_2_uint16(where, str, tdim);
+      break;
+    case 10:
+      rc = ile_pgm_str_2_uint32(where, str, tdim);
+      break;
+    case 20:
+      rc = ile_pgm_str_2_uint64(where, str, tdim);
+      break;
+    default:
+      rc = SQL_ERROR;
+      break;
+    }
+    break;
+  case 'f':
+    switch (tlen) {
+    case 4:
+      rc = ile_pgm_str_2_float(where, str, tdim);
+      break;
+    case 8:
+      rc = ile_pgm_str_2_double(where, str, tdim);
+      break;
+    default:
+      rc = SQL_ERROR;
+      break;
+    }
+    break;
+  case 'p':
+    rc = ile_pgm_str_2_packed(where, str, tdim, tlen, tscale);
+    break;
+  case 's':
+    rc = ile_pgm_str_2_zoned(where, str, tdim, tlen, tscale);
+    break;
+  case 'a':
+    rc = ile_pgm_str_2_char(where, str, tdim, tlen, tvary, tccsid);
+    break;
+  case 'b':
+    rc = ile_pgm_str_2_bin(where, str, tdim, tlen, tvary);
+    break;
+  case 'h':
+    rc = ile_pgm_str_2_hole(where, tdim, tlen);
+    break;
+  default:
+    rc = SQL_ERROR;
+    break;
+  }
+  return rc;
+}
 
+void tool_dcl_s_set_len(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm)
+{
+  int rc = 0;
+  char *where = NULL;
+  tool_node_t *node = (tool_node_t *)tool->curr;
+  tool_node_t *node2 = NULL;
+  tool_node_t *node3 = NULL;
+  tool_key_data_struct_t * node_s = NULL;
+  tool_key_ds_struct_t *node_ds = NULL;
+  tool_key_ds_struct_t *node_ds_end = NULL;
+  /* loop all */
+  for (node = tool->first; node; node = node->next) {
+    if (node->key == TOOL400_KEY_DCL_S) {
+      node_s = (tool_key_data_struct_t *) node;
+      if (node_s->setlen) {
+        for (node2 = tool->first; node2 && !node_s->setlenval; node2 = node2->next) {
+          if (node2->key == TOOL400_KEY_DCL_DS) {
+            node_ds = (tool_key_ds_struct_t *) node2;
+            if (node_ds->getlen && !strcmp(node_s->setlen, node_ds->getlen)) {
+              for (node3 = node2; node3 && !node_s->setlenval; node3 = node3->next) {
+                if (node3->key == TOOL400_KEY_END_DS && node2->ord == node3->ord) {
+                  node_ds_end = (tool_key_ds_struct_t *) node3;
+                  node_s->setlenval = node_ds_end->offset - node_ds->offset;
+                  where = (char *)tpgm->layout + node_s->offset;
+                  rc = tool_dcl_int_2_set_len(node_s->typ,node_s->tlen,node_s->tscale,node_s->tvary,node_s->tccsid,node_s->setlenval,where);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 
 /* "dcl-ds":["name",dimension, "in|out|both|value|const|return"] */
 SQLRETURN tool_dcl_ds(
@@ -1141,6 +1267,7 @@ ile_pgm_call_t **playout) {
   int dou = 0;
   char * where_dou = NULL;
   tool_key_data_struct_t * node = NULL;
+  tool_key_ds_struct_t *node_ds = (tool_key_ds_struct_t *)tool->curr;
 
   /* parse dimension */
   rc = ile_pgm_str_2_int32((char *)&tdim, in_dim, 1);
@@ -1175,6 +1302,9 @@ ile_pgm_call_t **playout) {
       }
     }
   }
+
+  /* save offset */
+  node_ds->offset = where - (char *)layout;
 
   /* parse data */
   *ds_dim = tdim;
@@ -1230,6 +1360,7 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   char * pgm_s_dim = NULL;
   char * pgm_s_by = NULL;
   char * pgm_s_ccsid = NULL;
+  char * pgm_s_len = NULL;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
@@ -1259,12 +1390,16 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
     case TOOL400_S_BY:
       pgm_s_by = val;
       break;
+    case TOOL400_S_SETLEN:
+      pgm_s_len = val;
+      tpgm->pgm_any_setlen = 1;
+      break;
     default:
       break;
     }
   }
   /* write or read data */
-  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, *isDs, (ile_pgm_call_t **)&tpgm->layout);
+  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, pgm_s_len, *isDs, (ile_pgm_call_t **)&tpgm->layout);
   return sqlrc;
 }
 
@@ -1295,6 +1430,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_node_t * pgm_ds_idx_node = node;
+  tool_key_ds_struct_t *node_ds = NULL;
   int pgm_ds_idx_outareaLen = 0;
   int j = 0;
   int ds_spill_len = 0;
@@ -1304,6 +1440,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   char * where_dob = NULL;
   /* current node (output) */
   tool->curr = node;
+  node_ds = (tool_key_ds_struct_t *) node;
   /* pgm ds attributes (parser order 1st) */
   for (i=0; i < TOOL400_ATTR_MAX && node->akey[i]; i++) {
     key = node->akey[i];
@@ -1313,6 +1450,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     switch (key) {
     case TOOL400_DS_NAME:
       pgm_ds_name = val;
+      node_ds->getlen = val;
       break;
     case TOOL400_DS_DIM:
       pgm_ds_dim = val;
@@ -1384,6 +1522,11 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
       sqlrc = tool_key_pgm_ds_run(tool, tpgm, isDs, isOut, &node);
       break;
     case TOOL400_KEY_END_DS:
+      /* save offset */
+      node_ds = (tool_key_ds_struct_t *) node;
+      where = ile_pgm_parm_location(0, ILE_PGM_BY_IN_DS, 0, 0, (ile_pgm_call_t *)tpgm->layout);
+      node_ds->offset = where - (char *)tpgm->layout;
+      /* in or out processing */
       if (!isOut) {
         /* multiple dim DS */
         if (pgm_ds_dim_cnt > 1) {
@@ -1523,6 +1666,10 @@ SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * 
     if (sqlrc == SQL_ERROR) {
       tool_dump_end(sqlrc, "pgm_params_error", i, lvl, key, val);
     }
+  }
+  /* setlen<>getlen before pgm call */
+  if (!isOut && tpgm->pgm_any_setlen) {
+    tool_dcl_s_set_len(tool, tpgm);
   }
   return sqlrc;
 }
