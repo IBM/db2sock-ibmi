@@ -57,8 +57,10 @@ db2sock/ILE-PROC             - db2proc.srvpgm - ILE toolkit service interface iC
 db2sock/ILE-PROC-USER        - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
 db2sock/ILE-TOOLKIT-JSON     - db2procj, db2procjr, db2procjh - ILE stored procedures to call toolkit (remote) 
 db2sock/toolkit-base         - libtkit400.a - toolkit base driver source (optional)
+                             - tkit400.srvpgm - ILE toolkit base driver source (remote)
 db2sock/toolkit-parser-json  - libjson400.a - toolkit json parser driver source (optional)
-db2sock/tests_ILE-RPG        - RPG tests for tests_json
+                             - json400.srvpgm - ILE toolkit base driver source (remote)
+db2sock/tests_ILE-RPG        - RPG tests for tests_json (optional)
 db2sock/tests_json           - json tests (optional)
 db2sock/tests_c              - c tests (optional)
 db2sock/tests_php            - php tests (optional)
@@ -101,14 +103,31 @@ Note:
 install yips download pre-compile
 ===
 call qp2term
+== replace symbolic link with new libdb400.a (db2sock) ===
+> ls -l /QOpenSys/usr/lib/libdb400.a
+lrwxrwxrwx /QOpenSys/usr/lib/libdb400.a -> ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a
+> cp /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a-save
+> rm /QOpenSys/usr/lib/libdb400.a
 > cp libdb400.a /QOpenSys/usr/lib/.
+> cp /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a-save /QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a
+== additional toolkit modules ===
 > cp libtkit400.a /QOpenSys/usr/lib/. (optional toolkit)
 > cp libjson400.a /QOpenSys/usr/lib/. (optional json parser toolkit)
 > cp db2jsonfcgi /QOpenSys/usr/lib/. (optional toolkit fastcgi 32 bit)
 > cp db2jsonfcgi_64 /QOpenSys/usr/lib/. (optional toolkit fastcgi 64 bit)
+== ILE modules ==
 qcmd (proc for toolkit + RPG tests)
 RSTLIB SAVLIB(DB2JSON) DEV(*SAVF) SAVF(QGPL/DB2JSON)
+
+===
+reset original libdb400.a (when done new db2sock version ... or never ...)
+===
+> cd /QOpenSys/usr/lib
+> ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
 ```
+
+#RUN remote via json
+See tests_php json calls to db2procj, db2procjr, db2procjh.
 
 #Run ILE CGI (optional)
 REST json to libdb400.a [Source -> ILE-CGI/README.md](https://bitbucket.org/litmis/db2sock/src)
