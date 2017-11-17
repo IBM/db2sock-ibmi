@@ -41,12 +41,12 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 - (**available**) Service driver - provide good PASE side TRACE capabilities for service 
 - (**available**) Traditional APIs - provide all current libdb400.a CLI APIs 
 - (**available**) Wide APIs (UTF16) - provide all current missing libdb400.a 'wide' CLI APIs 
-- (**available**) Async APIs - high performing async CLI APIs for all new PASE languages, 'callback' (nodejs), and, poll/reap (php).
-- (**few**) Aggregate APIs - SQL400(API) prefix special APIs aggregate common functions/options 
-- (**few**) JSON APIs - enable json only calls REST DB2 called by any language on/off IBM i (db2json - ILE CGI for Apache).
-- (**none**) Socket APIs - enable socket based for ideas like 'private' connections
-- (**none**) Toolkit APIs - replace xmlservice with consistent 'everything database' matching IBM DB2 current directions with service APIs
-
+- (**available**) Async APIs - high performing async CLI APIs for all new PASE languages.
+- (**few**) Aggregate APIs - SQL400(API) aggregate common functions/options (db2 extension writers) 
+- (**none**) Socket APIs - enable socket based for ideas like 'private' connections (daemons like MySql) 
+- (**partial**) Toolkit APIs - replace xmlservice (see JSON APIs, XML APIs, etc.)
+- (**partial**) Toolkit JSON APIs - enable json only calls by any language on/off IBM i.
+- (**none**) Toolkit XML APIs - enable json only calls by any language on/off IBM i.
 
 # README.md (sub-directories).
 ```
