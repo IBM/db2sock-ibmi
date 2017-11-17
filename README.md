@@ -59,7 +59,7 @@ db2sock/ILE-TOOLKIT-JSON     - db2procj, db2procjr, db2procjh - ILE stored proce
 db2sock/toolkit-base         - libtkit400.a - toolkit base driver source (optional)
                              - tkit400.srvpgm - ILE toolkit base driver source (remote)
 db2sock/toolkit-parser-json  - libjson400.a - toolkit json parser driver source (optional)
-                             - json400.srvpgm - ILE toolkit base driver source (remote)
+                             - json400.srvpgm - ILE toolkit json parser driver source (remote)
 db2sock/tests_ILE-RPG        - RPG tests for tests_json (optional)
 db2sock/tests_json           - json tests (optional)
 db2sock/tests_c              - c tests (optional)
