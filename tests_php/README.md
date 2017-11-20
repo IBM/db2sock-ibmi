@@ -6,6 +6,7 @@ php tests.
 
 # run
 ```
+> export PHP_URL=http://ut28p63/db2/db2json.pgm
 > export PHP_DB=MYIBMI (*LOCAL)
 > export PHP_UID=MYUID
 > export PHP_PWD=MYPWD

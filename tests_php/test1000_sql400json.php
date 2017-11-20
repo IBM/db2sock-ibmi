@@ -4,7 +4,7 @@ $user       = getenv("PHP_UID");
 $password   = getenv("PHP_PWD");
 
 function help() {
-  die("Syntax: php test1000_sql400json.php ../tests_c/j0001_pgm_hello");
+  die("Syntax: php test1000_sql400json.php ../tests_json/j0001_pgm_hello");
 }
 
 if (!isset($argv) || !isset($argv[1])) {

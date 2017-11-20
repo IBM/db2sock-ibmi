@@ -44,20 +44,12 @@ go: mkinc removeo $(CGI400PGM)
 	$(CCC) --lib $(ILELIB) -g --src $<
 ### -- CGI400PGM (ILE c)
 $(CGI400PGM): $(CGI400OBJS)
-	$(CCPGM) --pgm $(CGI400PGM) --lib $(ILELIB) --mod $(CGI400OBJS) --option "BNDSRVPGM(QHTTPSVR/QZSRCORE)"
-
+	$(CCPGM) --pgm $(CGI400PGM) --lib $(ILELIB) --mod $(CGI400OBJS) --option "BNDSRVPGM($(ILELIB)/JSON400 $(ILELIB)/TKIT400)"
 
 mkinc:
 	@echo "#ifndef _ICONF_H" > iconf.h
 	@echo "#define _ICONF_H" >> iconf.h
-	@echo "#define DB2_MAX_JSON_OUT 512000" >> iconf.h
-	@echo "#define DB2_ARG0_PGM \"/QOpenSys/usr/lib/start32\"" >> iconf.h
-	@echo "#define DB2_ENV_PATH \"PATH=$(INSTALLBIN):/usr/bin\"" >> iconf.h
-	@echo "#define DB2_ENV_LIBPATH \"LIBPATH=$(CHROOT)$(INSTALLDIR):$(INSTALLDIR):/usr/lib\"" >> iconf.h
-	@echo "#define DB2_ENV_ATTACH \"PASE_THREAD_ATTACH=Y\"" >> iconf.h
-	@echo "#define DB2_ENV_TRACE \"TRACE=off\"" >> iconf.h
-	@echo "#define DB2_FILE_LIBDB400 \"libdb400.a(shr.o)\"" >> iconf.h
-	@echo "#define DB2_SYM_SQL400JSON \"SQL400Json\"" >> iconf.h
+	@echo "#define ILELIB \"$(ILELIB)\"" >> iconf.h
 	@echo "#endif /* _ICONF_HH */" >> iconf.h
 clean:
 	rm -f $(CGI400PGM)

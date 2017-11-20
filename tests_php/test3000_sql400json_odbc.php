@@ -8,7 +8,7 @@ if (!extension_loaded('odbc')) {
 }
 
 function help() {
-  die("Syntax: php test3000_sql400json_odbc.php ../tests_c/j0001_pgm_hello");
+  die("Syntax: php test3000_sql400json_odbc.php ../tests_json/j0001_pgm_hello");
 }
 
 if (!isset($argv) || !isset($argv[1])) {

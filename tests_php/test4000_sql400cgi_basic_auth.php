@@ -1,10 +1,10 @@
 <?php
-$database   = getenv("PHP_DB");
-$user       = getenv("PHP_UID");
-$password   = getenv("PHP_PWD");
+$url        = getenv("PHP_URL"); // export PHP_URL=http://ut28p63/db2/db2json.pgm
+$user       = getenv("PHP_UID"); // export PHP_UID=MYID
+$password   = getenv("PHP_PWD"); // export PHP_MYPWD
 
 function help() {
-  die("Syntax: php test2000_sql400json_set.php ../tests_json/j0001_pgm_hello");
+  die("Syntax: php test4000_sql400cgi_basic_auth.php ../tests_json/j0001_pgm_hello");
 }
 
 if (!isset($argv) || !isset($argv[1])) {
@@ -24,17 +24,17 @@ $clob = $clobjson;
 print("Input:\n");
 var_dump($clob);
 
-$conn = db2_connect($database,$user,$password);
-if (!$conn) die("fail connect: $database,$user\n");
-$stmt = db2_prepare($conn, "call DB2JSON.DB2PROCJR(?)");
-if (!$stmt) die("Bad prepare: ".db2_stmt_errormsg());
-$ret=db2_execute($stmt, array($clob));
-if (!$ret) die("Bad execute: ".db2_stmt_errormsg());
-$clob = "";
-while ($row = db2_fetch_array($stmt)){
-  $clob .= $row[0];
-}
-$clob = trim($clob);
+$context  = stream_context_create(
+  array('http' =>
+    array(
+      'method'  => 'POST',
+      'header'  => "Content-type: application/x-www-form-urlencoded\r\n".
+                   "Authorization: Basic " . base64_encode("$user:$password"),
+      'content' => $clob
+    )
+  )
+);
+$clob = file_get_contents($url, false, $context);
 print("Output:\n");
 var_dump($clob);
 

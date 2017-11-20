@@ -2,7 +2,7 @@
 
 ==Experimental==
 
-Apache REST json interface to new async libdb400.a driver. 
+Apache REST json interface to JSON400 driver. 
 
 # configure
 
@@ -25,11 +25,10 @@ ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
   allow from all
   SetHandler cgi-script
   Options +ExecCGI
-  CGIConvMode BINARY
 </Directory>
 
 
 Note: 
-- Must use CGIConvMode BINARY for directory.
+- Unsupported CGIConvMode BINARY, EBCDIC_JCD, MIXED.
 ```
 

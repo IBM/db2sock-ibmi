@@ -28,5 +28,8 @@ Server type="application/x-httpd-db2" CommandLine="/QOpenSys/db2sock/QOpenSys/us
 IpcDir /www/apachedft/logs
 ```
 
+# http (ut28p63 == your machine)
+
+http://ut28p63/db2/db2json.pgm
 
 
