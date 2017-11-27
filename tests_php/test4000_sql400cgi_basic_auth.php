@@ -1,5 +1,6 @@
 <?php
-$url        = getenv("PHP_URL"); // export PHP_URL=http://ut28p63/db2/db2json.pgm
+$url        = getenv("PHP_URL"); // export PHP_URL=http://ut28p63/db2/db2json.pgm  (ILE-CGI - works partial)
+                                 // export PHP_URL=http://ut28p63/db2json.db2  (fastcgi-PASE - works good)
 $user       = getenv("PHP_UID"); // export PHP_UID=MYID
 $password   = getenv("PHP_PWD"); // export PHP_MYPWD
 

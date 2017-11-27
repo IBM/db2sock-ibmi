@@ -3,6 +3,7 @@
 ==Experimental==
 
 Apache REST json interface to JSON400 driver. 
+This fastcgi interface seems to work best (over ILE_CGI).
 
 # configure
 
@@ -18,6 +19,7 @@ also work for SSL, kerberos, %%client%%, EIM, etc.
    Order Deny,Allow 
    Deny From all     
 </Directory>
+
 ScriptAlias /db2/ /QSYS.LIB/DB2JSON.LIB/
 <Directory /QSYS.LIB/DB2JSON.LIB/>
   AllowOverride None

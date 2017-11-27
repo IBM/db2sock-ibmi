@@ -34,6 +34,13 @@ DB2FCGILIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
 DB2FCGIPGM64      = db2jsonfcgi_64
 DB2FCGILIBOBJS64  = /QOpenSys/usr/lib/crt0_64.o $(DB2FCGILIBOBJS32)
 DB2FCGILIBDEPS64  = $(LIBDEPALL)
+### DB2NGIX
+DB2NGIXPGM32      = db2jsonngix
+DB2NGIXLIBOBJS32  = cgi-fcgi.o fcgiapp.o os_unix.o fcgi_stdio.o
+DB2NGIXLIBDEPS32  = /QOpenSys/usr/lib/crt0.o $(LIBDEPALL)
+DB2NGIXPGM64      = db2jsonngix_64
+DB2NGIXLIBOBJS64  = /QOpenSys/usr/lib/crt0_64.o $(DB2NGIXLIBOBJS32)
+DB2NGIXLIBDEPS64  = $(LIBDEPALL)
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -51,9 +58,11 @@ help:
 ### tells make all things to do (ordered)
 tgt64:
 	@$(MAKE) CCFLAGS="$(CCFLAGS64)" DB2FCGIPGM="$(DB2FCGIPGM64)" DB2FCGILIBOBJS="$(DB2FCGILIBOBJS64)" DB2FCGILIBDEPS="$(DB2FCGILIBDEPS64)" TGT64="64" go
+	@$(MAKE) CCFLAGS="$(CCFLAGS64)" DB2NGIXPGM="$(DB2NGIXPGM64)" DB2NGIXLIBOBJS="$(DB2NGIXLIBOBJS64)" DB2NGIXLIBDEPS="$(DB2NGIXLIBDEPS64)" TGT64="64" go
 tgt32:
 	@$(MAKE) CCFLAGS="$(CCFLAGS32)" DB2FCGIPGM="$(DB2FCGIPGM32)" DB2FCGILIBOBJS="$(DB2FCGILIBOBJS32)" DB2FCGILIBDEPS="$(DB2FCGILIBDEPS32)" go
-go: cpy removeo $(DB2FCGIPGM)
+	@$(MAKE) CCFLAGS="$(CCFLAGS32)" DB2NGIXPGM="$(DB2NGIXPGM32)" DB2NGIXLIBOBJS="$(DB2NGIXLIBOBJS32)" DB2NGIXLIBDEPS="$(DB2NGIXLIBDEPS32)" go
+go: cpy removeo $(DB2FCGIPGM) $(DB2NGIXPGM)
 
 ### generic rules
 ### (note: .c.o compiles all c parts in OBJS list)
@@ -66,6 +75,11 @@ $(DB2FCGIPGM32): $(DB2FCGILIBOBJS)
 	$(CC) $(CCFLAGS) $(DB2FCGILIBOBJS) $(DB2FCGILIBDEPS) -o $(DB2FCGIPGM32)
 $(DB2FCGIPGM64): $(DB2FCGILIBOBJS)
 	$(CC) $(CCFLAGS) $(DB2FCGILIBOBJS) $(DB2FCGILIBDEPS) -o $(DB2FCGIPGM64)
+### -- db2jsonngix_32/64
+$(DB2NGIXPGM32): $(DB2NGIXLIBOBJS)
+	$(CC) $(CCFLAGS) $(DB2NGIXLIBOBJS) $(DB2NGIXLIBDEPS) -o $(DB2NGIXPGM32)
+$(DB2NGIXPGM64): $(DB2NGIXLIBOBJS)
+	$(CC) $(CCFLAGS) $(DB2NGIXLIBOBJS) $(DB2NGIXLIBDEPS) -o $(DB2NGIXPGM64)
 
 cpy:
 	tar -xf fcgi.tar
@@ -73,12 +87,12 @@ cpy:
 	cp $(FCGI)/libfcgi/fcgiapp.c .
 	cp $(FCGI)/libfcgi/os_unix.c .
 	cp $(FCGI)/libfcgi/fcgi_stdio.c .
-clean:
-	rm $(DB2FCGIPGM32)
-	rm -f *.o
+	cp $(FCGI)/cgi-fcgi/cgi-fcgi.c .
 removeo:
 	rm -f *.o
 install:
 	cp ./$(DB2FCGIPGM32) $(INSTALLDIR)/.
 	cp ./$(DB2FCGIPGM64) $(INSTALLDIR)/.
+	cp ./$(DB2NGIXPGM32) $(INSTALLDIR)/.
+	cp ./$(DB2NGIXPGM64) $(INSTALLDIR)/.
 
