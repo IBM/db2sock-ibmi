@@ -52,6 +52,7 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 ```
 db2sock                      - libdb400.a - db2 driver source
 db2sock/fastcgi              - db2jsonfcgi - fastcgi rest interface source (optional)
+                             - db2jsonngix - fastcgi cgi starter rest interface source (optional)
 db2sock/ILE-CGI              - db2json.pgm - ILE CGI rest interface source (optional)
 db2sock/ILE-PROC             - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
 db2sock/ILE-PROC-USER        - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
@@ -115,6 +116,8 @@ lrwxrwxrwx /QOpenSys/usr/lib/libdb400.a -> ../../QIBM/ProdData/OS400/PASE/lib/li
 > cp libjson400.a /QOpenSys/usr/lib/. (optional json parser toolkit)
 > cp db2jsonfcgi /QOpenSys/usr/lib/. (optional toolkit fastcgi 32 bit)
 > cp db2jsonfcgi_64 /QOpenSys/usr/lib/. (optional toolkit fastcgi 64 bit)
+> cp db2jsonngix /QOpenSys/usr/lib/. (optional toolkit fastcgi 32 bit)
+> cp db2jsonngix_64 /QOpenSys/usr/lib/. (optional toolkit fastcgi 64 bit)
 == ILE modules ==
 qcmd (proc for toolkit + RPG tests)
 RSTLIB SAVLIB(DB2JSON) DEV(*SAVF) SAVF(QGPL/DB2JSON)
