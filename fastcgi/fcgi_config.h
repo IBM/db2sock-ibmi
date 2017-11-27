@@ -42,9 +42,11 @@
 
 /* Define if sockaddr_un in sys/un.h contains a sun_len component */
 /* #undef HAVE_SOCKADDR_UN_SUN_LEN */
+#define HAVE_SOCKADDR_UN_SUN_LEN 1
 
 /* Define if the socklen_t typedef is in sys/socket.h */
 /* #undef HAVE_SOCKLEN */
+#define HAVE_SOCKLEN 1
 
 /* Define if you have the <stdint.h> header file. */
 /* #undef HAVE_STDINT_H */

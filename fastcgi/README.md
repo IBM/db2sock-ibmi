@@ -46,7 +46,11 @@ http://ut28p63/db2json.db2
 start db2jsonfcgi (using db2jsonngix)
 ===
 bash-4.3$ cd /QOpenSys/usr/lib
+-- localhost:port (option 1) --
 bash-4.3$ ./db2jsonngix -start -connect 127.0.0.1:9002 ./db2jsonfcgi
+-- unix domain socket (option 2) --
+bash-4.3$ ./db2jsonngix -start -connect /tmp/db3.sock ./db2jsonfcgi
+
 
 ===
 start nginx
@@ -136,11 +140,10 @@ http {
         }
         # pass db3 json to FastCGI server listening on /home/ADC/nginx/logs/db3.soc
         # ./db2jsonngix -start -connect /tmp/db3.sock ./db2jsonfcgi
-        # Note: Bug db2jsonngix db3.sock (db2jsonngix), matches db3.soc (nginx).
-        #       Also, using chroot /QOpenSys/db2sock for development db2sock,
+        # Note: Using chroot /QOpenSys/db2sock for development db2sock,
         #       but running nginx as root /QOpenSys/QIBM/ProdData/OPS/tools/bin/nginx.
         location ~ \.db3$ {
-            fastcgi_pass   unix:/QOpenSys/db2sock/tmp/db3.soc;
+            fastcgi_pass   unix:/QOpenSys/db2sock/tmp/db3.sock;
             fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
             include        fastcgi_params;
         }
