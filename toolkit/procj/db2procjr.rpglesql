@@ -1,0 +1,374 @@
+     H NOMAIN
+     H AlwNull(*UsrCtl)
+     H BNDDIR('QC2LE')
+
+       // ****************************************************          
+       //  includes          
+       // ****************************************************          
+      /copy ../PaseType_h          
+
+       // --------------------------
+       // globals
+       // --------------------------
+       dcl-pr strstr pointer extproc('strstr');
+         pVal1 pointer Value options(*string);
+         pVal2 pointer Value options(*string);
+       end-pr;
+
+       dcl-pr cpybytes  extproc('_CPYBYTES');
+         pTarget pointer Value;
+         pSource pointer Value;
+         nLength uns(10) Value;
+       end-pr;
+
+       dcl-pr memset pointer extproc('__memset');
+         pTarget pointer Value;
+         nChar int(10) Value;
+         nBufLen uns(10) Value;
+       end-pr;
+
+       dcl-pr strlen int(10) extproc('strlen');
+         pVal pointer Value options(*string);
+       end-pr;
+
+       dcl-pr custom_SQL400Json int(10) extproc('custom_SQL400Json');
+         hdbc int(10) Value;
+         injson pointer Value;
+         inlen int(10) Value;
+         outjson pointer Value;
+         outlen int(10) Value;
+       end-pr;
+
+       dcl-s sLast151 int(10) inz(0);
+       dcl-s Occurs151 packed(5:0) inz(5001);
+       dcl-ds Output151 occurs(5001);
+         Out151 char(3000);
+       end-ds;
+
+       dcl-pr  iJson400C ind;
+         clob pointer value;
+         flag ind value;
+       end-pr;
+
+       dcl-pr iJson400R ind extproc(*CL:'iJson400R');
+         clob pointer value;
+       end-pr;
+
+       dcl-pr iJson400H ind extproc(*CL:'iJson400H');
+         clob pointer value;
+       end-pr;
+
+       dcl-ds over_t qualified based(Template);
+         ubufx char(32);
+         bytex char(1) overlay(ubufx);
+         boolx ind overlay(ubufx);
+         twox char(2) overlay(ubufx);
+         chrx int(3) overlay(ubufx);
+         uchrx uns(3) overlay(ubufx);
+         shortx int(5) overlay(ubufx);
+         ushortx uns(5) overlay(ubufx);
+         intx int(10) overlay(ubufx);
+         uintx uns(10) overlay(ubufx);
+         longlongx int(20) overlay(ubufx);
+         ulonglongx uns(20) overlay(ubufx);
+         floatx float(4) overlay(ubufx);
+         doublex float(8) overlay(ubufx);
+         ptrx pointer overlay(ubufx);
+         char1 char(1) overlay(ubufx);
+         char2 char(2) overlay(ubufx);
+         char3 char(3) overlay(ubufx);
+         char4 char(4) overlay(ubufx);
+         char5 char(5) overlay(ubufx);
+         char6 char(6) overlay(ubufx);
+         char7 char(7) overlay(ubufx);
+         char8 char(8) overlay(ubufx);
+         char9 char(9) overlay(ubufx);
+         char10 char(10) overlay(ubufx);
+         char11 char(11) overlay(ubufx);
+         chardim char(1) dim(32) overlay(ubufx);
+       end-ds;
+
+       // --------------------------
+       // globals debug
+       // --------------------------
+       dcl-pr iDebugMe;
+         Message varchar(100) value;
+       end-pr;
+       dcl-pr iDebugMeJson;
+         clobData pointer value;
+       end-pr;
+       dcl-pr QMHSNDM  ExtPgm('QMHSNDM');
+         MsgID char(7) const;
+         QualMsgF char(20) const;
+         MsgTxt char(32767) const options(*varsize);
+         MsgTxtLen int(10) const;
+         MsgType char(10) const;
+         MsgQueues char(20) const dim(50) options(*varsize);
+         NumQueues int(10) const;
+         RpyQueue char(20) const;
+         MsgKey char(4);
+         ErrorCode char(8000) options(*varsize);
+         CCSID int(10) const options(*nopass);
+       end-pr;
+       dcl-pr QMHRCVPM  ExtPgm('QMHRCVPM');
+         MsgInfo char(32767) options(*varsize);
+         MsgInfoLen int(10) const;
+         Format char(8) const;
+         StackEntry char(10) const;
+         StackCount int(10) const;
+         MsgType char(10) const;
+         MsgKey char(4) const;
+         WaitTime int(10) const;
+         MsgAction char(10) const;
+         ErrorCode char(8000) options(*varsize);
+       end-pr;
+
+       // --------------------------
+       // debug message to *QSYSOPR
+       // --------------------------
+       dcl-proc iDebugMe export;
+       dcl-pi  *N;
+         Message varchar(100) value;
+       end-pi;
+       dcl-ds RCVM0100 qualified;
+         BytesRtn int(10);
+         BytesAvail int(10);
+         MsgSev int(10);
+         MsgID char(7);
+         MsgType char(2);
+         MsgKey char(4);
+         vvnam7 char(7);
+         CCSID_status int(10);
+         CCSID int(10);
+         MsgDtaLen int(10);
+         MsgDtaAvail int(10);
+         MsgDta char(8000);
+       end-ds;
+       dcl-ds ErrorCode qualified;
+         BytesProv int(10) inz(0);
+         BytesAvail int(10) inz(0);
+       end-ds;
+       dcl-s MsgKey char(4);
+       dcl-s MsgQ char(20) dim(1) inz('*SYSOPR');
+       dcl-s Reply char(100);
+       dcl-s cmd char(100) inz(*BLANKS);
+       dcl-s rcb ind inz(*OFF);
+       dcl-s rc int(10) inz(0);
+       QMHSNDM( *blanks          
+                   : *blanks          
+                   : Message          
+                   : %len(Message)          
+                   : '*INQ'          
+                   : MsgQ          
+                   : %elem(MsgQ)          
+                   : '*PGMQ'          
+                   : MsgKey          
+                   : ErrorCode );          
+          
+       // Wait up to 1 hour (3600 seconds) for a reply to the          
+       // above message. If you change the value of 3600 below to          
+       // a value of -1, it will wait indefinitely.          
+       QMHRCVPM( RCVM0100          
+                    : %size(RCVM0100)          
+                    : 'RCVM0100'          
+                    : '*'          
+                    : 0          
+                    : '*RPY'          
+                    : MsgKey          
+                    : 3600          
+                    : '*REMOVE'          
+                    : ErrorCode );          
+       Reply = %subst(RCVM0100.MsgDta: 1: RCVM0100.MsgDtaLen);          
+       end-proc;
+
+       // --------------------------
+       // debug message to *QSYSOPR
+       // --------------------------
+       dcl-proc iDebugMeJson export;
+       dcl-pi  *N;
+         clobData pointer value;
+       end-pi;
+       dcl-s lenDebug int(10) inz(0);
+       dcl-s posDebug pointer inz(*NULL);
+       dcl-s posDebugEnd pointer inz(*NULL);
+       dcl-s msg char(100) inz('debug db2procjr');
+       // debug me
+       posDebug = strstr(clobData:'"debug":"');
+       if posDebug <> *NULL;
+         posDebug += 9;
+         posDebugEnd = strstr(posDebug:'"');
+         lenDebug = posDebugEnd - posDebug;
+         if lenDebug > 1;
+           if lenDebug > %size(msg) - 1;
+             lenDebug = %size(msg) - 1;
+           endif;
+           msg = %str(posDebug:lenDebug);
+         endif;
+         iDebugMe(msg);
+       endif;
+       end-proc;
+
+
+       // --------------------------
+       // db2procjr(clob) -- json interface
+       // --------------------------
+       dcl-proc iJson400C;
+       dcl-pi  *N ind;
+         clob pointer value;
+         flag ind value;
+       end-pi;
+       //  vars          
+       dcl-s rc ind inz(*OFF);
+       dcl-s clobData pointer inz(*NULL);
+       dcl-s clobLen int(10) inz(0);
+       dcl-s outData pointer inz(*NULL);
+       dcl-s outLen int(10) inz(0);
+       dcl-s i int(10) inz(0);
+       dcl-s sqlrc int(10) inz(0);
+       dcl-s nest int(10) inz(0);
+       dcl-s pCopy pointer inz(*NULL);
+       dcl-ds myCopy likeds(over_t) based(pCopy);
+
+       dcl-s sbang char(1) inz(*BLANKS);
+       dcl-s spound char(1) inz(*BLANKS);
+       dcl-s sdollar char(1) inz(*BLANKS);
+       dcl-s sat char(1) inz(*BLANKS);
+       dcl-s sbackslash char(1) inz(*BLANKS);
+       dcl-s sopen_brace char(1) inz(*BLANKS);
+       dcl-s sclose_brace char(1) inz(*BLANKS);
+       dcl-s scaret char(1) inz(*BLANKS);
+       dcl-s sbacktick char(1) inz(*BLANKS);
+       dcl-s sopen_bracket char(1) inz(*BLANKS);
+       dcl-s sclose_bracket char(1) inz(*BLANKS);
+       dcl-s sbar char(1) inz(*BLANKS);
+       dcl-s stilde char(1) inz(*BLANKS);
+
+       dcl-s palloc pointer inz(*NULL);
+       dcl-s ptr1 pointer inz(*NULL);
+       dcl-s ptr2 pointer inz(*NULL);
+       dcl-s hack char(8) inz('DEADBEEF');
+       dcl-s ptr2Len int(10) inz(0);
+
+       sbang = ccsid_variant_bang();
+       spound = ccsid_variant_pound();
+       sdollar = ccsid_variant_dollar();
+       sat = ccsid_variant_at();
+       sbackslash = ccsid_variant_backslash();
+       sopen_brace = ccsid_variant_open_brace();
+       sclose_brace = ccsid_variant_close_brace();
+       scaret = ccsid_variant_caret();
+       sbacktick = ccsid_variant_backtick();
+       sopen_bracket = ccsid_variant_open_bracket();
+       sclose_bracket = ccsid_variant_close_bracket();
+       sbar = ccsid_variant_bar();
+       stilde = ccsid_variant_tilde();
+
+       // hey adc debug
+       iDebugMeJson(clob + 4);
+
+       // process input
+       pCopy = clob; 
+       clobLen = myCopy.intx;
+       clobData = clob + 4;
+       for i = 1 to clobLen;
+         pCopy = clobData + (i - 1);
+         if myCopy.bytex = sopen_bracket; // '{'
+           nest += 1;
+         elseif myCopy.bytex = sclose_bracket; // '}'
+           nest -= 1;
+           if nest = 0;
+             leave;
+           endif;
+         endif;
+       endfor;
+       memset(clobData + i: 0: clobLen - i);
+       clobLen = i + 1;
+
+       // make call
+       outData = %addr(Output151);
+       outLen = 5001 * 3000;
+       memset(outData:0:outLen);
+       sqlrc = custom_SQL400Json(0:
+                 clobData:
+                 clobLen:
+                 outData:
+                 outLen);
+
+       // clear input
+       memset(clobData:0:clobLen);         
+
+       // output sql result set for rows 
+       outLen = strlen(outData);
+       Occurs151 = outLen / 3000 + 1;          
+
+       // Parse DEADBEEF end of row
+       // and concat rows for full document
+       // row 1: {{"good":"json"DEADBEEF
+       // row 2: ,"more":"goodDEADBEEF
+       // row 3: json"}DEADBEEF
+       // row n: }DEADEDBEEF
+       if flag = *ON;
+         ptr1 = outData;
+         palloc = %alloc((Occurs151 + 1) * 3000);
+         ptr2 = palloc;
+         memset(ptr2:0:(Occurs151 + 1) * 3000);
+         for i = 1 to Occurs151;
+           if ptr2Len + 3000 < outLen;
+             cpybytes(ptr2:ptr1:3000);
+             ptr2 += 3000;
+             ptr2Len += 3000;
+             cpybytes(ptr2:%addr(hack):%size(hack));
+             ptr2 += %size(hack);
+             ptr2Len += %size(hack);
+           elseif (ptr2Len < outLen);
+             cpybytes(ptr2:ptr1:outLen - ptr2Len);
+             ptr2 += (outLen - ptr2Len);
+             ptr2Len += (outLen - ptr2Len);
+             cpybytes(ptr2:%addr(hack):%size(hack));
+             ptr2 += %size(hack);
+             ptr2Len += %size(hack);
+           endif;
+           ptr1 += 3000;
+         endfor;
+         ptr1 = outData;
+         ptr2 = palloc;
+         cpybytes(ptr1:ptr2:ptr2Len);
+         dealloc(en) palloc;
+         // output sql result set for rows 
+         outLen = strlen(outData);
+         Occurs151 = outLen / 3000 + 1;          
+       endif;
+
+       // result set of row for concat
+       exec sql          
+         Set Result Sets Array :Output151 For :Occurs151 Rows;
+
+       if sqlrc < 0;
+         rc = *OFF;
+       else;
+         rc = *ON;
+       endif;          
+
+       return rc;          
+       end-proc;
+
+       // --------------------------
+       // db2procjr(clob) -- json interface
+       // --------------------------
+       dcl-proc iJson400R export;
+       dcl-pi  *N ind;
+         clob pointer value;
+       end-pi;
+       return iJson400C(clob:*OFF);          
+       end-proc;
+
+       // --------------------------
+       // db2procjh(clob) -- json interface (hack)
+       // --------------------------
+       dcl-proc iJson400H export;
+       dcl-pi  *N ind;
+         clob pointer value;
+       end-pi;
+       return iJson400C(clob:*ON);          
+       end-proc;
+

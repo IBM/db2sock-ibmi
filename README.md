@@ -50,22 +50,21 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 
 # README.md (sub-directories).
 ```
-db2sock                      - libdb400.a - db2 driver source
-db2sock/fastcgi              - db2jsonfcgi - fastcgi rest interface source (optional)
-                             - db2jsonngix - fastcgi cgi starter rest interface source (optional)
-db2sock/ILE-CGI              - db2json.pgm - ILE CGI rest interface source (optional)
-db2sock/ILE-PROC             - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
-db2sock/ILE-PROC-USER        - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
-db2sock/ILE-TOOLKIT-JSON     - db2procj, db2procjr, db2procjh - ILE stored procedures to call toolkit (remote) 
-db2sock/toolkit-base         - libtkit400.a - toolkit base driver source (optional)
+db2sock/db2                  - libdb400.a - db2 driver source
+db2sock/toolkit              - libtkit400.a - toolkit base driver source (optional)
                              - tkit400.srvpgm - ILE toolkit base driver source (remote)
-db2sock/toolkit-parser-json  - libjson400.a - toolkit json parser driver source (optional)
+db2sock/toolkit/fastcgi      - db2jsonfcgi - fastcgi rest interface source (optional)
+                             - db2jsonngix - fastcgi cgi starter rest interface source (optional)
+db2sock/toolkit/cgi          - db2json.pgm - ILE CGI rest interface source (optional)
+db2sock/toolkit/proc         - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
+db2sock/toolkit/proc-user    - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
+db2sock/toolkit/procj        - db2procj, db2procjr, db2procjh - ILE stored procedures to call toolkit (remote) 
+db2sock/toolkit/parser-json  - libjson400.a - toolkit json parser driver source (optional)
                              - json400.srvpgm - ILE toolkit json parser driver source (remote)
-db2sock/tests_ILE-RPG        - RPG tests for tests_json (optional)
-db2sock/tests_json           - json tests (optional)
-db2sock/tests_c              - c tests (optional)
-db2sock/tests_php            - php tests (optional)
-db2sock/tests_c_ILE-RPG      - RPG tests (optional)
+db2sock/tests/rpg            - RPG tests for tests_json (optional)
+db2sock/tests/json           - json tests (optional)
+db2sock/tests/c              - c tests (optional)
+db2sock/tests/php            - php tests (optional)
 ```
 
 ##Trace
@@ -83,7 +82,6 @@ export TRACE=ws (console)
 == trace file with coredump, read with dbx -W ==
 export TRACE=stop (file + stop coredump)
 ```
-
 
 ##YIPS pre-compiled test vesion
 * [YIPS test version binary](http://yips.idevcloud.com/wiki/index.php/Databases/SuperDriver)
@@ -128,15 +126,6 @@ reset original libdb400.a (when done new db2sock version ... or never ...)
 > cd /QOpenSys/usr/lib
 > ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
 ```
-
-#RUN remote via json
-See tests_php json calls to db2procj, db2procjr, db2procjh.
-
-#Run ILE CGI (optional)
-REST json to libdb400.a [Source -> ILE-CGI/README.md](https://bitbucket.org/litmis/db2sock/src)
-
-#Run PASE fastcgi (optional)
-REST json to libdb400.a [Source -> fastcgi/README.md](https://bitbucket.org/litmis/db2sock/src)
 
 #Contributors
 - Tony Cairns, IBM

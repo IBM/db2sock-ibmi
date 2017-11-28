@@ -23,50 +23,18 @@ Note:
 === build everything ===
 > ./makeall.sh
 > ./makeclean.sh
-
-*******************
-* optional individual makes
-*******************
-
-== libdb400.a ===
-> cd db2sock
-> make tgt32 tgt64 install
-> make proc
-
-== db2proc.srvpgm (optional) ===
-> export CHROOT=/path/chroot
-> cd db2sock/ILE-PROC
-> make proc
-
-== libtkit400.a (optional) ===
-> cd db2sock/toolkit-base
-> make tgt32 tgt64 install
-
-== libjson400.a (optional) ===
-> cd db2sock/toolkit-parser-json
-> make tgt32 tgt64 install
-> make proc
-
-== db2jsonfcgi (optional) ===
-> cd db2sock/fastcgi
-> make tgt32 tgt64 install
-
-== db2json.pgm (optional) ===
-> export CHROOT=/path/chroot
-> cd db2sock/ILE-CGI
-> make cgi
-
+(see make file for individual compiles)
 ```
 Notes: 
 
-- db2json.pgm, db2proc.srvpgm requires borgi project (https://bitbucket.org/litmis/borgi)
+- requires borgi project (https://bitbucket.org/litmis/borgi)
 
 - libjson400.a json toolkit parser is optionally dynamically loaded via SQL400Json API. 
 This default parser may be replaced by any Open Source json parser (DIY enabled).
 
 - libtkit400.a toolkit runner is dynamically loaded via SQL400Json API with libjson400.a.
 This object provides toolkit functions similar to XMLSERVICE (db2proc.srvpgm).
-You must build db2proc.srvpgm db2 procedure before libtkit400.a to create ILE-PROC/iconf.h.
+You must build db2proc.srvpgm db2 procedure before libtkit400.a to create proc/iconf.h.
 At runtime you may override db2 procedure library location with env var TOOLLIB (optional).
 
 
