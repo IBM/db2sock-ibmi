@@ -663,6 +663,24 @@ SQL400IgnoreNullFromUtf16Join
 SQL400Json
 SQL400JsonAsync
 SQL400JsonJoin
+SQL400HackExecDirect
+SQL400HackExecDirectAsync
+SQL400HackExecDirectJoin
+SQL400HackPrepare
+SQL400HackPrepareAsync
+SQL400HackPrepareJoin
+SQL400HackExecute
+SQL400HackExecuteAsync
+SQL400HackExecuteJoin
+SQL400HackFetch
+SQL400HackFetchAsync
+SQL400HackFetchJoin
+SQL400HackDescribeCol
+SQL400HackDescribeColAsync
+SQL400HackDescribeColJoin
+SQL400HackBindCol
+SQL400HackBindColAsync
+SQL400HackBindColJoin
 
 
 dev_dump

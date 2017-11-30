@@ -1,0 +1,9 @@
+#!libhack400(shr.o)
+
+SQL400HackExecDirect
+SQL400HackPrepare
+SQL400HackExecute
+SQL400HackFetch
+SQL400HackDescribeCol
+SQL400HackBindCol
+

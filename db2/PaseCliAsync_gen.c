@@ -9983,3 +9983,338 @@ SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag)
   }
   return myptr;
 }
+SQLRETURN SQL400HackExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackExecDirect( hstmt, szSqlStr, cbSqlStr );
+  if (init_cli_trace()) {
+    dump_SQL400HackExecDirect(sqlrc,  hstmt, szSqlStr, cbSqlStr );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackExecDirectThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackExecDirectStruct * myptr = (SQL400HackExecDirectStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackExecDirect( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  if (init_cli_trace()) {
+    dump_SQL400HackExecDirect(myptr->sqlrc,  myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackExecDirectCallback(SQL400HackExecDirectStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackExecDirectStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackExecDirectAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackExecDirectStruct * myptr = (SQL400HackExecDirectStruct *) malloc(sizeof(SQL400HackExecDirectStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szSqlStr = szSqlStr;
+  myptr->cbSqlStr = cbSqlStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackExecDirectThread, (void *)myptr);
+  return tid;
+}
+SQL400HackExecDirectStruct * SQL400HackExecDirectJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackExecDirectStruct * myptr = (SQL400HackExecDirectStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackExecDirectStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400HackPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackPrepare( hstmt, szSqlStr, cbSqlStr );
+  if (init_cli_trace()) {
+    dump_SQL400HackPrepare(sqlrc,  hstmt, szSqlStr, cbSqlStr );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackPrepareThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackPrepareStruct * myptr = (SQL400HackPrepareStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackPrepare( myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  if (init_cli_trace()) {
+    dump_SQL400HackPrepare(myptr->sqlrc,  myptr->hstmt, myptr->szSqlStr, myptr->cbSqlStr );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackPrepareCallback(SQL400HackPrepareStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackPrepareStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackPrepareAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackPrepareStruct * myptr = (SQL400HackPrepareStruct *) malloc(sizeof(SQL400HackPrepareStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->szSqlStr = szSqlStr;
+  myptr->cbSqlStr = cbSqlStr;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackPrepareThread, (void *)myptr);
+  return tid;
+}
+SQL400HackPrepareStruct * SQL400HackPrepareJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackPrepareStruct * myptr = (SQL400HackPrepareStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackPrepareStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400HackExecute( SQLHSTMT  hstmt )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackExecute( hstmt );
+  if (init_cli_trace()) {
+    dump_SQL400HackExecute(sqlrc,  hstmt );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackExecuteThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackExecuteStruct * myptr = (SQL400HackExecuteStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackExecute( myptr->hstmt );
+  if (init_cli_trace()) {
+    dump_SQL400HackExecute(myptr->sqlrc,  myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackExecuteCallback(SQL400HackExecuteStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackExecuteStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackExecuteAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackExecuteStruct * myptr = (SQL400HackExecuteStruct *) malloc(sizeof(SQL400HackExecuteStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackExecuteThread, (void *)myptr);
+  return tid;
+}
+SQL400HackExecuteStruct * SQL400HackExecuteJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackExecuteStruct * myptr = (SQL400HackExecuteStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackExecuteStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400HackFetch( SQLHSTMT  hstmt )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackFetch( hstmt );
+  if (init_cli_trace()) {
+    dump_SQL400HackFetch(sqlrc,  hstmt );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackFetchThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackFetchStruct * myptr = (SQL400HackFetchStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackFetch( myptr->hstmt );
+  if (init_cli_trace()) {
+    dump_SQL400HackFetch(myptr->sqlrc,  myptr->hstmt );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackFetchCallback(SQL400HackFetchStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackFetchStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackFetchAsync ( SQLHSTMT  hstmt, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackFetchStruct * myptr = (SQL400HackFetchStruct *) malloc(sizeof(SQL400HackFetchStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackFetchThread, (void *)myptr);
+  return tid;
+}
+SQL400HackFetchStruct * SQL400HackFetchJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackFetchStruct * myptr = (SQL400HackFetchStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackFetchStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400HackDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackDescribeCol( hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+  if (init_cli_trace()) {
+    dump_SQL400HackDescribeCol(sqlrc,  hstmt, icol, szColName, cbColNameMax, pcbColName, pfSqlType, pcbColDef, pibScale, pfNullable );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackDescribeColThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackDescribeColStruct * myptr = (SQL400HackDescribeColStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackDescribeCol( myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  if (init_cli_trace()) {
+    dump_SQL400HackDescribeCol(myptr->sqlrc,  myptr->hstmt, myptr->icol, myptr->szColName, myptr->cbColNameMax, myptr->pcbColName, myptr->pfSqlType, myptr->pcbColDef, myptr->pibScale, myptr->pfNullable );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackDescribeColCallback(SQL400HackDescribeColStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackDescribeColStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackDescribeColStruct * myptr = (SQL400HackDescribeColStruct *) malloc(sizeof(SQL400HackDescribeColStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->szColName = szColName;
+  myptr->cbColNameMax = cbColNameMax;
+  myptr->pcbColName = pcbColName;
+  myptr->pfSqlType = pfSqlType;
+  myptr->pcbColDef = pcbColDef;
+  myptr->pibScale = pibScale;
+  myptr->pfNullable = pfNullable;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackDescribeColThread, (void *)myptr);
+  return tid;
+}
+SQL400HackDescribeColStruct * SQL400HackDescribeColJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackDescribeColStruct * myptr = (SQL400HackDescribeColStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackDescribeColStruct *) NULL;
+  }
+  return myptr;
+}
+SQLRETURN SQL400HackBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue )
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  init_table_lock(hstmt, 1);
+  sqlrc = custom_SQL400HackBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
+  if (init_cli_trace()) {
+    dump_SQL400HackBindCol(sqlrc,  hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
+  }
+  init_table_unlock(hstmt, 1);
+  return sqlrc;
+}
+void * SQL400HackBindColThread (void *ptr)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int myccsid = init_CCSID400(0);
+  SQL400HackBindColStruct * myptr = (SQL400HackBindColStruct *) ptr;
+  init_table_lock(myptr->hstmt, 1);
+  myptr->sqlrc = custom_SQL400HackBindCol( myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  if (init_cli_trace()) {
+    dump_SQL400HackBindCol(myptr->sqlrc,  myptr->hstmt, myptr->icol, myptr->iType, myptr->rgbValue, myptr->cbValueMax, myptr->pcbValue );
+  }
+  init_table_unlock(myptr->hstmt, 1);
+  /* void SQL400HackBindColCallback(SQL400HackBindColStruct* ); */
+  if (myptr->callback) {
+    void (*ptrFunc)(SQL400HackBindColStruct* ) = myptr->callback;
+    ptrFunc( myptr );
+  }
+  pthread_exit((void *)myptr);
+}
+pthread_t SQL400HackBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback )
+{
+  int rc = 0;
+  pthread_t tid = 0;
+  SQL400HackBindColStruct * myptr = (SQL400HackBindColStruct *) malloc(sizeof(SQL400HackBindColStruct));
+  myptr->sqlrc = SQL_SUCCESS;
+  myptr->hstmt = hstmt;
+  myptr->icol = icol;
+  myptr->iType = iType;
+  myptr->rgbValue = rgbValue;
+  myptr->cbValueMax = cbValueMax;
+  myptr->pcbValue = pcbValue;
+  myptr->callback = callback;
+  rc = pthread_create(&tid, NULL, SQL400HackBindColThread, (void *)myptr);
+  return tid;
+}
+SQL400HackBindColStruct * SQL400HackBindColJoin (pthread_t tid, SQLINTEGER flag)
+{
+  SQL400HackBindColStruct * myptr = (SQL400HackBindColStruct *) NULL;
+  int active = 0;
+  active = init_table_in_progress(myptr->hstmt, 1);
+  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
+    pthread_join(tid,(void**)&myptr);
+  } else {
+    return (SQL400HackBindColStruct *) NULL;
+  }
+  return myptr;
+}

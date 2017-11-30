@@ -892,7 +892,7 @@ SQLRETURN SQL400pClose(SQLHDBC hdbc)
 
 SQLRETURN SQL400CloseAllStmts(SQLHDBC hdbc)
 
-# custom utilitites 
+# custom cmd 
 
 SQLRETURN SQL400Cmd(SQLHDBC hdbc,
  SQLCHAR * cmd)
@@ -968,4 +968,36 @@ SQLRETURN SQL400Json(SQLHDBC hdbc,
  SQLINTEGER inlen, 
  SQLCHAR * outjson,
  SQLINTEGER outlen)
+
+# custom toolkit hack
+
+SQLRETURN SQL400HackExecDirect(SQLHSTMT hstmt, 
+ SQLCHAR * szSqlStr, 
+ SQLINTEGER cbSqlStr)
+
+SQLRETURN SQL400HackPrepare(SQLHSTMT hstmt, 
+ SQLCHAR * szSqlStr, 
+ SQLINTEGER cbSqlStr)
+
+SQLRETURN SQL400HackExecute(SQLHSTMT hstmt)
+
+SQLRETURN SQL400HackFetch(SQLHSTMT hstmt)
+
+SQLRETURN SQL400HackDescribeCol(SQLHSTMT hstmt, 
+ SQLSMALLINT icol, 
+ SQLCHAR * szColName, 
+ SQLSMALLINT cbColNameMax, 
+ SQLSMALLINT * pcbColName, 
+ SQLSMALLINT * pfSqlType, 
+ SQLINTEGER * pcbColDef, 
+ SQLSMALLINT * pibScale, 
+ SQLSMALLINT * pfNullable)
+
+SQLRETURN SQL400HackBindCol(SQLHSTMT hstmt, 
+ SQLSMALLINT icol, 
+ SQLSMALLINT iType, 
+ SQLPOINTER rgbValue, 
+ SQLINTEGER cbValueMax, 
+ SQLINTEGER * pcbValue)
+
 

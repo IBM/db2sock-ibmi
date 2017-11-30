@@ -38,6 +38,10 @@ void *dlhandle = NULL;
  */
 void *dlhandle_json = NULL;
 /* 
+ * dlopen handle of PASE hack parser
+ */
+void *dlhandle_hack = NULL;
+/* 
  * ile activate db2 
  */
 int db2_cli_srvpgm_mark;
@@ -161,19 +165,20 @@ void custom_iconv_close(int myccsid, int utfccsid) {
  * multiple threads starting.
  */
 void * init_cli_dlsym() {
-#ifdef __64BIT__
-  char *dlservice = getenv(PASECLIDRIVER64_ENV_VAR);
-  if (dlservice  == NULL) {
-    dlservice = PASECLIDRIVER64;
-  }
-#else
-  char *dlservice = getenv(PASECLIDRIVER32_ENV_VAR);
-  if (dlservice  == NULL) {
-    dlservice = PASECLIDRIVER32;
-  }
-#endif
+  char *dlservice = NULL;
   if (dlhandle  == NULL) {
     init_lock();
+#ifdef __64BIT__
+    dlservice = getenv(PASECLIDRIVER64_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = PASECLIDRIVER64;
+    }
+#else
+    dlservice = getenv(PASECLIDRIVER32_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = PASECLIDRIVER32;
+    }
+#endif
     if (dlhandle  == NULL) {
       dlhandle = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
       if (dlhandle == NULL)  {
@@ -193,19 +198,20 @@ void * init_cli_dlsym() {
  * multiple threads starting.
  */
 void * init_json_dlsym() {
-#ifdef __64BIT__
-  char *dlservice = getenv(DB2JSONPARSER64_ENV_VAR);
-  if (dlservice  == NULL) {
-    dlservice = DB2JSONPARSER64;
-  }
-#else
-  char *dlservice = getenv(DB2JSONPARSER32_ENV_VAR);
-  if (dlservice  == NULL) {
-    dlservice = DB2JSONPARSER32;
-  }
-#endif
+  char *dlservice = NULL;
   if (dlhandle_json  == NULL) {
     init_lock();
+#ifdef __64BIT__
+    dlservice = getenv(DB2JSONPARSER64_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = DB2JSONPARSER64;
+    }
+#else
+    dlservice = getenv(DB2JSONPARSER32_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = DB2JSONPARSER32;
+    }
+#endif
     if (dlhandle_json  == NULL) {
       dlhandle_json = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
       if (dlhandle_json == NULL)  {
@@ -216,6 +222,39 @@ void * init_json_dlsym() {
     init_unlock();
   }
   return dlhandle_json;
+}
+/* 
+ * dlopen handle of PASE hack parser
+ * Note: dlhandle_hack is checked twice,
+ * second under global lock,
+ * to avoid race conditions
+ * multiple threads starting.
+ */
+void * init_hack_dlsym() {
+  char *dlservice = NULL;
+  if (dlhandle_hack  == NULL) {
+    init_lock();
+#ifdef __64BIT__
+    dlservice = getenv(DB2HACKPARSER64_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = DB2HACKPARSER64;
+    }
+#else
+    dlservice = getenv(DB2HACKPARSER32_ENV_VAR);
+    if (dlservice  == NULL) {
+      dlservice = DB2HACKPARSER32;
+    }
+#endif
+    if (dlhandle_hack  == NULL) {
+      dlhandle_hack = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
+      if (dlhandle_hack == NULL)  {
+        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
+        exit(-1);
+      }
+    }
+    init_unlock();
+  }
+  return dlhandle_hack;
 }
 /* activate db2 srvpgm */
 int init_cli_srvpgm() {
@@ -350,6 +389,8 @@ void init_table_dtor(int handle) {
   }
   IBMiTable[handle].hdbc = 0;
   IBMiTable[handle].hstmt = 0;
+  IBMiTable[handle].in_progress = 0;
+  IBMiTable[handle].use_flag = 0;
   // init_unlock(); - lock in Free routine
 }
 void * init_table_addr(int handle) {
@@ -436,6 +477,16 @@ int init_table_in_progress(int handle,int flag) {
     }
   }
   return 0;
+}
+
+/* No lock.
+ * handle -- hstmt
+ */
+void init_table_use_set(int handle, int usage) {
+  IBMiTable[handle].use_flag = usage;
+}
+int init_table_use_flag(int handle) {
+  return IBMiTable[handle].use_flag;
 }
 
 

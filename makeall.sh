@@ -46,8 +46,16 @@ cd ..
 
 echo "====================================================="
 echo "====================================================="
-echo "== toolkit libjson400.a (optional) ==="
+echo "== toolkit/parser-json libjson400.a (optional) ==="
 cd toolkit/parser-json
+make tgt32 tgt64 install
+make proc
+cd ../..
+
+echo "====================================================="
+echo "====================================================="
+echo "== toolkit/parser-hack libhack400.a (optional) ==="
+cd toolkit/parser-hack
 make tgt32 tgt64 install
 make proc
 cd ../..

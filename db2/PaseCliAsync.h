@@ -188,6 +188,12 @@ SQLRETURN SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGE
 SQLRETURN SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+SQLRETURN SQL400HackExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+SQLRETURN SQL400HackPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+SQLRETURN SQL400HackExecute( SQLHSTMT  hstmt );
+SQLRETURN SQL400HackFetch( SQLHSTMT  hstmt );
+SQLRETURN SQL400HackDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
+SQLRETURN SQL400HackBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
 
 /* ===================================================
  * NORMAL CLI interfaces
@@ -468,6 +474,12 @@ typedef struct SQL400IgnoreNullFromUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; 
 typedef struct SQL400IgnoreNullToUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400IgnoreNullToUtf16Struct;
 typedef struct SQL400IgnoreNullFromUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400IgnoreNullFromUtf16Struct;
 typedef struct SQL400JsonStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * injson; SQLINTEGER  inlen; SQLCHAR * outjson; SQLINTEGER  outlen; void * callback; } SQL400JsonStruct;
+typedef struct SQL400HackExecDirectStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLCHAR * szSqlStr; SQLINTEGER  cbSqlStr; void * callback; } SQL400HackExecDirectStruct;
+typedef struct SQL400HackPrepareStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLCHAR * szSqlStr; SQLINTEGER  cbSqlStr; void * callback; } SQL400HackPrepareStruct;
+typedef struct SQL400HackExecuteStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; void * callback; } SQL400HackExecuteStruct;
+typedef struct SQL400HackFetchStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; void * callback; } SQL400HackFetchStruct;
+typedef struct SQL400HackDescribeColStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLCHAR * szColName; SQLSMALLINT  cbColNameMax; SQLSMALLINT * pcbColName; SQLSMALLINT * pfSqlType; SQLINTEGER * pcbColDef; SQLSMALLINT * pibScale; SQLSMALLINT * pfNullable; void * callback; } SQL400HackDescribeColStruct;
+typedef struct SQL400HackBindColStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLSMALLINT  iType; SQLPOINTER  rgbValue; SQLINTEGER  cbValueMax; SQLINTEGER * pcbValue; void * callback; } SQL400HackBindColStruct;
 
 
 /* join async thread                    */
@@ -757,6 +769,18 @@ SQL400IgnoreNullToUtf16Struct * SQL400IgnoreNullToUtf16Join (pthread_t tid, SQLI
 SQL400IgnoreNullFromUtf16Struct * SQL400IgnoreNullFromUtf16Join (pthread_t tid, SQLINTEGER flag);
 /* void SQL400JsonCallback(SQL400JsonStruct* ); */
 SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackExecDirectCallback(SQL400HackExecDirectStruct* ); */
+SQL400HackExecDirectStruct * SQL400HackExecDirectJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackPrepareCallback(SQL400HackPrepareStruct* ); */
+SQL400HackPrepareStruct * SQL400HackPrepareJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackExecuteCallback(SQL400HackExecuteStruct* ); */
+SQL400HackExecuteStruct * SQL400HackExecuteJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackFetchCallback(SQL400HackFetchStruct* ); */
+SQL400HackFetchStruct * SQL400HackFetchJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackDescribeColCallback(SQL400HackDescribeColStruct* ); */
+SQL400HackDescribeColStruct * SQL400HackDescribeColJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackBindColCallback(SQL400HackBindColStruct* ); */
+SQL400HackBindColStruct * SQL400HackBindColJoin (pthread_t tid, SQLINTEGER flag);
 
 
 /* start an async call to DB2 CLI */
@@ -903,6 +927,12 @@ pthread_t SQL400IgnoreNullFromUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQL
 pthread_t SQL400IgnoreNullToUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
 pthread_t SQL400IgnoreNullFromUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
 pthread_t SQL400JsonAsync ( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback );
+pthread_t SQL400HackExecDirectAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback );
+pthread_t SQL400HackPrepareAsync ( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr, void * callback );
+pthread_t SQL400HackExecuteAsync ( SQLHSTMT  hstmt, void * callback );
+pthread_t SQL400HackFetchAsync ( SQLHSTMT  hstmt, void * callback );
+pthread_t SQL400HackDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback );
+pthread_t SQL400HackBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback );
 
 /* ===================================================
  * ILE CLI interfaces
@@ -1314,6 +1344,12 @@ void dump_SQL400IgnoreNullFromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  
 void dump_SQL400IgnoreNullToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+void dump_SQL400HackExecDirect(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+void dump_SQL400HackPrepare(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+void dump_SQL400HackExecute(SQLRETURN sqlrc,  SQLHSTMT  hstmt );
+void dump_SQL400HackFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt );
+void dump_SQL400HackDescribeCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
+void dump_SQL400HackBindCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
 
 /* ===================================================
  * INTERNAL USE
@@ -1346,6 +1382,12 @@ SQLRETURN custom_SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQ
 SQLRETURN custom_SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN custom_SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+SQLRETURN custom_SQL400HackExecDirect( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+SQLRETURN custom_SQL400HackPrepare( SQLHSTMT  hstmt, SQLCHAR * szSqlStr, SQLINTEGER  cbSqlStr );
+SQLRETURN custom_SQL400HackExecute( SQLHSTMT  hstmt );
+SQLRETURN custom_SQL400HackFetch( SQLHSTMT  hstmt );
+SQLRETURN custom_SQL400HackDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
+SQLRETURN custom_SQL400HackBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
 
 
 #endif /* _PASECLIASYNC_H */
