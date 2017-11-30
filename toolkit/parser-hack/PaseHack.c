@@ -228,7 +228,7 @@ SQLRETURN custom_SQL400HackFetch(SQLHSTMT hstmt)
   /* hstmt hold PaseHackResource */
   rsc = (PaseHackResource *) init_table_use_data(hstmt);
 
-  /* output into user buffer */
+  /* output into user buffer (TBD -- need multi-fetch partial json) */
   if (rsc->userjson && rsc->userlen) {
     alen = strlen(rsc->outjson);
     if (alen && alen < rsc->userlen) {
