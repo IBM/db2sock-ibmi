@@ -11,10 +11,16 @@
 #include "../PaseType.h"
 #endif
 
-SQLRETURN custom_SQL400Hack(SQLHSTMT hstmt, 
- SQLCHAR * szSqlStr, 
- SQLINTEGER cbSqlStr, 
- SQLINTEGER cbExecute);
+#define DB2_HACK_SQL_ERROR -42
+#define DB2_HACK_MAX_JSON 15000000
+typedef struct PaseHackResource {
+  int inlen;
+  char * injson;
+  int outlen;
+  char * outjson;
+  int userlen;
+  char * userjson;
+} PaseHackResource;
 
 #endif /* _PASEHACK_H */
 

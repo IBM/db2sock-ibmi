@@ -57,7 +57,6 @@ echo "====================================================="
 echo "== toolkit/parser-hack libhack400.a (optional) ==="
 cd toolkit/parser-hack
 make tgt32 tgt64 install
-make proc
 cd ../..
 
 echo "====================================================="

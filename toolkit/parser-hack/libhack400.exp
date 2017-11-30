@@ -1,9 +1,11 @@
 #!libhack400(shr.o)
 
-SQL400HackExecDirect
-SQL400HackPrepare
-SQL400HackExecute
-SQL400HackFetch
-SQL400HackDescribeCol
-SQL400HackBindCol
+custom_SQL400HackExecDirect
+custom_SQL400HackPrepare
+custom_SQL400HackExecute
+custom_SQL400HackFetch
+custom_SQL400HackDescribeCol
+custom_SQL400HackBindCol
+custom_SQL400HackParamData
+custom_SQL400HackPutData
 

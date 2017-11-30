@@ -7,6 +7,9 @@
 #include "PaseCliInit.h"
 #include "PaseCliAsync.h"
 
+/*
+ * proto
+ */
 SQLINTEGER flag_custom_SQL400HackExecDirect;
 SQLRETURN (*symbol_custom_SQL400HackExecDirect)( SQLHSTMT, SQLCHAR *, SQLINTEGER);
 
@@ -30,6 +33,15 @@ SQLRETURN (*symbol_custom_SQL400HackBindCol)( SQLHSTMT,
   SQLSMALLINT, SQLSMALLINT, SQLPOINTER, 
   SQLINTEGER, SQLINTEGER *);
 
+SQLINTEGER flag_custom_SQL400HackParamData;
+SQLRETURN (*symbol_custom_SQL400HackParamData)( SQLHSTMT, SQLPOINTER * );
+
+SQLINTEGER flag_custom_SQL400HackPutData;
+SQLRETURN (*symbol_custom_SQL400HackPutData)( SQLHSTMT, SQLPOINTER, SQLINTEGER );
+
+/*
+ * code
+ */
 SQLRETURN custom_SQL400HackExecDirect(SQLHSTMT hstmt, 
  SQLCHAR * szSqlStr, 
  SQLINTEGER cbSqlStr)
@@ -124,5 +136,35 @@ SQLRETURN custom_SQL400HackBindCol(SQLHSTMT hstmt,
   sqlrc = symbol_custom_SQL400HackBindCol( hstmt, icol, iType, rgbValue, cbValueMax, pcbValue );
   return sqlrc;
 }
+
+SQLRETURN custom_SQL400HackParamData(SQLHSTMT hstmt, 
+ SQLPOINTER * Value)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  void *dlhandle = NULL;
+  if (!flag_custom_SQL400HackParamData) {
+    dlhandle = init_hack_dlsym();
+    symbol_custom_SQL400HackParamData = dlsym(dlhandle, "custom_SQL400HackParamData");
+    flag_custom_SQL400HackParamData = 1;
+  }
+  sqlrc = symbol_custom_SQL400HackParamData( hstmt, Value );
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400HackPutData(SQLHSTMT hstmt, 
+ SQLPOINTER Data, 
+ SQLINTEGER SLen)
+{
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  void *dlhandle = NULL;
+  if (!flag_custom_SQL400HackPutData) {
+    dlhandle = init_hack_dlsym();
+    symbol_custom_SQL400HackPutData = dlsym(dlhandle, "custom_SQL400HackPutData");
+    flag_custom_SQL400HackPutData = 1;
+  }
+  sqlrc = symbol_custom_SQL400HackPutData( hstmt, Data, SLen );
+  return sqlrc;
+}
+
 
 

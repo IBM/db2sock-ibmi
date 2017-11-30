@@ -79,6 +79,21 @@ void init_unlock() {
   pthread_mutex_unlock(&threadMutexLock);
 }
 
+/* ==========================
+ * malloc/free
+ * ==========================
+ */
+void * init_new(int size) {
+  void * buffer = malloc(size + 1);
+  memset(buffer,0,size + 1);
+  return buffer;
+}
+void init_free(char *buffer) {
+  if (buffer) {
+    free(buffer);
+  }
+}
+
 /*
  * conversion (not threadsafe)
  */
@@ -391,6 +406,11 @@ void init_table_dtor(int handle) {
   IBMiTable[handle].hstmt = 0;
   IBMiTable[handle].in_progress = 0;
   IBMiTable[handle].use_flag = 0;
+  IBMiTable[handle].use_size = 0;
+  if (IBMiTable[handle].use_data) {
+    init_free(IBMiTable[handle].use_data);
+  }
+  IBMiTable[handle].use_data = NULL;
   // init_unlock(); - lock in Free routine
 }
 void * init_table_addr(int handle) {
@@ -487,6 +507,70 @@ void init_table_use_set(int handle, int usage) {
 }
 int init_table_use_flag(int handle) {
   return IBMiTable[handle].use_flag;
+}
+void * init_table_use_data(int handle) {
+  return IBMiTable[handle].use_data;
+}
+void * init_table_use_data_new(int handle, int size, int nullterm) {
+  char * tmp = NULL;
+  int toldSz = 0;
+  char * told = NULL;
+  int tnewSz = 0;
+  char * tnew = NULL;
+  told = IBMiTable[handle].use_data;
+  toldSz = IBMiTable[handle].use_size;
+  if (!(size + nullterm)) {
+    return told;
+  }
+  if (toldSz) {
+    init_free(told);
+  }
+  tnewSz = toldSz + size;
+  tnew = init_new(tnewSz + nullterm);
+  return tnew;
+}
+void * init_table_use_data_copy_in(int handle, char *data, int size, int nullterm) {
+  char * tmp = NULL;
+  int toldSz = 0;
+  char * told = NULL;
+  int tnewSz = 0;
+  char * tnew = NULL;
+  told = IBMiTable[handle].use_data;
+  toldSz = IBMiTable[handle].use_size;
+  if (!(size + nullterm)) {
+    return told;
+  }
+  tnewSz = toldSz + size;
+  tnew = init_new(tnewSz + nullterm);
+  if (toldSz) {
+    memcpy(tnew, told, toldSz);
+    init_free(told);
+    tmp = tnew + toldSz;
+  } else {
+    tmp = tnew;
+  }
+  memcpy(tmp, data, size);
+  IBMiTable[handle].use_data = tnew;
+  IBMiTable[handle].use_size = tnewSz;
+  return tnew;
+}
+int init_table_use_data_copy_out(int handle, char *data, int size, int nullterm) {
+  int tmpSz = 0;
+  char * tmp = NULL;
+  tmp = IBMiTable[handle].use_data;
+  tmpSz = IBMiTable[handle].use_size;
+  if (!data || !size) {
+    return -1;
+  }
+  if (!tmp || !tmpSz) {
+    return 0;
+  }
+  if (size + nullterm > tmpSz) {
+    memcpy(data, tmp, size - nullterm);
+  } else {
+    memcpy(data, tmp, tmpSz);
+  }
+  return 0;
 }
 
 

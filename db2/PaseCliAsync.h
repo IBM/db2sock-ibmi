@@ -194,6 +194,8 @@ SQLRETURN SQL400HackExecute( SQLHSTMT  hstmt );
 SQLRETURN SQL400HackFetch( SQLHSTMT  hstmt );
 SQLRETURN SQL400HackDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
 SQLRETURN SQL400HackBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
+SQLRETURN SQL400HackParamData( SQLHSTMT  hstmt, SQLPOINTER * Value );
+SQLRETURN SQL400HackPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen );
 
 /* ===================================================
  * NORMAL CLI interfaces
@@ -480,6 +482,8 @@ typedef struct SQL400HackExecuteStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; void 
 typedef struct SQL400HackFetchStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; void * callback; } SQL400HackFetchStruct;
 typedef struct SQL400HackDescribeColStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLCHAR * szColName; SQLSMALLINT  cbColNameMax; SQLSMALLINT * pcbColName; SQLSMALLINT * pfSqlType; SQLINTEGER * pcbColDef; SQLSMALLINT * pibScale; SQLSMALLINT * pfNullable; void * callback; } SQL400HackDescribeColStruct;
 typedef struct SQL400HackBindColStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLSMALLINT  icol; SQLSMALLINT  iType; SQLPOINTER  rgbValue; SQLINTEGER  cbValueMax; SQLINTEGER * pcbValue; void * callback; } SQL400HackBindColStruct;
+typedef struct SQL400HackParamDataStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLPOINTER * Value; void * callback; } SQL400HackParamDataStruct;
+typedef struct SQL400HackPutDataStruct { SQLRETURN sqlrc; SQLHSTMT  hstmt; SQLPOINTER  Data; SQLINTEGER  SLen; void * callback; } SQL400HackPutDataStruct;
 
 
 /* join async thread                    */
@@ -781,6 +785,10 @@ SQL400HackFetchStruct * SQL400HackFetchJoin (pthread_t tid, SQLINTEGER flag);
 SQL400HackDescribeColStruct * SQL400HackDescribeColJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400HackBindColCallback(SQL400HackBindColStruct* ); */
 SQL400HackBindColStruct * SQL400HackBindColJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackParamDataCallback(SQL400HackParamDataStruct* ); */
+SQL400HackParamDataStruct * SQL400HackParamDataJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400HackPutDataCallback(SQL400HackPutDataStruct* ); */
+SQL400HackPutDataStruct * SQL400HackPutDataJoin (pthread_t tid, SQLINTEGER flag);
 
 
 /* start an async call to DB2 CLI */
@@ -933,6 +941,8 @@ pthread_t SQL400HackExecuteAsync ( SQLHSTMT  hstmt, void * callback );
 pthread_t SQL400HackFetchAsync ( SQLHSTMT  hstmt, void * callback );
 pthread_t SQL400HackDescribeColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable, void * callback );
 pthread_t SQL400HackBindColAsync ( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue, void * callback );
+pthread_t SQL400HackParamDataAsync ( SQLHSTMT  hstmt, SQLPOINTER * Value, void * callback );
+pthread_t SQL400HackPutDataAsync ( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen, void * callback );
 
 /* ===================================================
  * ILE CLI interfaces
@@ -1350,6 +1360,8 @@ void dump_SQL400HackExecute(SQLRETURN sqlrc,  SQLHSTMT  hstmt );
 void dump_SQL400HackFetch(SQLRETURN sqlrc,  SQLHSTMT  hstmt );
 void dump_SQL400HackDescribeCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
 void dump_SQL400HackBindCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
+void dump_SQL400HackParamData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER * Value );
+void dump_SQL400HackPutData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen );
 
 /* ===================================================
  * INTERNAL USE
@@ -1388,6 +1400,8 @@ SQLRETURN custom_SQL400HackExecute( SQLHSTMT  hstmt );
 SQLRETURN custom_SQL400HackFetch( SQLHSTMT  hstmt );
 SQLRETURN custom_SQL400HackDescribeCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLCHAR * szColName, SQLSMALLINT  cbColNameMax, SQLSMALLINT * pcbColName, SQLSMALLINT * pfSqlType, SQLINTEGER * pcbColDef, SQLSMALLINT * pibScale, SQLSMALLINT * pfNullable );
 SQLRETURN custom_SQL400HackBindCol( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  iType, SQLPOINTER  rgbValue, SQLINTEGER  cbValueMax, SQLINTEGER * pcbValue );
+SQLRETURN custom_SQL400HackParamData( SQLHSTMT  hstmt, SQLPOINTER * Value );
+SQLRETURN custom_SQL400HackPutData( SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen );
 
 
 #endif /* _PASECLIASYNC_H */

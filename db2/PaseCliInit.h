@@ -42,7 +42,9 @@ typedef struct PaseCliResource {
   pthread_mutexattr_t threadMutexAttr; /* recursive lock    */
   int in_progress;                 /* operation in progress */
   int use_flag;                    /* flag operation        */
+  int use_size;                    /* flag operation size   */
   char *hKey;                      /* persistent key        */
+  char *use_data;                  /* flag operation data   */
 } PaseCliResource;
 
 #define PASECLIMAXCCSID 3000
@@ -113,6 +115,10 @@ int init_table_stmt_2_conn(int hstmt);
 #define DB2CLI_USAGE_TOOLKIT 1
 void init_table_use_set(int handle, int usage);
 int init_table_use_flag(int handle);
+void * init_table_use_data(int handle);
+void * init_table_use_data_new(int handle, int size, int nullterm);
+void * init_table_use_data_copy_in(int handle, char *data, int size, int nullterm);
+int init_table_use_data_copy_out(int handle, char *data, int size, int nullterm);
 
 /* persistent connection */
 void init_table_add_hash(int handle, char * db, char * uid, char * pwd, char * qual, int flag);

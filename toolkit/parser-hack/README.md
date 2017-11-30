@@ -8,8 +8,8 @@ Welcome to db2sock project. This 'toolkit' is a dynamically loaded toolkit inter
 Any HACK parser can be used to call this interface.
 The parser simply includes PaseTool.h, compile with -ltkit400, calls toolkit APIs.
 
-The parsers are dynamically loaded via SQL400Hack interfaces. 
-Default parser is provided (toolkit-parser-hack, toolkit-parser-xml).
+The parsers are dynamically loaded via SQL400Hack(API) interfaces. 
+Default parser is provided (toolkit-parser-hack).
 An environment variable allows any override any parser of your own (hack, xml, csv, etc.).
 
 ```

@@ -3617,3 +3617,42 @@ void dump_SQL400HackBindCol(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLSMALLINT  icol
     }
   }
 }
+void dump_SQL400HackParamData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER * Value ) {
+  if (dev_go(sqlrc,"sql400hackparamdata")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400HackParamData");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER*","Value",Value,Value);
+    printf_hexdump(mykey,Value,80);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+void dump_SQL400HackPutData(SQLRETURN sqlrc,  SQLHSTMT  hstmt, SQLPOINTER  Data, SQLINTEGER  SLen ) {
+  if (dev_go(sqlrc,"sql400hackputdata")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400HackPutData");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHSTMT","hstmt",hstmt,hstmt);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","Data",Data,Data);
+    printf_hexdump(mykey,Data,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","SLen",SLen,SLen);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_STMT,hstmt);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
