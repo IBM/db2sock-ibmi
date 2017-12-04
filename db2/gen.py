@@ -1,3 +1,4 @@
+
 # description: Generate PaseCliAsync_gen.c
 # command:     python gen.py
 PaseSqlCli_file = "./gen_cli_template.c"
@@ -1307,14 +1308,8 @@ file_libdb400_exp += "printf_force_SIGQUIT" + "\n"
 file_libdb400_exp += "printf_sqlrc_status" + "\n"
 file_libdb400_exp += "printf_sqlrc_head_foot" + "\n"
 file_libdb400_exp += "sprintf_format" + "\n"
-file_libdb400_exp += "init_table_use_data" + "\n"
-file_libdb400_exp += "init_table_use_data_new" + "\n"
-file_libdb400_exp += "init_table_use_data_copy_in" + "\n"
-file_libdb400_exp += "init_table_use_data_copy_out" + "\n"
 file_libdb400_exp += "" + "\n"
 file_libdb400_exp += "" + "\n"
 with open("libdb400.exp", "w") as text_file:
     text_file.write(file_libdb400_exp)
-
-
 

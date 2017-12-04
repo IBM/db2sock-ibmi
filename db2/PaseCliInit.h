@@ -18,12 +18,6 @@
 #define DB2JSONPARSER64_ENV_VAR "DB2JSONPARSER64"
 #define DB2JSONPARSER64 "libjson400.a(shr_64.o)"
 
-/* customer replace hack parser (toolkit/parser-hack) */
-#define DB2HACKPARSER32_ENV_VAR "DB2HACKPARSER32"
-#define DB2HACKPARSER32 "libhack400.a(shr.o)"
-#define DB2HACKPARSER64_ENV_VAR "DB2HACKPARSER64"
-#define DB2HACKPARSER64 "libhack400.a(shr_64.o)"
-
 /* original PASE driver */
 #define PASECLIDRIVER32_ENV_VAR "PASECLIDRIVER32"
 #define PASECLIDRIVER32 "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
@@ -85,7 +79,6 @@ char ** init_cli_dbx();
 /* load */
 void * init_cli_dlsym();
 void * init_json_dlsym();
-void * init_hack_dlsym();
 int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
 
@@ -109,10 +102,8 @@ int init_table_stmt_2_conn(int hstmt);
 /*
  * statment usage
  * 0 - normal
- * 1 - sql toolkit override
  */
 #define DB2CLI_USAGE_NORMAL 0
-#define DB2CLI_USAGE_TOOLKIT 1
 void init_table_use_set(int handle, int usage);
 int init_table_use_flag(int handle);
 void * init_table_use_data(int handle);

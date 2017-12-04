@@ -663,30 +663,6 @@ SQL400IgnoreNullFromUtf16Join
 SQL400Json
 SQL400JsonAsync
 SQL400JsonJoin
-SQL400HackExecDirect
-SQL400HackExecDirectAsync
-SQL400HackExecDirectJoin
-SQL400HackPrepare
-SQL400HackPrepareAsync
-SQL400HackPrepareJoin
-SQL400HackExecute
-SQL400HackExecuteAsync
-SQL400HackExecuteJoin
-SQL400HackFetch
-SQL400HackFetchAsync
-SQL400HackFetchJoin
-SQL400HackDescribeCol
-SQL400HackDescribeColAsync
-SQL400HackDescribeColJoin
-SQL400HackBindCol
-SQL400HackBindColAsync
-SQL400HackBindColJoin
-SQL400HackParamData
-SQL400HackParamDataAsync
-SQL400HackParamDataJoin
-SQL400HackPutData
-SQL400HackPutDataAsync
-SQL400HackPutDataJoin
 
 
 dev_dump
@@ -705,9 +681,5 @@ printf_force_SIGQUIT
 printf_sqlrc_status
 printf_sqlrc_head_foot
 sprintf_format
-init_table_use_data
-init_table_use_data_new
-init_table_use_data_copy_in
-init_table_use_data_copy_out
 
 

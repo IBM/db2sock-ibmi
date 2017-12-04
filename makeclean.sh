@@ -47,8 +47,6 @@ dltmod --lib $ILELIB --mod IBYVALS7
 dltmod --lib $ILELIB --mod IBYVALS8
 dltmod --lib $ILELIB --mod PASEJSDMP
 dltmod --lib $ILELIB --mod PASEJSON
-dltmod --lib $ILELIB --mod PASEHKDMP
-dltmod --lib $ILELIB --mod PASEHACK
 dltmod --lib $ILELIB --mod PASETO400
 dltmod --lib $ILELIB --mod PASETODMP
 dltmod --lib $ILELIB --mod PASETOILE

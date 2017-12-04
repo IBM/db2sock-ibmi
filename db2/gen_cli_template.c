@@ -969,42 +969,4 @@ SQLRETURN SQL400Json(SQLHDBC hdbc,
  SQLCHAR * outjson,
  SQLINTEGER outlen)
 
-# custom toolkit hack
-
-SQLRETURN SQL400HackExecDirect(SQLHSTMT hstmt, 
- SQLCHAR * szSqlStr, 
- SQLINTEGER cbSqlStr)
-
-SQLRETURN SQL400HackPrepare(SQLHSTMT hstmt, 
- SQLCHAR * szSqlStr, 
- SQLINTEGER cbSqlStr)
-
-SQLRETURN SQL400HackExecute(SQLHSTMT hstmt)
-
-SQLRETURN SQL400HackFetch(SQLHSTMT hstmt)
-
-SQLRETURN SQL400HackDescribeCol(SQLHSTMT hstmt, 
- SQLSMALLINT icol, 
- SQLCHAR * szColName, 
- SQLSMALLINT cbColNameMax, 
- SQLSMALLINT * pcbColName, 
- SQLSMALLINT * pfSqlType, 
- SQLINTEGER * pcbColDef, 
- SQLSMALLINT * pibScale, 
- SQLSMALLINT * pfNullable)
-
-SQLRETURN SQL400HackBindCol(SQLHSTMT hstmt, 
- SQLSMALLINT icol, 
- SQLSMALLINT iType, 
- SQLPOINTER rgbValue, 
- SQLINTEGER cbValueMax, 
- SQLINTEGER * pcbValue)
-
-SQLRETURN SQL400HackParamData(SQLHSTMT hstmt, 
- SQLPOINTER * Value)
-
-SQLRETURN SQL400HackPutData(SQLHSTMT hstmt, 
- SQLPOINTER Data, 
- SQLINTEGER SLen)
-
 

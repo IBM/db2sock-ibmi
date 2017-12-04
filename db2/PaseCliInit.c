@@ -38,10 +38,6 @@ void *dlhandle = NULL;
  */
 void *dlhandle_json = NULL;
 /* 
- * dlopen handle of PASE hack parser
- */
-void *dlhandle_hack = NULL;
-/* 
  * ile activate db2 
  */
 int db2_cli_srvpgm_mark;
@@ -237,39 +233,6 @@ void * init_json_dlsym() {
     init_unlock();
   }
   return dlhandle_json;
-}
-/* 
- * dlopen handle of PASE hack parser
- * Note: dlhandle_hack is checked twice,
- * second under global lock,
- * to avoid race conditions
- * multiple threads starting.
- */
-void * init_hack_dlsym() {
-  char *dlservice = NULL;
-  if (dlhandle_hack  == NULL) {
-    init_lock();
-#ifdef __64BIT__
-    dlservice = getenv(DB2HACKPARSER64_ENV_VAR);
-    if (dlservice  == NULL) {
-      dlservice = DB2HACKPARSER64;
-    }
-#else
-    dlservice = getenv(DB2HACKPARSER32_ENV_VAR);
-    if (dlservice  == NULL) {
-      dlservice = DB2HACKPARSER32;
-    }
-#endif
-    if (dlhandle_hack  == NULL) {
-      dlhandle_hack = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
-      if (dlhandle_hack == NULL)  {
-        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
-        exit(-1);
-      }
-    }
-    init_unlock();
-  }
-  return dlhandle_hack;
 }
 /* activate db2 srvpgm */
 int init_cli_srvpgm() {

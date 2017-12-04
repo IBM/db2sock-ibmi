@@ -4,7 +4,7 @@ echo "====================================================="
 echo "====================================================="
 if [ ! -d /QSYS.LIB ]; then
   if [ "x$CHROOT" = "x" ]; then 
-    echo "env var CHROOT not set"
+    echo "env var CHROOT not set  (export CHROOT=/QOpenSys/db2sock)"
     exit
   fi
 fi
@@ -12,6 +12,7 @@ echo "== CHROOT ($CHROOT) =="
 
 if [ "x$ILELIB" = "x" ]; then 
   ILELIB="DB2JSON"
+  export ILELIB="$ILELIB"
 fi
 echo "== ILELIB ($ILELIB) =="
 
@@ -50,13 +51,6 @@ echo "== toolkit/parser-json libjson400.a (optional) ==="
 cd toolkit/parser-json
 make tgt32 tgt64 install
 make proc
-cd ../..
-
-echo "====================================================="
-echo "====================================================="
-echo "== toolkit/parser-hack libhack400.a (optional) ==="
-cd toolkit/parser-hack
-make tgt32 tgt64 install
 cd ../..
 
 echo "====================================================="

@@ -27,7 +27,7 @@ INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I..
 LIBOBJSALL   = PaseCliLibDB400_gen.o PaseCliAsync_gen.o PaseCliILE_gen.o PaseCliInit.o \
                PaseCliDev.o PaseCliDevConsole.o PaseCliDevFile.o PaseCliPrintf.o PaseCliDump_gen.o \
                SQL400Cmd.o SQL400Connect.o SQL400Convert.o SQL400Stmt2Hdbc.o SQL400Version.o \
-               SQL400Json.o SQL400Hack.o
+               SQL400Json.o
 LIBEXPS      = -Wl,-bE:libdb400.exp
 LIBOBJS32    = $(LIBOBJSALL)
 SHRLIB32     = libdb400.a
