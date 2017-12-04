@@ -12,20 +12,10 @@ These additions should make DB2 language extension writing easier.
 
 ## IBM i script language writers (DB2 extensions)
 
-Tired of the same old ODBC/CLI problems in your DB2 script language driver extension (npm, pecl, pip, etc.)???
-
-If you are attempting to build a new language db2 driver (nodejs example), please consider contacting db2sock project issues.
+If you are attempting to build a new  IBM i language db2 driver (nodejs example), please consider contacting db2sock project issues.
 That is, together, we should be able to add new APIs to db2sock (libdb400.a) to 'remedy' any db2 language coding difficult 
 in your new language driver. I suggest we need only achieve a right balance of 'Aggregate APIs' in db2sock to fit real 
-world of scripting language DB2 driver demands. 
-
-To point, today, using exsiting ODBC/CLI architecture, any async DB2 language (like nodejs), 
-must code far too much low level ODBC/CLI 'hacking' to achieve true async DB2 extension APIs. I suggest due to limited ODBC/CLI architecture
-,aka, ODBC/CLI square peg attempting to fit a round scripting language hole (pardoning water cooler parlance).
-Open Source project db2sock can/should extend ODBC/CLI architecture clearly lacking for modern scripting DB2 environments (Aggregate APIs).
-
-A real world collaboration project like a new async driver (nodejs), would go a long way making useful/durable new 'Aggregate APIs'
-that actually help get the db2 extension work done right with minimal effort (goal). 
+world of scripting language DB2 driver demands.
 
 ## features
 
