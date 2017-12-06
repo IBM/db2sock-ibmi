@@ -31,9 +31,7 @@
  */
 #define TOOLLIB "TOOLLIB"
 
-/*
-See README.md for details.
-*/
+/* == range == */
 #define TOOL400_RANGE_ELEM_KIT_BEG 1
 #define TOOL400_RANGE_ELEM_DB2_BEG 2
 #define TOOL400_RANGE_ELEM_KIT_END 3
@@ -42,7 +40,6 @@ See README.md for details.
 #define TOOL400_RANGE_ATTR_DB2 6
 #define TOOL400_RANGE_KEY_SPEC 7
 #define TOOL400_RANGE_HIGH 8
-
 
 /* == elements == */
 #define TOOL400_KEY_ELEM_BEG        0   /* key 'action' elem range */
