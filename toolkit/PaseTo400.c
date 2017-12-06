@@ -6,9 +6,10 @@
 #include <sqlcli.h>
 #include "PaseType.h"
 
-/* TBD -- functional place holder (for impatient folk of no name) 
-*/
-
+/* This module is only used ILE compile.
+ * Modifies a few libdb400.a extended APIs
+ * to enable single source code major function.
+ */
 
 static SQLHANDLE env_hndl;
 static int env_server_mode;
@@ -143,17 +144,7 @@ SQLRETURN SQL400Connect( SQLCHAR * db, SQLCHAR * uid, SQLCHAR * pwd, SQLINTEGER 
     sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
   }
   henv = env_hndl;
-  /* henv -- always server mode */
-  if (!env_server_mode) {
-    attr = SQL_TRUE;
-    sqlrc = SQLSetEnvAttr((SQLHENV)henv, SQL_ATTR_SERVER_MODE, (SQLPOINTER)&attr, (SQLINTEGER) 0);
-    /* we are already in a stored proc call (direct calling) */
-    if (sqlrc < SQL_SUCCESS) {
-      env_server_mode = -1;
-    } else {
-      env_server_mode = 1;
-    }
-  }
+  /* henv -- ILE side do not enter server mode (already there in cases) */
 
   /* null input (or NULL terminated string) */
   if (db != NULL) {

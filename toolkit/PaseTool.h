@@ -34,39 +34,36 @@
 /*
 See README.md for details.
 */
-#define TOOL400_RANGE_ELEM_RSV_BEG 1
-#define TOOL400_RANGE_ELEM_USR_BEG 2
-#define TOOL400_RANGE_ELEM_RSV_END 3
-#define TOOL400_RANGE_ELEM_USR_END 4
-#define TOOL400_RANGE_ATTR_RSV 5
-#define TOOL400_RANGE_ATTR_USR 6
+#define TOOL400_RANGE_ELEM_KIT_BEG 1
+#define TOOL400_RANGE_ELEM_DB2_BEG 2
+#define TOOL400_RANGE_ELEM_KIT_END 3
+#define TOOL400_RANGE_ELEM_DB2_END 4
+#define TOOL400_RANGE_ATTR_KIT 5
+#define TOOL400_RANGE_ATTR_DB2 6
 #define TOOL400_RANGE_KEY_SPEC 7
 #define TOOL400_RANGE_HIGH 8
 
 
+/* == elements == */
 #define TOOL400_KEY_ELEM_BEG        0   /* key 'action' elem range */
-#define TOOL400_KEY_ELEM_RSV_BEG    0   /* toolkit beg action */
-#define TOOL400_KEY_ELEM_RSV_BEG2 399   /* toolkit beg action */
-#define TOOL400_KEY_ELEM_RSV_END  400   /* toolkit end action */
-#define TOOL400_KEY_ELEM_RSV_END2 799   /* toolkit end action */
-#define TOOL400_KEY_ELEM_USR_BEG  800   /* user beg elem */
-#define TOOL400_KEY_ELEM_USR_BEG2 899   /* user beg elem */
-#define TOOL400_KEY_ELEM_USR_END  900   /* user end elem */
-#define TOOL400_KEY_ELEM_USR_END2 999   /* user end elem */
+#define TOOL400_KEY_ELEM_KIT_BEG    0   /* toolkit beg action (000 - 099) */
+#define TOOL400_KEY_ELEM_KIT_END  100   /* toolkit end action (100 - 199) */
+#define TOOL400_KEY_ELEM_DB2_BEG  800   /* db2 beg elem (800 - 899) */
+#define TOOL400_KEY_ELEM_DB2_END  900   /* db2 end elem (900 - 999) */
 #define TOOL400_KEY_ELEM_END      999   /* key 'action' elem range */
 
-#define TOOL400_KEY_ATTR_BEG     1000   /* attribute range */
-#define TOOL400_KEY_ATTR_RSV_BEG 1000   /* toolkit beg attribute */
-#define TOOL400_KEY_ATTR_RSV_END 1799   /* toolkit end attribute */
-#define TOOL400_KEY_ATTR_USR_BEG 1800   /* user beg attribute */
-#define TOOL400_KEY_ATTR_USR_END 1899   /* user end attribute */
+/* == attributes == */
+#define TOOL400_KEY_ATTR_BEG     1000   /* attribute range (1000-1999) */
+#define TOOL400_KEY_ATTR_KIT_BEG 1000   /* toolkit beg attribute (1000-1099) */
+#define TOOL400_KEY_ATTR_DB2_BEG 1800   /* db2 beg attribute (1800-1899) */
 #define TOOL400_KEY_ATTR_END     1999   /* attribute range */
 
-#define TOOL400_KEY_SPEC_BEG     2000   /* special attribute range */
+/* == special == */
+#define TOOL400_KEY_SPEC_BEG     2000   /* special attribute range (2000 - 2099) */
 #define TOOL400_KEY_ARY_BEG      2071   /*"["*/
 #define TOOL400_KEY_ARY_SEP      2072   /*","*/
 #define TOOL400_KEY_ARY_END      2073   /*"]"*/
-#define TOOL400_KEY_SEPC_END     2999   /* special attribute range */
+#define TOOL400_KEY_SEPC_END     2099   /* special attribute range */
 
 #define TOOL400_KEY_HIGH         9000   /* everything above parser only range (remove before call) */
 
@@ -77,28 +74,21 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 */
 #define TOOL400_ATTR_MAX          9     /* max 9 attributes per element (TOOL400_KEY_PGM, etc.) */
 
-#define TOOL400_KEY_QUERY        10     /*"query": */
-#define TOOL400_QUERY_STMT     1011     /*"stmt":"select * from animals where breed=?"*/
-#define TOOL400_KEY_END_QUERY   410     /*"end"*/
 
-#define TOOL400_KEY_PARM         20     /*"parm": */
-#define TOOL400_PARM_VALUE     1021     /*"value":"fox"*/
-#define TOOL400_KEY_END_PARM    420     /*"end"*/
+/* === shell === */
 
-#define TOOL400_KEY_FETCH        30     /*"fetch": */
-#define TOOL400_FETCH_REC      1031     /*"rec":"all"*/
-#define TOOL400_KEY_END_FETCH   430     /*"end"*/
-
+/* === cmd === */
 #define TOOL400_KEY_CMD          40     /*"cmd"*/
 #define TOOL400_CMD_EXEC       1041     /*"exec":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"*/
-#define TOOL400_KEY_END_CMD     440     /*"end"*/
+#define TOOL400_KEY_END_CMD     140     /*"end"*/
 
+/* === pgm === */
 #define TOOL400_KEY_PGM          50     /*"pgm"*/
 #define TOOL400_PGM_NAME       1051     /*"name":"MYPGM"*/
 #define TOOL400_PGM_LIB        1052     /*"lib":"*LIBL"*/
 #define TOOL400_PGM_FUNC       1053     /*"func":"MYFUNC" (SRVPGM function)*/
 #define TOOL400_PGM_DEBUG      1054     /*"debugpgm":"stopped in qsysopr" (qsysopr message)*/
-#define TOOL400_KEY_END_PGM     450     /*"end"*/
+#define TOOL400_KEY_END_PGM     150     /*"end"*/
 
 #define TOOL400_KEY_DCL_DS       60     /*"ds"*/
 #define TOOL400_DS_NAME        1061     /*"name":"my_ds_t"*/
@@ -123,7 +113,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * character - *blanks end output array element
                                          * numeric   - zero end output array element
                                          */
-#define TOOL400_KEY_END_DS      460     /*"end"*/
+#define TOOL400_KEY_END_DS      160     /*"end"*/
 
 #define TOOL400_KEY_DCL_S        70     /*"s"*/
 #define TOOL400_S_NAME         1071     /*"name":"myvar"*/
@@ -132,7 +122,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_S_BY           1074     /*"by":"in|out|both|value|const|return"*/
 #define TOOL400_S_VALUE        1075     /*"value":"42" */
 #define TOOL400_S_SETLEN       1076     /*"setlen":"TOOL400_DS_NAME" (search name ds, calc length, setlen) */
-#define TOOL400_KEY_END_S       470     /*"end"*/
+#define TOOL400_KEY_END_S       170     /*"end"*/
                                         /* -- types --
                                          * "5a"    char(5)         char a[5]
                                          * "5av2"  varchar(5:2)    struct varchar{short,a[5]}
@@ -154,21 +144,39 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * "12s2"  zoned(12:2)     (no c equiv)
                                          * "8h"    hole            hole
                                          */
-#define TOOL400_KEY_CONN         90     /*"connect":*/
-#define TOOL400_CONN_DB        1091     /*"database":"*LOCAL"*/
-#define TOOL400_CONN_UID       1092     /*"name":"MYUSER"*/
-#define TOOL400_CONN_PWD       1093     /*"password":"MYPWD"*/
-#define TOOL400_CONN_LIBL      1094     /*"libl":"MYLIB YOURLIB"*/
-#define TOOL400_CONN_CURLIB    1095     /*"curlib":"MYLIB"*/
-#define TOOL400_CONN_QUAL      1096     /*"qual":"myper1" (persistent connection) */
-#define TOOL400_CONN_ISOLATION 1097     /*"isolation":
+
+
+
+/* === db2 === */
+#define TOOL400_KEY_CONN        810     /*"connect":*/
+#define TOOL400_CONN_DB        1811     /*"database":"*LOCAL"*/
+#define TOOL400_CONN_UID       1812     /*"name":"MYUSER"*/
+#define TOOL400_CONN_PWD       1813     /*"password":"MYPWD"*/
+#define TOOL400_CONN_LIBL      1814     /*"libl":"MYLIB YOURLIB"*/
+#define TOOL400_CONN_CURLIB    1815     /*"curlib":"MYLIB"*/
+#define TOOL400_CONN_QUAL      1816     /*"qual":"myper1" (persistent connection) */
+#define TOOL400_CONN_ISOLATION 1817     /*"isolation":
                                          *  "nc" - SQL_TXN_NO_COMMIT (No Commit)
                                          *  "uc" - SQL_TXN_READ_UNCOMMITTED (Uncommitted Read)
                                          *  "cs" - SQL_TXN_READ_COMMITTED (Cursor Stability)
                                          *  "rr" - SQL_TXN_REPEATABLE_READ (Repeatable Read )
                                          *  "rs" - SQL_TXN_SERIALIZABLE (Read Stability)
                                          */
-#define TOOL400_KEY_END_CONN    490     /*"end"*/
+#define TOOL400_KEY_END_CONN    910     /*"end"*/
+
+
+#define TOOL400_KEY_QUERY       820     /*"query": */
+#define TOOL400_QUERY_STMT     1821     /*"stmt":"select * from animals where breed=?"*/
+#define TOOL400_KEY_END_QUERY   920     /*"end"*/
+
+#define TOOL400_KEY_PARM        830     /*"parm": */
+#define TOOL400_PARM_VALUE     1831     /*"value":"fox"*/
+#define TOOL400_KEY_END_PARM    930     /*"end"*/
+
+#define TOOL400_KEY_FETCH       840     /*"fetch": */
+#define TOOL400_FETCH_REC      1841     /*"rec":"all"*/
+#define TOOL400_KEY_END_FETCH   940     /*"end"*/
+
 
 /* other defines */
 #define TOOL400_EXPAND_CHAR 3

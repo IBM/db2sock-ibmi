@@ -322,28 +322,28 @@ tool_node_t * tool_node_elem_push(tool_struct_t * tool, int key, char * val, int
 
 int tool_key_range(int key) {
   int match = 0;
-  /*  toolkit node begin */
-  if ( (key >= TOOL400_KEY_ELEM_RSV_BEG && key <= TOOL400_KEY_ELEM_RSV_BEG2) ) {
-    match = TOOL400_RANGE_ELEM_RSV_BEG;
-  /*  toolkit node end */
-  } else if ( (key >= TOOL400_KEY_ELEM_RSV_END && key <= TOOL400_KEY_ELEM_RSV_END2) ) {
-    match = TOOL400_RANGE_ELEM_RSV_END;
-  /*  user node begin */
-  } else if ( (key >= TOOL400_KEY_ELEM_USR_BEG && key <= TOOL400_KEY_ELEM_USR_BEG2) ) {
-    match = TOOL400_RANGE_ELEM_USR_BEG;
-  /*  user node end */
-  } else if ( (key >= TOOL400_KEY_ELEM_USR_END && key <= TOOL400_KEY_ELEM_USR_END2) ) {
-    match = TOOL400_RANGE_ELEM_USR_END;
-  /* toolkit attribute */
-  } else  if ( (key >= TOOL400_KEY_ATTR_RSV_BEG && key <= TOOL400_KEY_ATTR_RSV_END) ) {
-    match = TOOL400_RANGE_ATTR_RSV;
-  /* user attribute */
-  } else  if ( (key >= TOOL400_KEY_ATTR_USR_BEG && key <= TOOL400_KEY_ATTR_USR_END) ) {
-    match = TOOL400_RANGE_ATTR_USR;
-  /* special attr */
-  } else  if ( (key >= TOOL400_KEY_SPEC_BEG && key <= TOOL400_KEY_SEPC_END) ) {
+  /*  toolkit node begin (0..99) */
+  if ( (key >= TOOL400_KEY_ELEM_KIT_BEG && key < TOOL400_KEY_ELEM_KIT_BEG + 100) ) {
+    match = TOOL400_RANGE_ELEM_KIT_BEG;
+  /*  toolkit node end (199..199) */
+  } else if ( (key >= TOOL400_KEY_ELEM_KIT_END && key < TOOL400_KEY_ELEM_KIT_END + 100) ) {
+    match = TOOL400_RANGE_ELEM_KIT_END;
+  /*  db2 node begin (800..899)*/
+  } else if ( (key >= TOOL400_KEY_ELEM_DB2_BEG && key < TOOL400_KEY_ELEM_DB2_BEG + 100) ) {
+    match = TOOL400_RANGE_ELEM_DB2_BEG;
+  /*  db2 node end (900-999) */
+  } else if ( (key >= TOOL400_KEY_ELEM_DB2_END && key < TOOL400_KEY_ELEM_DB2_END + 100) ) {
+    match = TOOL400_RANGE_ELEM_DB2_END;
+  /* toolkit attribute (1000..1099) */
+  } else  if ( (key >= TOOL400_KEY_ATTR_KIT_BEG && key < TOOL400_KEY_ATTR_KIT_BEG + 100) ) {
+    match = TOOL400_RANGE_ATTR_KIT;
+  /* db2 attribute (1800..1899) */
+  } else  if ( (key >= TOOL400_KEY_ATTR_DB2_BEG && key < TOOL400_KEY_ATTR_DB2_BEG + 100) ) {
+    match = TOOL400_RANGE_ATTR_DB2;
+  /* special attr (2000..2099) */
+  } else  if ( (key >= TOOL400_KEY_SPEC_BEG && key < TOOL400_KEY_SPEC_BEG + 100) ) {
     match = TOOL400_RANGE_KEY_SPEC;
-  /* parser only (not toolkit) */
+  /* parser only, not toolkit (9000+) */
   } else  if ( key >= TOOL400_KEY_HIGH ) {
     match = TOOL400_RANGE_HIGH;
   }
@@ -410,16 +410,12 @@ tool_node_t * tool_node_add(tool_struct_t * tool, int key, char *val, int ord) {
 
   range = tool_key_range(key);
   switch (range) {
-  case TOOL400_RANGE_ELEM_RSV_BEG:
-  case TOOL400_RANGE_ELEM_USR_BEG:
-  case TOOL400_RANGE_ELEM_RSV_END:
-  case TOOL400_RANGE_ELEM_USR_END:
+  case TOOL400_RANGE_ELEM_KIT_BEG:
+  case TOOL400_RANGE_ELEM_DB2_BEG:
+  case TOOL400_RANGE_ELEM_KIT_END:
+  case TOOL400_RANGE_ELEM_DB2_END:
     node = tool_node_elem_push(tool, key, val, size, ord);
     break;
-  case TOOL400_RANGE_ATTR_RSV:
-  case TOOL400_RANGE_ATTR_USR:
-  case TOOL400_RANGE_KEY_SPEC:
-  case TOOL400_RANGE_HIGH:
   default:
     break;
   }
@@ -428,78 +424,18 @@ tool_node_t * tool_node_add(tool_struct_t * tool, int key, char *val, int ord) {
 }
 
 int tool_key_match_beg_2_end(int key) {
-  int match = 0;
-  int range = 0;
-  range = tool_key_range(key);
-  switch (range) {
-  case TOOL400_RANGE_ELEM_RSV_BEG:
-    match = key + (TOOL400_KEY_ELEM_RSV_END - TOOL400_KEY_ELEM_RSV_BEG);
-    break;
-  case TOOL400_RANGE_ELEM_USR_BEG:
-    match = key + (TOOL400_KEY_ELEM_USR_END - TOOL400_KEY_ELEM_USR_BEG);
-    break;
-  case TOOL400_RANGE_ELEM_RSV_END:
-  case TOOL400_RANGE_ELEM_USR_END:
-  case TOOL400_RANGE_ATTR_RSV:
-  case TOOL400_RANGE_ATTR_USR:
-  case TOOL400_RANGE_KEY_SPEC:
-  case TOOL400_RANGE_HIGH:
-  default:
-    break;
-  }
-  return match;
+  return key + 100;
 }
 
 int tool_key_match_end_2_beg(int key) {
-  int match = 0;
-  int range = 0;
-  range = tool_key_range(key);
-  switch (range) {
-  case TOOL400_RANGE_ELEM_RSV_BEG:
-  case TOOL400_RANGE_ELEM_USR_BEG:
-    break;
-  case TOOL400_RANGE_ELEM_RSV_END:
-    match = key - (TOOL400_KEY_ELEM_RSV_END - TOOL400_KEY_ELEM_RSV_BEG);
-    break;
-  case TOOL400_RANGE_ELEM_USR_END:
-    match = key - (TOOL400_KEY_ELEM_USR_END - TOOL400_KEY_ELEM_USR_BEG);
-    break;
-  case TOOL400_RANGE_ATTR_RSV:
-  case TOOL400_RANGE_ATTR_USR:
-  case TOOL400_RANGE_KEY_SPEC:
-  case TOOL400_RANGE_HIGH:
-  default:
-    break;
-  }
-  return match;
+  return key - 100;
 }
 
 int tool_key_match_attr_2_beg(int key) {
   int match = 0;
-  int range = 0;
-  int tmp = 0;
-  range = tool_key_range(key);
-  switch (range) {
-  case TOOL400_RANGE_ELEM_RSV_BEG:
-  case TOOL400_RANGE_ELEM_USR_BEG:
-  case TOOL400_RANGE_ELEM_RSV_END:
-  case TOOL400_RANGE_ELEM_USR_END:
-    break;
-  case TOOL400_RANGE_ATTR_RSV:
-    tmp = (key - (TOOL400_KEY_ATTR_RSV_BEG - TOOL400_KEY_ELEM_RSV_BEG));
-    tmp -= tmp % 10;
-    match = tmp;
-    break;
-  case TOOL400_RANGE_ATTR_USR:
-    tmp = (key - (TOOL400_KEY_ATTR_USR_BEG - TOOL400_KEY_ELEM_USR_BEG));
-    tmp -= tmp % 10;
-    match = tmp;
-    break;
-  case TOOL400_RANGE_KEY_SPEC:
-  case TOOL400_RANGE_HIGH:
-  default:
-    break;
-  }
+  int tmp = key - 1000;
+  tmp -= tmp % 10;
+  match = tmp;
   return match;
 }
 

@@ -25,9 +25,9 @@ static char stilde;
  * json <map> toolkit keys
  * ==========================
  */
-/* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"*libl","curlib":"curlib"}} */
+/* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"mylib yourlib","curlib":"mylib"}} */
 char * json_conn_attr [] = {"db","uid","pwd","qual","iso","libl","curlib", NULL};
-int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL400_CONN_QUAL,TOOL400_CONN_LIBL,TOOL400_CONN_ISOLATION,TOOL400_CONN_CURLIB};
+int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL400_CONN_QUAL,TOOL400_CONN_ISOLATION,TOOL400_CONN_LIBL, TOOL400_CONN_CURLIB};
 /* {"pgm":{"name":"MYPGM","lib":"MYLIB","func":"MyFunc","debugpgm":"stopped in qsysopr"}} */
 char * json_pgm_attr [] = {"name","lib","func","debugpgm", NULL};
 int json_pgm_tool [] = {TOOL400_PGM_NAME,TOOL400_PGM_LIB,TOOL400_PGM_FUNC,TOOL400_PGM_DEBUG};
@@ -607,17 +607,17 @@ void json_tkit(tool_struct_t *tool, int max, json_key_t * bigkey) {
       json_dump_one("json_tkit(1)", lvl1, key1, val1);
       range = tool_key_range(key1);
       switch (range) {
-      case TOOL400_RANGE_ELEM_RSV_BEG:
-      case TOOL400_RANGE_ELEM_USR_BEG:
+      case TOOL400_RANGE_ELEM_KIT_BEG:
+      case TOOL400_RANGE_ELEM_DB2_BEG:
         json_dump_one("json_tkit(2)", lvl1, key1, val1);
         node = tool_node_beg(tool, key1, lvl1);
         break;
-      case TOOL400_RANGE_ELEM_RSV_END:
-      case TOOL400_RANGE_ELEM_USR_END:
+      case TOOL400_RANGE_ELEM_KIT_END:
+      case TOOL400_RANGE_ELEM_DB2_END:
         node = tool_node_end(tool, node, key1, lvl1);
         break;
-      case TOOL400_RANGE_ATTR_RSV:
-      case TOOL400_RANGE_ATTR_USR:
+      case TOOL400_RANGE_ATTR_KIT:
+      case TOOL400_RANGE_ATTR_DB2:
         node = tool_node_attr(tool, node, key1, val1, lvl1);
         break;
       case TOOL400_RANGE_KEY_SPEC:

@@ -3,6 +3,9 @@
 
 #include <qp2user.h>
 
+/* This module is only used ILE compile.
+ */
+
 #ifndef ILEpointer
 typedef void * ILEpointer;
 #endif

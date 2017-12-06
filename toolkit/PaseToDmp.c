@@ -166,18 +166,14 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ARY_END", val);
       break;
 
-    case TOOL400_KEY_ATTR_RSV_BEG:
-      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_RSV_BEG", val);
+    case TOOL400_KEY_ATTR_KIT_BEG:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_KIT_BEG", val);
       break;
-    case TOOL400_KEY_ATTR_RSV_END:
-      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ATTR_RSV_END", val);
-      break;
+
     case TOOL400_KEY_SPEC_BEG:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_SPEC_BEG", val);
       break;
-    case TOOL400_KEY_SEPC_END:
-      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_SEPC_END", val);
-      break;
+
     case TOOL400_KEY_HIGH:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_HIGH", val);
       break;
