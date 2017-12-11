@@ -10,11 +10,21 @@ if [ ! -d /QSYS.LIB ]; then
 fi
 echo "== CHROOT ($CHROOT) =="
 
+
 if [ "x$ILELIB" = "x" ]; then 
-  ILELIB="DB2JSON"
-  export ILELIB="$ILELIB"
+    echo "ILELIB not set  (export ILELIB=DB2JSON)"
+    exit
 fi
 echo "== ILELIB ($ILELIB) =="
+
+if [ ! -f /QOpenSys/usr/bin/crtrpgmod ]; then
+    echo "borgi utility /QOpenSys/usr/bin/crtrpgmod not found"
+    echo "project borgi required for ILE Makefile compiles"
+    echo "( download src https://bitbucket.org/litmis/borgi )"
+    echo "( pre-compiled http://yips.idevcloud.com/wiki/index.php/Databases/Borgi )"
+    exit
+fi
+echo "== project borgi ok /QOpenSys/usr/bin/crtrpgmod (https://bitbucket.org/litmis/borgi) =="
 
 echo "====================================================="
 echo "====================================================="
