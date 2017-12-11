@@ -22,7 +22,7 @@ Run driver tests_json ...
 > php run_ibm_db2_io.php
 > php run_odbc.php
 > php run_odbc.php
-> php test4000_sql400cgi_basic_auth.php
+> php run_cgi_basic_auth.php
 
 Note: Basic auth is ignored by nginx (do not have to change).
 
