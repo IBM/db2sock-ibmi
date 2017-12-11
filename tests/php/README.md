@@ -6,7 +6,7 @@ php tests.
 
 # run
 ```
-> export PHP_URL=http://ut28p63/db2/db2json.pgm  (ILE-CGI - works partial)
+> export PHP_URL=http://myibmi/db2/db2json.pgm  (ILE-CGI - works partial)
 > export PHP_URL=http://myibmi/db2json.db2  (fastcgi- apache or nginx - works good)
 --- optional ---
 > export PHP_DB=MYIBMI (*LOCAL)
