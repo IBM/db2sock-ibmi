@@ -35,6 +35,14 @@ cd ..
 
 echo "====================================================="
 echo "====================================================="
+echo "== toolkit/rexx $ILELIB/QREXSRC.CMDIO (optional) ==="
+cd toolkit/rexx
+make rexx
+cd ../..
+
+
+echo "====================================================="
+echo "====================================================="
 echo "== toolkit/proc $ILELIB/db2proc.srvpgm (optional) ==="
 cd toolkit/proc
 make proc

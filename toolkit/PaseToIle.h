@@ -116,6 +116,7 @@ int ile_pgm_type_size(char typ, int tlen, int tdim, int tvary);
 int ile_pgm_by(char *str, char typ, int tlen, int tdim, int tvary, int isDs, int * spill_len, int * pase_sig);
 char * ile_pgm_parm_location(int isOut, int by, short sig, int tlen, ile_pgm_call_t * layout);
 void ile_pgm_trim_ebcdic(char *str, int len);
+void ile_pgm_trim_ascii(char *str, int len);
 char * ile_pgm_spill_top_buf(ile_pgm_call_t * layout);
 int ile_pgm_spill_top_offset(ile_pgm_call_t * layout);
 int ile_pgm_spill_length(ile_pgm_call_t * layout);

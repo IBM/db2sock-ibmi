@@ -21,6 +21,18 @@
 /*=================================================
  * toolkit copy in/out ILE parm layout
  */
+void ile_pgm_trim_ascii(char *str, int len) {
+  int j = 0;
+  char * c = NULL;
+  for (c = str, j = len - 1; j >= 0; j--) {
+    if (!c[j] || c[j] == 0x20) {
+      c[j] = 0x00;
+      len = j;
+    } else {
+      break;
+    }
+  }
+}
 
 void ile_pgm_trim_ebcdic(char *str, int len) {
   int j = 0;

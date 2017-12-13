@@ -48,9 +48,12 @@ int json_fetch_tool [] = {TOOL400_FETCH_REC};
 
 /* == toolkit cmd == */
 
-/* {"cmd":{"exec":"addlible mylib"}} */
-char * json_cmd_attr [] = {"exec",NULL};
-int json_cmd_tool [] = {TOOL400_CMD_EXEC};
+/* 
+ * {"cmd":{"exec":"addlible mylib"}}
+ * {"cmd":{"rexx":"RTVJOBA CCSID(?N) USRLIBL(?) SYSLIBL(?)"}}
+ */
+char * json_cmd_attr [] = {"exec","rexx",NULL};
+int json_cmd_tool [] = {TOOL400_CMD_EXEC, TOOL400_CMD_REXX};
 
 
 /* == toolkit pgm, srvpgm == */

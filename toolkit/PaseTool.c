@@ -1790,6 +1790,17 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   int max = 0;
   int go = 1;
   char * cmd = NULL;
+  int len = 0;
+  int fetch_odd = 0;
+  int fetch_recs = 0;
+  int isRexx = 0;
+  int lessEscapeQuotes = 0;
+  SQLHANDLE hstmt = 0;
+  SQLCHAR cmd_tmp[TOOL400_MAX_CMD_BUFF];
+  SQLCHAR query_string[TOOL400_MAX_CMD_BUFF];
+  SQLCHAR col_name[69];
+  SQLCHAR col_val[69];
+  SQLINTEGER col_len = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_cmd_struct_t * tcmd = (tool_key_cmd_struct_t *) node;
@@ -1808,9 +1819,22 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     lvl = node->ord;
     tool_dump_attr(sqlrc, "cmd_run(a)", i, lvl, key, val);
     switch (key) {
+    /* "exec":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"
+     */
     case TOOL400_CMD_EXEC:
       cmd = val;
       break;
+    /* "rexx":"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM('456 RTVJOBA CCSID(?N) USRLIBL(?)')"
+     * select * from db2json/out456
+     */
+    case TOOL400_CMD_REXX:
+      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
+      isRexx = hstmt;
+      memset(cmd_tmp,0,sizeof(cmd_tmp));
+      sprintf(cmd_tmp,"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM(''%d %s'')",isRexx,val);
+      ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
+      cmd = cmd_tmp;
+      lessEscapeQuotes = 2;
       break;
     default:
       break;
@@ -1819,7 +1843,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   /* output */
   tool_output_cmd_beg(tool, cmd);
   /* sql */
-  tcmd->cmd_len = strlen(cmd);
+  tcmd->cmd_len = strlen(cmd) - lessEscapeQuotes;
   memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
   sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
   /* statement */
@@ -1834,6 +1858,60 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
   }
   sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
+  /* rexx output */
+  if (isRexx && sqlrc == SQL_SUCCESS) {
+    /* query QTEMP.OUT456 */
+    memset(query_string,0,sizeof(query_string));
+    sprintf(query_string,"select SRCDTA from QTEMP.OUT%d",isRexx);
+    sqlrc = SQLExecDirect(hstmt, query_string, (SQLINTEGER)SQL_NTS);
+    col_len = sizeof(col_val);
+    memset(col_val,0,sizeof(col_val));
+    sqlrc = SQLBindCol((SQLHSTMT)hstmt,
+                         1,
+                         SQL_CHAR, 
+                         col_val,
+                         col_len,
+                         &col_len);
+    /* fetch */
+    memset(cmd_tmp,0,sizeof(cmd_tmp));
+    sqlrc = SQL_SUCCESS;
+    tool_output_record_array_beg(tool);
+    while (sqlrc == SQL_SUCCESS) {
+      col_len = sizeof(col_val);
+      memset(col_val,0,sizeof(col_val));
+      sqlrc = SQLFetch(hstmt);
+      if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+        if (!fetch_recs) {
+          tool_output_record_no_data_found(tool);
+        } else {
+          sqlrc = SQL_SUCCESS;
+        }
+        break;
+      }
+      fetch_recs += 1;
+      /* DEADBEEF remove */
+      memcpy(col_val,&col_val[8],sizeof(col_val)-9);
+      /* start name ("name":"value") */
+      if (strchr(col_val,':')) {
+        if (fetch_odd > 1) {
+          tool_output_record_row_beg(tool);
+          tool_output_record_name_value(tool, col_name, cmd_tmp, SQL_CHAR, col_len);
+          tool_output_record_row_end(tool);
+        }
+        fetch_odd = 1;
+        memcpy(col_name, col_val, sizeof(col_val));
+        ile_pgm_trim_ascii(col_name, sizeof(col_val));
+        len = strlen(col_name);
+        col_name[len-1] = 0x0;
+        memset(cmd_tmp,0,sizeof(cmd_tmp));
+      } else {
+        fetch_odd += 1;
+        strcat(cmd_tmp,col_val);
+        ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
+      }
+    } /* fetch loop */
+    tool_output_record_array_end(tool);
+  }   
   /* output */
   tool_output_cmd_end(tool);
   /* close */
@@ -1841,6 +1919,10 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, tcmd->hstmt);
   }
   tcmd->hstmt = 0;
+  if (hstmt) {
+    sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  }
+  hstmt = 0;
   return sqlrc;
 }
 
