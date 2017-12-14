@@ -16,9 +16,9 @@ line = V.dat
 line
 if RC <> 0 
 then do
-  say '            DEADBEEFerror:'
+  say '            DEADBEE:error'
   say '            DEADBEEF'||RC
-  say '            DEADBEEFREXXEOF:'
+  say '            DEADBEE:REXXEOF'
   say '            DEADBEEF'||RC
   exit
 end
@@ -30,13 +30,13 @@ then do
   end
 end
 else do
-  say '            DEADBEEFerror:'
+  say '            DEADBEE:error'
   say '            DEADBEEF'||line
-  say '            DEADBEEFREXXEOF:'
+  say '            DEADBEE:REXXEOF'
   say '            DEADBEEF'||RC
   exit
 end
-say '            DEADBEEFREXXEOF:'
+say '            DEADBEE:REXXEOF'
 say '            DEADBEEF'||RC
 exit
 keyparm:
@@ -64,8 +64,9 @@ keyparm:
   if name <> "nada" 
   then do
     pe = 40
+    gooy = "            DEADBEE:"
     goop = "            DEADBEEF"
-    say goop||name||':'
+    say gooy||name
     mydata = strip(data)
     len = length(mydata)
     do while (len > 0)

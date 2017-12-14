@@ -1783,7 +1783,7 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
 SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sqlrc1 = SQL_SUCCESS;
-  int i = 0;
+  int i = 0, j = 0;
   int key = 0;
   char * val = NULL;
   int lvl = 0;
@@ -1794,7 +1794,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   int fetch_odd = 0;
   int fetch_recs = 0;
   int isRexx = 0;
-  int lessEscapeQuotes = 0;
+  int isRexxError = 0;
   SQLHANDLE hstmt = 0;
   SQLCHAR cmd_tmp[TOOL400_MAX_CMD_BUFF];
   SQLCHAR query_string[TOOL400_MAX_CMD_BUFF];
@@ -1830,11 +1830,8 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     case TOOL400_CMD_REXX:
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
       isRexx = hstmt;
-      memset(cmd_tmp,0,sizeof(cmd_tmp));
-      sprintf(cmd_tmp,"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM(''%d %s'')",isRexx,val);
-      ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
-      cmd = cmd_tmp;
-      lessEscapeQuotes = 2;
+      sprintf(tcmd->cmd_buff,"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM('%d %s')",isRexx,val);
+      cmd = tcmd->cmd_buff;
       break;
     default:
       break;
@@ -1842,9 +1839,20 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   /* output */
   tool_output_cmd_beg(tool, cmd);
-  /* sql */
-  tcmd->cmd_len = strlen(cmd) - lessEscapeQuotes;
-  memset(tcmd->cmd_buff,0,TOOL400_MAX_CMD_BUFF);
+  /* sql actual len cmd (ignore escape quotes) */
+  tcmd->cmd_len = strlen(cmd);
+  /* escape single quotes */
+  memset(cmd_tmp,0,TOOL400_MAX_CMD_BUFF);
+  for (i=0, j=0; i < tcmd->cmd_len && j < TOOL400_MAX_CMD_BUFF; i++, j++) {
+    cmd_tmp[j] = cmd[i];
+    /* found single quote, add another single quote */
+    if (cmd_tmp[j] == '\'') {
+      j++;
+      cmd_tmp[j] = '\'';
+    }
+  }
+  cmd = cmd_tmp;
+  memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
   sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tcmd->hstmt);
@@ -1889,29 +1897,37 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         break;
       }
       fetch_recs += 1;
-      /* DEADBEEF remove */
-      memcpy(col_val,&col_val[8],sizeof(col_val)-9);
       /* start name ("name":"value") */
-      if (strchr(col_val,':')) {
+      if (col_val[7]==':') {
+        /* DEADBEE: remove */
+        memcpy(col_val,&col_val[8],sizeof(col_val)-9);
         if (fetch_odd > 1) {
           tool_output_record_row_beg(tool);
           tool_output_record_name_value(tool, col_name, cmd_tmp, SQL_CHAR, col_len);
           tool_output_record_row_end(tool);
+          /* rexx error? */
+          if (!strcmp(col_name,"error")) {
+            isRexxError = 1;
+          }
         }
         fetch_odd = 1;
         memcpy(col_name, col_val, sizeof(col_val));
         ile_pgm_trim_ascii(col_name, sizeof(col_val));
-        len = strlen(col_name);
-        col_name[len-1] = 0x0;
         memset(cmd_tmp,0,sizeof(cmd_tmp));
       } else {
+        /* DEADBEEF remove */
+        memcpy(col_val,&col_val[8],sizeof(col_val)-9);
         fetch_odd += 1;
         strcat(cmd_tmp,col_val);
         ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
       }
     } /* fetch loop */
     tool_output_record_array_end(tool);
-  }   
+  }
+  /* rexx errors ? */
+  if (isRexxError) {
+    sqlrc = tool_sql_errors(tool, hstmt, SQL_HANDLE_STMT, SQL_ERROR);
+  }
   /* output */
   tool_output_cmd_end(tool);
   /* close */
@@ -1920,6 +1936,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   tcmd->hstmt = 0;
   if (hstmt) {
+    /* mmm maybe should ... 'DLTF FILE(QTEMP/OUT'||V.id||')' */
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
   }
   hstmt = 0;
