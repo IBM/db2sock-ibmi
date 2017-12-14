@@ -78,6 +78,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_KEY_CMD          40     /*"cmd"*/
 #define TOOL400_CMD_EXEC       1041     /*"exec":"CHGLIBL LIBL(DB2JSON QTEMP) CURLIB(DB2JSON)"*/
 #define TOOL400_CMD_REXX       1042     /*"rexx":"RTVJOBA CCSID(?N) USRLIBL(?) SYSLIBL(?)"*/
+#define TOOL400_CMD_QSH        1043     /*"qsh":"ls -1 /home/adc"*/
 #define TOOL400_KEY_END_CMD     140     /*"end"*/
 
 /* === pgm === */
