@@ -25,7 +25,7 @@ helpile:
 	@echo "> $(MAKE) rexx"
 	@echo "------------------------------------------------------------"
 cpyrexx:
-	dltf --lib $(ILELIB) --file QREXSRC
+	-dltf --lib $(ILELIB) --file QREXSRC
 	crtsrcpf --lib $(ILELIB) --file QREXSRC --option "RCDLEN(92) MBR(*NONE) TEXT('rexx')"
 	cpyfrmstmf --from cmdio.rexx --to /qsys.lib/$(ILELIB).lib/QREXSRC.file/CMDIO.mbr --option "STMFCCSID(819) DBFCCSID(37)"
 
