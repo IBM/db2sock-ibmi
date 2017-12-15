@@ -21,6 +21,19 @@
 /*=================================================
  * toolkit copy in/out ILE parm layout
  */
+char * ile_pgm_find_new_line_ascii(char *str) {
+  int j = 0;
+  char * c = NULL;
+  for (c = str, j = 0; c[j]; j++) {
+    /* 819 LF or next line (1208 nexline C285) */
+    if (c[j] == 0x0A || c[j] == 0x85 || (c[j] == 0xC2 && c[j+1] == 0x85)) {
+      return &c[j];
+    }
+  }
+  return NULL;
+}
+
+
 void ile_pgm_trim_ascii(char *str, int len) {
   int j = 0;
   char * c = NULL;

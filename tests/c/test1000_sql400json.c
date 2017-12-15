@@ -56,6 +56,8 @@ int main(int argc, char * argv[]) {
   /* test */
   printf("input(%d):\n%s\n",inlen,injson);
 
+  /* sqlrc = SQLOverrideCCSID400( 1208 ); */
+
   /* json call (hdbc=0 - json handles connection) */
   sqlrc = SQL400Json(0, injson, inlen, outjson, outlen);
   printf("output(%d):\n%s\n\n",strlen(outjson),outjson);

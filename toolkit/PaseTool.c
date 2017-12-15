@@ -1973,7 +1973,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       strcat(cmd_tmp,col_val);
       /* find ascii LF for rows */
       lastLF = cmd_tmp;
-      posLF = strchr(lastLF,0x0A); 
+      posLF = ile_pgm_find_new_line_ascii(lastLF); 
       while (posLF) {
         isQshRow++;
         memset(qshRow,0,sizeof(qshRow));
@@ -1984,7 +1984,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         tool_output_record_name_value(tool, qshRow, lastLF, SQL_CHAR, isQshLen);
         tool_output_record_row_end(tool);
         lastLF = posLF + 1;
-        posLF = strchr(lastLF,0x0A); 
+        posLF = ile_pgm_find_new_line_ascii(lastLF); 
       }
       /* shift remain data */
       posLF = lastLF;
