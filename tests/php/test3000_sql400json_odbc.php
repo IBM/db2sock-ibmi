@@ -44,12 +44,15 @@ $clob = trim($clob);
 var_dump($clob);
 
 $sqlrc = 0;
-$tok = strtok($string, "\n");
+$tok = strtok($clobexp, "\n");
 while ($tok !== false) {
-  if (!strpos($clob,$tok)) {
+  $pos = strpos($clob,$tok);
+  if ($pos === false) {
     print("fail missing ". $tok . "\n");
-    $sqlrc = 0;
+    $sqlrc = -1;
     break;
+  } else {
+    $sqlrc = 0;
   }
   $tok = strtok("\n");
 }
