@@ -192,7 +192,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 /* error */
 #define TOOL400_JOBLOG_MAX_COLS 15
 #define TOOL400_JOBLOG_MAX_SIZE 200
-#define TOOL400_JOBLOG_MAX_REC 4
+#define TOOL400_JOBLOG_MAX_REC 30
 
 
 /*
