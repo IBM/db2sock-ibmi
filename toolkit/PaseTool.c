@@ -579,8 +579,8 @@ void tool_output_script_beg(tool_struct_t *tool) {
 void tool_output_script_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_script_end(tool->curr, tool->outarea, tool->outareaLen);
 }
-void tool_output_query_beg(tool_struct_t *tool, char *query) {
-  tool->outareaLen = tool->output_query_beg(tool->curr, tool->outarea, tool->outareaLen, query);
+void tool_output_query_beg(tool_struct_t *tool, char *query, int stmt) {
+  tool->outareaLen = tool->output_query_beg(tool->curr, tool->outarea, tool->outareaLen, query, stmt);
 }
 void tool_output_query_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_query_end(tool->curr, tool->outarea, tool->outareaLen);
@@ -2202,6 +2202,7 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
   while (sqlrc == SQL_SUCCESS) {
     sqlrc = SQLFetch(tqry->hstmt);
     if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+      tqry->stmt_close = 1;
       if (!fetch_recs) {
         tool_output_record_no_data_found(tool);
       } else {
@@ -2217,6 +2218,11 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
       }
     }
     tool_output_record_row_end(tool);
+    /* below count requested records (pagination) */
+    if (!tqry->stmt_recs || fetch_recs < tqry->stmt_recs) {
+      continue;
+    }
+    break;
   } /* fetch loop */
   tool_output_record_array_end(tool);
   /* clean up col names */
@@ -2259,6 +2265,13 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLSMALLINT parm_data_type = 0;
   SQLSMALLINT parm_nullable = 0;
 
+  /* close stmt at end? */
+  if (tconn->presistent) {
+    tqry->stmt_close = 0;
+  } else {
+    tqry->stmt_close = 1;
+  }
+
   /* current node (output) */
   tool->curr = node;
 
@@ -2272,172 +2285,192 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     case TOOL400_QUERY_STMT:
       query = val;
       break;
+    case TOOL400_QUERY_HNDL:
+      tqry->hstmt = ile_pgm_char_2_int(val, strlen(val), 0);
     default:
       break;
     }
   }
-  /* no query */
-  if (!query) {
+  /* no query, no handle */
+  if (!query && !tqry->hstmt) {
     return sqlrc;
   }
+  /* need hstmt */
+  if (!tqry->hstmt) {
+    /* statement */
+    sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
+  }
   /* output */
-  tool_output_query_beg(tool, query);  
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tqry->hstmt);
-  /* prepare */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
-  }
-  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
-
-  /* parms? */
-  memset(parm_len, 0, sizeof(parm_len));
-  if (tqry->hstmt) {
-    sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
-  }
-  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
-  /* query parms */
-  if (!node_next) {
-    node_next = node->next;
-  }
-  for (i=0, go = 1, node = node_next, node_next = NULL; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
-    key = node->key;
-    val = node->val;
-    lvl = node->ord;
-    if (!max) {
-      max = node->ord;
+  tool_output_query_beg(tool, query, tqry->hstmt);
+  if (query) {  
+    /* prepare */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);
     }
-    if (lvl > max) {
-      continue;
+    sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+  
+    /* parms? */
+    memset(parm_len, 0, sizeof(parm_len));
+    if (tqry->hstmt) {
+      sqlrc = SQLNumParams((SQLHSTMT)tqry->hstmt, (SQLSMALLINT*)&parm_max);
     }
-    *curr_node = node;
-    /* current node (output) */
-    tool->curr = node;
-    tool_dump_beg(sqlrc, "query_parm", i, lvl, key, val);
-    switch (key) {
-    case TOOL400_KEY_PARM:
-      /* query parm attributes (parser order 1st) */
-      for (j=0, query_val = NULL; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
-        key = node->akey[j];
-        val = node->aval[j];
+    sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+    /* query parms */
+    if (!node_next) {
+      node_next = node->next;
+    }
+    if (node_next->key != TOOL400_KEY_PARM) {
+      node_next = NULL;
+    } else { 
+      for (i=0, go = 1, node = node_next, node_next = NULL; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
+        key = node->key;
+        val = node->val;
         lvl = node->ord;
-        tool_dump_beg(sqlrc, "query_parm(a)", j, lvl, key, val);
+        if (!max) {
+          max = node->ord;
+        }
+        if (lvl > max) {
+          continue;
+        }
+        *curr_node = node;
+        /* current node (output) */
+        tool->curr = node;
+        tool_dump_beg(sqlrc, "query_parm", i, lvl, key, val);
         switch (key) {
-        case TOOL400_PARM_VALUE:
-          query_val = val;
+        case TOOL400_KEY_PARM:
+          /* query parm attributes (parser order 1st) */
+          for (j=0, query_val = NULL; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
+            key = node->akey[j];
+            val = node->aval[j];
+            lvl = node->ord;
+            tool_dump_beg(sqlrc, "query_parm(a)", j, lvl, key, val);
+            switch (key) {
+            case TOOL400_PARM_VALUE:
+              query_val = val;
+              break;
+            default:
+              break;
+            }
+            tool_dump_end(sqlrc, "query_parm2(a)", j, lvl, key, val);
+          }
+          if (query_val && parm_cnt <= parm_max) {
+            sqlrc = SQLDescribeParam((SQLHSTMT)tqry->hstmt, 
+                    (SQLUSMALLINT)parm_cnt + 1, /* running count */
+                    &parm_data_type, 
+                    &parm_precision,
+                    &parm_scale,
+                    &parm_nullable);
+            parm_len[parm_cnt] = SQL_NTS;
+            sqlrc = SQLBindParameter((SQLHSTMT)tqry->hstmt,
+                    (SQLUSMALLINT)parm_cnt + 1,
+                    SQL_PARAM_INPUT,
+                    SQL_CHAR,
+                    parm_data_type,
+                    parm_precision,
+                    parm_scale,
+                    query_val, /* input value */
+                    0,
+                    &parm_len[parm_cnt] /* in/out length (above) */
+                    );
+            parm_cnt++;
+          }
+          break;
+        case TOOL400_KEY_END_PARM:
+          node_next = (tool_node_t *)node->next;
+          if (!node_next || node_next->key != TOOL400_KEY_PARM) {
+            go = 0;
+          }
           break;
         default:
           break;
         }
-        tool_dump_end(sqlrc, "query_parm2(a)", j, lvl, key, val);
+        tool_dump_end(sqlrc, "query_parm_end", i, lvl, key, val);
       }
-      if (query_val && parm_cnt <= parm_max) {
-        sqlrc = SQLDescribeParam((SQLHSTMT)tqry->hstmt, 
-                (SQLUSMALLINT)parm_cnt + 1, /* running count */
-                &parm_data_type, 
-                &parm_precision,
-                &parm_scale,
-                &parm_nullable);
-        parm_len[parm_cnt] = SQL_NTS;
-        sqlrc = SQLBindParameter((SQLHSTMT)tqry->hstmt,
-                (SQLUSMALLINT)parm_cnt + 1,
-                SQL_PARAM_INPUT,
-                SQL_CHAR,
-                parm_data_type,
-                parm_precision,
-                parm_scale,
-                query_val, /* input value */
-                0,
-                &parm_len[parm_cnt] /* in/out length (above) */
-                );
-        parm_cnt++;
+      /* parms error */
+      if (sqlrc == SQL_ERROR) {
+        /* output */
+        tool_output_query_end(tool);  
+        return sqlrc;
       }
-      break;
-    case TOOL400_KEY_END_PARM:
-      node_next = (tool_node_t *)node->next;
-      if (!node_next || node_next->key != TOOL400_KEY_PARM) {
-        go = 0;
-      }
-      break;
-    default:
-      break;
+    } /* TOOL400_KEY_PARM */
+  
+    /* execute */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
     }
-    tool_dump_end(sqlrc, "query_parm_end", i, lvl, key, val);
-  }
-  /* parms error */
-  if (sqlrc == SQL_ERROR) {
-    /* output */
-    tool_output_query_end(tool);  
-    return sqlrc;
-  }
-
-  /* execute */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLExecute((SQLHSTMT)tqry->hstmt);
-  }
-  sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
-  /* execute error */
-  if (sqlrc == SQL_ERROR) {
-    /* output */
-    tool_output_query_end(tool);  
-    return sqlrc;
-  }
+    sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+    /* execute error */
+    if (sqlrc == SQL_ERROR) {
+      /* output */
+      tool_output_query_end(tool);  
+      return sqlrc;
+    }
+  } /* if (query) */
 
   /* query children (parser order next) */
   if (!node_next) {
     node_next = node->next;
   }
-  for (i=0, go = 1, node = node_next, node_next = NULL; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
-    key = node->key;
-    val = node->val;
-    lvl = node->ord;
-    if (!max) {
-      max = node->ord;
-    }
-    if (lvl > max) {
-      continue;
-    }
-    *curr_node = node;
-    /* current node (output) */
-    tool->curr = node;
-    tool_dump_beg(sqlrc, "query_fetch", i, lvl, key, val);
-    switch (key) {
-    case TOOL400_KEY_FETCH:
-      /* query parm attributes (parser order 1st) */
-      for (j=0, query_fetch = NULL; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
-        key = node->akey[j];
-        val = node->aval[j];
-        lvl = node->ord;
-        tool_dump_beg(sqlrc, "query_fetch(a)", j, lvl, key, val);
-        switch (key) {
-        case TOOL400_FETCH_REC:
-          query_fetch = val;
-          break;
-        default:
-          break;
+  if (node_next->key != TOOL400_KEY_FETCH) {
+    node_next = NULL;
+  } else {
+    for (i=0, go = 1, node = node_next, node_next = NULL; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
+      key = node->key;
+      val = node->val;
+      lvl = node->ord;
+      if (!max) {
+        max = node->ord;
+      }
+      if (lvl > max) {
+        continue;
+      }
+      *curr_node = node;
+      /* current node (output) */
+      tool->curr = node;
+      tool_dump_beg(sqlrc, "query_fetch", i, lvl, key, val);
+      switch (key) {
+      case TOOL400_KEY_FETCH:
+        /* query parm attributes (parser order 1st) */
+        for (j=0, query_fetch = NULL; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
+          key = node->akey[j];
+          val = node->aval[j];
+          lvl = node->ord;
+          tool_dump_beg(sqlrc, "query_fetch(a)", j, lvl, key, val);
+          switch (key) {
+          case TOOL400_FETCH_REC:
+            query_fetch = val;
+            if (val[0]=='a' || val[0]=='A') {
+              tqry->stmt_recs = 0;
+            } else {
+              tqry->stmt_recs = ile_pgm_char_2_int(val, strlen(val), 0);
+            }
+            break;
+          default:
+            break;
+          }
+          tool_dump_end(sqlrc, "query_fetch(a)", j, lvl, key, val);
         }
-        tool_dump_end(sqlrc, "query_fetch(a)", j, lvl, key, val);
+        /* fetch not complete */
+         if (query_fetch) {
+          sqlrc = tool_key_fetch_run(tool, tqry);
+        }
+        break;
+      case TOOL400_KEY_END_FETCH:
+        node_next = (tool_node_t *)node->next;
+        if (!node_next || node_next->key != TOOL400_KEY_FETCH) {
+          go = 0;
+        }
+        break;
+      default:
+        break;
       }
-      /* fetch not complete */
-      if (query_fetch) {
-        sqlrc = tool_key_fetch_run(tool, tqry);
-      }
-      break;
-    case TOOL400_KEY_END_FETCH:
-      node_next = (tool_node_t *)node->next;
-      if (!node_next || node_next->key != TOOL400_KEY_FETCH) {
-        go = 0;
-      }
-      break;
-    default:
-      break;
+      tool_dump_end(sqlrc, "query_fetch_end", i, lvl, key, val);
     }
-    tool_dump_end(sqlrc, "query_fetch_end", i, lvl, key, val);
-  }
+  } /* TOOL400_KEY_FETCH */
   /* output */
   tool_output_query_end(tool);  
   /* close */
-  if (tqry->hstmt) {
+  if (tqry->hstmt && tqry->stmt_close) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, tqry->hstmt);
     tqry->hstmt = 0;
   }

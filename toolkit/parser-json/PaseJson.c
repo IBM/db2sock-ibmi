@@ -38,8 +38,8 @@ int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL4
         {"fetch":[{"rec":"all"}]}
        ]} 
 */
-char * json_query_attr [] = {"stmt",NULL};
-int json_query_tool [] = {TOOL400_QUERY_STMT};
+char * json_query_attr [] = {"stmt","handle",NULL};
+int json_query_tool [] = {TOOL400_QUERY_STMT,TOOL400_QUERY_HNDL};
 char * json_parm_attr [] = {"value",NULL};
 int json_parm_tool [] = {TOOL400_PARM_VALUE};
 char * json_fetch_attr [] = {"rec",NULL};
@@ -199,10 +199,13 @@ int json_output_script_end(tool_node_t *tool, char *out_caller, int outLen) {
   return retLen;
 }
 
-int json_output_query_beg(tool_node_t *tool, char *out_caller, int outLen, char * query) {
+int json_output_query_beg(tool_node_t *tool, char *out_caller, int outLen, char * query, int stmt) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-      "%c\"query\":%c\"%s\"",sopen_bracket,sopen_brace, query);
+      "%c\"query\":%c%c\"%s\":%d%c,%c\"%s\":\"%s\"%c",sopen_bracket,sopen_brace, 
+      sopen_bracket,"handle",stmt,sclose_bracket,
+      sopen_bracket,"stmt",query,sclose_bracket
+      );
   return retLen;
 }
 int json_output_query_end(tool_node_t *tool, char *out_caller, int outLen) {

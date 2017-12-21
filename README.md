@@ -37,6 +37,7 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 - (**partial**) Toolkit APIs - replace xmlservice (see JSON APIs, XML APIs, etc.)
 - (**partial**) Toolkit JSON APIs - enable json only calls by any language on/off IBM i.
 - (**none**) Toolkit XML APIs - enable json only calls by any language on/off IBM i.
+- (**none**) LUW match libdb2.a - enable LUW DB2 source compiles without ifdef PASE 
 
 # README.md (sub-directories).
 ```

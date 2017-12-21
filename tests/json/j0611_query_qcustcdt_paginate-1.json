@@ -1,0 +1,9 @@
+{"connect":[
+  {"qual":"fred"},
+  {"query":[{"stmt":"select * from QIWS/QCUSTCDT"}, 
+            {"fetch":[{"rec":2}]},
+            {"fetch":[{"rec":2}]},
+            {"fetch":[{"rec":"all"}]}
+           ]}
+]}
+

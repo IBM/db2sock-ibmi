@@ -166,6 +166,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 
 #define TOOL400_KEY_QUERY       820     /*"query": */
 #define TOOL400_QUERY_STMT     1821     /*"stmt":"select * from animals where breed=?"*/
+#define TOOL400_QUERY_HNDL     1822     /*"handle":4 (stmt handle, fetch pagination)*/
 #define TOOL400_KEY_END_QUERY   920     /*"end"*/
 
 #define TOOL400_KEY_PARM        830     /*"parm": */
@@ -173,7 +174,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_KEY_END_PARM    930     /*"end"*/
 
 #define TOOL400_KEY_FETCH       840     /*"fetch": */
-#define TOOL400_FETCH_REC      1841     /*"rec":"all"*/
+#define TOOL400_FETCH_REC      1841     /*"rec":"all" or "rec":42 (pagination)*/
 #define TOOL400_KEY_END_FETCH   940     /*"end"*/
 
 
@@ -214,7 +215,7 @@ typedef struct tool_node {
 
 typedef int (*output_script_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_script_end_t)(tool_node_t *, char *, int);
-typedef int (*output_query_beg_t)(tool_node_t *, char *, int, char *);
+typedef int (*output_query_beg_t)(tool_node_t *, char *, int, char *, int);
 typedef int (*output_record_array_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_record_array_end_t)(tool_node_t *, char *, int);
 typedef int (*output_record_no_data_found_t)(tool_node_t *, char *, int);
@@ -334,6 +335,8 @@ typedef struct tool_key_conn_struct {
 typedef struct tool_key_query_struct {
   tool_node_t node;
   SQLHANDLE hstmt;
+  int stmt_close;
+  int stmt_recs;
 } tool_key_query_struct_t;
 
 typedef struct tool_key_cmd_struct {
