@@ -44,6 +44,11 @@ char * json_parm_attr [] = {"value",NULL};
 int json_parm_tool [] = {TOOL400_PARM_VALUE};
 char * json_fetch_attr [] = {"rec",NULL};
 int json_fetch_tool [] = {TOOL400_FETCH_REC};
+/* {"close":[{"handle":4}
+       ]} 
+*/
+char * json_close_attr [] = {"handle",NULL};
+int json_close_tool [] = {TOOL400_CLOSE_HNDL};
 
 
 /* == toolkit cmd == */
@@ -72,10 +77,11 @@ int json_s_tool [] = {TOOL400_S_NAME,TOOL400_S_DIM,TOOL400_S_TYPE,TOOL400_S_VALU
 /* == internal map == */
 
 /* primary elements */
-char * json_elem_key [] = {"connect","query","parm","fetch","cmd","pgm","ds", "s", NULL};
+char * json_elem_key [] = {"connect","query","close","parm","fetch","cmd","pgm","ds", "s", NULL};
 int json_elem_tool_beg [] = {
 TOOL400_KEY_CONN,
 TOOL400_KEY_QUERY,
+TOOL400_KEY_CLOSE,
 TOOL400_KEY_PARM,
 TOOL400_KEY_FETCH,
 TOOL400_KEY_CMD,
@@ -85,6 +91,7 @@ TOOL400_KEY_DCL_S};
 int json_elem_tool_end [] = {
 TOOL400_KEY_END_CONN,
 TOOL400_KEY_END_QUERY,
+TOOL400_KEY_END_CLOSE,
 TOOL400_KEY_END_PARM,
 TOOL400_KEY_END_FETCH,
 TOOL400_KEY_END_CMD,
@@ -94,6 +101,7 @@ TOOL400_KEY_END_S};
 char ** json_elem_attr_key[] = {
 json_conn_attr,
 json_query_attr,
+json_close_attr,
 json_parm_attr,
 json_fetch_attr,
 json_cmd_attr,
@@ -104,6 +112,7 @@ json_s_attr
 int * json_elem_attr_tool [] = {
 json_conn_tool,
 json_query_tool,
+json_close_tool,
 json_parm_tool,
 json_fetch_tool,
 json_cmd_tool,
@@ -214,6 +223,22 @@ int json_output_query_end(tool_node_t *tool, char *out_caller, int outLen) {
     "%c%c",sclose_brace,sclose_bracket);
   return retLen;
 }
+int json_output_close_beg(tool_node_t *tool, char *out_caller, int outLen, int hndl, int flag) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
+      "%c\"close\":%c%c\"%s\":%d%c,%c\"%s\":\"%s\"%c",sopen_bracket,sopen_brace, 
+      sopen_bracket,"handle",hndl,sclose_bracket,
+      sopen_bracket,"flag",flag,sclose_bracket
+      );
+  return retLen;
+}
+int json_output_close_end(tool_node_t *tool, char *out_caller, int outLen) {
+  int retLen = outLen;
+  retLen = json_output_printf(JSON400_ADJUST_RMV_COMMA, out_caller, retLen, 
+    "%c%c",sclose_brace,sclose_bracket);
+  return retLen;
+}
+
 int json_output_record_array_beg(tool_node_t *tool, char *out_caller, int outLen) {
   int retLen = outLen;
   retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
@@ -863,6 +888,8 @@ SQLRETURN custom_SQL400Json(SQLHDBC hdbc,
     &json_output_script_end,
     &json_output_query_beg,
     &json_output_query_end,
+    &json_output_close_beg,
+    &json_output_close_end,
     &json_output_record_array_beg,
     &json_output_record_array_end,
     &json_output_record_no_data_found,

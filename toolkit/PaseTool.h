@@ -177,6 +177,10 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_FETCH_REC      1841     /*"rec":"all" or "rec":42 (pagination)*/
 #define TOOL400_KEY_END_FETCH   940     /*"end"*/
 
+#define TOOL400_KEY_CLOSE       850     /*"close": */
+#define TOOL400_CLOSE_HNDL     1852     /*"handle":"all" (all connection) or 4 (stmt handle)*/
+#define TOOL400_KEY_END_CLOSE   950     /*"end"*/
+
 
 /* other defines */
 #define TOOL400_EXPAND_CHAR 3
@@ -216,6 +220,9 @@ typedef struct tool_node {
 typedef int (*output_script_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_script_end_t)(tool_node_t *, char *, int);
 typedef int (*output_query_beg_t)(tool_node_t *, char *, int, char *, int);
+typedef int (*output_query_end_t)(tool_node_t *, char *, int);
+typedef int (*output_close_beg_t)(tool_node_t *, char *, int, int, int);
+typedef int (*output_close_end_t)(tool_node_t *, char *, int);
 typedef int (*output_record_array_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_record_array_end_t)(tool_node_t *, char *, int);
 typedef int (*output_record_no_data_found_t)(tool_node_t *, char *, int);
@@ -225,7 +232,6 @@ typedef int (*output_record_row_beg_t)(tool_node_t *, char *, int);
 #define TOOL400_DATA_IS_NULL SQL_NULL_DATA
 typedef int (*output_record_name_value_t)(tool_node_t *, char *, int, char *, char *, int, int);
 typedef int (*output_record_row_end_t)(tool_node_t *, char *, int);
-typedef int (*output_query_end_t)(tool_node_t *, char *, int);
 typedef int (*output_sql_errors_t)(tool_node_t *, char *, int, int, int, char *, char *);
 typedef int (*output_pgm_beg_t)(tool_node_t *, char *, int, char *, char *, char *);
 typedef int (*output_pgm_end_t)(tool_node_t *, char *, int);
@@ -248,6 +254,8 @@ typedef struct tool_struct {
   output_script_end_t output_script_end;
   output_query_beg_t output_query_beg;
   output_query_end_t output_query_end;
+  output_close_beg_t output_close_beg;
+  output_close_end_t output_close_end;
   output_record_array_beg_t output_record_array_beg;
   output_record_array_end_t output_record_array_end;
   output_record_no_data_found_t output_record_no_data_found;
@@ -294,6 +302,8 @@ tool_struct_t * tool_ctor(
   output_script_end_t output_script_end,
   output_query_beg_t output_query_beg,
   output_query_end_t output_query_end,
+  output_close_beg_t output_close_beg,
+  output_close_end_t output_close_end,
   output_record_array_beg_t output_record_array_beg,
   output_record_array_end_t output_record_array_end,
   output_record_no_data_found_t output_record_no_data_found,
@@ -338,6 +348,11 @@ typedef struct tool_key_query_struct {
   int stmt_close;
   int stmt_recs;
 } tool_key_query_struct_t;
+
+typedef struct tool_key_close_struct {
+  tool_node_t node;
+  SQLHANDLE hstmt;
+} tool_key_close_struct_t;
 
 typedef struct tool_key_cmd_struct {
   tool_node_t node;

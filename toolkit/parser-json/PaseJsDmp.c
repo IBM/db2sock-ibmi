@@ -107,8 +107,21 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_QUERY_STMT:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_QUERY_STMT", val);
       break;
+    case TOOL400_QUERY_HNDL:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_QUERY_HNDL", val);
+      break;
     case TOOL400_KEY_END_QUERY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_QUERY", val);
+      break;
+
+    case TOOL400_KEY_CLOSE:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CLOSE", val);
+      break;
+    case TOOL400_CLOSE_HNDL:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_CLOSE_HNDL", val);
+      break;
+    case TOOL400_KEY_END_CLOSE:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_CLOSE", val);
       break;
 
 
