@@ -2,7 +2,7 @@
 This project is under construction. APIs are changing daily, therefore, you should not use for ANY production purpose. 
 When this warning disappears, APIs will be considered stable.
 
-#db2sock - libjson400.a (default)
+#db2sock/toolkit/parser-json - libjson400.a (default)
 
 Welcome to db2sock project. This 'toolkit' is a dynamically loaded toolkit interface. 
 Any JSON/XML parser can be used to call this interface.
@@ -19,5 +19,5 @@ An environment variable allows any override any parser of your own (json, xml, c
 
 For json examples see source/tests/json.
 
-See toolkit-base/README.md for post-parser toolkit interface details.
+See toolkit-base/README.md for generic toolkit interface details.
 
