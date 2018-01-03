@@ -40,3 +40,47 @@ output(74):
 result:
 success (0)
 ```
+
+## FAQ
+
+1) Need a db2 connection? No. A default 'stateless' connection is implicit (current profile).
+```
+$ cat json/j0101_srvpgm_hello.json 
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLO"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}
+
+```
+
+2) How do i paginate records? Use qualified 'state full' connection like "qual":"fred" (current profile).
+```
+$ cat json/j0611_query_qcustcdt_paginate-1.json
+{"connect":[
+  {"qual":"fred"},
+  {"query":[{"stmt":"select * from QIWS/QCUSTCDT"}, 
+            {"fetch":[{"rec":2}]},
+            {"fetch":[{"rec":2}]},
+            {"fetch":[{"rec":"all"}]}
+           ]}
+]}
+```
+
+3) How do i close result set? Use qualified close.
+```
+{"connect":[
+  {"qual":"fred"},
+  {"query":[{"stmt":"select * from QIWS/QCUSTCDT"}, 
+            {"fetch":[{"rec":2}]},
+            {"fetch":[{"rec":2}]}
+           ]}
+]}
+{"connect":[
+  {"qual":"fred"},
+  {"close":[{"handle":'.$handle.'}]}
+]}
+```
+Note: A statement handle is returned in output of a "query".
+```
+"{"script":[{"query":[{"handle":3},
+```
+
