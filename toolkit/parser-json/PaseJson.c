@@ -613,7 +613,7 @@ void json_xform(int max, json_key_t * bigkey) {
               break; /* break attr loop (k) */
             }
             /* normal attr ok? */
-            for (l=0; akey && *akey && attr_key[l]; l++) {
+            for (l=0; key[k] == JSON400_KEY && akey && *akey && attr_key[l]; l++) {
               if (!strcmp(attr_key[l],akey)) {
                 key[k] = attr_val[l];
                 break;

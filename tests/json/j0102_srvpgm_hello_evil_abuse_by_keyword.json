@@ -1,0 +1,4 @@
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLO"},
+        {"s":{"name":"type", "type":"128a", "value":"Hi there"}}
+       ]}
+
