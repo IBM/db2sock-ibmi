@@ -54,7 +54,6 @@ $ cat json/j0101_srvpgm_hello.json
 
 2) How do i paginate records? Use qualified 'state full' connection like "qual":"fred" (current profile).
 ```
-$ cat json/j0611_query_qcustcdt_paginate-1.json
 {"connect":[
   {"qual":"fred"},
   {"query":[{"stmt":"select * from QIWS/QCUSTCDT"}, 
@@ -62,6 +61,11 @@ $ cat json/j0611_query_qcustcdt_paginate-1.json
             {"fetch":[{"rec":2}]},
            ]}
 ]}
+Note: A statement handle is returned in output of a "query".
+
+fetch "rec":"all" will close statement last record.
+"{"script":[{"query":[{"handle":3},
+
 {"connect":[
   {"qual":"fred"},
   {"query":[{"handle":'.$handle.'},
@@ -69,15 +73,10 @@ $ cat json/j0611_query_qcustcdt_paginate-1.json
            ]}
 ]}
 
-"rec":"all" will close statement last record.
-```
-Note: A statement handle is returned in output of a "query".
-```
-"{"script":[{"query":[{"handle":3},
 ```
 
 
-3) How do i close result set? Use qualified close.
+3) How do i close result set early? Use qualified close.
 ```
 {"connect":[
   {"qual":"fred"},
@@ -86,12 +85,11 @@ Note: A statement handle is returned in output of a "query".
             {"fetch":[{"rec":2}]}
            ]}
 ]}
+Note: A statement handle is returned in output of a "query".
+
+close "handle":3 will close statement.
 {"connect":[
   {"qual":"fred"},
   {"close":[{"handle":'.$handle.'}]}
 ]}
-```
-Note: A statement handle is returned in output of a "query".
-```
-"{"script":[{"query":[{"handle":3},
 ```
