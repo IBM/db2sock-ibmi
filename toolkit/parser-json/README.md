@@ -22,3 +22,21 @@ An environment variable allows any override any parser of your own (json, xml, c
 
 For json examples see db2sock/tests/json.
 
+Run json samples using small PASE c test program (./test1000_sql400json32).
+
+```
+bash-4.3$ cd db2sock/tests/c
+
+bash-4.3$ ./test1000_sql400json32 ../json/j0101_srvpgm_hello                      
+input(5000000):
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLO"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}
+
+
+output(74):
+{"script":[{"pgm":["HELLOSRV","DB2JSON","HELLO",{"char":"Hello World"}]}]}
+
+result:
+success (0)
+```
