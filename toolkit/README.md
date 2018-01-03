@@ -20,7 +20,14 @@ All protocol input/output syntax operations are controlled by the parser. Aka, t
 
 ## run toolkit
 
-DB2 db2sock driver libdb400.a CLI new toolkit API SQL400Json(injson, outjson) dynamically loads json parser responsible for input/output (see env var above).
+DB2 db2sock driver libdb400.a CLI new toolkit API SQL400Json(injson, outjson) dynamically loads json parser responsible for input/output (below).
 The same simple toolkit API will be true for any other protocol we decide to implement, SQL400Xml(inxml, outxml), SQL400Cvs(incvs, outcvs), etc.
+
+```
+json parser (see toolkit/parser-json)
+> export DB2JSONPARSER32 libjson400.a(shr.o)
+> export DB2JSONPARSER64 libjson400.a(shr_64.o)
+* Note: Default is libjson400.a, env vars are not required.
+```
 
 
