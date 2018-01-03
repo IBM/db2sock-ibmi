@@ -7,6 +7,7 @@ When this warning disappears, APIs will be considered stable.
 Welcome to db2sock project. This 'toolkit' is a dynamically loaded toolkit interface. 
 Any JSON/XML parser can be used to call this interface.
 The parser simply includes PaseTool.h, compile with -ltkit400, calls toolkit APIs.
+See db2sock/toolkit/README.md for generic toolkit interface details.
 
 The parsers are dynamically loaded via SQL400Json or SQL400Xml interfaces. 
 Default parser is provided (toolkit-parser-json, toolkit-parser-xml).
@@ -17,7 +18,7 @@ An environment variable allows any override any parser of your own (json, xml, c
 > export DB2JSONPARSER64 libjson400.a(shr_64.o)
 ```
 
-For json examples see source/tests/json.
+## examples (best source sytax)
 
-See toolkit-base/README.md for generic toolkit interface details.
+For json examples see db2sock/tests/json.
 
