@@ -62,10 +62,9 @@ $ cat json/j0101_srvpgm_hello.json
            ]}
 ]}
 Note: A statement handle is returned in output of a "query".
-
-fetch "rec":"all" will close statement last record.
 "{"script":[{"query":[{"handle":3},
 
+fetch "rec":"all" will close statement last record.
 {"connect":[
   {"qual":"fred"},
   {"query":[{"handle":'.$handle.'},
@@ -86,6 +85,7 @@ fetch "rec":"all" will close statement last record.
            ]}
 ]}
 Note: A statement handle is returned in output of a "query".
+"{"script":[{"query":[{"handle":3},
 
 close "handle":3 will close statement.
 {"connect":[
