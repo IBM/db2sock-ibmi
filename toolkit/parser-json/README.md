@@ -60,10 +60,22 @@ $ cat json/j0611_query_qcustcdt_paginate-1.json
   {"query":[{"stmt":"select * from QIWS/QCUSTCDT"}, 
             {"fetch":[{"rec":2}]},
             {"fetch":[{"rec":2}]},
+           ]}
+]}
+{"connect":[
+  {"qual":"fred"},
+  {"query":[{"handle":'.$handle.'},
             {"fetch":[{"rec":"all"}]}
            ]}
 ]}
+
+"rec":"all" will close statement last record.
 ```
+Note: A statement handle is returned in output of a "query".
+```
+"{"script":[{"query":[{"handle":3},
+```
+
 
 3) How do i close result set? Use qualified close.
 ```
@@ -83,4 +95,3 @@ Note: A statement handle is returned in output of a "query".
 ```
 "{"script":[{"query":[{"handle":3},
 ```
-
