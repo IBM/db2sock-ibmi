@@ -1046,7 +1046,8 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
   char * utf8 = NULL;
   char * c = NULL;
   char * str_empty = "";
-  char * str_tool_empty = "{}";
+  /* char * str_tool_empty = "{}"; */
+  char * str_tool_empty = "\"\""; /* Danny Roessner */
   /* ebcdic ccsid? */
   if (!tccsid) {
     tccsid = Qp2jobCCSID();
