@@ -1,0 +1,7 @@
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLOAGAIN"},
+        {"s":[
+               {"name":"char", "type":"128a", "value":"Hi there", "by":"in"},
+               {"name":"char", "type":"128a", "value":"Hi back", "by":"return"}
+             ]}
+       ]}
+

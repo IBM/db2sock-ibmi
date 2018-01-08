@@ -800,7 +800,7 @@ ile_pgm_call_t **playout) {
   node->offset = where - (char *)layout;
 
   /* output suspended (no need convert, etc.) */
-  if (isOut && tool->outhold) {
+  if (isOut && (tool->outhold || node->by == ILE_PGM_BY_REF_IN)) {
     return SQL_SUCCESS;
   }
 
@@ -1384,6 +1384,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   tool_node_t * pgm_ds_idx_node = node;
   tool_key_ds_struct_t *node_ds = NULL;
   int pgm_ds_idx_outareaLen = 0;
+  int pgm_ds_all_input = 0;
   int j = 0;
   int ds_spill_len = 0;
   char * where = NULL;
@@ -1409,6 +1410,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
       break;
     case TOOL400_DS_BY:
       pgm_ds_by = val;
+      if (val[0] == 'i') { /* ILE_PGM_BY_IN_DS */
+        pgm_ds_all_input = 1;
+      }
       break;
     case TOOL400_DS_DOU:
       pgm_ds_dou = val;
@@ -1435,6 +1439,10 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         pgm_ds_idx_outareaLen = tool->outareaLen;
       }
       tool_output_pgm_dcl_ds_rec_beg(tool);
+      if (pgm_ds_all_input) {
+        tool->outhold = 1;
+        tool->outholdord = pgm_ds_idx_node->ord;
+      }
     }
   }
   /* pgm ds children (parser order next) */
