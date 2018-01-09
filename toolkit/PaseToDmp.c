@@ -162,6 +162,9 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
     case TOOL400_S_BY:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_BY", val);
       break;
+    case TOOL400_S_NOCONV:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_NOCONV", val);
+      break;
     case TOOL400_S_VALUE:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_VALUE", val);
       break;

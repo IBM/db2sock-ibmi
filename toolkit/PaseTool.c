@@ -710,13 +710,13 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, char * debug, ile_pgm_call
   layout = ile_pgm_grow(playout, ILE_PGM_ALLOC_BLOCK);
 
   /* copy ebcdic */
-  rc = ile_pgm_str_2_char((char *)&layout->pgm, pgm, 1, sizeof(layout->pgm), 0, 0);
+  rc = ile_pgm_str_2_char((char *)&layout->pgm, pgm, 1, sizeof(layout->pgm), 0, 0, 1);
   ile_pgm_trim_ebcdic((char *)&layout->pgm, sizeof(layout->pgm));
-  rc = ile_pgm_str_2_char((char *)&layout->lib, lib, 1, sizeof(layout->lib), 0, 0);
+  rc = ile_pgm_str_2_char((char *)&layout->lib, lib, 1, sizeof(layout->lib), 0, 0, 1);
   ile_pgm_trim_ebcdic((char *)&layout->lib, sizeof(layout->lib));
-  rc = ile_pgm_str_2_char((char *)&layout->func, func, 1, sizeof(layout->func), 0, 0);
+  rc = ile_pgm_str_2_char((char *)&layout->func, func, 1, sizeof(layout->func), 0, 0, 1);
   ile_pgm_trim_ebcdic((char *)&layout->func, sizeof(layout->func));
-  rc = ile_pgm_str_2_char((char *)&layout->debug, debug, 1, sizeof(layout->debug), 0, 0);
+  rc = ile_pgm_str_2_char((char *)&layout->debug, debug, 1, sizeof(layout->debug), 0, 0, 1);
   ile_pgm_trim_ebcdic((char *)&layout->debug, sizeof(layout->debug));
 
   /* layout return */
@@ -733,6 +733,7 @@ char * in_dim,
 char * in_by,
 char * in_ccsid,
 char * in_setlen,
+char * in_noconv,
 int isDs,
 ile_pgm_call_t **playout) {
 
@@ -749,6 +750,8 @@ ile_pgm_call_t **playout) {
   int rc = 0;
   int by = 0;
   char * where = NULL;
+
+  int tflag = 1;
 
   int pase_sig = 0;
   tool_key_data_struct_t * node = NULL;
@@ -769,6 +772,27 @@ ile_pgm_call_t **playout) {
   rc = ile_pgm_str_2_int32((char *)&tccsid, in_ccsid, 1);
   if (tccsid < 1) {
     tccsid = 0;
+  }
+
+  /* parse no convert ("in|out|both") */
+  if (in_noconv) {
+    switch(in_noconv[0]) {
+    case 'i':
+      if (!isOut) {
+        tflag = 0;
+      }
+      break;
+    case 'o':
+      if (isOut) {
+        tflag = 0;
+      }
+      break;
+    case 'b':
+      tflag = 0;
+      break;
+    default:
+      break;
+    }
   }
 
   /* parse in|out|both|value|const|return */
@@ -918,9 +942,9 @@ ile_pgm_call_t **playout) {
     break;
   case 'a':
     if (isOut) {
-      ile_pgm_char_2_output(tool, where, tlen, tvary, tccsid, tdim);
+      ile_pgm_char_2_output(tool, where, tlen, tvary, tccsid, tdim, tflag);
     } else {
-      rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid);
+      rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid, tflag);
     }
     break;
   case 'b':
@@ -1135,7 +1159,7 @@ char *where)
     rc = ile_pgm_str_2_zoned(where, str, tdim, tlen, tscale);
     break;
   case 'a':
-    rc = ile_pgm_str_2_char(where, str, tdim, tlen, tvary, tccsid);
+    rc = ile_pgm_str_2_char(where, str, tdim, tlen, tvary, tccsid, 1);
     break;
   case 'b':
     rc = ile_pgm_str_2_bin(where, str, tdim, tlen, tvary);
@@ -1313,6 +1337,7 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   char * pgm_s_by = NULL;
   char * pgm_s_ccsid = NULL;
   char * pgm_s_len = NULL;
+  char * pgm_s_noconv = NULL;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
@@ -1342,6 +1367,9 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
     case TOOL400_S_BY:
       pgm_s_by = val;
       break;
+    case TOOL400_S_NOCONV:
+      pgm_s_noconv = val;
+      break;
     case TOOL400_S_SETLEN:
       pgm_s_len = val;
       tpgm->pgm_any_setlen = 1;
@@ -1351,7 +1379,7 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
     }
   }
   /* write or read data */
-  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, pgm_s_len, *isDs, (ile_pgm_call_t **)&tpgm->layout);
+  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, pgm_s_len, pgm_s_noconv, *isDs, (ile_pgm_call_t **)&tpgm->layout);
   return sqlrc;
 }
 

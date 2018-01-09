@@ -969,7 +969,7 @@ int ile_pgm_zoned_2_int(char * where, int tlen, int tscale) {
   return (int) value;
 }
 
-int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid) {
+int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid, int tflag) {
   int rc = 0;
   int i = 0;
   int j = 0;
@@ -995,7 +995,12 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
   /* convert ccsid */
   if (len) {
     ebcdic = tool_new(len*4);
-    rc = SQL400FromUtf8(0, str, len, ebcdic, len*4, tccsid);
+    if (tflag) {
+      rc = SQL400FromUtf8(0, str, len, ebcdic, len*4, tccsid);
+    /* no convert (Sebastian Misiewicz) */
+    } else {
+      memcpy(ebcdic, str, len);
+    }
     c = ebcdic;
     j = 0;
     for (i = len*4 - 1; i>-1; i--) {
@@ -1010,7 +1015,7 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
   if (len > tlen) {
     len = tlen;
   }
-  /* copy in ebcdic space pad (0x40) */
+  /* copy in ebcdic space pad */
   for (i=0; i < tdim; i++, wherev += tlen) {
     /* vary */
     if (tvary == 4) {
@@ -1022,9 +1027,15 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
       *short_value = len;
       wherev += 2;
     }
-    /* ebcdic space pad (0x40) */
+    /* space pad */
     if (len < tlen) {
-      memset(wherev,0x40,tlen);
+      /* ebcdic space pad (0x40) */
+      if (tflag) {
+        memset(wherev,0x40,tlen);
+      /* no convert space pad (0x20) */
+      } else {
+        memset(wherev,0x20,tlen);
+      }
     }
     /* ebcdic chars */
     if (len && ebcdic) {
@@ -1037,7 +1048,7 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
   }
   return 0;
 }
-int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim) {
+int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag) {
   int rc = 0;
   int i = 0;
   int j = 0;
@@ -1073,7 +1084,12 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
     if (len) {
       /* convert ebcdic to utf8 */
       memset(utf8,0,len*4);
-      rc = SQL400ToUtf8(0, wherev, len, utf8, len*4, tccsid);
+      if (tflag) {
+        rc = SQL400ToUtf8(0, wherev, len, utf8, len*4, tccsid);
+      /* no convert (Sebastian Misiewicz) */
+      } else {
+        memcpy(utf8, wherev, len);
+      }
       /* trim */
       len = strlen(utf8);
       for (c = utf8, j = len - 1; j >= 0; j--) {

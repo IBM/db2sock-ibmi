@@ -204,6 +204,9 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_S_BY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_BY", val);
       break;
+    case TOOL400_S_NOCONV:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_NOCONV", val);
+      break;
     case TOOL400_S_VALUE:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_VALUE", val);
       break;
