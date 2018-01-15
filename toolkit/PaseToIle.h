@@ -86,7 +86,7 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
 int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale);
 int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tscale, int tdim);
 int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid, int tflag);
-int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag);
+int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag, int tescape);
 int ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary);
 int ile_pgm_bin_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tdim);
 

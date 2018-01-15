@@ -12,11 +12,22 @@
 #ifdef __IBMC__
 #define hex_space 0x40
 #define hex_nbr 0xF0
+#define hex_backspace 0x16
+#define hex_form_feed 0x0C
+#define hex_newline 0x25
+#define hex_carriage_return 0x0D
+#define hex_tab 0x05
+#define hex_double_quote 0x7F
 #else
 #define hex_space 0x20
 #define hex_nbr 0x30
+#define hex_backspace 0x08
+#define hex_form_feed 0x0C
+#define hex_newline 0x0A
+#define hex_carriage_return 0x0D
+#define hex_tab 0x09
+#define hex_double_quote 0x22
 #endif
-
 
 /*=================================================
  * toolkit copy in/out ILE parm layout
@@ -1048,17 +1059,21 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
   }
   return 0;
 }
-int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag) {
+int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag, int tescape) {
   int rc = 0;
   int i = 0;
   int j = 0;
+  int k = 0;
   char * wherev = where;
   int len = 0;
   char * utf8 = NULL;
   char * c = NULL;
+  char e = '\0';
   char * str_empty = "";
   /* char * str_tool_empty = "{}"; */
   char * str_tool_empty = "\"\""; /* Danny Roessner */
+  /* variant (ebcdic) */
+  char e_backslash = ccsid_variant_backslash();
   /* ebcdic ccsid? */
   if (!tccsid) {
     tccsid = Qp2jobCCSID();
@@ -1098,6 +1113,54 @@ int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary
           len = j;
         } else {
           break;
+        }
+      }
+      /* escape
+       * - 0x08 Backspace is replaced with \b.
+       * - 0x0C Form feed is replaced with \f.
+       * - 0x0A Newline is replaced with \n.
+       * - 0x0D Carriage return is replaced with \r.
+       * - 0x09 Tab is replaced with \t.
+       * - 0x22 Double quote is replaced with \"
+       * - 0x5C Backslash is replaced with \\
+       */
+      if (tescape && len) {
+        for (c = utf8, j = 0; c[j] && j < len; j++) {
+          e = '\0';
+          /* bloody ebcdic variant characters */
+          if (c[j] == e_backslash) {
+            e = e_backslash;
+          } else { 
+            switch(c[j]) {
+              case hex_backspace:
+                e = 'b';
+                break;
+              case hex_form_feed:
+                e = 'f';
+                break;
+              case hex_newline:
+                e = 'n';
+                break;
+              case hex_carriage_return:
+                e = 'r';
+                break;
+              case hex_tab:
+                e = 't';
+                break;
+              case hex_double_quote:
+                e = hex_double_quote;
+                break;
+              default:
+                break;
+            }
+          }
+          if (e != '\0') {
+            len++;
+            memcpy(&c[j+2], &c[j+1], len - j);
+            c[j] = e_backslash;
+            j++;
+            c[j] = e;
+          }
         }
       }
     } /* j loop (trim) */

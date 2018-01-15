@@ -39,6 +39,8 @@ HAMELA06PGM  = hamela06.pgm
 HAMELA06OBJS = hamela06.mod
 RAINBANKPGM  = rainbank.pgm
 RAINBANKOBJS = rainbank.mod
+DANNY01PGM  = danny01.pgm
+DANNY01OBJS = danny01.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target
@@ -48,7 +50,7 @@ help: speakile helpile
 rpg: removeo $(HELLOPGM) $(HELLOSRVPGM) $(RAINBOWPGM) $(RAINSRVPGM) \
   $(HAMELA01PGM) $(HAMELA02PGM) $(HAMELA03PGM) $(HAMELA04PGM) \
   $(HAMELA05PGM) $(HAMELA06PGM) \
-  $(RAINBANKPGM)
+  $(RAINBANKPGM) $(DANNY01PGM)
 
 .SUFFIXES: .mod .rpgle
 ### CRTRPGMOD
@@ -87,6 +89,9 @@ $(HAMELA06PGM): $(HAMELA06OBJS)
 ### -- RAINBANKPGM (ILE RPG)
 $(RAINBANKPGM): $(RAINBANKOBJS)
 	$(CCPGM) --pgm $(RAINBANKPGM) --lib $(ILELIB) --mod $(RAINBANKOBJS)
+### -- DANNY01PGM (ILE RPG)
+$(DANNY01PGM): $(DANNY01OBJS)
+	$(CCPGM) --pgm $(DANNY01PGM) --lib $(ILELIB) --mod $(DANNY01OBJS)
 
 speakile:
 	@echo "------------------------------------------------------------"

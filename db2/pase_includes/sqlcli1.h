@@ -1,3 +1,6 @@
+#ifndef SQLCLI1_H
+#define SQLCLI1_H
+
 /*
  * sqlcli1.h match LUW header geometry
  *
@@ -15,4 +18,6 @@
 #include "sql.h"
 #include "sqlca.h"
 #include "sqlcli.h"
+
+#endif /* SQLCLI1_H */
 
