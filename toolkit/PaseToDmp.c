@@ -143,6 +143,15 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
     case TOOL400_DS_BY:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_BY", val);
       break;
+    case TOOL400_DS_DOU:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_DOU", val);
+      break;
+    case TOOL400_DS_DOB:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_DOB", val);
+      break;
+    case TOOL400_DS_DOS:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_DS_DOS", val);
+      break;
     case TOOL400_KEY_END_DS:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_DS", val);
       break;
@@ -164,6 +173,12 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
       break;
     case TOOL400_S_NOCONV:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_NOCONV", val);
+      break;
+    case TOOL400_S_DOU:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_DOU", val);
+      break;
+    case TOOL400_S_DOB:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_DOB", val);
       break;
     case TOOL400_S_VALUE:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_S_VALUE", val);

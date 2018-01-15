@@ -7,29 +7,6 @@
 #include "PaseToIle.h"
 
 /*=================================================
- * ebcdic char ccsid mess
- */
-#ifdef __IBMC__
-#define hex_space 0x40
-#define hex_nbr 0xF0
-#define hex_backspace 0x16
-#define hex_form_feed 0x0C
-#define hex_newline 0x25
-#define hex_carriage_return 0x0D
-#define hex_tab 0x05
-#define hex_double_quote 0x7F
-#else
-#define hex_space 0x20
-#define hex_nbr 0x30
-#define hex_backspace 0x08
-#define hex_form_feed 0x0C
-#define hex_newline 0x0A
-#define hex_carriage_return 0x0D
-#define hex_tab 0x09
-#define hex_double_quote 0x22
-#endif
-
-/*=================================================
  * toolkit copy in/out ILE parm layout
  */
 char * ile_pgm_find_new_line_ascii(char *str) {

@@ -101,7 +101,7 @@ key[n]                                  val[n] - "names" parser dependent (anyth
                                          * '+'  search forward for count field name 
                                          * '+-' search forward, backward
                                          * '-+' search backward, forward (default)
-                                         *"dob":"+-" (optional for dob)
+                                         *"dos":"+-" (optional for dob)
                                          * '-'  check for zero ds "TOOL400_S_NAME"
                                          * '+'  check for blank ds "TOOL400_S_NAME" 
                                          * '+-' check blank, then zero
@@ -122,6 +122,13 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_S_VALUE        1075     /*"value":"42" */
 #define TOOL400_S_SETLEN       1076     /*"setlen":"TOOL400_DS_NAME" (search name ds, calc length, setlen) */
 #define TOOL400_S_NOCONV       1077     /*"noconv":"in|out|both" (no convert string) */
+#define TOOL400_S_DOU          1078     /*"dou":"TOOL400_S_NAME" (search count field name)
+                                         *"dou":4 (literal)
+                                         */
+#define TOOL400_S_DOB          1079     /*"dob":"on" (search 'empty' field)
+                                         * character - *blanks end output array element
+                                         * numeric   - zero end output array element
+                                         */
 #define TOOL400_KEY_END_S       170     /*"end"*/
                                         /* -- types --
                                          * "5a"    char(5)         char a[5]
@@ -289,6 +296,9 @@ typedef struct tool_struct {
   int outlen;
   int outhold;
   int outholdord;
+  int dataholdmax;
+  int dataholdcnt;
+  int dataholdempty;
   int hdbc;
   SQLINTEGER sqlCode;
   SQLCHAR sqlState[SQL_SQLSTATE_SIZE + 1];

@@ -654,8 +654,52 @@ void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char * name, int tdim) {
   }
 }
 void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
+  int i = 0;
   if (!tool->outhold) {
-    tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
+    /* dob? */
+    if (tool->dataholdempty && !tool->dataholdmax) {
+      /* empty string */
+      if (value[0] == hex_double_quote && value[1] == hex_double_quote) 
+      {
+        tool->dataholdcnt = 2;
+        tool->dataholdmax = 1;
+      }
+      if (numFlag && !tool->dataholdmax) {
+        for (i=0; value[i] && !tool->dataholdmax; i++) {
+          switch(value[i]) {
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9':
+          case '.':
+          case '-':
+          case '+':
+            break;
+          default:
+            tool->dataholdcnt = 2;
+            tool->dataholdmax = 1;
+            break;
+          }
+        }
+      }
+    }
+    /* dou? */
+    if (tool->dataholdmax) {
+      tool->dataholdcnt++;
+      if (tool->dataholdcnt > tool->dataholdmax) {
+         tool->outhold = 1;
+      }
+    }
+    if (!tool->outhold) {
+      tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
+    }
+    tool->outhold = 0;
   }
 }
 void tool_output_pgm_dcl_s_end(tool_struct_t *tool, int tdim) {
@@ -723,6 +767,69 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, char * debug, ile_pgm_call
   *playout = layout;
 }
 
+/* int value from 'anything' */
+int tool_dcl_s_2_int(
+char typ,
+int tlen,
+int tscale,
+int tvary,
+char *where) 
+{
+  /* dcl-s type */
+  switch (typ) {
+  case 'i':
+    switch (tlen) {
+    case 3:
+      return ile_pgm_int8_2_int(where);
+    case 5:
+      return ile_pgm_int16_2_int(where);
+    case 10:
+      return ile_pgm_int32_2_int(where);
+    case 20:
+      return ile_pgm_int64_2_int(where);
+    default:
+      return ile_pgm_int32_2_int(where);
+    }
+    break;
+  case 'u':
+    switch (tlen) {
+    case 3:
+      return ile_pgm_uint8_2_int(where);
+    case 5:
+      return ile_pgm_uint16_2_int(where);
+    case 10:
+      return ile_pgm_uint32_2_int(where);
+    case 20:
+      return ile_pgm_uint64_2_int(where);
+    default:
+      return ile_pgm_uint32_2_int(where);
+    }
+    break;
+  case 'f':
+    switch (tlen) {
+    case 4:
+      return ile_pgm_float_2_int(where);
+    case 8:
+      return ile_pgm_double_2_int(where);
+    default:
+      return ile_pgm_double_2_int(where);
+    }
+  case 'p':
+    return ile_pgm_packed_2_int(where, tlen, tscale);
+  case 's':
+    return ile_pgm_zoned_2_int(where, tlen, tscale);
+  case 'a':
+    return ile_pgm_char_2_int(where, tlen, tvary);
+  case 'b':
+    return ile_pgm_bin_2_int(where, tlen);
+  case 'h':
+    return ile_pgm_hole_2_int(where, tlen);
+  default:
+    break;
+  }
+  return 0;
+}
+
 /* "dcl-s":["name","type", value, dimension, "in|out|both|value|const|return"], */
 SQLRETURN tool_dcl_s(tool_struct_t *tool, 
 int isOut, 
@@ -734,6 +841,9 @@ char * in_by,
 char * in_ccsid,
 char * in_setlen,
 char * in_noconv,
+char * in_dou,
+char * in_dob,
+char * in_dou_search,
 int isDs,
 ile_pgm_call_t **playout) {
 
@@ -754,6 +864,8 @@ ile_pgm_call_t **playout) {
   int tflag = 1;
 
   int pase_sig = 0;
+  int dou = 0;
+  char * where_dou = NULL;
   tool_key_data_struct_t * node = NULL;
 
   /* parse "12p2", "5a", "5av2", ... */
@@ -806,6 +918,32 @@ ile_pgm_call_t **playout) {
   where = ile_pgm_parm_location(isOut, by, pase_sig, spill_len, layout);
   if (!where) {
     return SQL_ERROR;
+  }
+
+  /* no dou or dob */
+  tool->dataholdempty = 0;
+  tool->dataholdmax = 0;
+  tool->dataholdcnt = 0;
+
+  /* "dou":? */
+  if (isOut && in_dou) {
+    /* "dou":4 (literal) */
+    dou = ile_pgm_char_2_int_valid(in_dou, strlen(in_dou), 0);
+    /* "dou":"TOOL400_S_NAME" */
+    if (dou < 0) {
+      dou = 0;
+      node = (tool_key_data_struct_t *) tool_node_find_s_dou_name(tool, in_dou, in_dou_search);
+      if (node && node->tlen) {
+        where_dou = (char *)layout + node->offset;
+        dou = tool_dcl_s_2_int(node->typ, node->tlen, node->tscale, node->tvary, where_dou);
+        tool->dataholdmax = dou;
+      }
+    }
+  }
+
+  /* "dob":? */
+  if (isOut && in_dob) {
+    tool->dataholdempty = 1;
   }
 
   /* update data node info */
@@ -964,6 +1102,17 @@ ile_pgm_call_t **playout) {
     break;
   }
 
+  /* "dou":? */
+  if (isOut && in_dou) {
+    tool->dataholdmax = 0;
+    tool->dataholdcnt = 0;
+  }
+
+  /* "dob":? */
+  if (isOut && in_dob) {
+    tool->dataholdempty = 0;
+  }
+
   /* output processing */
   if (isOut) {
     tool_output_pgm_dcl_s_end(tool, tdim);
@@ -972,68 +1121,6 @@ ile_pgm_call_t **playout) {
   return rc;
 }
 
-/* int value from 'anything' */
-int tool_dcl_s_2_int(
-char typ,
-int tlen,
-int tscale,
-int tvary,
-char *where) 
-{
-  /* dcl-s type */
-  switch (typ) {
-  case 'i':
-    switch (tlen) {
-    case 3:
-      return ile_pgm_int8_2_int(where);
-    case 5:
-      return ile_pgm_int16_2_int(where);
-    case 10:
-      return ile_pgm_int32_2_int(where);
-    case 20:
-      return ile_pgm_int64_2_int(where);
-    default:
-      return ile_pgm_int32_2_int(where);
-    }
-    break;
-  case 'u':
-    switch (tlen) {
-    case 3:
-      return ile_pgm_uint8_2_int(where);
-    case 5:
-      return ile_pgm_uint16_2_int(where);
-    case 10:
-      return ile_pgm_uint32_2_int(where);
-    case 20:
-      return ile_pgm_uint64_2_int(where);
-    default:
-      return ile_pgm_uint32_2_int(where);
-    }
-    break;
-  case 'f':
-    switch (tlen) {
-    case 4:
-      return ile_pgm_float_2_int(where);
-    case 8:
-      return ile_pgm_double_2_int(where);
-    default:
-      return ile_pgm_double_2_int(where);
-    }
-  case 'p':
-    return ile_pgm_packed_2_int(where, tlen, tscale);
-  case 's':
-    return ile_pgm_zoned_2_int(where, tlen, tscale);
-  case 'a':
-    return ile_pgm_char_2_int(where, tlen, tvary);
-  case 'b':
-    return ile_pgm_bin_2_int(where, tlen);
-  case 'h':
-    return ile_pgm_hole_2_int(where, tlen);
-  default:
-    break;
-  }
-  return 0;
-}
 
 /* blank value from 'anything' */
 int tool_dcl_s_is_blank(
@@ -1338,6 +1425,9 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   char * pgm_s_ccsid = NULL;
   char * pgm_s_len = NULL;
   char * pgm_s_noconv = NULL;
+  char * pgm_s_dou = NULL;
+  char * pgm_s_dob = NULL;
+  char * pgm_s_dim_dou_search = NULL;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   /* current node (output) */
@@ -1374,12 +1464,18 @@ SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
       pgm_s_len = val;
       tpgm->pgm_any_setlen = 1;
       break;
+    case TOOL400_S_DOU:
+      pgm_s_dou = val;
+      break;
+    case TOOL400_S_DOB:
+      pgm_s_dob = val;
+      break;
     default:
       break;
     }
   }
   /* write or read data */
-  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, pgm_s_len, pgm_s_noconv, *isDs, (ile_pgm_call_t **)&tpgm->layout);
+  sqlrc = tool_dcl_s(tool, isOut, pgm_s_name, pgm_s_type, pgm_s_val, pgm_s_dim, pgm_s_by, pgm_s_ccsid, pgm_s_len, pgm_s_noconv, pgm_s_dou, pgm_s_dob, pgm_s_dim_dou_search, *isDs, (ile_pgm_call_t **)&tpgm->layout);
   return sqlrc;
 }
 

@@ -185,6 +185,15 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
     case TOOL400_DS_BY:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_BY", val);
       break;
+    case TOOL400_DS_DOU:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_DOU", val);
+      break;
+    case TOOL400_DS_DOB:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_DOB", val);
+      break;
+    case TOOL400_DS_DOS:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_DS_DOS", val);
+      break;
     case TOOL400_KEY_END_DS:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_DS", val);
       break;
@@ -206,6 +215,12 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
       break;
     case TOOL400_S_NOCONV:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_NOCONV", val);
+      break;
+    case TOOL400_S_DOU:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_DOU", val);
+      break;
+    case TOOL400_S_DOB:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_DOB", val);
       break;
     case TOOL400_S_VALUE:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_S_VALUE", val);
