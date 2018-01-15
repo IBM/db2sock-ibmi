@@ -55,5 +55,7 @@ dltmod --lib $ILELIB --mod PASETOOL
 dltmod --lib $ILELIB --mod RAINBANK
 dltmod --lib $ILELIB --mod RAINBOW
 dltmod --lib $ILELIB --mod RAINSRV
+dltmod --lib $ILELIB --mod DANNY01
+dltmod --lib $ILELIB --mod DANNY02
 
 

@@ -1,5 +1,5 @@
 {"pgm":[
-    {"name":"DANNY01",  "lib":"DB2JSON"},
+    {"name":"DANNY02",  "lib":"DB2JSON"},
     {"s": {"name":"inCount", "type":"10i0", "value":3, "by":"in"}},
     {"ds": [{"name":"inputDS","dim":20, "by": "in"},
         {"s":[
@@ -8,7 +8,7 @@
         ]}
     ]},
     {"s": {"name":"outCount", "type":"10i0", "value":1}},
-    {"s": {"name":"outputA", "type":"10a", "dim":20, "dob": "oon"}},
+    {"s": {"name":"outputA", "type":"10i0", "dim":20, "dou": "outCount"}},
     {"s": {"name":"last", "type":"20a", "value":"ll"}}
 ]}
 

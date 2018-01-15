@@ -655,6 +655,7 @@ void tool_output_pgm_dcl_s_beg(tool_struct_t *tool, char * name, int tdim) {
 }
 void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
   int i = 0;
+  int isZero = 1;
   if (!tool->outhold) {
     /* dob? */
     if (tool->dataholdempty && !tool->dataholdmax) {
@@ -664,28 +665,22 @@ void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
         tool->dataholdcnt = 2;
         tool->dataholdmax = 1;
       }
+      /* is zero (numeric) */
       if (numFlag && !tool->dataholdmax) {
-        for (i=0; value[i] && !tool->dataholdmax; i++) {
+        for (i=0, isZero = 1; value[i] && isZero; i++) {
           switch(value[i]) {
           case '0':
-          case '1':
-          case '2':
-          case '3':
-          case '4':
-          case '5':
-          case '6':
-          case '7':
-          case '8':
-          case '9':
           case '.':
-          case '-':
-          case '+':
+          case ' ':
             break;
           default:
-            tool->dataholdcnt = 2;
-            tool->dataholdmax = 1;
+            isZero = 0;
             break;
           }
+        }
+        if (isZero) {
+          tool->dataholdcnt = 2;
+          tool->dataholdmax = 1;
         }
       }
     }
