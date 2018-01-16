@@ -182,7 +182,7 @@ SQLBindColStruct * SQLBindColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindColStruct * myptr = (SQLBindColStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -258,7 +258,7 @@ SQLBindFileToColStruct * SQLBindFileToColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindFileToColStruct * myptr = (SQLBindFileToColStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -334,7 +334,7 @@ SQLBindFileToParamStruct * SQLBindFileToParamJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLBindFileToParamStruct * myptr = (SQLBindFileToParamStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -410,7 +410,7 @@ SQLBindParamStruct * SQLBindParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindParamStruct * myptr = (SQLBindParamStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -488,7 +488,7 @@ SQLBindParameterStruct * SQLBindParameterJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLBindParameterStruct * myptr = (SQLBindParameterStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -557,7 +557,7 @@ SQLCancelStruct * SQLCancelJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCancelStruct * myptr = (SQLCancelStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -626,7 +626,7 @@ SQLCloseCursorStruct * SQLCloseCursorJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCloseCursorStruct * myptr = (SQLCloseCursorStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -701,7 +701,7 @@ SQLColAttributeStruct * SQLColAttributeJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributeStruct * myptr = (SQLColAttributeStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -776,7 +776,7 @@ SQLColAttributeWStruct * SQLColAttributeWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributeWStruct * myptr = (SQLColAttributeWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -851,7 +851,7 @@ SQLColAttributesStruct * SQLColAttributesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributesStruct * myptr = (SQLColAttributesStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -926,7 +926,7 @@ SQLColAttributesWStruct * SQLColAttributesWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColAttributesWStruct * myptr = (SQLColAttributesWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1003,7 +1003,7 @@ SQLColumnPrivilegesStruct * SQLColumnPrivilegesJoin (pthread_t tid, SQLINTEGER f
 {
   SQLColumnPrivilegesStruct * myptr = (SQLColumnPrivilegesStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1080,7 +1080,7 @@ SQLColumnPrivilegesWStruct * SQLColumnPrivilegesWJoin (pthread_t tid, SQLINTEGER
 {
   SQLColumnPrivilegesWStruct * myptr = (SQLColumnPrivilegesWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1157,7 +1157,7 @@ SQLColumnsStruct * SQLColumnsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColumnsStruct * myptr = (SQLColumnsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1234,7 +1234,7 @@ SQLColumnsWStruct * SQLColumnsWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLColumnsWStruct * myptr = (SQLColumnsWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1309,7 +1309,7 @@ SQLConnectStruct * SQLConnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLConnectStruct * myptr = (SQLConnectStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1384,7 +1384,7 @@ SQLConnectWStruct * SQLConnectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLConnectWStruct * myptr = (SQLConnectWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1454,7 +1454,7 @@ SQLCopyDescStruct * SQLCopyDescJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLCopyDescStruct * myptr = (SQLCopyDescStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->sDesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1679,7 +1679,7 @@ SQLDescribeColStruct * SQLDescribeColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeColStruct * myptr = (SQLDescribeColStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1756,7 +1756,7 @@ SQLDescribeColWStruct * SQLDescribeColWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeColWStruct * myptr = (SQLDescribeColWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1830,7 +1830,7 @@ SQLDescribeParamStruct * SQLDescribeParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDescribeParamStruct * myptr = (SQLDescribeParamStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1911,7 +1911,7 @@ SQLDisconnectStruct * SQLDisconnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDisconnectStruct * myptr = (SQLDisconnectStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -1987,7 +1987,7 @@ SQLDriverConnectStruct * SQLDriverConnectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDriverConnectStruct * myptr = (SQLDriverConnectStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2063,7 +2063,7 @@ SQLDriverConnectWStruct * SQLDriverConnectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLDriverConnectWStruct * myptr = (SQLDriverConnectWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2348,7 +2348,7 @@ SQLExecDirectStruct * SQLExecDirectJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecDirectStruct * myptr = (SQLExecDirectStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2419,7 +2419,7 @@ SQLExecDirectWStruct * SQLExecDirectWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecDirectWStruct * myptr = (SQLExecDirectWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2488,7 +2488,7 @@ SQLExecuteStruct * SQLExecuteJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExecuteStruct * myptr = (SQLExecuteStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2561,7 +2561,7 @@ SQLExtendedFetchStruct * SQLExtendedFetchJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLExtendedFetchStruct * myptr = (SQLExtendedFetchStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2630,7 +2630,7 @@ SQLFetchStruct * SQLFetchJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLFetchStruct * myptr = (SQLFetchStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2701,7 +2701,7 @@ SQLFetchScrollStruct * SQLFetchScrollJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLFetchScrollStruct * myptr = (SQLFetchScrollStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2782,7 +2782,7 @@ SQLForeignKeysStruct * SQLForeignKeysJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLForeignKeysStruct * myptr = (SQLForeignKeysStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -2863,7 +2863,7 @@ SQLForeignKeysWStruct * SQLForeignKeysWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLForeignKeysWStruct * myptr = (SQLForeignKeysWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3042,7 +3042,7 @@ SQLGetColStruct * SQLGetColJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetColStruct * myptr = (SQLGetColStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3116,7 +3116,7 @@ SQLGetColWStruct * SQLGetColWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetColWStruct * myptr = (SQLGetColWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3189,7 +3189,7 @@ SQLGetConnectAttrStruct * SQLGetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetConnectAttrStruct * myptr = (SQLGetConnectAttrStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3262,7 +3262,7 @@ SQLGetConnectAttrWStruct * SQLGetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLGetConnectAttrWStruct * myptr = (SQLGetConnectAttrWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3333,7 +3333,7 @@ SQLGetConnectOptionStruct * SQLGetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 {
   SQLGetConnectOptionStruct * myptr = (SQLGetConnectOptionStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3404,7 +3404,7 @@ SQLGetConnectOptionWStruct * SQLGetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 {
   SQLGetConnectOptionWStruct * myptr = (SQLGetConnectOptionWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3476,7 +3476,7 @@ SQLGetCursorNameStruct * SQLGetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetCursorNameStruct * myptr = (SQLGetCursorNameStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3548,7 +3548,7 @@ SQLGetCursorNameWStruct * SQLGetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetCursorNameWStruct * myptr = (SQLGetCursorNameWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3622,7 +3622,7 @@ SQLGetDataStruct * SQLGetDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDataStruct * myptr = (SQLGetDataStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3696,7 +3696,7 @@ SQLGetDescFieldStruct * SQLGetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescFieldStruct * myptr = (SQLGetDescFieldStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3770,7 +3770,7 @@ SQLGetDescFieldWStruct * SQLGetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescFieldWStruct * myptr = (SQLGetDescFieldWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3849,7 +3849,7 @@ SQLGetDescRecStruct * SQLGetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescRecStruct * myptr = (SQLGetDescRecStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -3928,7 +3928,7 @@ SQLGetDescRecWStruct * SQLGetDescRecWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetDescRecWStruct * myptr = (SQLGetDescRecWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4352,7 +4352,7 @@ SQLGetFunctionsStruct * SQLGetFunctionsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetFunctionsStruct * myptr = (SQLGetFunctionsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4425,7 +4425,7 @@ SQLGetInfoStruct * SQLGetInfoJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetInfoStruct * myptr = (SQLGetInfoStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4498,7 +4498,7 @@ SQLGetInfoWStruct * SQLGetInfoWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetInfoWStruct * myptr = (SQLGetInfoWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4571,7 +4571,7 @@ SQLGetLengthStruct * SQLGetLengthJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetLengthStruct * myptr = (SQLGetLengthStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4648,7 +4648,7 @@ SQLGetPositionStruct * SQLGetPositionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetPositionStruct * myptr = (SQLGetPositionStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4725,7 +4725,7 @@ SQLGetPositionWStruct * SQLGetPositionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetPositionWStruct * myptr = (SQLGetPositionWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4798,7 +4798,7 @@ SQLGetStmtAttrStruct * SQLGetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtAttrStruct * myptr = (SQLGetStmtAttrStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4871,7 +4871,7 @@ SQLGetStmtAttrWStruct * SQLGetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtAttrWStruct * myptr = (SQLGetStmtAttrWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -4942,7 +4942,7 @@ SQLGetStmtOptionStruct * SQLGetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtOptionStruct * myptr = (SQLGetStmtOptionStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5013,7 +5013,7 @@ SQLGetStmtOptionWStruct * SQLGetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetStmtOptionWStruct * myptr = (SQLGetStmtOptionWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5091,7 +5091,7 @@ SQLGetSubStringStruct * SQLGetSubStringJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetSubStringStruct * myptr = (SQLGetSubStringStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5169,7 +5169,7 @@ SQLGetSubStringWStruct * SQLGetSubStringWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetSubStringWStruct * myptr = (SQLGetSubStringWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5239,7 +5239,7 @@ SQLGetTypeInfoStruct * SQLGetTypeInfoJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetTypeInfoStruct * myptr = (SQLGetTypeInfoStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5309,7 +5309,7 @@ SQLGetTypeInfoWStruct * SQLGetTypeInfoWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLGetTypeInfoWStruct * myptr = (SQLGetTypeInfoWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5378,7 +5378,7 @@ SQLLanguagesStruct * SQLLanguagesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLLanguagesStruct * myptr = (SQLLanguagesStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5447,7 +5447,7 @@ SQLMoreResultsStruct * SQLMoreResultsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLMoreResultsStruct * myptr = (SQLMoreResultsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5521,7 +5521,7 @@ SQLNativeSqlStruct * SQLNativeSqlJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNativeSqlStruct * myptr = (SQLNativeSqlStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5595,7 +5595,7 @@ SQLNativeSqlWStruct * SQLNativeSqlWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNativeSqlWStruct * myptr = (SQLNativeSqlWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5665,7 +5665,7 @@ SQLNextResultStruct * SQLNextResultJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNextResultStruct * myptr = (SQLNextResultStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5735,7 +5735,7 @@ SQLNumParamsStruct * SQLNumParamsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNumParamsStruct * myptr = (SQLNumParamsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5805,7 +5805,7 @@ SQLNumResultColsStruct * SQLNumResultColsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLNumResultColsStruct * myptr = (SQLNumResultColsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5875,7 +5875,7 @@ SQLParamDataStruct * SQLParamDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLParamDataStruct * myptr = (SQLParamDataStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -5946,7 +5946,7 @@ SQLParamOptionsStruct * SQLParamOptionsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLParamOptionsStruct * myptr = (SQLParamOptionsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6017,7 +6017,7 @@ SQLPrepareStruct * SQLPrepareJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrepareStruct * myptr = (SQLPrepareStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6088,7 +6088,7 @@ SQLPrepareWStruct * SQLPrepareWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrepareWStruct * myptr = (SQLPrepareWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6163,7 +6163,7 @@ SQLPrimaryKeysStruct * SQLPrimaryKeysJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrimaryKeysStruct * myptr = (SQLPrimaryKeysStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6238,7 +6238,7 @@ SQLPrimaryKeysWStruct * SQLPrimaryKeysWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPrimaryKeysWStruct * myptr = (SQLPrimaryKeysWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6315,7 +6315,7 @@ SQLProcedureColumnsStruct * SQLProcedureColumnsJoin (pthread_t tid, SQLINTEGER f
 {
   SQLProcedureColumnsStruct * myptr = (SQLProcedureColumnsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6392,7 +6392,7 @@ SQLProcedureColumnsWStruct * SQLProcedureColumnsWJoin (pthread_t tid, SQLINTEGER
 {
   SQLProcedureColumnsWStruct * myptr = (SQLProcedureColumnsWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6467,7 +6467,7 @@ SQLProceduresStruct * SQLProceduresJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLProceduresStruct * myptr = (SQLProceduresStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6542,7 +6542,7 @@ SQLProceduresWStruct * SQLProceduresWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLProceduresWStruct * myptr = (SQLProceduresWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6613,7 +6613,7 @@ SQLPutDataStruct * SQLPutDataJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLPutDataStruct * myptr = (SQLPutDataStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6750,7 +6750,7 @@ SQLRowCountStruct * SQLRowCountJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLRowCountStruct * myptr = (SQLRowCountStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6822,7 +6822,7 @@ SQLSetConnectAttrStruct * SQLSetConnectAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetConnectAttrStruct * myptr = (SQLSetConnectAttrStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6894,7 +6894,7 @@ SQLSetConnectAttrWStruct * SQLSetConnectAttrWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLSetConnectAttrWStruct * myptr = (SQLSetConnectAttrWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -6965,7 +6965,7 @@ SQLSetConnectOptionStruct * SQLSetConnectOptionJoin (pthread_t tid, SQLINTEGER f
 {
   SQLSetConnectOptionStruct * myptr = (SQLSetConnectOptionStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7036,7 +7036,7 @@ SQLSetConnectOptionWStruct * SQLSetConnectOptionWJoin (pthread_t tid, SQLINTEGER
 {
   SQLSetConnectOptionWStruct * myptr = (SQLSetConnectOptionWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7107,7 +7107,7 @@ SQLSetCursorNameStruct * SQLSetCursorNameJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetCursorNameStruct * myptr = (SQLSetCursorNameStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7178,7 +7178,7 @@ SQLSetCursorNameWStruct * SQLSetCursorNameWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetCursorNameWStruct * myptr = (SQLSetCursorNameWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7251,7 +7251,7 @@ SQLSetDescFieldStruct * SQLSetDescFieldJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescFieldStruct * myptr = (SQLSetDescFieldStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7324,7 +7324,7 @@ SQLSetDescFieldWStruct * SQLSetDescFieldWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescFieldWStruct * myptr = (SQLSetDescFieldWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7402,7 +7402,7 @@ SQLSetDescRecStruct * SQLSetDescRecJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetDescRecStruct * myptr = (SQLSetDescRecStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdesc, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7548,7 +7548,7 @@ SQLSetParamStruct * SQLSetParamJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetParamStruct * myptr = (SQLSetParamStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7620,7 +7620,7 @@ SQLSetStmtAttrStruct * SQLSetStmtAttrJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtAttrStruct * myptr = (SQLSetStmtAttrStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7692,7 +7692,7 @@ SQLSetStmtAttrWStruct * SQLSetStmtAttrWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtAttrWStruct * myptr = (SQLSetStmtAttrWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7763,7 +7763,7 @@ SQLSetStmtOptionStruct * SQLSetStmtOptionJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtOptionStruct * myptr = (SQLSetStmtOptionStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7834,7 +7834,7 @@ SQLSetStmtOptionWStruct * SQLSetStmtOptionWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSetStmtOptionWStruct * myptr = (SQLSetStmtOptionWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7912,7 +7912,7 @@ SQLSpecialColumnsStruct * SQLSpecialColumnsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLSpecialColumnsStruct * myptr = (SQLSpecialColumnsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -7990,7 +7990,7 @@ SQLSpecialColumnsWStruct * SQLSpecialColumnsWJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLSpecialColumnsWStruct * myptr = (SQLSpecialColumnsWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8134,7 +8134,7 @@ SQLStatisticsStruct * SQLStatisticsJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLStatisticsStruct * myptr = (SQLStatisticsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8211,7 +8211,7 @@ SQLStatisticsWStruct * SQLStatisticsWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLStatisticsWStruct * myptr = (SQLStatisticsWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8286,7 +8286,7 @@ SQLTablePrivilegesStruct * SQLTablePrivilegesJoin (pthread_t tid, SQLINTEGER fla
 {
   SQLTablePrivilegesStruct * myptr = (SQLTablePrivilegesStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8361,7 +8361,7 @@ SQLTablePrivilegesWStruct * SQLTablePrivilegesWJoin (pthread_t tid, SQLINTEGER f
 {
   SQLTablePrivilegesWStruct * myptr = (SQLTablePrivilegesWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8438,7 +8438,7 @@ SQLTablesStruct * SQLTablesJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLTablesStruct * myptr = (SQLTablesStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8515,7 +8515,7 @@ SQLTablesWStruct * SQLTablesWJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQLTablesWStruct * myptr = (SQLTablesWStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -8693,7 +8693,7 @@ SQL400Stmt2HdbcStruct * SQL400Stmt2HdbcJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400Stmt2HdbcStruct * myptr = (SQL400Stmt2HdbcStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hstmt, 1);
+  active = init_table_in_progress(tid, 1);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9186,7 +9186,7 @@ SQL400CloseStruct * SQL400CloseJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400CloseStruct * myptr = (SQL400CloseStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9239,7 +9239,7 @@ SQL400pCloseStruct * SQL400pCloseJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400pCloseStruct * myptr = (SQL400pCloseStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9292,7 +9292,7 @@ SQL400CloseAllStmtsStruct * SQL400CloseAllStmtsJoin (pthread_t tid, SQLINTEGER f
 {
   SQL400CloseAllStmtsStruct * myptr = (SQL400CloseAllStmtsStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9346,7 +9346,7 @@ SQL400CmdStruct * SQL400CmdJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400CmdStruct * myptr = (SQL400CmdStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9400,7 +9400,7 @@ SQL400ChgLiblStruct * SQL400ChgLiblJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ChgLiblStruct * myptr = (SQL400ChgLiblStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9454,7 +9454,7 @@ SQL400ChgCurLibStruct * SQL400ChgCurLibJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ChgCurLibStruct * myptr = (SQL400ChgCurLibStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9512,7 +9512,7 @@ SQL400ToUtf8Struct * SQL400ToUtf8Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ToUtf8Struct * myptr = (SQL400ToUtf8Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9570,7 +9570,7 @@ SQL400FromUtf8Struct * SQL400FromUtf8Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400FromUtf8Struct * myptr = (SQL400FromUtf8Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9628,7 +9628,7 @@ SQL400ToUtf16Struct * SQL400ToUtf16Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400ToUtf16Struct * myptr = (SQL400ToUtf16Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9686,7 +9686,7 @@ SQL400FromUtf16Struct * SQL400FromUtf16Join (pthread_t tid, SQLINTEGER flag)
 {
   SQL400FromUtf16Struct * myptr = (SQL400FromUtf16Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9744,7 +9744,7 @@ SQL400IgnoreNullToUtf8Struct * SQL400IgnoreNullToUtf8Join (pthread_t tid, SQLINT
 {
   SQL400IgnoreNullToUtf8Struct * myptr = (SQL400IgnoreNullToUtf8Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9802,7 +9802,7 @@ SQL400IgnoreNullFromUtf8Struct * SQL400IgnoreNullFromUtf8Join (pthread_t tid, SQ
 {
   SQL400IgnoreNullFromUtf8Struct * myptr = (SQL400IgnoreNullFromUtf8Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9860,7 +9860,7 @@ SQL400IgnoreNullToUtf16Struct * SQL400IgnoreNullToUtf16Join (pthread_t tid, SQLI
 {
   SQL400IgnoreNullToUtf16Struct * myptr = (SQL400IgnoreNullToUtf16Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9918,7 +9918,7 @@ SQL400IgnoreNullFromUtf16Struct * SQL400IgnoreNullFromUtf16Join (pthread_t tid, 
 {
   SQL400IgnoreNullFromUtf16Struct * myptr = (SQL400IgnoreNullFromUtf16Struct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {
@@ -9975,7 +9975,7 @@ SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag)
 {
   SQL400JsonStruct * myptr = (SQL400JsonStruct *) NULL;
   int active = 0;
-  active = init_table_in_progress(myptr->hdbc, 0);
+  active = init_table_in_progress(tid, 0);
   if (flag == SQL400_FLAG_JOIN_WAIT || !active) {
     pthread_join(tid,(void**)&myptr);
   } else {

@@ -328,7 +328,7 @@ char ** init_cli_dbx() {
 
 
 /* caller hold resource level lock
- * init_table_ctor(hdbc,hdbc)     -- opening a hdbc (connection)
+ * init_table_ctor(hdbc,hdbc)  -- opening a hdbc (connection)
  * init_table_ctor(hstmt,hdbc) -- map a stmt to a hdbc (connection)
  * These lock are resource level 'lock multiple', any thread.
  * That is, PTHREAD_MUTEX_RECURSIVE, therefore, same thread, 
@@ -347,6 +347,7 @@ void init_table_ctor(int handle, int hdbc) {
   IBMiTable[handle].hstmt = handle;
   IBMiTable[handle].hdbc = hdbc;
   IBMiTable[handle].hKey = NULL;
+  IBMiTable[handle].tid = 0;
   // init_unlock(); - lock in Alloc routine
 }
 /* DB2 free not thread safe
@@ -374,6 +375,7 @@ void init_table_dtor(int handle) {
     init_free(IBMiTable[handle].use_data);
   }
   IBMiTable[handle].use_data = NULL;
+  IBMiTable[handle].tid = 0;
   // init_unlock(); - lock in Free routine
 }
 void * init_table_addr(int handle) {
@@ -425,22 +427,30 @@ void init_table_lock(int handle, int flag) {
   if (flag) {
     pthread_mutex_lock(&IBMiTable[IBMiTable[handle].hdbc].threadMutexLock);
     IBMiTable[IBMiTable[handle].hdbc].in_progress += 1;
+    IBMiTable[IBMiTable[handle].hdbc].tid = pthread_self();
   } else {
     pthread_mutex_lock(&IBMiTable[handle].threadMutexLock);
     IBMiTable[handle].in_progress += 1;
+    IBMiTable[handle].tid = pthread_self();
   }
 }
 void init_table_unlock(int handle,int flag) {
   if (flag) {
-    pthread_mutex_unlock(&IBMiTable[IBMiTable[handle].hdbc].threadMutexLock);
     if (IBMiTable[handle].in_progress > 0) {
       IBMiTable[IBMiTable[handle].hdbc].in_progress -= 1;
     }
+    if (!IBMiTable[handle].in_progress) {
+      IBMiTable[IBMiTable[handle].hdbc].tid = 0;
+    }
+    pthread_mutex_unlock(&IBMiTable[IBMiTable[handle].hdbc].threadMutexLock);
   } else {
-    pthread_mutex_unlock(&IBMiTable[handle].threadMutexLock);
     if (IBMiTable[handle].in_progress > 0) {
       IBMiTable[handle].in_progress -= 1;
     }
+    if (!IBMiTable[handle].in_progress) {
+      IBMiTable[handle].tid = 0;
+    }
+    pthread_mutex_unlock(&IBMiTable[handle].threadMutexLock);
   }
 }
 /* No lock.
@@ -449,13 +459,12 @@ void init_table_unlock(int handle,int flag) {
  * This is dicey, but false yes/no is
  * likely ok, when used as 'join'.
  */
-int init_table_in_progress(int handle,int flag) {
-  if (flag) {
-    if (IBMiTable[IBMiTable[handle].hdbc].in_progress > 0) {
-      return 1;
-    }
-  } else {
-    if (IBMiTable[handle].in_progress > 0) {
+int init_table_in_progress(pthread_t tid,int flag) {
+  int i = 0;
+  // any statements this hdbc
+  for (i=0;i<PASECLIMAXRESOURCE;i++) {
+    if (IBMiTable[i].tid == tid) 
+    {
       return 1;
     }
   }

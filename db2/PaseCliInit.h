@@ -31,7 +31,8 @@
 #define PASECLIMAXRESOURCE 33000
 typedef struct PaseCliResource {
   int hstmt;                       /* index hstmt or hdbc   */
-  int hdbc;                        /* index to hdc (above)  */ 
+  int hdbc;                        /* index to hdc (above)  */
+  pthread_t tid;                   /* thread id (hdc or hstmt) */ 
   pthread_mutex_t threadMutexLock; /* lock hdbc or hstmt    */
   pthread_mutexattr_t threadMutexAttr; /* recursive lock    */
   int in_progress;                 /* operation in progress */
@@ -87,7 +88,7 @@ void init_table_ctor(int handle, int hdbc);
 void init_table_dtor(int handle);
 void init_table_lock(int handle,int flag);
 void init_table_unlock(int handle,int flag);
-int init_table_in_progress(int handle,int flag);
+int init_table_in_progress(pthread_t tid,int flag);
 /*
  * find any hstmt associated with this hdbc
  * (connection lock assumed client)

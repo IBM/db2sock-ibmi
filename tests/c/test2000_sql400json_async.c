@@ -27,6 +27,17 @@ int main(int argc, char * argv[]) {
   char * bad = "_bad.";
   pthread_t tid = 0;
   SQL400JsonStruct * tdata = NULL;
+  SQLHANDLE hdbc = 0;
+  char *db  = NULL;
+  char *uid = NULL;
+  char *pwd = NULL;
+  char *libl  = NULL;
+  char *curlib = NULL;
+  char *trace  = NULL;
+  /* profile db2 */
+  db  = getenv(SQL_DB400);
+  uid = getenv(SQL_UID400);
+  pwd = getenv(SQL_PWD400);
 
   /* bad */
   if (argc < 2) {
@@ -61,11 +72,14 @@ int main(int argc, char * argv[]) {
   /* sqlrc = SQLOverrideCCSID400( 1208 ); */
 
   /* json call (hdbc=0 - json handles connection) */
-  tid = SQL400JsonAsync(0, injson, inlen, outjson, outlen, NULL);
+  /* SQL400 aggregate API -- convert db, uid, pwd to UTF8, set-up env, sys naming, server mode, etc. */
+  sqlrc = SQL400ConnectUtf8(819, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, &hdbc, SQL_TXN_NO_COMMIT, libl, curlib);
+  tid = SQL400JsonAsync(hdbc, injson, inlen, outjson, outlen, NULL);
   printf("call(tid=%d)\n",tid);
   while(!tdata) {
     printf("waiting(tid=%d)\n",tid);
-    tdata = SQL400JsonJoin (tid, 0);
+    tdata = SQL400JsonJoin (tid, SQL400_FLAG_JOIN_NO_WAIT);
+    if (!tdata) sleep(1);
   }
   free(tdata);
   printf("output(%d):\n%s\n\n",strlen(outjson),outjson);
@@ -95,6 +109,9 @@ int main(int argc, char * argv[]) {
   } else {
     printf("fail (%d)\n",sqlrc);
   }
+
+  sqlrc = SQLDisconnect(hdbc);
+  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
 
   return sqlrc;
 }

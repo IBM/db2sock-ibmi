@@ -950,11 +950,11 @@ for line in f:
   if argtype1st == "SQLHENV":
     PaseCliAsync_c_main += "  /* not lock */" + "\n"
   elif argtype1st == "SQLHDBC":
-    PaseCliAsync_c_main += "  active = init_table_in_progress(myptr->" + argname1st + ", 0);" + "\n"
+    PaseCliAsync_c_main += "  active = init_table_in_progress(tid, 0);" + "\n"
   elif argtype1st == "SQLHSTMT":
-    PaseCliAsync_c_main += "  active = init_table_in_progress(myptr->" + argname1st + ", 1);" + "\n"
+    PaseCliAsync_c_main += "  active = init_table_in_progress(tid, 1);" + "\n"
   elif argtype1st == "SQLHDESC":
-    PaseCliAsync_c_main += "  active = init_table_in_progress(myptr->" + argname1st + ", 1);" + "\n"
+    PaseCliAsync_c_main += "  active = init_table_in_progress(tid, 1);" + "\n"
   PaseCliAsync_c_main += "  if (flag == SQL400_FLAG_JOIN_WAIT || !active) {" + "\n"
   PaseCliAsync_c_main += "    pthread_join(tid,(void**)&myptr);" + "\n"
   PaseCliAsync_c_main += "  } else {" + "\n"
