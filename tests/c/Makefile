@@ -36,6 +36,7 @@ TEST0001     = test0001_error
 TEST0011     = test0011_resource_array_async_callback
 TEST0012     = test0012_resource_array_async_join
 TEST1000     = test1000_sql400json
+TEST2000     = test2000_sql400json_async
 TEST9999     = test9999_driver_version
 
 ### tells make all things to do (order)
@@ -51,6 +52,7 @@ go: speakpase $(TEST0000)$(BIT) \
 	$(TEST0011)$(BIT) \
 	$(TEST0012)$(BIT) \
 	$(TEST1000)$(BIT) \
+	$(TEST2000)$(BIT) \
 	$(TEST9999)$(BIT) \
 	clean
 
@@ -69,6 +71,8 @@ $(TEST0012)$(BIT): $(TEST0012).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0012).o -o $(TEST0012)$(BIT)
 $(TEST1000)$(BIT): $(TEST1000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1000).o -o $(TEST1000)$(BIT)
+$(TEST2000)$(BIT): $(TEST2000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST2000).o -o $(TEST2000)$(BIT)
 $(TEST9999)$(BIT): $(TEST9999).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST9999).o -o $(TEST9999)$(BIT)
 
