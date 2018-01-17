@@ -57,5 +57,6 @@ dltmod --lib $ILELIB --mod RAINBOW
 dltmod --lib $ILELIB --mod RAINSRV
 dltmod --lib $ILELIB --mod DANNY01
 dltmod --lib $ILELIB --mod DANNY02
+dltmod --lib $ILELIB --mod DANNY03
 dltmod --lib $ILELIB --mod IAMSLOW
 
