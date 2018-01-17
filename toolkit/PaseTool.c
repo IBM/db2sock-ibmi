@@ -685,7 +685,7 @@ void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
       }
     }
     /* dou? */
-    if (tool->dataholdmax) {
+    if (tool->dataholdmaxset || tool->dataholdmax) {
       tool->dataholdcnt++;
       if (tool->dataholdcnt > tool->dataholdmax) {
          tool->outhold = 1;
@@ -694,6 +694,7 @@ void tool_output_pgm_dcl_s_data(tool_struct_t *tool, char *value, int numFlag) {
     if (!tool->outhold) {
       tool->outareaLen = tool->output_pgm_dcl_s_data(tool->curr, tool->outarea, tool->outareaLen, value, numFlag);
     }
+    /* not 'ds' level hold, therefore reset off */
     tool->outhold = 0;
   }
 }
@@ -918,6 +919,7 @@ ile_pgm_call_t **playout) {
   /* no dou or dob */
   tool->dataholdempty = 0;
   tool->dataholdmax = 0;
+  tool->dataholdmaxset = 0;
   tool->dataholdcnt = 0;
 
   /* "dou":? */
@@ -932,6 +934,7 @@ ile_pgm_call_t **playout) {
         where_dou = (char *)layout + node->offset;
         dou = tool_dcl_s_2_int(node->typ, node->tlen, node->tscale, node->tvary, where_dou);
         tool->dataholdmax = dou;
+        tool->dataholdmaxset = 1;
       }
     }
   }
@@ -1100,6 +1103,7 @@ ile_pgm_call_t **playout) {
   /* "dou":? */
   if (isOut && in_dou) {
     tool->dataholdmax = 0;
+    tool->dataholdmaxset = 0;
     tool->dataholdcnt = 0;
   }
 
