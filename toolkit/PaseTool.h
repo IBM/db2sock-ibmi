@@ -296,6 +296,7 @@ typedef struct tool_struct {
   int outlen;
   int outhold;
   int outholdord;
+  int outallinput;
   int dataholdmax;
   int dataholdmaxset;
   int dataholdcnt;

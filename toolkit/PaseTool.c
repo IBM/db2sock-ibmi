@@ -1556,13 +1556,13 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
                       (ile_pgm_call_t **)&tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
-    tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
+    if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
     if (pgm_ds_dim_cnt) {
       if (!tool->outhold) {
         pgm_ds_idx_outareaLen = tool->outareaLen;
       }
-      tool_output_pgm_dcl_ds_rec_beg(tool);
-      if (pgm_ds_all_input) {
+      if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_rec_beg(tool);
+      if (!tool->outhold && pgm_ds_all_input) {
         tool->outhold = 1;
         tool->outholdord = pgm_ds_idx_node->ord;
       }
@@ -1663,8 +1663,8 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
              }
           }
           if (pgm_ds_dim_max) {
-            tool_output_pgm_dcl_ds_rec_end(tool);
-            tool_output_pgm_dcl_ds_rec_beg(tool);
+            if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_rec_end(tool);
+            if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_rec_beg(tool);
             if (!tool->outhold) {
               pgm_ds_idx_outareaLen = tool->outareaLen;
             }
@@ -1680,9 +1680,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
             }
           }
           if (pgm_ds_dim_max) {
-            tool_output_pgm_dcl_ds_rec_end(tool);
+            if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_rec_end(tool);
           }
-          tool_output_pgm_dcl_ds_end(tool, pgm_ds_dim_max);
+          if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_end(tool, pgm_ds_dim_max);
           pgm_ds_dim_max = 0;
           go = 0;
         }
@@ -1697,7 +1697,6 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   }
   return sqlrc;
 }
-
 
 SQLRETURN tool_key_pgm_params_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int isOut, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
