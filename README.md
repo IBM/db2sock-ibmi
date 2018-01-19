@@ -226,17 +226,40 @@ The fork project in-memory calls in a scripting language leaves QTEMP data activ
 
 Many RPG programs use QTEMP 'work files' to hold intermediate results of complex operations. 
 QTEMP is scoped to current process, therefore, when job ends all company 'work file' data disappears. 
-Only rarely do RPG programs go out of the way to delete QTEMP company data. 
-Like previous case (forked project), in-memory call QTEMP stays alive forever in the scripting language job. 
+Only rarely do RPG programs go out of the way to delete QTEMP company data. Like previous case (forked project), 
+in-memory call QTEMP stays alive forever in the scripting language job. 
 To hack, simple script read QTEMP in scripting language job. Very unsafe (but fast).
+
+**easily hack (in-memory calls editorial)**
+
+Basically fork project faster in-memory call is it's own worst enemy. 
+That is, _PGMCALL/_ILECALL in-memory call 'good', can be used for in-memory call 'bad'. 
+
+There are so many hack 'in-memory' state examples, a complete listing is impossible. 
+
+Example (simple): Your 'good' script faster in-memory calls RPG program uses QTEMP file of credit card numbers. 
+Great! However RPG program does not delete QTEMP files (oh oh). Hours later, a 'bad' hacker script uses 'faster' 
+in-memory calls to read QTEMP using native file IO (open, read, close). Nasty! You've been hacked by in-memory 
+leaving QTEMP hanging around with active data. 
+
+Aka, 'faster' in-memory call is it's own worst enemy. 
+
+There is no 'faster' free lunch with forked project db2sock. In fact, whole idea is likely bad for IBM i. 
+I am not being evil. On contrary, fork project in-memory idea is clever(ish). I am simply trying to help avoid weeks of 
+effort that will most likely ultimately be scraped.
+
+BTW – PASE community suggestion of porting fflib to wrapper _PGMCALL/_ILECALL has been heralded as replacement for toolkits. 
+Unfortunately this has same 'bad' in-memory hack consequences for web sites discussed. 
+ 
 
 **You decide, speed vs secure**
 
-To date, fork project author and myself have not been able to come to agreement on the risk. 
+To date, fork project author and myself have not been able to come to agreement on the risk.
+I felt the issues are sever enough to warrent comment (sorry).
 
-The main db2sock project uses QSQSRVR proxy jobs (db2 connect), 
+The main db2sock project uses QSQSRVR proxy jobs (db2 connect),
 therefore company data is NOT live in any web server daemon job. In fact,  
-most use 'stateless' QSQSRVR jobs, which are zero'd between uses (detach QSQSRVR job processing). 
+most use 'stateless' QSQSRVR jobs, which is zero'd between uses (detach QSQSRVR job processing). 
 Aka, safe toolkit as can be expected. 
 
 You have facts, and, decide for yourself.
