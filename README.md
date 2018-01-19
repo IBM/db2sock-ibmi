@@ -213,11 +213,11 @@ The fork project in-memory calls in a scripting job leaves company data active f
 
 Each time your script uses toolkit call a PGM/SRVPGM, the program is activated in the toolkit job. 
 In fact, anything your srvpgm/pgm ran in job is 'live' in activated memory. 
-Activation of your pgm/srvpgm is for life of the process. 
-This also means any in-memory calls you made have data also 'live' for the life of the process.  
-Scripting language jobs stay alive forever, therefore using in-memory calling (fork project), 
-your company data is available for hacking. To hack, simple script recall last pgm/srvpgm anytime 
-and get the last social security number (whatever laying around). Very unsafe (but fast).
+Activation of your pgm/srvpgm is for life of the process. This also means any in-memory calls you made 
+have data also 'live' for the life of the process.  Scripting language jobs stay alive forever, 
+therefore using in-memory calling (fork project), your company data is available for hacking. To hack, 
+simple script recall last pgm/srvpgm anytime and get the last social security number (whatever laying around). 
+Very unsafe (but fast).
 
 
 2) QTEMP data left live php process is bad.
@@ -248,7 +248,7 @@ There is no 'faster' free lunch with forked project db2sock. In fact, whole idea
 I am not being evil. On contrary, fork project in-memory idea is clever(ish). I am simply trying to help avoid weeks of 
 effort that will most likely ultimately be scraped.
 
-BTW â€“ PASE community suggestion of porting fflib to wrapper _PGMCALL/_ILECALL has been heralded as replacement for toolkits. 
+BTW – PASE community suggestion of porting fflib to wrapper _PGMCALL/_ILECALL has been heralded as replacement for toolkits. 
 Unfortunately this has same 'bad' in-memory hack consequences for web sites discussed. 
  
 
@@ -262,5 +262,5 @@ therefore company data is NOT live in any web server daemon job. In fact,
 most use 'stateless' QSQSRVR jobs, which is zero'd between uses (detach QSQSRVR job processing). 
 Aka, safe toolkit as can be expected. 
 
-You have facts, and, decide for yourself.
+You have facts. Decide for yourself.
 
