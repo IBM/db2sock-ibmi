@@ -202,7 +202,7 @@ Why? All fast web servers supporting scripting languages use an idea of 'daemon'
 That is, scripting language stays active in a job(s) handling requests. 
 Obviously, careful what 'company data' we leave hanging around live in-memory in scripting language jobs. 
 To wit, any company data still 'live' in a script job can be hacked. 
-Herein lies a major design flaw in alternative faster in-memory alternative db2sock (warning).
+Herein lies a major design flaw in alternative faster in-memory call db2sock project (a warning).
 
 Note: Php is example, but applies to all scripting languages.
 
