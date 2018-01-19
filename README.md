@@ -246,17 +246,19 @@ also been heralded as fast call replacement for toolkits. Unfortunately same 'ba
 **You decide, speed vs secure**
 
 To date, fork project author and myself have not been able to come to agreement on the risk.
-I felt alternative in-memory issues are sever enough to warrent comment.
+I felt alternative in-memory issues are severe enough to warrent comment.
 
 This main db2sock project uses QSQSRVR proxy jobs (db2 connect),
 therefore company data is NOT live in any web server daemon job. In fact,  
 most use 'stateless' QSQSRVR jobs, which is zero'd between uses (detach QSQSRVR job processing). 
 Aka, safe toolkit as can be expected. 
 
-There is no 'faster' free lunch with alternative in-memory db2sock. In fact, idea is likely bad for IBM i. 
-The alternative in-memory idea is clever. XMLSERVICE uses the idea in QSQSRVR job (safe). However, I am simply 
+There is no 'faster' free lunch with alternative in-memory db2sock. In fact, idea is likely bad for IBM i
+in the web srever context (scripting languages on web). The alternative in-memory idea is clever. In fact, 
+XMLSERVICE uses  _PGMCALL/_ILECALL in a QSQSRVR job (safe). However, I am simply 
 trying to help avoid weeks of effort that will most likely ultimately be scraped. I suggest spend time better helping
 current QSQSRVR design.
 
-However, we could add a in-memory path 'for experts'. I am inclined not. You have facts. Decide for yourself. 
+However, if popular opinion overrides, we could add a faster in-memory path 'for experts'. 
+I am inclined not (obviously). You have facts. Decide for yourself. 
 
