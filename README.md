@@ -186,43 +186,41 @@ please feel free to use issues on git project (click 'Issues' left panel).
 
 The following security discussion in-memory _PGMCALL/_ILECALL calling is for geeks only. 
 This project is NOT (repeat NOT), implementing in-memory calling of ILE PGMS/SRVPGMs. 
-Aka, safe toolkit as can be expected.
+Aka, current safe toolkit as can be expected using widely used QSQSRVR jobs.
 
 **The debate. Faster is not better. In fact, just plain unsafe (my argument).**
 
-Everybody feels allure of 'going faster', toolkit calls no different. 
-However recent events publicly indicated, 'faster' is not always 'better' (Specter and Meltdown).
+Everybody feels allure of 'going faster'. Toolkit calls no different. However,'faster' is not always 'better'.
 
 **To point.**
 
-A fork of this project is experimenting with in-memory calling of ILE PGMS/SRVPGMs for faster performance. 
+A alternative fork of this project is experimenting with in-memory calling of ILE PGMS/SRVPGMs for faster performance. 
 The fork project uses faster in-memory toolkit calls with _PGMCALL/_ILECALL, aka, calling your RPG in-memory scripting. 
-However, security side affects of in-memory calling in web scripting languages are substantial.
+However, security side affects of alternative in-memory calling in web scripting languages are substantial.
 
 Why? All fast web servers supporting scripting languages use an idea of 'daemon' scripting jobs.
 That is, scripting language stays active in a job(s) handling requests. 
-Obviously, be careful what 'company data' we leave hanging around live in-memory in scripting language jobs. 
-To wit, any company data still live in a script job can be hacked. 
-Herein lies a major design flaw in faster fork copy of db2sock (my warning).
+Obviously, careful what 'company data' we leave hanging around live in-memory in scripting language jobs. 
+To wit, any company data still 'live' in a script job can be hacked. 
+Herein lies a major design flaw in alternative faster in-memory alternative db2sock (warning).
 
 Note: Php is example, but applies to all scripting languages.
 
 1) Company data live in php process is bad.
 
-The fork project in-memory calls in a scripting job leaves company data active forever (easily hacked). 
+The alternative in-memory calls in a scripting job leaves company data active forever (easily hacked). 
 
 Each time your script uses toolkit call a PGM/SRVPGM, the program is activated in the toolkit job. 
 In fact, anything your srvpgm/pgm ran in job is 'live' in activated memory. 
 Activation of your pgm/srvpgm is for life of the process. This also means any in-memory calls you made 
-have data also 'live' for the life of the process.  Scripting language jobs stay alive forever, 
-therefore using in-memory calling (fork project), your company data is available for hacking. To hack, 
-simple script recall last pgm/srvpgm anytime and get the last social security number (whatever laying around). 
+have data also 'live' for life of the process (not explicit freed/zero'd).  Scripting language jobs stay alive forever, 
+therefore using in-memory calling, your company data is available for hacking. To hack, 
+simple script recall last pgm/srvpgm anytime and get last social security number (whatever laying around). 
 Very unsafe (but fast).
-
 
 2) QTEMP data left live php process is bad.
 
-The fork project in-memory calls in a scripting language leaves QTEMP data active forever (easily hacked).
+The alternative in-memory calls in a scripting language leaves QTEMP data active forever (easily hacked).
 
 Many RPG programs use QTEMP 'work files' to hold intermediate results of complex operations. 
 QTEMP is scoped to current process, therefore, when job ends all company 'work file' data disappears. 
@@ -230,37 +228,35 @@ Only rarely do RPG programs go out of the way to delete QTEMP company data. Like
 in-memory call QTEMP stays alive forever in the scripting language job. 
 To hack, simple script read QTEMP in scripting language job. Very unsafe (but fast).
 
-**easily hack (in-memory calls editorial)**
+Many basic issues alternative faster in-memory calling, but perhaps enough already to end debate.
 
-Basically fork project faster in-memory call is it's own worst enemy. 
-That is, _PGMCALL/_ILECALL in-memory call 'good', can be used for in-memory call 'bad'. 
+**easily hack demonstrated (in-memory calls editorial)**
 
-There are so many hack 'in-memory' state examples, a complete listing is impossible. 
+Basically alternative faster in-memory call is it's own worst enemy. 
+That is, any _PGMCALL/_ILECALL in-memory call 'good', can be used for in-memory call 'bad'. 
 
 Example (simple): Your 'good' script faster in-memory calls RPG program uses QTEMP file of credit card numbers. 
 Great! However RPG program does not delete QTEMP files (oh oh). Hours later, a 'bad' hacker script uses 'faster' 
-in-memory calls to read QTEMP using native file IO (open, read, close). Nasty! You've been hacked by in-memory 
-leaving QTEMP hanging around with active data. 
+in-memory calls to read QTEMP using native file IO (open, read, close). Nasty! You've been hacked by alternative in-memory 
+leaving QTEMP hanging around in php job with active data.
 
-Aka, 'faster' in-memory call is it's own worst enemy. 
-
-There is no 'faster' free lunch with forked project db2sock. In fact, whole idea is likely bad for IBM i. 
-I am not being evil. On contrary, fork project in-memory idea is clever(ish). I am simply trying to help avoid weeks of 
-effort that will most likely ultimately be scraped.
-
-BTW – PASE community suggestion of porting fflib to wrapper _PGMCALL/_ILECALL has been heralded as replacement for toolkits. 
-Unfortunately this has same 'bad' in-memory hack consequences for web sites discussed. 
+BTW (side note) - Another PASE community alternative suggestion of porting fflib to wrapper _PGMCALL/_ILECALL has 
+also been heralded as fast call replacement for toolkits. Unfortunately same 'bad' in-memory hack consequences for web sites. 
  
-
 **You decide, speed vs secure**
 
 To date, fork project author and myself have not been able to come to agreement on the risk.
-I felt the issues are sever enough to warrent comment (sorry).
+I felt alternative in-memory issues are sever enough to warrent comment.
 
-The main db2sock project uses QSQSRVR proxy jobs (db2 connect),
+This main db2sock project uses QSQSRVR proxy jobs (db2 connect),
 therefore company data is NOT live in any web server daemon job. In fact,  
 most use 'stateless' QSQSRVR jobs, which is zero'd between uses (detach QSQSRVR job processing). 
 Aka, safe toolkit as can be expected. 
 
-You have facts. Decide for yourself.
+There is no 'faster' free lunch with alternative in-memory db2sock. In fact, idea is likely bad for IBM i. 
+The alternative in-memory idea is clever. XMLSERVICE uses the idea in QSQSRVR job (safe). However, I am simply 
+trying to help avoid weeks of effort that will most likely ultimately be scraped. I suggest spend time better helping
+current QSQSRVR design.
+
+However, we could add a in-memory path 'for experts'. I am inclined not. You have facts. Decide for yourself. 
 
