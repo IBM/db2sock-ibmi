@@ -25,20 +25,6 @@ int main(int argc, char * argv[]) {
   FILE *fp_exp = NULL;
   char * fp_prefix = argv[1];
   char * bad = "_bad.";
-  pthread_t tid = 0;
-  SQL400JsonStruct * tdata = NULL;
-  SQLHANDLE hdbc = 0;
-  char *db  = NULL;
-  char *uid = NULL;
-  char *pwd = NULL;
-  char *libl  = NULL;
-  char *curlib = NULL;
-  char *trace  = NULL;
-  int fast_wait = 0;
-  /* profile db2 */
-  db  = getenv(SQL_DB400);
-  uid = getenv(SQL_UID400);
-  pwd = getenv(SQL_PWD400);
 
   /* bad */
   if (argc < 2) {
@@ -55,9 +41,18 @@ int main(int argc, char * argv[]) {
     sqlrc = SQL_ERROR;
   }
   memset(injson,0,sizeof(injson));
+  strcat(injson,"{\"connect\":[");
+  strcat(injson,"{\"qual\":\"*memory\"},");
   while (sqlrc == SQL_SUCCESS && (fgets(fp_buf, sizeof(fp_buf), fp_json) != NULL)) {
-    strcat(injson,fp_buf);
+    ptr = strstr(fp_buf,"connect");
+    if (!ptr) {
+      strcat(injson,fp_buf);
+    } else {
+      printf("success ignore (%d)\n",sqlrc);
+      return sqlrc;
+    }
   } 
+  strcat(injson,"]}");
 
   /* exp test file */
   sprintf(fp_file_exp,"%s.exp",fp_prefix);
@@ -73,17 +68,7 @@ int main(int argc, char * argv[]) {
   /* sqlrc = SQLOverrideCCSID400( 1208 ); */
 
   /* json call (hdbc=0 - json handles connection) */
-  /* SQL400 aggregate API -- convert db, uid, pwd to UTF8, set-up env, sys naming, server mode, etc. */
-  sqlrc = SQL400ConnectUtf8(819, (SQLCHAR *) db, (SQLCHAR *) uid, (SQLCHAR *) pwd, &hdbc, SQL_TXN_NO_COMMIT, libl, curlib);
-  tid = SQL400JsonAsync(hdbc, injson, inlen, outjson, outlen, NULL);
-  printf("call(tid=%d)\n",tid);
-  tdata = SQL400JsonJoin (tid, SQL400_FLAG_JOIN_NO_WAIT);
-  while(!tdata) {
-    printf("waiting(tid=%d)\n",tid);
-    tdata = SQL400JsonJoin (tid, SQL400_FLAG_JOIN_NO_WAIT);
-    if (!tdata) sleep(1);
-  }
-  free(tdata);
+  sqlrc = SQL400Json(0, injson, inlen, outjson, outlen);
   printf("output(%d):\n%s\n\n",strlen(outjson),outjson);
 
   /* output */
@@ -111,9 +96,6 @@ int main(int argc, char * argv[]) {
   } else {
     printf("fail (%d)\n",sqlrc);
   }
-
-  sqlrc = SQLDisconnect(hdbc);
-  sqlrc = SQLFreeHandle(SQL_HANDLE_DBC, hdbc);
 
   return sqlrc;
 }

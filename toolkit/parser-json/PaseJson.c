@@ -28,7 +28,7 @@ static char stilde;
 
 /* == toolkit db2 == */
 
-/* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"QUAL","iso":"nc|uc|cs|rr|rs","libl":"mylib yourlib","curlib":"mylib"}}
+/* {"connect":{"db":"DB","uid":"UID","pwd":"PWD","qual":"label","iso":"nc|uc|cs|rr|rs","libl":"mylib yourlib","curlib":"mylib"}}
  * Note: connection is provided toolkit services (if missing). Aka, connect(null, null, null)
  */
 char * json_conn_attr [] = {"db","uid","pwd","qual","iso","libl","curlib", NULL};

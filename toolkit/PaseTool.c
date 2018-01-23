@@ -19,6 +19,28 @@
 #include "PaseToIle.h"
 #include "PaseToDmp.h"
 #include "PaseTool.h"
+#include "imemcall.h"
+
+
+/*=================================================
+ * toolkit memory call
+ */
+#ifndef __IBMC__
+/* load up in memory option */
+SQLINTEGER iCall400MemoryLoaded;
+SQLCHAR iCall400MemoryBuf[132];
+typedef struct iCall400MemoryIleCallStruct {ILEarglist_base base; ILEpointer blob; } iCall400MemoryIleCallStruct;
+#define ROUND_QUAD(x) (((size_t)(x) + 0xf) & ~0xf)
+#endif
+
+/*=================================================
+ * toolkit internal
+ */
+#define TOOL400_CONN_TYPE_SET 1
+#define TOOL400_CONN_TYPE_POOL 2
+#define TOOL400_CONN_TYPE_MEMORY_ILE 3
+#define TOOL400_CONN_TYPE_MEMORY_PASE 4
+
 
 /*=================================================
  * toolkit prototypes
@@ -740,6 +762,165 @@ void tool_output_joblog_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_joblog_end(tool->curr, tool->outarea, tool->outareaLen);
 }
 
+/*=================================================
+ * toolkit in memory option
+ */
+
+#ifdef __IBMC__
+SQLRETURN iCall400Memory(char * blob)
+{
+  iCall400(blob);
+  return SQL_SUCCESS;
+}
+#else
+/* load up in memory option */
+SQLRETURN iCall400Memory(char * blob)
+{
+  int rc = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int actMark = 0;
+  char * ileSymPtr = (char *) NULL;
+  iCall400MemoryIleCallStruct * arglist = (iCall400MemoryIleCallStruct *) NULL;
+  char buffer[ sizeof(iCall400MemoryIleCallStruct) + 16 ];
+  static arg_type_t iCall400MemoryIleSigStruct[] = { ARG_MEMPTR, ARG_END };
+  arglist = (iCall400MemoryIleCallStruct *)ROUND_QUAD(buffer);
+  ileSymPtr = (char *)ROUND_QUAD(&iCall400MemoryBuf);
+  memset(buffer,0,sizeof(buffer));
+  actMark = _ILELOAD(ILEMEMCALL, ILELOAD_LIBOBJ); /* imemcall.h (Makefile ) */
+  if (!iCall400MemoryLoaded) {
+    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "iCall400");
+    if (rc < 0) {
+      return SQL_ERROR;
+    }
+    iCall400MemoryLoaded = 1;
+  }
+  arglist->blob.s.addr = (ulong) blob;
+  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, iCall400MemoryIleSigStruct, RESULT_INT32);
+  if (rc != ILECALL_NOERROR) {
+    return SQL_ERROR;
+  }
+  return SQL_SUCCESS;
+}
+#endif
+
+/*=================================================
+ * toolkit errors
+ */
+
+int tool_sql_errors(tool_struct_t * tool, SQLHANDLE handle, SQLSMALLINT hType, int rc)
+{
+  SQLSMALLINT length = 0;
+  SQLCHAR *p = NULL;
+  SQLSMALLINT recno = 1;
+  tool->sqlCode = 0;
+  if (rc == SQL_ERROR) {
+    memset(tool->sqlMsg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
+    memset(tool->sqlState, '\0', SQL_SQLSTATE_SIZE + 1);
+    if ( SQLGetDiagRec(hType, handle, recno, tool->sqlState, &tool->sqlCode, tool->sqlMsg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
+      if (tool->sqlMsg[length-1] == '\n') {
+        p = &tool->sqlMsg[length-1];
+        *p = '\0';
+      }
+      tool_output_sql_errors(tool, rc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
+      return SQL_ERROR;
+    }
+  }
+  return SQL_SUCCESS;
+}
+
+SQLRETURN tool_joblog_errors(tool_struct_t * tool, SQLHANDLE hdbc) {
+  /*
+  *sort time descend (new entries first)
+  */
+  char * hostSql = "select\
+  message_id as msgid,\
+  message_type as msgtype,\
+  message_subtype as msgsub,\
+  severity as msgsev,\
+  cast(message_timestamp as varchar(26)) as msgstamp,\
+  to_library as msgtolib,\
+  to_program as msgtopgm,\
+  to_module as msgtomod,\
+  cast(to_procedure as varchar(128)) as msgtoproc,\
+  to_instruction as msgtoinst,\
+  cast(message_text as varchar(200) ccsid 37) as msgtxt\
+  from table(qsys2.joblog_info('*')) a\
+  where severity >= 20 order by msgstamp DESC";
+  int j = 0;
+  int rec = 0;
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLRETURN sql_exec_rc = SQL_SUCCESS;
+  SQLHANDLE hstmt = 0;
+  SQLSMALLINT nResultCols = 0;
+  SQLCHAR buff_name[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
+  SQLCHAR buff_value[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
+  SQLINTEGER buff_len[TOOL400_JOBLOG_MAX_COLS];
+  SQLSMALLINT buff_type[TOOL400_JOBLOG_MAX_COLS];
+  SQLINTEGER fStrLen[TOOL400_JOBLOG_MAX_COLS];
+  SQLSMALLINT name_length = 0;
+  SQLSMALLINT type = 0;
+  SQLINTEGER size = 0;
+  SQLSMALLINT scale = 0;
+  SQLSMALLINT nullable = 0;
+
+  /* output */
+  tool_output_joblog_beg(tool);
+  /* statement */
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+  /* prepare */
+  sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLPOINTER)hostSql, (SQLINTEGER)SQL_NTS);
+  /* execute */
+  sqlrc = SQLExecute((SQLHSTMT)hstmt);
+  sql_exec_rc = sqlrc;
+  /* result set */
+  sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
+  if (nResultCols > 0) {
+    for (j = 0 ; j < nResultCols; j++) {
+      size = TOOL400_JOBLOG_MAX_SIZE;
+      memset(buff_name[j],0,TOOL400_JOBLOG_MAX_SIZE);
+      memset(buff_value[j],0,TOOL400_JOBLOG_MAX_SIZE);
+      buff_type[j] = 0;
+      fStrLen[j] = SQL_NTS;
+      sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
+      sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
+    }
+    sqlrc = SQL_SUCCESS;
+    while (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLFetch(hstmt);
+      if ( sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
+        break;
+      }
+      tool_output_joblog_rec(tool,
+        buff_value[0],
+        buff_value[1],
+        buff_value[2],
+        buff_value[3],
+        buff_value[4],
+        buff_value[5],
+        buff_value[6],
+        buff_value[7],
+        buff_value[8],
+        buff_value[9],
+        buff_value[10]);
+      rec++;
+      if (rec > TOOL400_JOBLOG_MAX_REC) {
+        break;
+      }
+    }
+  } else {
+    sql_exec_rc = -1;
+  }
+  /* close */
+  sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+  /* output */
+  tool_output_joblog_end(tool);
+
+ return sql_exec_rc;
+}
+
+/*=================================================
+ * toolkit calls
+ */
 
 /* "pgm":["NAME","LIB","procedure"], */
 SQLRETURN tool_pgm(char *pgm, char *lib, char * func, char * debug, ile_pgm_call_t **playout) {
@@ -1385,28 +1566,6 @@ ile_pgm_call_t **playout) {
  * toolkit run parsed key, val, lvl
  */
 
-int tool_sql_errors(tool_struct_t * tool, SQLHANDLE handle, SQLSMALLINT hType, int rc)
-{
-  SQLSMALLINT length = 0;
-  SQLCHAR *p = NULL;
-  SQLSMALLINT recno = 1;
-  tool->sqlCode = 0;
-  if (rc == SQL_ERROR) {
-    memset(tool->sqlMsg, '\0', SQL_MAX_MESSAGE_LENGTH + 1);
-    memset(tool->sqlState, '\0', SQL_SQLSTATE_SIZE + 1);
-    if ( SQLGetDiagRec(hType, handle, recno, tool->sqlState, &tool->sqlCode, tool->sqlMsg, SQL_MAX_MESSAGE_LENGTH + 1, &length)  == SQL_SUCCESS ) {
-      if (tool->sqlMsg[length-1] == '\n') {
-        p = &tool->sqlMsg[length-1];
-        *p = '\0';
-      }
-      tool_output_sql_errors(tool, rc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
-      return SQL_ERROR;
-    }
-  }
-  return SQL_SUCCESS;
-}
-
-
 /* program */
 SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, char * ds_dob, int * dob, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -1762,6 +1921,7 @@ SQLRETURN tool_key_pgm_call_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   char * pgm_shift_pase = NULL;
   int pgm_shift_len = 0;
   SQLINTEGER pgm_shift_sql_max = 0;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   ile_pgm_call_t * layout = (ile_pgm_call_t *)tpgm->layout;
   /* how far? */
   layout->step = 0;
@@ -1769,50 +1929,51 @@ SQLRETURN tool_key_pgm_call_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   if (layout->return_start) {
     layout->return_end = layout->pos;
   }
-#ifdef __IBMC__
-  iCall400((char *) tpgm->layout);
-  sqlrc = 0;
-#else
-  /* shift to blob alignment
-   * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
-   *                                           .
-   *                                    ........
-   *                                    .
-   * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
-   */
-  layout->blob_pad[0] = -1;
-  layout->blob_pad[1] = -1;
-  layout->blob_pad[2] = -1;
-  pgm_shift_ile = (char *)&layout->blob_pad[3];
-  pgm_shift_pase = pgm_shift_ile + 4;
-  pgm_shift_len = layout->max - (pgm_shift_pase - (char *)tpgm->layout);
-  memcpy(pgm_shift_ile,pgm_shift_pase,pgm_shift_len);
-  pgm_shift_sql_max = layout->max;
-  /* bind parm */
-  sqlrc = SQLBindParameter((SQLHSTMT)tpgm->hstmt,
-                           (SQLUSMALLINT) 1,
-                           SQL_PARAM_INPUT_OUTPUT,
-                           SQL_C_BINARY,
-                           SQL_BLOB,
-                           layout->max,
-                           0,
-                           (SQLPOINTER)tpgm->layout,
-                           0,
-                           &pgm_shift_sql_max);
-  /* execute */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLExecute((SQLHSTMT)tpgm->hstmt);
+  /* in memory option? */
+  if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+    sqlrc = iCall400Memory((char *) tpgm->layout);
+  /* normal db2 qsqsrvr option */
+  } else {
+    /* shift to blob alignment
+     * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+     *                                           .
+     *                                    ........
+     *                                    .
+     * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+     */
+    layout->blob_pad[0] = -1;
+    layout->blob_pad[1] = -1;
+    layout->blob_pad[2] = -1;
+    pgm_shift_ile = (char *)&layout->blob_pad[3];
+    pgm_shift_pase = pgm_shift_ile + 4;
+    pgm_shift_len = layout->max - (pgm_shift_pase - (char *)tpgm->layout);
+    memcpy(pgm_shift_ile,pgm_shift_pase,pgm_shift_len);
+    pgm_shift_sql_max = layout->max;
+    /* bind parm */
+    sqlrc = SQLBindParameter((SQLHSTMT)tpgm->hstmt,
+                             (SQLUSMALLINT) 1,
+                             SQL_PARAM_INPUT_OUTPUT,
+                             SQL_C_BINARY,
+                             SQL_BLOB,
+                             layout->max,
+                             0,
+                             (SQLPOINTER)tpgm->layout,
+                             0,
+                             &pgm_shift_sql_max);
+    /* execute */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLExecute((SQLHSTMT)tpgm->hstmt);
+    }
+    sqlrc = tool_sql_errors(tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
+    /* shift to pase alignment
+     * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
+     *                                           .
+     *                                    ........
+     *                                    .
+     * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
+     */
+    memcpy(pgm_shift_pase,pgm_shift_ile,pgm_shift_len);
   }
-  sqlrc = tool_sql_errors(tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
-  /* shift to pase alignment
-   * pase -        |pad[0]|pad[1]|pad[2]|pad[3]|...argv...|
-   *                                           .
-   *                                    ........
-   *                                    .
-   * blob - |len   |pad[0]|pad[1]|pad[2]|...argv...| 
-   */
-  memcpy(pgm_shift_pase,pgm_shift_ile,pgm_shift_len);
-#endif
   return sqlrc;
 }
 
@@ -1878,9 +2039,12 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   tool_pgm(tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func, tpgm->pgm_ile_debug, (ile_pgm_call_t **)&tpgm->layout);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
-  /* prepare */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
+  /* in memory option? */
+  if (tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_ILE && tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_PASE) {
+    /* prepare */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
+    }
   }
   sqlrc = tool_sql_errors(tool, tpgm->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* call program (step 1-input, step 2-output)*/
@@ -2707,95 +2871,6 @@ SQLRETURN tool_key_close_run(tool_struct_t * tool, tool_node_t ** curr_node) {
 }
 
 /* connection */
-SQLRETURN tool_key_conn_joblog(tool_struct_t * tool, SQLHANDLE hdbc) {
-  /*
-  *sort time descend (new entries first)
-  */
-  char * hostSql = "select\
-  message_id as msgid,\
-  message_type as msgtype,\
-  message_subtype as msgsub,\
-  severity as msgsev,\
-  cast(message_timestamp as varchar(26)) as msgstamp,\
-  to_library as msgtolib,\
-  to_program as msgtopgm,\
-  to_module as msgtomod,\
-  cast(to_procedure as varchar(128)) as msgtoproc,\
-  to_instruction as msgtoinst,\
-  cast(message_text as varchar(200) ccsid 37) as msgtxt\
-  from table(qsys2.joblog_info('*')) a\
-  where severity >= 20 order by msgstamp DESC";
-  int j = 0;
-  int rec = 0;
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  SQLRETURN sql_exec_rc = SQL_SUCCESS;
-  SQLHANDLE hstmt = 0;
-  SQLSMALLINT nResultCols = 0;
-  SQLCHAR buff_name[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
-  SQLCHAR buff_value[TOOL400_JOBLOG_MAX_COLS][TOOL400_JOBLOG_MAX_SIZE];
-  SQLINTEGER buff_len[TOOL400_JOBLOG_MAX_COLS];
-  SQLSMALLINT buff_type[TOOL400_JOBLOG_MAX_COLS];
-  SQLINTEGER fStrLen[TOOL400_JOBLOG_MAX_COLS];
-  SQLSMALLINT name_length = 0;
-  SQLSMALLINT type = 0;
-  SQLINTEGER size = 0;
-  SQLSMALLINT scale = 0;
-  SQLSMALLINT nullable = 0;
-
-  /* output */
-  tool_output_joblog_beg(tool);
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
-  /* prepare */
-  sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLPOINTER)hostSql, (SQLINTEGER)SQL_NTS);
-  /* execute */
-  sqlrc = SQLExecute((SQLHSTMT)hstmt);
-  sql_exec_rc = sqlrc;
-  /* result set */
-  sqlrc = SQLNumResultCols((SQLHSTMT)hstmt, &nResultCols);
-  if (nResultCols > 0) {
-    for (j = 0 ; j < nResultCols; j++) {
-      size = TOOL400_JOBLOG_MAX_SIZE;
-      memset(buff_name[j],0,TOOL400_JOBLOG_MAX_SIZE);
-      memset(buff_value[j],0,TOOL400_JOBLOG_MAX_SIZE);
-      buff_type[j] = 0;
-      fStrLen[j] = SQL_NTS;
-      sqlrc = SQLDescribeCol((SQLHSTMT)hstmt, (SQLSMALLINT)(j + 1), (SQLCHAR *)buff_name[j], size, &name_length, &buff_type[j], &size, &scale, &nullable);
-      sqlrc = SQLBindCol((SQLHSTMT)hstmt, (j + 1), SQL_CHAR, buff_value[j], size, &fStrLen[j]);
-    }
-    sqlrc = SQL_SUCCESS;
-    while (sqlrc == SQL_SUCCESS) {
-      sqlrc = SQLFetch(hstmt);
-      if ( sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
-        break;
-      }
-      tool_output_joblog_rec(tool,
-        buff_value[0],
-        buff_value[1],
-        buff_value[2],
-        buff_value[3],
-        buff_value[4],
-        buff_value[5],
-        buff_value[6],
-        buff_value[7],
-        buff_value[8],
-        buff_value[9],
-        buff_value[10]);
-      rec++;
-      if (rec > TOOL400_JOBLOG_MAX_REC) {
-        break;
-      }
-    }
-  } else {
-    sql_exec_rc = -1;
-  }
-  /* close */
-  sqlrc = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-  /* output */
-  tool_output_joblog_end(tool);
-
- return sql_exec_rc;
-}
 
 SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -2817,15 +2892,7 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     } else {
       tconn->presistent = 0;
     }
-    key = node->key;
-    switch (key) {
-    case TOOL400_KEY_CONN:
-      tconn->conn_type = 1;
-      break;
-    default:
-      tconn->conn_type = 3;
-      break;
-    }
+    tconn->conn_type = TOOL400_CONN_TYPE_SET;
     tconn->conn_db = NULL;
     tconn->conn_uid = NULL;
     tconn->conn_pwd = NULL;
@@ -2862,7 +2929,12 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         break;
       case TOOL400_CONN_QUAL:
         tconn->conn_qual = val;
-        tconn->conn_type = 2;
+        if (strcmp(val,"*mem")) {
+          tconn->conn_type = TOOL400_CONN_TYPE_MEMORY_PASE;
+          tconn->conn_qual = NULL;
+        } else {
+          tconn->conn_type = TOOL400_CONN_TYPE_POOL;
+        }
         tconn->presistent = 1;
         break;
       case TOOL400_CONN_ISOLATION:
@@ -2892,6 +2964,14 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         break;
       }
     }
+#ifdef __IBMC__
+    /* already in ILE job */
+    tconn->conn_type = TOOL400_CONN_TYPE_MEMORY_ILE;
+    tconn->conn_db = NULL;
+    tconn->conn_uid = NULL;
+    tconn->conn_pwd = NULL;
+    tconn->conn_qual = NULL;
+#endif
     /* connect */
     if (tconn->presistent) {
       sqlrc = SQL400pConnect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, tconn->conn_qual, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
@@ -2899,7 +2979,7 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
     }
     sqlrc = tool_sql_errors(tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
-  } /* !tconn->hdbc */
+  }
   /* connect children (parser order next) */
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
     key = node->key;
@@ -2940,7 +3020,7 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     }
     /* joblog info */
     if (sqlrc == SQL_ERROR) {
-      tool_key_conn_joblog(tool, tconn->hdbc);
+      tool_joblog_errors(tool, tconn->hdbc);
     }
   }
   /* hdbc external (caller?) or pool (pConnect) */

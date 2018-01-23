@@ -55,8 +55,8 @@ tgt64:
 	@$(MAKE) CCFLAGS="$(CCFLAGS64)" SHRLIB="$(SHRLIB32)" SHROBJ="$(SHROBJ64)" LIBDEPS="$(LIBDEPS64)" LIBOBJS="$(LIBOBJS64)" TGT64="64" go
 tgt32:
 	@$(MAKE) CCFLAGS="$(CCFLAGS32)" SHRLIB="$(SHRLIB32)" SHROBJ="$(SHROBJ32)" LIBDEPS="$(LIBDEPS32)" LIBOBJS="$(LIBOBJS32)" go
-proc: speakile removeo $(SP400SRVPGM)
-go: speakpase removeo $(SHRLIB)
+proc: mkinc speakile removeo $(SP400SRVPGM)
+go: mkinc speakpase removeo $(SHRLIB)
 
 ### PASE
 ### generic rules
@@ -107,6 +107,11 @@ helpile:
 	@echo "> export ILELIB=DB2JSON"
 	@echo "> $(MAKE) proc"
 	@echo "------------------------------------------------------------"
+mkinc:
+	@echo "#ifndef _IMEMCALL_H" > imemcall.h
+	@echo "#define __IMEMCALL_H" >> imemcall.h
+	@echo "#define ILEMEMCALL \"$(ILELIB)/DB2PROC\"" >> imemcall.h
+	@echo "#endif /* __IMEMCALL_H */" >> imemcall.h
 clean:
 	rm -f *.a
 	rm -f *.o
