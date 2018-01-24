@@ -31,6 +31,14 @@
  */
 #define TOOLLIB "TOOLLIB"
 
+/*=================================================
+ * toolkit conn type (used internal)
+ */
+#define TOOL400_CONN_TYPE_SET 1
+#define TOOL400_CONN_TYPE_POOL 2
+#define TOOL400_CONN_TYPE_MEMORY_ILE 3
+#define TOOL400_CONN_TYPE_MEMORY_PASE 4
+
 /* == range == */
 #define TOOL400_RANGE_ELEM_KIT_BEG 1
 #define TOOL400_RANGE_ELEM_DB2_BEG 2

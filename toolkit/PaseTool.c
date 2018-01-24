@@ -19,28 +19,7 @@
 #include "PaseToIle.h"
 #include "PaseToDmp.h"
 #include "PaseTool.h"
-#include "imemcall.h"
-
-
-/*=================================================
- * toolkit memory call
- */
-#ifndef __IBMC__
-/* load up in memory option */
-SQLINTEGER iCall400MemoryLoaded;
-SQLCHAR iCall400MemoryBuf[132];
-typedef struct iCall400MemoryIleCallStruct {ILEarglist_base base; ILEpointer blob; } iCall400MemoryIleCallStruct;
-#define ROUND_QUAD(x) (((size_t)(x) + 0xf) & ~0xf)
-#endif
-
-/*=================================================
- * toolkit internal
- */
-#define TOOL400_CONN_TYPE_SET 1
-#define TOOL400_CONN_TYPE_POOL 2
-#define TOOL400_CONN_TYPE_MEMORY_ILE 3
-#define TOOL400_CONN_TYPE_MEMORY_PASE 4
-
+#include "PaseToMem.h"
 
 /*=================================================
  * toolkit prototypes
@@ -761,47 +740,6 @@ void tool_output_joblog_rec(tool_struct_t *tool, char * msgid, char * msgtype, c
 void tool_output_joblog_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_joblog_end(tool->curr, tool->outarea, tool->outareaLen);
 }
-
-/*=================================================
- * toolkit in memory option
- */
-
-#ifdef __IBMC__
-SQLRETURN iCall400Memory(char * blob)
-{
-  iCall400(blob);
-  return SQL_SUCCESS;
-}
-#else
-/* load up in memory option */
-SQLRETURN iCall400Memory(char * blob)
-{
-  int rc = 0;
-  SQLRETURN sqlrc = SQL_SUCCESS;
-  int actMark = 0;
-  char * ileSymPtr = (char *) NULL;
-  iCall400MemoryIleCallStruct * arglist = (iCall400MemoryIleCallStruct *) NULL;
-  char buffer[ sizeof(iCall400MemoryIleCallStruct) + 16 ];
-  static arg_type_t iCall400MemoryIleSigStruct[] = { ARG_MEMPTR, ARG_END };
-  arglist = (iCall400MemoryIleCallStruct *)ROUND_QUAD(buffer);
-  ileSymPtr = (char *)ROUND_QUAD(&iCall400MemoryBuf);
-  memset(buffer,0,sizeof(buffer));
-  actMark = _ILELOAD(ILEMEMCALL, ILELOAD_LIBOBJ); /* imemcall.h (Makefile ) */
-  if (!iCall400MemoryLoaded) {
-    rc = _ILESYM((ILEpointer *)ileSymPtr, actMark, "iCall400");
-    if (rc < 0) {
-      return SQL_ERROR;
-    }
-    iCall400MemoryLoaded = 1;
-  }
-  arglist->blob.s.addr = (ulong) blob;
-  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, iCall400MemoryIleSigStruct, RESULT_INT32);
-  if (rc != ILECALL_NOERROR) {
-    return SQL_ERROR;
-  }
-  return SQL_SUCCESS;
-}
-#endif
 
 /*=================================================
  * toolkit errors
@@ -1931,7 +1869,7 @@ SQLRETURN tool_key_pgm_call_run(tool_struct_t * tool, tool_key_pgm_struct_t * tp
   }
   /* in memory option? */
   if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
-    sqlrc = iCall400Memory((char *) tpgm->layout);
+    sqlrc = iCall400Pgm((char *) tpgm->layout);
   /* normal db2 qsqsrvr option */
   } else {
     /* shift to blob alignment
@@ -2112,6 +2050,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   int isQshRow = 0;
   int isQshError = 0;
   char * qshVal = NULL;
+  int save_conn_type = 0;
   SQLCHAR qshRow[50];
   SQLHANDLE hstmt = 0;
   SQLHANDLE hstmt2 = 0;
@@ -2130,6 +2069,9 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   tcmd->hstmt = 0;
   tcmd->cmd_len = 0;
   memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
+
+  /* save conn type (not support in memory for rexx or qsh) */
+  save_conn_type = tconn->conn_type;
 
   /* cmd attributes (parser order 1st) */
   for (i=0; i < TOOL400_ATTR_MAX && node->akey[i]; i++) {
@@ -2151,6 +2093,10 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       isRexx = hstmt;
       sprintf(tcmd->cmd_buff,"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM('%d %s')",isRexx,val);
       cmd = tcmd->cmd_buff;
+      /* in memory option? (not support rexx -- not work chroot) */
+      if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+        tconn->conn_type = TOOL400_CONN_TYPE_SET;
+      }
       break;
     /* "qsh":"STRQSH CMD('ls -1 /home/adc')"
      * select * from qtemp/out456
@@ -2159,6 +2105,10 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
       isQsh = hstmt;
       cmd = qshVal = val;
+      /* in memory option? (not support qsh -- not work chroot) */
+      if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+        tconn->conn_type = TOOL400_CONN_TYPE_SET;
+      }
       break;
     default:
       break;
@@ -2211,8 +2161,13 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       }
       cmd = cmd_tmp;
       memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
-      sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
-      sqlrc = SQLExecDirect(hstmt2, tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+      /* in memory option? */
+      if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+        sqlrc = iCall400Cmd(cmd, tcmd->cmd_len);
+      } else {
+        sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
+        sqlrc = SQLExecDirect(hstmt2, tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+      }
       sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, hstmt2);
     } /* loop h */
     /* STRQSH CMD */
@@ -2232,21 +2187,26 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       cmd_tmp[j] = '\'';
     }
   }
-  cmd = cmd_tmp;
-  memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
-  sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
   /* statement */
   sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tcmd->hstmt);
-  /* prepare */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+  /* in memory option? */
+  if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+    sqlrc = iCall400Cmd(cmd, tcmd->cmd_len);
+  } else {
+    cmd = cmd_tmp;
+    memset(tcmd->cmd_buff,0,sizeof(tcmd->cmd_buff));
+    sprintf(tcmd->cmd_buff,"CALL QSYS2.QCMDEXC('%s',%d)", cmd, tcmd->cmd_len);
+    /* prepare */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLPrepare((SQLHSTMT)tcmd->hstmt, (SQLCHAR*)tcmd->cmd_buff, (SQLINTEGER)SQL_NTS);
+    }
+    sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
+    /* execute */
+    if (sqlrc == SQL_SUCCESS) {
+      sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
+    }
+    sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   }
-  sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
-  /* execute */
-  if (sqlrc == SQL_SUCCESS) {
-    sqlrc = SQLExecute((SQLHSTMT)tcmd->hstmt);
-  }
-  sqlrc = tool_sql_errors(tool, tcmd->hstmt, SQL_HANDLE_STMT, sqlrc);
   /* ======
    * qsh output 
    */
@@ -2397,6 +2357,10 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
   }
   hstmt = 0;
+
+  /* restore conn type (not support in memory for rexx or qsh) */
+  tconn->conn_type = save_conn_type;
+
   return sqlrc;
 }
 

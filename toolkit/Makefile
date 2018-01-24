@@ -24,7 +24,7 @@ AROPT       = -X32_64
 INCLUDEPATH = -isystem /QOpenSys/usr/include -I. -I.. -I../db2
 
 ###  shared lib
-LIBOBJSALL   =  PaseToDmp.o PaseToIle.o PaseTool.o
+LIBOBJSALL   =  PaseToDmp.o PaseToIle.o PaseTool.o PaseToMem.o
 LIBEXPS      = -Wl,-bE:libtkit400.exp
 LIBOBJS32    = $(LIBOBJSALL)
 SHRLIB32     = libtkit400.a
@@ -44,7 +44,7 @@ CCCRPG	    = crtrpgmod
 
 ### *PGM proc
 SP400SRVPGM  = tkit400.srvpgm
-SP400OBJS    = PaseTo400.mod PaseToDmp.mod PaseToIle.mod PaseTool.mod PaseToSid.mod 
+SP400OBJS    = PaseTo400.mod PaseToDmp.mod PaseToIle.mod PaseTool.mod PaseToSid.mod PaseToMem.mod
 
 ### tells make all things to do (order)
 # do this if given an invalid target

@@ -17,6 +17,8 @@
 #include <qmhchgem.h>
 #include <qmhrcvpm.h>
 #include <qmhsndm.h>
+#include <qcmdexc.h>
+#include <micomput.h>
 #include "../PaseTool.h"
 #include "iconf.h" /* see Makefile */
 #include "ibyref.h" /* see gen.py */
@@ -379,4 +381,15 @@ void iCall400(char * blob)
   }
   layout->step = 5;
 }
+
+void iCmd400(char * blob, int blen) 
+{
+  char cmd[TOOL400_MAX_CMD_BUFF];
+  decimal(15,5) plen;
+  strcpy(cmd,blob);
+  cpynv(NUM_DESCR(_T_PACKED,15,5), &plen,
+        NUM_DESCR(_T_SIGNED,4,0), &blen);
+  QCMDEXC(cmd,plen);
+}
+
 
