@@ -1197,7 +1197,7 @@ ile_pgm_call_t **playout) {
     break;
   case 'a':
     if (isOut) {
-      ile_pgm_char_2_output(tool, where, tlen, tvary, tccsid, tdim, tflag, 1);
+      ile_pgm_char_2_output(tool, where, tlen, tvary, tccsid, tdim, tflag);
     } else {
       rc = ile_pgm_str_2_char(where, in_value, tdim, tlen, tvary, tccsid, tflag);
     }

@@ -27,30 +27,6 @@
 #define ILE_PGM_MAX_ARGS 159
 #define ILE_PGM_ALLOC_BLOCK 4096
 
-/*=================================================
- * ebcdic char ccsid mess
- */
-#ifdef __IBMC__
-#define hex_space 0x40
-#define hex_nbr 0xF0
-#define hex_backspace 0x16
-#define hex_form_feed 0x0C
-#define hex_newline 0x25
-#define hex_carriage_return 0x0D
-#define hex_tab 0x05
-#define hex_double_quote 0x7F
-#else
-#define hex_space 0x20
-#define hex_nbr 0x30
-#define hex_backspace 0x08
-#define hex_form_feed 0x0C
-#define hex_newline 0x0A
-#define hex_carriage_return 0x0D
-#define hex_tab 0x09
-#define hex_double_quote 0x22
-#endif
-
-
 typedef struct ile_pgm_call_struct {
 #ifdef __IBMC__
   /* pad blob alignment */
@@ -110,7 +86,7 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
 int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale);
 int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tscale, int tdim);
 int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, int tccsid, int tflag);
-int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag, int tescape);
+int ile_pgm_char_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tccsid, int tdim, int tflag);
 int ile_pgm_str_2_bin(char * where, char *str, int tdim, int tlen, int tvary);
 int ile_pgm_bin_2_output(tool_struct_t *tool, char * where, int tlen, int tvary, int tdim);
 

@@ -400,12 +400,111 @@ int json_output_pgm_dcl_s_beg(tool_node_t *tool, char *out_caller, int outLen, c
 }
 int json_output_pgm_dcl_s_data(tool_node_t *tool, char *out_caller, int outLen, char *value, int numFlag) {
   int retLen = outLen;
+  int len = 0;
+  int j = 0;
+  char * c = NULL;
+  char e = '\0';
+  /* variant (ebcdic) */
+  char e_backslash = ccsid_variant_backslash();
+  char * tmp = NULL;
+
   if (numFlag == 1) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "%s", value);
   } else {
+    /* escape
+     * - 0x08 Backspace is replaced with \b.
+     * - 0x0C Form feed is replaced with \f.
+     * - 0x0A Newline is replaced with \n.
+     * - 0x0D Carriage return is replaced with \r.
+     * - 0x09 Tab is replaced with \t.
+     * - 0x22 Double quote is replaced with \"
+     * - 0x5C Backslash is replaced with \\
+     */
+    len = strlen(value);
+    if (len) {
+      tmp = json_new(len*4);
+      strcpy(tmp, value);
+      value = tmp;
+      for (c = value, j = 0; c[j] && j < len; j++) {
+        e = '\0';
+        /* ran into back slash (ebcdic variant characters) */
+        if (c[j] == e_backslash) {
+          /* already escaped json? */
+          if (c[j + 1] == e_backslash) {
+            j++;
+            continue;
+          }
+          /* already escaped json? */
+          switch(c[j + 1]) {
+            case hex_backspace:
+              j++;
+              continue;
+              break;
+            case hex_form_feed:
+              j++;
+              continue;
+              break;
+            case hex_newline:
+              j++;
+              continue;
+              break;
+            case hex_carriage_return:
+              j++;
+              continue;
+              break;
+            case hex_tab:
+              j++;
+              continue;
+              break;
+            case hex_double_quote:
+              j++;
+              continue;
+              break;
+            default:
+              break;
+          }
+          /* standalone back slash (not escaped json) */
+          e = e_backslash;
+        } else { 
+          switch(c[j]) {
+            case hex_backspace:
+              e = 'b';
+              break;
+            case hex_form_feed:
+              e = 'f';
+              break;
+            case hex_newline:
+              e = 'n';
+              break;
+            case hex_carriage_return:
+              e = 'r';
+              break;
+            case hex_tab:
+              e = 't';
+              break;
+            case hex_double_quote:
+              e = hex_double_quote;
+              break;
+            default:
+              break;
+          }
+        }
+        if (e != '\0') {
+          len++;
+          memcpy(&c[j+2], &c[j+1], len - j);
+          c[j] = e_backslash;
+          j++;
+          c[j] = e;
+        }
+      }
+    }
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
       "\"%s\"", value);
+    /* free temp storage */
+    if (tmp) {
+      json_free(tmp);
+    }
   }
   return retLen;
 }

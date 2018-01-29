@@ -2,7 +2,7 @@
     {"name":"DANNY03",  "lib":"DB2JSON"},
     {"s": [
      {"name":"outone", "type":"64000a", "by":"out"},
-     {"name":"flag", "type":"10i0", "value":0, "by":"in"}
+     {"name":"flag", "type":"10i0", "value":1, "by":"in"}
     ]}
 ]}
 
