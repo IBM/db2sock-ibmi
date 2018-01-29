@@ -34,7 +34,7 @@ dltmod --lib $ILELIB --mod IBYREFP4
 dltmod --lib $ILELIB --mod IBYREFP5
 dltmod --lib $ILELIB --mod IBYREFS1
 dltmod --lib $ILELIB --mod IBYREFS2
-dltmod --lib $ILELIB --mod IBYREFS3PASETOMEM
+dltmod --lib $ILELIB --mod IBYREFS3
 dltmod --lib $ILELIB --mod IBYREFS4
 dltmod --lib $ILELIB --mod IBYREFS5
 dltmod --lib $ILELIB --mod IBYVALS1
