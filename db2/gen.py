@@ -1055,6 +1055,9 @@ file_PaseCliAsync_h += '#define _PASECLIASYNC_H' + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += file_pase_incl
 file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += '#ifdef __cplusplus' + "\n"
+file_PaseCliAsync_h += 'extern "C" {' + "\n"
+file_PaseCliAsync_h += '#endif' + "\n"
 file_PaseCliAsync_h += '/* ===================================================' + "\n"
 file_PaseCliAsync_h += ' * Using the driver' + "\n"
 file_PaseCliAsync_h += ' * ===================================================' + "\n"
@@ -1279,6 +1282,9 @@ file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliCustom_h_proto
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += "" + "\n"
+file_PaseCliAsync_h += '#ifdef __cplusplus ' + "\n"
+file_PaseCliAsync_h += '}' + "\n"
+file_PaseCliAsync_h += '#endif /* __cplusplus */' + "\n"
 file_PaseCliAsync_h += '#endif /* _PASECLIASYNC_H */' + "\n"
 with open("PaseCliAsync.h", "w") as text_file:
     text_file.write(file_PaseCliAsync_h)

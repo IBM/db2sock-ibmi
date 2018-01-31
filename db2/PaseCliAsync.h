@@ -9,6 +9,9 @@
 #include <as400_types.h>
 #include <as400_protos.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* ===================================================
  * Using the driver
  * ===================================================
@@ -1348,4 +1351,7 @@ SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, S
 SQLRETURN custom_SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
 
 
+#ifdef __cplusplus 
+}
+#endif /* __cplusplus */
 #endif /* _PASECLIASYNC_H */
