@@ -241,7 +241,7 @@ typedef int (*output_close_beg_t)(tool_node_t *, char *, int, int, int);
 typedef int (*output_close_end_t)(tool_node_t *, char *, int);
 typedef int (*output_record_array_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_record_array_end_t)(tool_node_t *, char *, int);
-typedef int (*output_record_no_data_found_t)(tool_node_t *, char *, int);
+typedef int (*output_record_no_data_found_t)(tool_node_t *, char *, int, int);
 typedef int (*output_record_row_beg_t)(tool_node_t *, char *, int);
 #define TOOL400_DATA_TYPE_NBR 1
 #define TOOL400_DATA_TYPE_CHAR 2

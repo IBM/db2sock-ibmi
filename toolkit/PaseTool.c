@@ -608,8 +608,8 @@ void tool_output_record_array_beg(tool_struct_t *tool) {
 void tool_output_record_array_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_record_array_end(tool->curr, tool->outarea, tool->outareaLen);
 }
-void tool_output_record_no_data_found(tool_struct_t *tool) {
-  tool->outareaLen = tool->output_record_no_data_found(tool->curr, tool->outarea, tool->outareaLen);
+void tool_output_record_no_data_found(tool_struct_t *tool, int recs) {
+  tool->outareaLen = tool->output_record_no_data_found(tool->curr, tool->outarea, tool->outareaLen, recs);
 }
 void tool_output_record_row_beg(tool_struct_t *tool) {
   tool->outareaLen = tool->output_record_row_beg(tool->curr, tool->outarea, tool->outareaLen);
@@ -2233,7 +2233,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       sqlrc = SQLFetch(hstmt);
       if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
         if (!fetch_recs) {
-          tool_output_record_no_data_found(tool);
+          tool_output_record_no_data_found(tool, 0);
         } else {
           sqlrc = SQL_SUCCESS;
         }
@@ -2307,7 +2307,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       sqlrc = SQLFetch(hstmt);
       if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
         if (!fetch_recs) {
-          tool_output_record_no_data_found(tool);
+          tool_output_record_no_data_found(tool, 0);
         } else {
           sqlrc = SQL_SUCCESS;
         }
@@ -2392,7 +2392,7 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
   /* no records */
   if (fetch_cols < 1) {
     tool_output_record_array_beg(tool);
-    tool_output_record_no_data_found(tool);
+    tool_output_record_no_data_found(tool, 0);
     tool_output_record_array_end(tool);
     return sqlrc;
   }
@@ -2477,17 +2477,18 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
     sqlrc = SQLFetch(tqry->hstmt);
     if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
       tqry->stmt_close = 1;
-      /* fetch pagination, always include 'last record' ... (i think)???
-      tool_output_record_no_data_found(tool);
+      /* fetch pagination, always include 'last record' ... (i think)??? */
+      tool_output_record_no_data_found(tool, fetch_recs);
       if (!fetch_recs) {
         sqlrc = SQL_SUCCESS;
       }
-      */
+/* Old, not always include 'last record'
       if (!fetch_recs) {
         tool_output_record_no_data_found(tool);
       } else {
         sqlrc = SQL_SUCCESS;
       }
+*/
       break;
     }
     tool_output_record_row_beg(tool);

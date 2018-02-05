@@ -1,0 +1,5 @@
+{"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=?"},
+        {"parm":[{"value":"Wilbur"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+

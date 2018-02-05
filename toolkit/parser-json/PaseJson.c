@@ -252,10 +252,16 @@ int json_output_record_array_end(tool_node_t *tool, char *out_caller, int outLen
   return retLen;
 }
 
-int json_output_record_no_data_found(tool_node_t *tool, char *out_caller, int outLen) {
+int json_output_record_no_data_found(tool_node_t *tool, char *out_caller, int outLen, int recs) {
   int retLen = outLen;
-  retLen = json_output_printf(JSON400_ADJUST_NDA, out_caller, retLen, 
-    "\"SQL_NO_DATA_FOUND\"");
+  char * name = "SQL_NO_DATA_FOUND";
+  if (recs > 0) {
+    retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
+      "\"%s\"",name);
+  } else {
+    retLen = json_output_printf(JSON400_ADJUST_NDA, out_caller, retLen, 
+      "\"%s\"",name);
+  }
   return retLen;
 }
 
