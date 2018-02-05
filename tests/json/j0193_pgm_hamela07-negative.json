@@ -1,0 +1,12 @@
+{"pgm":[{"name":"HAMELA07",  "lib":"DB2JSON"},
+        {"s":[{"name":"aint8",      "type":"3i0",   "value":-1},
+              {"name":"aint16",     "type":"5i0",   "value":-2},
+              {"name":"aint32",     "type":"10i0",  "value":-3},
+              {"name":"aint64",     "type":"20i0",  "value":-4},
+              {"name":"afloat",     "type":"4f2",   "value":-5.55},
+              {"name":"adouble",    "type":"8f3",   "value":-6.666},
+              {"name":"apacked",    "type":"12p2",  "value":-7.77},
+              {"name":"azoned",     "type":"12s2",  "value":-8.88}
+             ]}
+       ]}
+

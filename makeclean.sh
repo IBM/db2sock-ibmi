@@ -25,6 +25,7 @@ dltmod --lib $ILELIB --mod HAMELA03
 dltmod --lib $ILELIB --mod HAMELA04
 dltmod --lib $ILELIB --mod HAMELA05
 dltmod --lib $ILELIB --mod HAMELA06
+dltmod --lib $ILELIB --mod HAMELA07
 dltmod --lib $ILELIB --mod HELLO
 dltmod --lib $ILELIB --mod HELLOSRV
 dltmod --lib $ILELIB --mod IBYREFP1

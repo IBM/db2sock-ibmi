@@ -870,12 +870,15 @@ int json_parse(char * json, json_key_t * bigkey) {
     case '8':
     case '9':
     case '.':
+    case '-':
+    case '+':
       key[k++] = JSON400_VAL_NBR;
       lvl[k-1] = nest;
       val[k-1] = c;
       for (; *c; c++) {
         if (*c == '0' || *c == '1' || *c == '2' || *c == '3' || *c == '4' || *c == '5' 
-         || *c == '6' || *c == '7' || *c == '8' || *c == '9' || *c == '0' || *c == '.') {
+         || *c == '6' || *c == '7' || *c == '8' || *c == '9' || *c == '0' 
+         || *c == '.' || *c == '-' || *c == '+') {
           continue;
         } else {
           c--;

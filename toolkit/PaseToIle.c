@@ -629,7 +629,7 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
   int rightDigitValue = 0;
   char * c = NULL;
   char str[128];
-  for (i=0; i < tdim; i++, wherev += outLength) {
+  for (i=0, j=0; i < tdim; i++, wherev += outLength) {
     memset(str,0,sizeof(str));
     /* sign negative */
     c = wherev;
@@ -637,7 +637,7 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
     if (rightDigitValue == 0x0D) {
       str[j++] = '-';
     }
-    for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+    for (k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
       /* decimal point */
       l++;
       if (!isDot && tscale && l >= actLen - tscale) {
@@ -714,12 +714,13 @@ int ile_pgm_packed_2_int(char * where, int tlen, int tscale) {
 
   memset(str,0,sizeof(str));
   /* sign negative */
+  j=0;
   c = wherev;
   rightDigitValue = (char)(c[outLength-1] & 0x0F);
   if (rightDigitValue == 0x0D) {
     str[j++] = '-';
   }
-  for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+  for (k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
     /* decimal point */
     l++;
     if (!isDot && tscale && l >= actLen - tscale) {
@@ -845,7 +846,7 @@ int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tsca
   int rightDigitValue = 0;
   char * c = NULL;
   char str[128];
-  for (i=0; i < tdim; i++, wherev += outLength) {
+  for (i=0, j = 0; i < tdim; i++, wherev += outLength) {
     memset(str,0,sizeof(str));
     /* sign negative */
     c = wherev;
@@ -853,7 +854,7 @@ int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tsca
     if (leftDigitValue == 0x0D) {
       str[j++] = '-';
     }
-    for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+    for (k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
       /* digits */
       leftDigitValue = (char)((c[k] >> 4) & 0x0F);
       /* decimal point */
@@ -912,12 +913,13 @@ int ile_pgm_zoned_2_int(char * where, int tlen, int tscale) {
 
   memset(str,0,sizeof(str));
   /* sign negative */
+  j=0;
   c = wherev;
   leftDigitValue = (char)((c[outLength-1] >> 4) & 0x0F);
   if (leftDigitValue == 0x0D) {
     str[j++] = '-';
   }
-  for (j=0, k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
+  for (k=0, l=0, isOk=0, isDot=0, isScale=0; k < outLength; k++) {
     /* digits */
     leftDigitValue = (char)((c[k] >> 4) & 0x0F);
     /* decimal point */

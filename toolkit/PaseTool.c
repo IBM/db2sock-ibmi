@@ -2477,18 +2477,17 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
     sqlrc = SQLFetch(tqry->hstmt);
     if (sqlrc == SQL_NO_DATA_FOUND || sqlrc < SQL_SUCCESS ) {
       tqry->stmt_close = 1;
-      /* fetch pagination, always include 'last record' ... (i think)??? */
+      /* fetch pagination, always include 'last record' ... (i think)???
       tool_output_record_no_data_found(tool);
       if (!fetch_recs) {
         sqlrc = SQL_SUCCESS;
       }
-/*
+      */
       if (!fetch_recs) {
         tool_output_record_no_data_found(tool);
       } else {
         sqlrc = SQL_SUCCESS;
       }
-*/
       break;
     }
     tool_output_record_row_beg(tool);
