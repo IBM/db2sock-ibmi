@@ -2479,7 +2479,7 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
       tqry->stmt_close = 1;
       /* fetch pagination, always include 'last record' ... (i think)??? */
       tool_output_record_no_data_found(tool, fetch_recs);
-      if (!fetch_recs) {
+      if (fetch_recs) {
         sqlrc = SQL_SUCCESS;
       }
 /* Old, not always include 'last record'
