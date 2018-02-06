@@ -20,6 +20,16 @@ char * ile_pgm_find_new_line_ascii(char *str) {
   }
   return NULL;
 }
+char * ile_pgm_find_new_line_ebcdic(char *str) {
+  int j = 0;
+  char * c = NULL;
+  for (c = str, j = 0; c[j]; j++) {
+    if (c[j] == 0x25) {
+      return &c[j];
+    }
+  }
+  return NULL;
+}
 
 
 void ile_pgm_trim_ascii(char *str, int len) {

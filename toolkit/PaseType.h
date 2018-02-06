@@ -11,7 +11,7 @@ typedef void * ILEpointer;
 #endif
 
 #ifndef int8
-#define int8 char
+#define int8 signed char
 #endif
 #ifndef uint8
 #define uint8 unsigned char

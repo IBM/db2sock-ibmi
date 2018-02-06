@@ -2241,9 +2241,13 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       }
       fetch_recs += 1;
       strcat(cmd_tmp,col_val);
-      /* find ascii LF for rows */
+      /* find LF for rows */
       lastLF = cmd_tmp;
-      posLF = ile_pgm_find_new_line_ascii(lastLF); 
+#ifdef __IBMC__
+      posLF = ile_pgm_find_new_line_ebcdic(lastLF);
+#else /* PASE */
+      posLF = ile_pgm_find_new_line_ascii(lastLF);
+#endif
       while (posLF) {
         isQshRow++;
         memset(qshRow,0,sizeof(qshRow));
@@ -2254,7 +2258,11 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         tool_output_record_name_value(tool, qshRow, lastLF, SQL_CHAR, isQshLen);
         tool_output_record_row_end(tool);
         lastLF = posLF + 1;
-        posLF = ile_pgm_find_new_line_ascii(lastLF); 
+#ifdef __IBMC__
+        posLF = ile_pgm_find_new_line_ebcdic(lastLF);
+#else /* PASE */
+        posLF = ile_pgm_find_new_line_ascii(lastLF);
+#endif
       }
       /* shift remain data */
       posLF = lastLF;
@@ -2263,14 +2271,20 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         strcpy(cmd_tmp, posLF);
         posLF = cmd_tmp;
         isQshLen = strlen(posLF);
-        memset(posLF + isQshLen, 0, sizeof(cmd_tmp) - isQshLen);
+        posLF = cmd_tmp + isQshLen;
+        memset(posLF, 0, sizeof(cmd_tmp) - isQshLen);
       }
     } /* fetch loop */
     /* out remain data */
+#ifdef __IBMC__
+    ile_pgm_trim_ebcdic(cmd_tmp, sizeof(cmd_tmp));
+#else /* PASE */
     ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
+#endif
     lastLF = cmd_tmp;
     isQshLen = strlen(lastLF);
     if (isQshLen) {
+      posLF = cmd_tmp + isQshLen;
       isQshRow++;
       memset(qshRow,0,sizeof(qshRow));
       sprintf(qshRow,"R%d", isQshRow);
@@ -2329,14 +2343,22 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         }
         fetch_odd = 1;
         memcpy(col_name, col_val, sizeof(col_val));
+#ifdef __IBMC__
+        ile_pgm_trim_ebcdic(col_name, sizeof(col_val));
+#else /* PASE */
         ile_pgm_trim_ascii(col_name, sizeof(col_val));
+#endif
         memset(cmd_tmp,0,sizeof(cmd_tmp));
       } else {
         /* DEADBEEF remove */
         memcpy(col_val,&col_val[8],sizeof(col_val)-9);
         fetch_odd += 1;
         strcat(cmd_tmp,col_val);
+#ifdef __IBMC__
+        ile_pgm_trim_ebcdic(cmd_tmp, sizeof(cmd_tmp));
+#else /* PASE */
         ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
+#endif
       }
     } /* fetch loop */
     tool_output_record_array_end(tool);

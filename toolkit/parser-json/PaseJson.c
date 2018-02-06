@@ -410,9 +410,13 @@ int json_output_pgm_dcl_s_data(tool_node_t *tool, char *out_caller, int outLen, 
   int j = 0;
   char * c = NULL;
   char e = '\0';
+  int k = 0;
   /* variant (ebcdic) */
   char e_backslash = ccsid_variant_backslash();
   char * tmp = NULL;
+  char * ptr1 = NULL;
+  char * ptr2 = NULL;
+  int cpylen = 0;
 
   if (numFlag == 1) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
@@ -498,7 +502,12 @@ int json_output_pgm_dcl_s_data(tool_node_t *tool, char *out_caller, int outLen, 
         }
         if (e != '\0') {
           len++;
-          memcpy(&c[j+2], &c[j+1], len - j);
+          for (k=strlen(tmp)+1;k;k--) {
+            if (k == j) {
+              break;
+            }
+            c[k] = c[k-1];
+          }
           c[j] = e_backslash;
           j++;
           c[j] = e;
