@@ -87,6 +87,17 @@ int main(int argc, char * argv[]) {
   inlenutf8 = SQL_NTS;
   sqlrc = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, parm_data_type, parm_precision, parm_scale, injsonutf8, 0, &inlenutf8);
   sqlrc = SQLExecute(hstmt);
+  /* get your own errors (remote not have SQL400Json) */
+  if (sqlrc == SQL_ERROR) {
+    memset(injson,0,sizeof(injson));
+    strcat(injson,"{\"query\":[{\"stmt\":\"joblog\"}]}");
+    inlen = strlen(injson);
+    memset(injsonutf8,0,inlenutf8);
+    sqlrc = SQL400ToUtf8(hdbc, injson, inlen, injsonutf8, inlenutf8, 0);
+    inlenutf8 = SQL_NTS;
+    sqlrc = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT, SQL_C_CHAR, parm_data_type, parm_precision, parm_scale, injsonutf8, 0, &inlenutf8);
+    sqlrc = SQLExecute(hstmt);
+  }
   sqlrc = SQLNumResultCols(hstmt, &nResultCols);
   if (nResultCols == 1) {
     size = sizeof(buff_name);
@@ -96,7 +107,7 @@ int main(int argc, char * argv[]) {
     memset(outjsonutf8,0,outlenutf8);
     for (sqlrc = SQL_SUCCESS; sqlrc == SQL_SUCCESS;) {
       outjsonutf8 += strlen(outjsonutf8);
-      outlenutf8 = parm_precision * 4 - strlen(outjsonutf8);
+      outlenutf8 = parm_precision - strlen(outjsonutf8);
       outlenutf8 = SQL_NTS;
       sqlrc = SQLBindCol(hstmt,1,SQL_C_CHAR,outjsonutf8,size,&outlenutf8);
       sqlrc = SQLFetch(hstmt);

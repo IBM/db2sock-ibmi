@@ -331,7 +331,7 @@ int json_output_sql_errors(tool_node_t *tool, char *out_caller, int outLen, int 
   int retLen = outLen;
   if (rc == SQL_ERROR) {
     retLen = json_output_printf(JSON400_ADJUST_ADD_COMMA, out_caller, retLen, 
-        "\n%c\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"%c", sopen_bracket, sqlCode, sqlState, sqlMsg, sclose_bracket);
+        "%c\"ok\":false,\"sqlcode\":\"%d\",\"sqlstate\":\"%s\",\"sqlmsg\":\"%s\"%c", sopen_bracket, sqlCode, sqlState, sqlMsg, sclose_bracket);
   }
   return retLen;
 }

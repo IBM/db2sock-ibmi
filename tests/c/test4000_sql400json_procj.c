@@ -87,9 +87,16 @@ int main(int argc, char * argv[]) {
   inlenutf8 = SQL_NTS;
   sqlrc = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT_OUTPUT, SQL_C_CHAR, parm_data_type, parm_precision, parm_scale, injsonutf8, 0, &inlenutf8);
   sqlrc = SQLExecute(hstmt);
-  outlenutf8 = strlen(ptr2);
-  if (outlenutf8 && sqlrc == SQL_NO_DATA_FOUND) {
-    sqlrc = SQL_SUCCESS;
+  /* get your own errors (remote not have SQL400Json) */
+  if (sqlrc == SQL_ERROR) {
+    memset(injson,0,sizeof(injson));
+    strcat(injson,"{\"query\":[{\"stmt\":\"joblog\"}]}");
+    inlen = strlen(injson);
+    memset(injsonutf8,0,inlenutf8);
+    sqlrc = SQL400ToUtf8(hdbc, injson, inlen, injsonutf8, inlenutf8, 0);
+    inlenutf8 = SQL_NTS;
+    sqlrc = SQLBindParameter(hstmt, 1, SQL_PARAM_INPUT_OUTPUT, SQL_C_CHAR, parm_data_type, parm_precision, parm_scale, injsonutf8, 0, &inlenutf8);
+    sqlrc = SQLExecute(hstmt);
   }
   strncpy(outjson,ptr1,sizeof(outjson));
   free(ptr1);

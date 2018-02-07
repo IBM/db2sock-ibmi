@@ -181,7 +181,9 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 
 
 #define TOOL400_KEY_QUERY       820     /*"query": */
-#define TOOL400_QUERY_STMT     1821     /*"stmt":"select * from animals where breed=?"*/
+#define TOOL400_QUERY_STMT     1821     /*"stmt":"select * from animals where breed=?"
+                                         *"stmt":"joblog" - special joblog errors
+                                         */
 #define TOOL400_QUERY_HNDL     1822     /*"handle":4 (stmt handle, fetch pagination)*/
 #define TOOL400_KEY_END_QUERY   920     /*"end"*/
 

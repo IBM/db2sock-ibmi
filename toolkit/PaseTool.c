@@ -2532,6 +2532,7 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   int lvl = 0;
   int max = 0;
   int go = 1;
+  int isjoblog = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_query_struct_t * tqry = (tool_key_query_struct_t *) node;
@@ -2567,6 +2568,9 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     switch (key) {
     case TOOL400_QUERY_STMT:
       query = val;
+      if (!strcmp(query,"joblog")) {
+        isjoblog = 1;
+      }
       break;
     case TOOL400_QUERY_HNDL:
       tqry->hstmt = ile_pgm_char_2_int(val, strlen(val), 0);
@@ -2577,6 +2581,14 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   /* no query, no handle */
   if (!query && !tqry->hstmt) {
+    return sqlrc;
+  }
+  /* joblog ? */
+  if (isjoblog) {
+    sqlrc = SQL_ERROR;
+    tool_output_query_beg(tool, query, tqry->hstmt);
+    tool_output_sql_errors(tool, sqlrc, tool->sqlCode, tool->sqlState, tool->sqlMsg);
+    tool_output_query_end(tool);  
     return sqlrc;
   }
   /* need hstmt */
