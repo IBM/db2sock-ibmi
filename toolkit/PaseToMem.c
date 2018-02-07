@@ -107,7 +107,7 @@ SQLRETURN iCall400Cmd(char * blob, int len)
     iCall400CmdLoaded = 1;
   }
   rc = ile_pgm_str_2_char(cmd, blob, 1, sizeof(cmd), 0, 0, 1);
-  ile_pgm_trim_ebcdic(cmd, sizeof(cmd));
+  ile_pgm_trim(cmd, sizeof(cmd), FLAG_STR_EBCDIC);
   arglist->blob.s.addr = (ulong) &cmd;
   arglist->len = len;
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, iCall400CmdIleSigStruct, RESULT_INT32);

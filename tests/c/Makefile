@@ -38,6 +38,7 @@ TEST0012     = test0012_resource_array_async_join
 TEST1000     = test1000_sql400json
 TEST2000     = test2000_sql400json_async
 TEST3000     = test3000_sql400json_memory
+TEST4000     = test4000_sql400json_procj
 TEST5000     = test5000_sql400json_procjr
 TEST9999     = test9999_driver_version
 
@@ -56,6 +57,7 @@ go: speakpase $(TEST0000)$(BIT) \
 	$(TEST1000)$(BIT) \
 	$(TEST2000)$(BIT) \
 	$(TEST3000)$(BIT) \
+	$(TEST4000)$(BIT) \
 	$(TEST5000)$(BIT) \
 	$(TEST9999)$(BIT) \
 	clean
@@ -79,6 +81,8 @@ $(TEST2000)$(BIT): $(TEST2000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST2000).o -o $(TEST2000)$(BIT)
 $(TEST3000)$(BIT): $(TEST3000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST3000).o -o $(TEST3000)$(BIT)
+$(TEST4000)$(BIT): $(TEST4000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST4000).o -o $(TEST4000)$(BIT)
 $(TEST5000)$(BIT): $(TEST5000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST5000).o -o $(TEST5000)$(BIT)
 $(TEST9999)$(BIT): $(TEST9999).o

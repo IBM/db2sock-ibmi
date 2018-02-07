@@ -9,50 +9,64 @@
 /*=================================================
  * toolkit copy in/out ILE parm layout
  */
-char * ile_pgm_find_new_line_ascii(char *str) {
+char * ile_pgm_find_new_line(char *str, int flag) {
   int j = 0;
   char * c = NULL;
-  for (c = str, j = 0; c[j]; j++) {
-    /* 819 LF or next line (1208 nexline C285) */
-    if (c[j] == 0x0A || c[j] == 0x85 || (c[j] == 0xC2 && c[j+1] == 0x85)) {
-      return &c[j];
-    }
+  int op = FLAG_STR_COMPILE;
+  /* override compile default */
+  if (flag) {
+    op = flag;
   }
-  return NULL;
-}
-char * ile_pgm_find_new_line_ebcdic(char *str) {
-  int j = 0;
-  char * c = NULL;
   for (c = str, j = 0; c[j]; j++) {
-    if (c[j] == 0x25) {
-      return &c[j];
-    }
-  }
-  return NULL;
-}
-
-
-void ile_pgm_trim_ascii(char *str, int len) {
-  int j = 0;
-  char * c = NULL;
-  for (c = str, j = len - 1; j >= 0; j--) {
-    if (!c[j] || c[j] == 0x20) {
-      c[j] = 0x00;
-      len = j;
-    } else {
+    switch (op) {
+    case FLAG_STR_ASCII:
+      /* ascii 819 LF or next line (1208 nexline C285) */
+      if (c[j] == 0x0A || c[j] == 0x85 || (c[j] == 0xC2 && c[j+1] == 0x85)) {
+        return &c[j];
+      }
+      break;
+    case FLAG_STR_EBCDIC:
+      /* ebcdic LF */
+      if (c[j] == 0x25) {
+        return &c[j];
+      }
+      break;
+    default:
       break;
     }
   }
+  return NULL;
 }
 
-void ile_pgm_trim_ebcdic(char *str, int len) {
+void ile_pgm_trim(char *str, int len, int flag) {
   int j = 0;
   char * c = NULL;
+  int op = FLAG_STR_COMPILE;
+  /* override compile default */
+  if (flag) {
+    op = flag;
+  }
   for (c = str, j = len - 1; j >= 0; j--) {
-    if (!c[j] || c[j] == 0x40) {
-      c[j] = 0x00;
-      len = j;
-    } else {
+    switch (op) {
+    case FLAG_STR_ASCII:
+      /* ascii SPACE */
+      if (!c[j] || c[j] == 0x20) {
+        c[j] = 0x00;
+        len = j;
+      } else {
+        j = -1; /* end loop */
+      }
+      break;
+    case FLAG_STR_EBCDIC:
+      /* ebcdic SPACE */
+      if (!c[j] || c[j] == 0x40) {
+        c[j] = 0x00;
+        len = j;
+      } else {
+        j = -1;  /* end loop */
+      }
+      break;
+    default:
       break;
     }
   }

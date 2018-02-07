@@ -464,7 +464,10 @@ char ccsid_variant_tilde();
 /*=================================================
  * ebcdic char ccsid mess
  */
+#define FLAG_STR_ASCII 1
+#define FLAG_STR_EBCDIC 2
 #ifdef __IBMC__
+#define FLAG_STR_COMPILE FLAG_STR_EBCDIC
 #define hex_space 0x40
 #define hex_nbr 0xF0
 #define hex_backspace 0x16
@@ -473,7 +476,8 @@ char ccsid_variant_tilde();
 #define hex_carriage_return 0x0D
 #define hex_tab 0x05
 #define hex_double_quote 0x7F
-#else
+#else /* PASE */
+#define FLAG_STR_COMPILE FLAG_STR_ASCII
 #define hex_space 0x20
 #define hex_nbr 0x30
 #define hex_backspace 0x08
@@ -482,8 +486,10 @@ char ccsid_variant_tilde();
 #define hex_carriage_return 0x0D
 #define hex_tab 0x09
 #define hex_double_quote 0x22
+#define hex_nextline 0x85
+#define hex_utf8_nextline1 0xC2
+#define hex_utf8_nextline2 0x85
 #endif
-
 
 #endif /* _PASETOOL_H */
 

@@ -870,13 +870,13 @@ SQLRETURN tool_pgm(char *pgm, char *lib, char * func, char * debug, ile_pgm_call
 
   /* copy ebcdic */
   rc = ile_pgm_str_2_char((char *)&layout->pgm, pgm, 1, sizeof(layout->pgm), 0, 0, 1);
-  ile_pgm_trim_ebcdic((char *)&layout->pgm, sizeof(layout->pgm));
+  ile_pgm_trim((char *)&layout->pgm, sizeof(layout->pgm), FLAG_STR_EBCDIC);
   rc = ile_pgm_str_2_char((char *)&layout->lib, lib, 1, sizeof(layout->lib), 0, 0, 1);
-  ile_pgm_trim_ebcdic((char *)&layout->lib, sizeof(layout->lib));
+  ile_pgm_trim((char *)&layout->lib, sizeof(layout->lib), FLAG_STR_EBCDIC);
   rc = ile_pgm_str_2_char((char *)&layout->func, func, 1, sizeof(layout->func), 0, 0, 1);
-  ile_pgm_trim_ebcdic((char *)&layout->func, sizeof(layout->func));
+  ile_pgm_trim((char *)&layout->func, sizeof(layout->func), FLAG_STR_EBCDIC);
   rc = ile_pgm_str_2_char((char *)&layout->debug, debug, 1, sizeof(layout->debug), 0, 0, 1);
-  ile_pgm_trim_ebcdic((char *)&layout->debug, sizeof(layout->debug));
+  ile_pgm_trim((char *)&layout->debug, sizeof(layout->debug), FLAG_STR_EBCDIC);
 
   /* layout return */
   *playout = layout;
@@ -2243,11 +2243,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       strcat(cmd_tmp,col_val);
       /* find LF for rows */
       lastLF = cmd_tmp;
-#ifdef __IBMC__
-      posLF = ile_pgm_find_new_line_ebcdic(lastLF);
-#else /* PASE */
-      posLF = ile_pgm_find_new_line_ascii(lastLF);
-#endif
+      posLF = ile_pgm_find_new_line(lastLF, FLAG_STR_COMPILE);
       while (posLF) {
         isQshRow++;
         memset(qshRow,0,sizeof(qshRow));
@@ -2258,11 +2254,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         tool_output_record_name_value(tool, qshRow, lastLF, SQL_CHAR, isQshLen);
         tool_output_record_row_end(tool);
         lastLF = posLF + 1;
-#ifdef __IBMC__
-        posLF = ile_pgm_find_new_line_ebcdic(lastLF);
-#else /* PASE */
-        posLF = ile_pgm_find_new_line_ascii(lastLF);
-#endif
+        posLF = ile_pgm_find_new_line(lastLF, FLAG_STR_COMPILE);
       }
       /* shift remain data */
       posLF = lastLF;
@@ -2276,11 +2268,7 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       }
     } /* fetch loop */
     /* out remain data */
-#ifdef __IBMC__
-    ile_pgm_trim_ebcdic(cmd_tmp, sizeof(cmd_tmp));
-#else /* PASE */
-    ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
-#endif
+    ile_pgm_trim(cmd_tmp, sizeof(cmd_tmp), FLAG_STR_COMPILE);
     lastLF = cmd_tmp;
     isQshLen = strlen(lastLF);
     if (isQshLen) {
@@ -2343,22 +2331,14 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
         }
         fetch_odd = 1;
         memcpy(col_name, col_val, sizeof(col_val));
-#ifdef __IBMC__
-        ile_pgm_trim_ebcdic(col_name, sizeof(col_val));
-#else /* PASE */
-        ile_pgm_trim_ascii(col_name, sizeof(col_val));
-#endif
+        ile_pgm_trim(col_name, sizeof(col_val), FLAG_STR_COMPILE);
         memset(cmd_tmp,0,sizeof(cmd_tmp));
       } else {
         /* DEADBEEF remove */
         memcpy(col_val,&col_val[8],sizeof(col_val)-9);
         fetch_odd += 1;
         strcat(cmd_tmp,col_val);
-#ifdef __IBMC__
-        ile_pgm_trim_ebcdic(cmd_tmp, sizeof(cmd_tmp));
-#else /* PASE */
-        ile_pgm_trim_ascii(cmd_tmp, sizeof(cmd_tmp));
-#endif
+        ile_pgm_trim(cmd_tmp, sizeof(cmd_tmp), FLAG_STR_COMPILE);
       }
     } /* fetch loop */
     tool_output_record_array_end(tool);
