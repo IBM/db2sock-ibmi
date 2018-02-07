@@ -25,6 +25,8 @@ int main(int argc, char * argv[]) {
   FILE *fp_exp = NULL;
   char * fp_prefix = argv[1];
   char * bad = "_bad.";
+  char * fixup = NULL;
+  int fixlen = 0;
   pthread_t tid = 0;
   SQL400JsonStruct * tdata = NULL;
   SQLHANDLE hdbc = 0;
@@ -45,6 +47,12 @@ int main(int argc, char * argv[]) {
     printf("%s j0000_parm_required (none specified)\n",argv[0]);
     printf("success (%d)\n",sqlrc);
     return;
+  }
+  /* fix up */
+  fixup = strrchr(fp_prefix,'.');
+  if (fixup && (!strcmp(fixup,".json") || !strcmp(fixup,".exp"))) {
+    fixlen = strlen(fixup);
+    memset(fixup,0,fixlen);
   }
 
   /* json test file */
