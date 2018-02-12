@@ -83,6 +83,9 @@ def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
+  c_main += "    if (myccsid == 1208) {" + "\n"
+  c_main += "      custom_SQLSetEnvUTF8(*phenv);" + "\n"
+  c_main += "    }" + "\n"
   c_main += "  }" + "\n"
   c_main += "  init_unlock();" + "\n"
   # dump trace
@@ -157,6 +160,9 @@ def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db4
   c_main += "  case SQL_HANDLE_ENV:" + "\n"
   c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
+  c_main += "      if (myccsid == 1208) {" + "\n"
+  c_main += "        custom_SQLSetEnvUTF8(*ohnd);" + "\n"
+  c_main += "      }" + "\n"
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
   c_main += "  case SQL_HANDLE_DBC:" + "\n"
@@ -1280,6 +1286,7 @@ file_PaseCliAsync_h += ' * ===================================================' 
 file_PaseCliAsync_h += ' */' + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliCustom_h_proto
+file_PaseCliAsync_h += "SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env );" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '#ifdef __cplusplus ' + "\n"

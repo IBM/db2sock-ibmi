@@ -1,7 +1,7 @@
 #ifndef _PASECLILIC_H
 #define _PASECLILIC_H
 
-#define	DB2_CLI_VERSION "1.1.3-sg3"
+#define	DB2_CLI_VERSION "1.1.3-sg6"
 
 static char * license = "\
 Copyright (c) 2016 International Business Machines Corp.\n\

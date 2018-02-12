@@ -48,6 +48,9 @@ SQLRETURN SQLAllocEnv( SQLHENV * phenv )
   }
   if (sqlrc == SQL_SUCCESS) {
     init_table_ctor(*phenv, *phenv);
+    if (myccsid == 1208) {
+      custom_SQLSetEnvUTF8(*phenv);
+    }
   }
   init_unlock();
   if (init_cli_trace()) {
@@ -73,6 +76,9 @@ SQLRETURN SQLAllocHandle( SQLSMALLINT  htype, SQLINTEGER  ihnd, SQLINTEGER * ohn
   case SQL_HANDLE_ENV:
     if (sqlrc == SQL_SUCCESS) {
       init_table_ctor(*ohnd, *ohnd);
+      if (myccsid == 1208) {
+        custom_SQLSetEnvUTF8(*ohnd);
+      }
     }
     break;
   case SQL_HANDLE_DBC:

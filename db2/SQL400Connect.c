@@ -13,6 +13,17 @@ static int env_server_mode;
 /*
  * env 
  */
+SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLINTEGER yes = SQL_TRUE;
+  int myccsid = 1208;
+  if (!env_hndl) {
+    env_hndl = env;
+    sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
+    sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL_ATTR_UTF8, (SQLPOINTER)&yes, (SQLINTEGER) 0);
+  }
+  return sqlrc;
+}
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER yes = SQL_TRUE;

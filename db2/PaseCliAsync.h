@@ -1349,6 +1349,7 @@ SQLRETURN custom_SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQ
 SQLRETURN custom_SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN custom_SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
+SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env );
 
 
 #ifdef __cplusplus 
