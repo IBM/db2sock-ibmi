@@ -43,17 +43,24 @@ success (0)
 Local or remote call.
 
 Any scripting language may use current db2 (*DRDA) or odbc (*DDM) drivers to call included toolkit stored procedures.
+
 - db2json.db2jsonj - single input/output parameter clob(15MB). Whereby, db2 i/ohandles all json ccsid conversion.
+
 - db2json.db2jsonjr - single input parameter clob(15MB). Returns result set 3000 characters per record. Whereby, db2 fetch handles all json ccsid conversion.
+
 - db2json.db2jsonb - single input/output parameter blob(15MB). Whereby, client code must handle ascii/ebcdic csid conversion.
+
 - db2json.db2jsonbr - single input parameter blob(15MB). Returns result set 3000 bytes per record. Whereby, db2 fetch returns hex char representation of ebcdic. client code must handle ascii/ebcdic csid conversion.
 
 Examples (tests/c):
+```
 test4000_sql400json_procj32
 test5000_sql400json_procjr32
 test6000_sql400json_procb32
 test7000_sql400json_procbr32
+```
 
+Examples (tests/c):
 ```
 bash-4.3$ ./test5000_sql400json_procjr32 ../json/j0101_srvpgm_hello
 input(5000000):
