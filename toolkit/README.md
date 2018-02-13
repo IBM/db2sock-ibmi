@@ -12,6 +12,9 @@ Any parser can can use toolkit (xml, json, cvs, etc.). However, default parsers 
 # transports (configurations)
 
 Various json transports remote and local have been tested (included).
+The driver options are listed in performance order, memory fastest
+through REST slowest. 
+
 
 ## memory (compile) - call direct script language requires c extension compile
 
@@ -20,7 +23,10 @@ Local call only.
 Any scripting language may call directly to ILE via the in memory option. 
 Simply add {"connect":[{"qual":"*memory"}, ... ]} to your normal json call.
 However, your language provider need create a c extension
-to call SQL400Json(Async). 
+to call SQL400Json(Async).
+
+Warning: Many security and functional exposes using in memory call option for web languages. 
+See db2sock issues 'fast, may not be best' (you have been warned).
 
 Example (tests/c):
 ```
@@ -31,6 +37,33 @@ input(5000000):
        ]}
 
 ]}
+output(74):
+{"script":[{"pgm":["HELLOSRV","DB2JSON","HELLO",{"char":"Hello World"}]}]}
+
+result:
+success (0)
+```
+
+## New db2 advanced  API (compile) - call direct new advanced API
+
+Local call only. 
+
+Any scripting language may call directly to new CLI API SQL400Json(Async).
+The new API intended to add toolkit capabilities to your existing
+language db2 driver (php ibm_db2, etc.). All new CLI APIs include
+an Async version to change game of your interpreted language driver.
+However, your language provider need create a c extension
+to call SQL400Json(Async). 
+
+Example (tests/c):
+```
+bash-4.3$ ./test1000_sql400json32 ../json/j0101_srvpgm_hello       
+input(5000000):
+{"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLO"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}
+
+
 output(74):
 {"script":[{"pgm":["HELLOSRV","DB2JSON","HELLO",{"char":"Hello World"}]}]}
 
