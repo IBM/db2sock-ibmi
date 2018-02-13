@@ -40,6 +40,8 @@ TEST2000     = test2000_sql400json_async
 TEST3000     = test3000_sql400json_memory
 TEST4000     = test4000_sql400json_procj
 TEST5000     = test5000_sql400json_procjr
+TEST6000     = test6000_sql400json_procb
+TEST7000     = test7000_sql400json_procbr
 TEST9999     = test9999_driver_version
 
 ### tells make all things to do (order)
@@ -59,6 +61,8 @@ go: speakpase $(TEST0000)$(BIT) \
 	$(TEST3000)$(BIT) \
 	$(TEST4000)$(BIT) \
 	$(TEST5000)$(BIT) \
+	$(TEST6000)$(BIT) \
+	$(TEST7000)$(BIT) \
 	$(TEST9999)$(BIT) \
 	clean
 
@@ -85,6 +89,10 @@ $(TEST4000)$(BIT): $(TEST4000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST4000).o -o $(TEST4000)$(BIT)
 $(TEST5000)$(BIT): $(TEST5000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST5000).o -o $(TEST5000)$(BIT)
+$(TEST6000)$(BIT): $(TEST6000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST6000).o -o $(TEST6000)$(BIT)
+$(TEST7000)$(BIT): $(TEST7000).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST7000).o -o $(TEST7000)$(BIT)
 $(TEST9999)$(BIT): $(TEST9999).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST9999).o -o $(TEST9999)$(BIT)
 

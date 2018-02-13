@@ -48,6 +48,7 @@
        dcl-pr  iJson400C ind;
          clob pointer value;
          flag ind value;
+         hblob ind value;
        end-pr;
 
        dcl-pr iJson400R ind extproc(*CL:'iJson400R');
@@ -56,6 +57,10 @@
 
        dcl-pr iJson400H ind extproc(*CL:'iJson400H');
          clob pointer value;
+       end-pr;
+
+       dcl-pr iJson400B ind extproc(*CL:'iJson400B');
+         blob pointer value;
        end-pr;
 
        dcl-ds over_t qualified based(Template);
@@ -122,6 +127,134 @@
          MsgAction char(10) const;
          ErrorCode char(8000) options(*varsize);
        end-pr;
+
+       // ****************************************************          
+       //  convert hex 2 bin          
+       //  return (n - number of hex character bytes size string)          
+       // ****************************************************          
+       dcl-proc cpyB2Hex export;
+       dcl-pi  *N int(10);
+         pTarget pointer Value;
+         pSource pointer Value;
+         nLength uns(10) Value;
+       end-pi;
+       //  vars          
+       dcl-s itrim uns(10) inz(0);
+       dcl-s inbr uns(10) inz(0);
+       dcl-s hnbr uns(10) inz(0);
+       dcl-s lnbr uns(10) inz(0);
+       dcl-s hchr char(1) inz(*BLANKS);
+       dcl-s lchr char(1) inz(*BLANKS);
+       dcl-s ptCopy pointer inz(*NULL);
+       dcl-ds tCopy likeds(over_t) based(ptCopy);
+       dcl-s psCopy pointer inz(*NULL);
+       dcl-ds sCopy likeds(over_t) based(psCopy);
+       ptCopy = pTarget;          
+       psCopy = pSource;          
+       dow ptCopy < pTarget + nLength*2;          
+         // high bits          
+         hnbr = sCopy.uchrx;          
+         select;          
+         when hnbr>=240; // x'FO'          
+          hchr = 'F';          
+          lnbr = hnbr - 240;          
+         when hnbr>=224 and hnbr<240; // x'E0'          
+          hchr = 'E';          
+          lnbr = hnbr - 224;          
+         when hnbr>=208 and hnbr<224; // x'D0'          
+          hchr = 'D';          
+          lnbr = hnbr - 208;          
+         when hnbr>=192 and hnbr<208; // x'C0'          
+          hchr = 'C';          
+          lnbr = hnbr - 192;          
+         when hnbr>=176 and hnbr<192; // x'B0'          
+          hchr = 'B';          
+          lnbr = hnbr - 176;          
+         when hnbr>=160 and hnbr<176; // x'A0'          
+          hchr = 'A';          
+          lnbr = hnbr - 160;          
+         when hnbr>=144 and hnbr<160; // x'90'          
+          hchr = '9';          
+          lnbr = hnbr - 144;          
+         when hnbr>=128 and hnbr<144; // x'80'          
+          hchr = '8';          
+          lnbr = hnbr - 128;          
+         when hnbr>=112 and hnbr<128; // x'70'          
+          hchr = '7';          
+          lnbr = hnbr - 112;          
+         when hnbr>=96 and hnbr<112; // x'60'          
+          hchr = '6';          
+          lnbr = hnbr - 96;          
+         when hnbr>=80 and hnbr<96; // x'50'          
+          hchr = '5';          
+          lnbr = hnbr - 80;          
+         when hnbr>=64 and hnbr<80; // x'40'          
+          hchr = '4';          
+          lnbr = hnbr - 64;          
+         when hnbr>=48 and hnbr<64; // x'30'          
+          hchr = '3';          
+          lnbr = hnbr - 48;          
+         when hnbr>=32 and hnbr<48; // x'20'          
+          hchr = '2';          
+          lnbr = hnbr - 32;          
+         when hnbr>=16 and hnbr<32; // x'10'          
+          hchr = '1';          
+          lnbr = hnbr - 16;          
+         // other?          
+         other;          
+          hchr = '0';          
+          lnbr = hnbr;          
+         endsl;          
+         // low bits          
+         select;          
+         when lnbr>=15; // x'0F'          
+          lchr = 'F';          
+         when lnbr>=14 and lnbr<15; // x'0E'          
+          lchr = 'E';          
+         when lnbr>=13 and lnbr<14; // x'0D'          
+          lchr = 'D';          
+         when lnbr>=12 and lnbr<13; // x'0C'          
+          lchr = 'C';          
+         when lnbr>=11 and lnbr<12; // x'0B'          
+          lchr = 'B';          
+         when lnbr>=10 and lnbr<11; // x'0A'          
+          lchr = 'A';          
+         when lnbr>=9 and lnbr<10; // x'09'          
+          lchr = '9';          
+         when lnbr>=8 and lnbr<9; // x'08'          
+          lchr = '8';          
+         when lnbr>=7 and lnbr<8; // x'07'          
+          lchr = '7';          
+         when lnbr>=6 and lnbr<7; // x'06'          
+          lchr = '6';          
+         when lnbr>=5 and lnbr<6; // x'05'          
+          lchr = '5';          
+         when lnbr>=4 and lnbr<5; // x'04'          
+          lchr = '4';          
+         when lnbr>=3 and lnbr<4; // x'03'          
+          lchr = '3';          
+         when lnbr>=2 and lnbr<3; // x'02'          
+          lchr = '2';          
+         when lnbr>=1 and lnbr<2; // x'01'          
+          lchr = '1';          
+         // other?          
+         other;          
+          lchr = '0';          
+         endsl;          
+         psCopy += 1;          
+         // copy and next          
+         tCopy.bytex = hchr;          
+         ptCopy += 1;          
+         inbr += 1;          
+         tCopy.bytex = lchr;          
+         ptCopy += 1;          
+         inbr += 1;          
+         if hnbr > 0 or lnbr > 0;          
+           itrim = inbr;          
+         endif;          
+       enddo;          
+       return itrim; // use to be inbr (padded zeros)          
+       end-proc;
 
        // --------------------------
        // debug message to *QSYSOPR
@@ -216,6 +349,7 @@
        dcl-pi  *N ind;
          clob pointer value;
          flag ind value;
+         hblob ind value;
        end-pi;
        //  vars          
        dcl-s rc ind inz(*OFF);
@@ -248,6 +382,8 @@
        dcl-s ptr2 pointer inz(*NULL);
        dcl-s hack char(8) inz('DEADBEEF');
        dcl-s ptr2Len int(10) inz(0);
+
+       dcl-s phex pointer inz(*NULL);
 
        sbang = ccsid_variant_bang();
        spound = ccsid_variant_pound();
@@ -295,7 +431,22 @@
                  outLen);
 
        // clear input
-       memset(clobData:0:clobLen);         
+       memset(clobData:0:clobLen);
+
+       // hex back
+       if hblob = *ON;
+         outLen = strlen(outData);
+         phex = %alloc(outLen*8);
+         memset(phex:0:outLen*8);
+         cpyB2Hex(phex:outData:outLen);
+         clobLen = strlen(phex);
+         outLen = 5001 * 3000;
+         if clobLen > outLen - 1;
+            clobLen = outlen - 1;
+         endif;
+         cpybytes(outData:phex:clobLen);
+         dealloc(en) phex;
+       endif;        
 
        // output sql result set for rows 
        outLen = strlen(outData);
@@ -359,7 +510,7 @@
        dcl-pi  *N ind;
          clob pointer value;
        end-pi;
-       return iJson400C(clob:*OFF);          
+       return iJson400C(clob:*OFF:*OFF);          
        end-proc;
 
        // --------------------------
@@ -369,6 +520,16 @@
        dcl-pi  *N ind;
          clob pointer value;
        end-pi;
-       return iJson400C(clob:*ON);          
+       return iJson400C(clob:*ON:*OFF);          
+       end-proc;
+
+       // --------------------------
+       // db2procjh(blob) -- json interface (blob)
+       // --------------------------
+       dcl-proc iJson400B export;
+       dcl-pi  *N ind;
+         blob pointer value;
+       end-pi;
+       return iJson400C(blob:*OFF:*ON);          
        end-proc;
 

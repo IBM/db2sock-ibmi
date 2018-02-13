@@ -997,11 +997,13 @@ int ile_pgm_str_2_char(char * where, char *str, int tdim, int tlen, int tvary, i
   if (!str) {
     str = "";
   }
-  /* truncate user overflow field area */
+  /* truncate user overflow field area (below) */
   len = strlen(str);
+/*
   if (len > tlen) {
     len = tlen;
   }
+*/
   /* ebcdic ccsid? */
   if (!tccsid) {
     tccsid = Qp2jobCCSID();
