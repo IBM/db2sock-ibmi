@@ -41,21 +41,22 @@ simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb
 
 # README.md (sub-directories).
 ```
-db2sock/db2                  - libdb400.a - db2 driver source
-db2sock/toolkit              - libtkit400.a - toolkit base driver source (optional)
-                             - tkit400.srvpgm - ILE toolkit base driver source (remote)
-db2sock/toolkit/fastcgi      - db2jsonfcgi - fastcgi rest interface source (optional)
-                             - db2jsonngix - fastcgi cgi starter rest interface source (optional)
-db2sock/toolkit/cgi          - db2json.pgm - ILE CGI rest interface source (optional)
-db2sock/toolkit/proc         - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
-db2sock/toolkit/proc-user    - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
-db2sock/toolkit/procj        - db2procj, db2procjr, db2procjh - ILE stored procedures to call toolkit (remote) 
-db2sock/toolkit/parser-json  - libjson400.a - toolkit json parser driver source (optional)
-                             - json400.srvpgm - ILE toolkit json parser driver source (remote)
-db2sock/tests/rpg            - RPG tests for tests_json (optional)
-db2sock/tests/json           - json tests (optional)
-db2sock/tests/c              - c tests (optional)
-db2sock/tests/php            - php tests (optional)
+/db2                  - libdb400.a - db2 driver source
+/toolkit              - libtkit400.a - toolkit base driver source (optional)
+                      - tkit400.srvpgm - ILE toolkit base driver source (remote)
+/toolkit/fastcgi      - db2jsonfcgi - fastcgi rest interface source (optional)
+                      - db2jsonngix - fastcgi cgi starter rest interface source (optional)
+/toolkit/cgi          - db2json.pgm - ILE CGI rest interface source (optional)
+/toolkit/proc         - db2proc.srvpgm - ILE toolkit service interface iCall400 source (optional)
+/toolkit/proc-user    - db2user.srvpgm - ILE toolkit user special custom toolkit call enabler (optional)
+/toolkit/procj        - db2procj, db2procjr, db2procjh - ILE clob/char stored procedures to call toolkit (remote) 
+                      - db2procb, db2procbr            - ILE blob/bin stored procedures to call toolkit (remote) 
+/toolkit/parser-json  - libjson400.a - toolkit json parser driver source (optional)
+                      - json400.srvpgm - ILE toolkit json parser driver source (remote)
+/tests/rpg            - RPG tests for tests_json (optional)
+/tests/json           - json tests (optional)
+/tests/c              - c tests (optional)
+/tests/php            - php tests (optional)
 ```
 
 ##Trace
