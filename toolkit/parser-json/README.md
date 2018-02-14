@@ -52,8 +52,8 @@ Element "connect" (optional):
 - "pwd" (optional) - IBM i user profile id password.
 
 - "qual" (optional) - Qualifier identifier for 'persistent connection'. This connection will not be closed by toolkit.
-Special "qual":"*memory" performs calls in job (aka, php job memory, etc.). 
-The "*memory" option has significant security and functional risks (see db2sock issue 'faster, not always better').  
+Special ```"qual":"*memory"``` performs calls in job (aka, php job memory, etc.). 
+The memory option has significant security and functional risks (see db2sock issue 'faster, not always better').  
 
 - "iso" (optional) - Isolation setting for connection. Where, 
 "nc" - no commit (CRTLIB no journal), "uc" - read uncommitted (db2 default), "cs" - cursor stability, 
@@ -133,7 +133,7 @@ Element "pgm":
 
 - "lib" (optional) - Library name.
 
-"func":"MyFunc" (optional) - Service program procedure name.
+- "func":"MyFunc" (optional) - Service program procedure name.
 
 - "debugpgm" (optional) - stop before executing program with message in QSYSOPR. Used for ILE debugging. 
 
