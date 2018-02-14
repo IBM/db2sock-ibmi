@@ -119,14 +119,6 @@ Any scripting language may use current db2 (*DRDA) or odbc (*DDM) drivers to cal
 
 Examples (tests/c):
 ```
-test4000_sql400json_procj32 - db2json.db2jsonj
-test5000_sql400json_procjr32 - db2json.db2jsonjr
-test6000_sql400json_procb32 - db2json.db2jsonb
-test7000_sql400json_procbr32 - db2json.db2jsonbr
-```
-
-Examples (tests/c):
-```
 bash-4.3$ ./test5000_sql400json_procjr32 ../json/j0101_srvpgm_hello
 input(5000000):
 {"pgm":[{"name":"HELLOSRV", "lib":"DB2JSON", "func":"HELLO"},
