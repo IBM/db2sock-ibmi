@@ -142,6 +142,32 @@ Any scripting language may use standard REST json calls to toolkit web hosted on
 The REST API json interface was tested with Apache (cgi, fastcgi), and nginx (fastcgi).
 The configurations are many, so please check README subdirectories /fastcgi, /cgi.
 
+Examples (tests/php - basic authentication used):
+```
+<?php
+$url        = getenv("PHP_URL"); // export PHP_URL=http://ut28p63/db2/db2json.pgm  (ILE-CGI - works partial)
+                                 // export PHP_URL=http://ut28p63/db2json.db2  (fastcgi-PASE - works good)
+$user       = getenv("PHP_UID"); // export PHP_UID=MYID
+$password   = getenv("PHP_PWD"); // export PHP_MYPWD=secret
+$clob =
+'{"pgm":[{"name":"HELLO",  "lib":"DB2JSON"},
+        {"s":{"name":"char", "type":"128a", "value":"Hi there"}}
+       ]}';
+$context  = stream_context_create(
+  array('http' =>
+    array(
+      'method'  => 'POST',
+      'header'  => "Content-type: application/x-www-form-urlencoded\r\n".
+                   "Authorization: Basic " . base64_encode("$user:$password"),
+      'content' => $clob
+    )
+  )
+);
+$ret = file_get_contents($url, false, $context);
+var_dump($ret);
+?>
+```
+
 # Technical (add your own 'json parser')
 
 ## interface PaseTool.h (see toolkit/parser-json default)
