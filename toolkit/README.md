@@ -48,7 +48,7 @@ tests/php tests for tests/json:
 
 - test4000_sql400cgi_basic_auth.php - REST Apache cgi/fastcgi, nginx fastcgi hosted db2sock and toolkit (see /cgi and /fastcgi configurations)
 
-## memory (compile) - call direct script language requires c extension compile
+## 1) memory (compile) - call direct script language requires c extension compile
 
 Local call only. 
 
@@ -76,7 +76,7 @@ result:
 success (0)
 ```
 
-## New db2 advanced  API (compile) - call direct new advanced API
+## 2) New db2 advanced  API (compile) - call direct new advanced API
 
 Local call only. 
 
@@ -103,7 +103,7 @@ result:
 success (0)
 ```
 
-## db2 stored procedure (no compile) - call via language db2 driver
+## 3) db2 stored procedure (no compile) - call via language db2 driver
 
 Local or remote call.
 
@@ -134,7 +134,7 @@ success (0)
 ```
 
 
-## REST web server (no compile) - web server REST API (Apache, nginx, etc.)
+## 4) REST web server (no compile) - web server REST API (Apache, nginx, etc.)
 
 Local or remote call.
 
