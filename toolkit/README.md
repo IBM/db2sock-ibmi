@@ -15,6 +15,29 @@ Various json transports remote and local have been tested (included).
 The driver options are listed in performance order, memory fastest
 through REST slowest. 
 
+## sample tests
+
+Test programs /tests/c are c code designed for running toolkit /tests/json. 
+Convince python scripts run1000.py, etc., run all tests/json (python run1000.py). 
+Your toolkit script language provider may use following c programs as 'how to' pattern. 
+These are only simple c test samples, not complete patterns for production implementations. 
+
+Test for tests/json:
+```
+== (tests/c) ==
+test1000_sql400json -- new CLI API advanced SQL400Json
+test2000_sql400json_async -- new CLI API advanced SQL400JsonAsync
+test3000_sql400json_memory -- memory call
+test4000_sql400json_procj - db2 char stored procedure db2json.db2procj parm i/o clob(15MB)  (implicit convert ascii<>ebcdic)
+test5000_sql400json_procjr - db2 char stored procedure db2json.db2procjr parm clob(15MB) with result set fetch char  (implicit convert ascii<>ebcdic)
+test6000_sql400json_procb - db2 binary stored procedure db2json.db2procb parm i/o blob(15MB)  (no convert ebcdic)
+test7000_sql400json_procbr - db2 binary stored procedure db2json.db2procbr parm blob(15MB) with result set fetch char hex (no convert ebcdic)
+== (tests/php) ==
+test1000_sql400json.php - ibm_db2 char stored procedure db2json.db2procj parm i/o clob(15MB)  (implicit convert ascii<>ebcdic)
+test2000_sql400json_set.php - ibm_db2 char stored procedure db2json.db2procjr parm clob(15MB) with result set fetch char  (implicit convert ascii<>ebcdic)
+test3000_sql400json_odbc.php - odbc char stored procedure db2json.db2procjh parm clob(15MB) with result set fetch char w/deadbeef hack eol  (implicit convert ascii<>ebcdic)
+test4000_sql400cgi_basic_auth.php - REST Apache cgi/fastcgi, nginx fastcgi hosted db2sock and toolkit (see /cgi and /fastcgi configurations)
+```
 
 ## memory (compile) - call direct script language requires c extension compile
 
@@ -25,8 +48,8 @@ Simply add {"connect":[{"qual":"*memory"}, ... ]} to your normal json call.
 However, your language provider need create a c extension
 to call SQL400Json(Async).
 
-Warning: Many security and functional exposes using in memory call option for web languages. 
-See db2sock issues 'fast, may not be best' (you have been warned).
+Warning: Many security and functional exposes using in memory ILE call option for web languages. 
+See db2sock issues 'fast, may not be best'.
 
 Example (tests/c):
 ```
@@ -87,10 +110,10 @@ Any scripting language may use current db2 (*DRDA) or odbc (*DDM) drivers to cal
 
 Examples (tests/c):
 ```
-test4000_sql400json_procj32
-test5000_sql400json_procjr32
-test6000_sql400json_procb32
-test7000_sql400json_procbr32
+test4000_sql400json_procj32 - db2json.db2jsonj
+test5000_sql400json_procjr32 - db2json.db2jsonjr
+test6000_sql400json_procb32 - db2json.db2jsonb
+test7000_sql400json_procbr32 - db2json.db2jsonbr
 ```
 
 Examples (tests/c):
