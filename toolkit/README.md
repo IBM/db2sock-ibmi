@@ -22,7 +22,7 @@ Convince python scripts run1000.py, etc., run all tests/json (python run1000.py)
 Your toolkit script language provider may use following c programs as 'how to' pattern. 
 These are only simple c test samples, not complete patterns for production implementations. 
 
-c tests for tests/json:
+tests/c for tests/json:
 
 - test1000_sql400json -- new CLI API advanced SQL400Json
 
@@ -38,7 +38,7 @@ c tests for tests/json:
 
 - test7000_sql400json_procbr - db2 binary stored procedure db2json.db2procbr parm blob(15MB) with result set fetch char hex (no convert ebcdic)
 
-php tests for tests/json:
+tests/php tests for tests/json:
 
 - test1000_sql400json.php - ibm_db2 char stored procedure db2json.db2procj parm i/o clob(15MB)  (implicit convert ascii<>ebcdic)
 
@@ -109,13 +109,13 @@ Local or remote call.
 
 Any scripting language may use current db2 (*DRDA) or odbc (*DDM) drivers to call included toolkit stored procedures.
 
-- db2json.db2jsonj - single input/output parameter clob(15MB). Whereby, db2 i/ohandles all json ccsid conversion.
+- db2json.db2jsonj(CLOB(15M)) - single input/output parameter clob. Whereby, db2 i/ohandles all json ccsid conversion.
 
-- db2json.db2jsonjr - single input parameter clob(15MB). Returns result set 3000 characters per record. Whereby, db2 fetch handles all json ccsid conversion.
+- db2json.db2jsonjr(CLOB(15M)) - single input parameter clob. Returns result set 3000 characters per record. Whereby, db2 fetch handles all json ccsid conversion.
 
-- db2json.db2jsonb - single input/output parameter blob(15MB). Whereby, client code must handle ascii/ebcdic csid conversion.
+- db2json.db2jsonb(BLOB(15M)) - single input/output parameter blob. Whereby, client code must handle ascii/ebcdic csid conversion.
 
-- db2json.db2jsonbr - single input parameter blob(15MB). Returns result set 3000 bytes per record. Whereby, db2 fetch returns hex char representation of ebcdic. client code must handle ascii/ebcdic csid conversion.
+- db2json.db2jsonbr(BLOB(15M)) - single input parameter blob. Returns result set 3000 bytes per record. Whereby, db2 fetch returns hex char representation of ebcdic. client code must handle ascii/ebcdic csid conversion.
 
 Examples (tests/c):
 ```
