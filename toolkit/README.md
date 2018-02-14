@@ -137,7 +137,7 @@ success (0)
 
 Local or remote call.
 
-Any scripting language may use standard REST json calls to toolkit hoisted on IBM i.
+Any scripting language may use standard REST json calls to toolkit web hosted on IBM i.
 The REST API json interface was tested with Apache (cgi, fastcgi), and nginx (fastcgi).
 The configurations are many, so please check README subdirectories /fastcgi, /cgi.
 
