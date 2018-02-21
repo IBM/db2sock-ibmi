@@ -106,8 +106,7 @@ reset original libdb400.a (when done new db2sock version ... or never ...)
 ===
 > cd /QOpenSys/usr/lib
 > ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
-
-
+```
 
 ## Obsolete 1.1.4-sg1(-)
 
