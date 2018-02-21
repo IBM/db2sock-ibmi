@@ -30,10 +30,6 @@ pthread_mutexattr_t threadMutexAttr;
 PaseConvResource IBMiCCSID[PASECLIMAXCCSID];
 
 /* 
- * dlopen handle of PASE libdb400.a (real driver) 
- */
-void *dlhandle = NULL;
-/* 
  * dlopen handle of PASE json parser
  */
 void *dlhandle_json = NULL;
@@ -169,39 +165,6 @@ void custom_iconv_close(int myccsid, int utfccsid) {
   init_unlock();
 }
 
-/* 
- * dlopen handle of PASE libdb400.a
- * Note: dlhandle is checked twice,
- * second under global lock,
- * to avoid race conditions
- * multiple threads starting.
- */
-void * init_cli_dlsym() {
-  char *dlservice = NULL;
-  if (dlhandle  == NULL) {
-    init_lock();
-#ifdef __64BIT__
-    dlservice = getenv(PASECLIDRIVER64_ENV_VAR);
-    if (dlservice  == NULL) {
-      dlservice = PASECLIDRIVER64;
-    }
-#else
-    dlservice = getenv(PASECLIDRIVER32_ENV_VAR);
-    if (dlservice  == NULL) {
-      dlservice = PASECLIDRIVER32;
-    }
-#endif
-    if (dlhandle  == NULL) {
-      dlhandle = dlopen(dlservice, RTLD_NOW|RTLD_MEMBER);
-      if (dlhandle == NULL)  {
-        printf("Service %s Not Found:  %s\n", dlservice, dlerror());
-        exit(-1);
-      }
-    }
-    init_unlock();
-  }
-  return dlhandle;
-}
 /* 
  * dlopen handle of PASE json parser
  * Note: dlhandle_json is checked twice,

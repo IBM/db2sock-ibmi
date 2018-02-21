@@ -18,12 +18,6 @@
 #define DB2JSONPARSER64_ENV_VAR "DB2JSONPARSER64"
 #define DB2JSONPARSER64 "libjson400.a(shr_64.o)"
 
-/* original PASE driver */
-#define PASECLIDRIVER32_ENV_VAR "PASECLIDRIVER32"
-#define PASECLIDRIVER32 "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr.o)"
-#define PASECLIDRIVER64_ENV_VAR "PASECLIDRIVER64"
-#define PASECLIDRIVER64 "/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a(shr_64.o)"
-
 /* IBM i DB2 CLI interface (ILE) */
 #define DB2CLISRVPGM "QSYS/QSQCLI"
 
@@ -79,7 +73,6 @@ int init_cli_trace();
 char ** init_cli_dbx();
 
 /* load */
-void * init_cli_dlsym();
 void * init_json_dlsym();
 int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
