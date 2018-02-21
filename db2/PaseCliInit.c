@@ -354,10 +354,11 @@ char ** init_cli_dbx() {
  */
 void init_table_ctor(int handle, int hdbc) {
   // init_lock(); - lock in Alloc routine
-  if (!IBMiTable[handle].hstmt) {
+  if (!IBMiTable[handle].hstmt && !IBMiTable[handle].thread_init) {
     pthread_mutexattr_init(&IBMiTable[handle].threadMutexAttr);
     pthread_mutexattr_settype(&IBMiTable[handle].threadMutexAttr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&IBMiTable[handle].threadMutexLock, &IBMiTable[handle].threadMutexAttr);
+    IBMiTable[handle].thread_init = 1;
     IBMiTable[handle].in_progress = 0;
   }
   IBMiTable[handle].hstmt = handle;

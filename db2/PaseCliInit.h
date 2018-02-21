@@ -35,6 +35,7 @@ typedef struct PaseCliResource {
   pthread_t tid;                   /* thread id (hdc or hstmt) */ 
   pthread_mutex_t threadMutexLock; /* lock hdbc or hstmt    */
   pthread_mutexattr_t threadMutexAttr; /* recursive lock    */
+  int thread_init;                 /* mutext init complete */
   int in_progress;                 /* operation in progress */
   int use_flag;                    /* flag operation        */
   int use_size;                    /* flag operation size   */
