@@ -21,10 +21,7 @@ world of scripting language DB2 driver demands.
 
 Run time, libdb400.a should fit seamless under any existing scripting language db2 extension. 
 That is to say, new libdb400.a exports everything old PASE libdb400.a, same synchronous CLI APIs,
-but providing new advanced functions (above). At this time, new libdb400.a driver is designed to 
-augment current PASE libdb400.a, therefore both must be on the machine. However, eventually new 
-libdb400.a driver may replace PASE version entirely.  You do NOT have to recompile your language extension, 
-simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb400.a (see Run below)
+but providing new advanced functions (above).
 
 ##design goals (the list)
 - (**available**) No impact - libdb400.a should fit seamless under any existing scripting language db2 extension.
@@ -80,16 +77,9 @@ export TRACE=stop (file + stop coredump)
 
 Install 'no LIBPATH' configuration (my machine and chroots). 
 This enables every PASE language on the machine to start using new driver.
-```
-===
-chroot only (ignore in root)
-===
-> mkdir -p /QOpenSys/QIBM/ProdData/OS400/PASE/lib
-> cp /QOpenSys/usr/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib/.
-Note: 
-- manditory save PASE libdb400.a (first time only)
-- new driver uses PASE libdb400.a (above location)
+Any version 1.1.4-sg1(+) no longer require old shipped PASE libdb400.a.
 
+```
 ===
 install yips download pre-compile
 ===
@@ -111,12 +101,33 @@ lrwxrwxrwx /QOpenSys/usr/lib/libdb400.a -> ../../QIBM/ProdData/OS400/PASE/lib/li
 == ILE modules ==
 qcmd (proc for toolkit + RPG tests)
 RSTLIB SAVLIB(DB2JSON) DEV(*SAVF) SAVF(QGPL/DB2JSON)
-
 ===
 reset original libdb400.a (when done new db2sock version ... or never ...)
 ===
 > cd /QOpenSys/usr/lib
 > ln -sf ../../QIBM/ProdData/OS400/PASE/lib/libdb400.a libdb400.a
+
+
+
+## Obsolete 1.1.4-sg1(-)
+
+The following instructions are for older db2sock drivers only prior 1.1.4-sg1.
+
+Obsolete - At this time, new libdb400.a driver is designed to 
+augment current PASE libdb400.a, therefore both must be on the machine. However, eventually new 
+libdb400.a driver may replace PASE version entirely.  You do NOT have to recompile your language extension, 
+simply set PASE LIBPATH for new libdb400.a. Possible configuration new/old libdb400.a (see Run below)
+
+
+```
+===
+chroot only (ignore in root)
+===
+> mkdir -p /QOpenSys/QIBM/ProdData/OS400/PASE/lib
+> cp /QOpenSys/usr/lib/libdb400.a /QOpenSys/QIBM/ProdData/OS400/PASE/lib/.
+Note: 
+- manditory save PASE libdb400.a (first time only)
+- new driver uses PASE libdb400.a (above location)
 ```
 
 #Contributors
@@ -131,15 +142,14 @@ MIT
 #Author Notes
 
 To be clear, **new libdb400.a synchronous driver CLI APIs are the same (today APIs).**
-That is, new libdb400.a under most PASE languages will run exactly same code path. In fact, at present new libdb400.a 
-will run 'original APIs' by calling old driver (/QOpenSys/QIBM/ProdData/OS400/PASE/lib/libdb400.a).
+That is, new libdb400.a under most PASE languages will run exactly same code path.
 You really should be able to slip this driver under your current PASE favorite script language and keep running (i am).
 
 Specifically 'new' changes to old driver, **original UTF-8 (1208) and new UTF-16 (1200 - wide) APIs take 
 alternate short path directly call ILE API database (no PASE iconv).** 
 Current technical theory is all UTF-8/16 DB2 CLI APIs should work without old PASE libdb400.a iconv 'assistance'.
 In unlikely event UTF-8/16 fast path proves untrue (not work), 
-some new CLI APIs may return back to PASE iconv like current libdb400.a (old driver). 
+some new CLI APIs may return back to PASE iconv similar current libdb400.a (old driver). 
 
 All asynchronous APIs with suffix **'Async/Thread'** are new. 
 Also, all aggregate APIs with prefix **'SQL400'** are new (mutiple call task APIs).  
