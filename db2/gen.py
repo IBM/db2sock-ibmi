@@ -78,14 +78,12 @@ def PaseCliAsync_c_main_SQLAllocEnv(ile_or_custom_call, call_name, normal_db400_
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "    init_table_ctor(*phenv, *phenv);" + "\n"
-  c_main += "    if (myccsid == 1208) {" + "\n"
-  c_main += "      custom_SQLSetEnvUTF8(*phenv);" + "\n"
-  c_main += "    }" + "\n"
+  c_main += "    custom_SQLSetEnvCCSID(*phenv, myccsid);" + "\n"
   c_main += "  }" + "\n"
   c_main += "  init_unlock();" + "\n"
   # dump trace
@@ -105,7 +103,7 @@ def PaseCliAsync_c_main_SQLAllocConnect(ile_or_custom_call, call_name, normal_db
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
@@ -129,7 +127,7 @@ def PaseCliAsync_c_main_SQLAllocStmt(ile_or_custom_call, call_name, normal_db400
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  if (sqlrc == SQL_SUCCESS) {" + "\n"
@@ -153,16 +151,14 @@ def PaseCliAsync_c_main_SQLAllocHandle(ile_or_custom_call, call_name, normal_db4
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  switch (htype) {" + "\n"
   c_main += "  case SQL_HANDLE_ENV:" + "\n"
   c_main += "    if (sqlrc == SQL_SUCCESS) {" + "\n"
   c_main += "      init_table_ctor(*ohnd, *ohnd);" + "\n"
-  c_main += "      if (myccsid == 1208) {" + "\n"
-  c_main += "        custom_SQLSetEnvUTF8(*ohnd);" + "\n"
-  c_main += "      }" + "\n"
+  c_main += "      custom_SQLSetEnvCCSID(*ohnd, myccsid);" + "\n"
   c_main += "    }" + "\n"
   c_main += "    break;" + "\n"
   c_main += "  case SQL_HANDLE_DBC:" + "\n"
@@ -195,7 +191,7 @@ def PaseCliAsync_c_main_SQLFreeEnv(ile_or_custom_call, call_name, normal_db400_a
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  init_unlock();" + "\n"
@@ -221,7 +217,7 @@ def PaseCliAsync_c_main_SQLFreeConnect(ile_or_custom_call, call_name, normal_db4
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  init_table_dtor(hdbc);" + "\n"
@@ -243,7 +239,7 @@ def PaseCliAsync_c_main_SQLFreeStmt(ile_or_custom_call, call_name, normal_db400_
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  init_table_dtor(hstmt);" + "\n"
@@ -276,7 +272,7 @@ def PaseCliAsync_c_main_SQLFreeHandle(ile_or_custom_call, call_name, normal_db40
   c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += '  default:' + "\n"
-  c_main += "    sqlrc = libdb400_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += "    sqlrc = " + ile_or_custom_call + call_name + '(' + normal_db400_args + ' );' + "\n"
   c_main += "    break;" + "\n"
   c_main += "  }" + "\n"
   c_main += "  switch (htype) {" + "\n"
@@ -303,6 +299,661 @@ def SQLDisconnect_check_persistent(hdbc_code, return_code, set_code):
   c_main += "    " + return_code + "\n"
   c_main += "  }" + "\n"
   return c_main
+
+# ===============================================
+# non-utf (old libdb400.a)
+# ===============================================
+# SQL400IgnoreNullAnyToAny(hdbc, inparm, inlen, outparm, outlen, inccsid, outccsid)
+# SQL400IgnoreNullAnyFromAny(hdbc, inparm, inlen, outparm, outlen, inccsid, outccsid)
+def non_utf_copy_in():
+  c_main = ""
+  c_main += 'int non_utf_copy_in_hdbc(SQLHDBC	hdbc, SQLCHAR **tmp, SQLCHAR **src, SQLINTEGER srclen, SQLINTEGER maxlen) {' + "\n"
+  c_main += '  SQLRETURN sqlrc1 = SQL_SUCCESS;' + "\n"
+  c_main += '  int inccsid = init_CCSID400(0);' + "\n"
+  c_main += '  int outccsid = init_job_CCSID400();' + "\n"
+  c_main += '  SQLCHAR * inparm = *src;' + "\n"
+  c_main += '  SQLINTEGER inlen = srclen;' + "\n"
+  c_main += '  SQLCHAR * outparm = (SQLCHAR *) NULL;' + "\n"
+  c_main += '  SQLINTEGER outlen = 0;' + "\n"
+  c_main += '  if (inparm) {' + "\n"
+  c_main += '    if (srclen == SQL_NTS) {' + "\n"
+  c_main += '      inlen = strlen(inparm);' + "\n"
+  c_main += '    }' + "\n"
+  c_main += '    outlen = maxlen;' + "\n"
+  c_main += '    outparm = (SQLCHAR *) malloc(outlen);' + "\n"
+  c_main += '    memset(outparm,0,outlen);' + "\n"    
+  c_main += '    sqlrc1 = SQL400IgnoreNullAnyToAny(hdbc, inparm, inlen,  outparm, outlen, inccsid, outccsid);' + "\n"
+  c_main += '    outlen = strlen(outparm);' + "\n"    
+  c_main += '  }' + "\n"
+  c_main += '  *tmp = *src;' + "\n"    
+  c_main += '  if (*src) {' + "\n"
+  c_main += '    *src = outparm;' + "\n"    
+  c_main += '  }' + "\n"
+  c_main += '  return outlen;' + "\n"
+  c_main += '}' + "\n"
+  c_main += 'int non_utf_copy_in_hstmt(SQLHSTMT hstmt, SQLCHAR **tmp, SQLCHAR **src, SQLINTEGER srclen, SQLINTEGER maxlen) {' + "\n"
+  c_main += '  SQLHDBC hdbc = init_table_stmt_2_conn(hstmt);' + "\n"
+  c_main += '  return non_utf_copy_in_hdbc(hdbc, tmp, src, srclen, maxlen);' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_copy_in_free():
+  c_main = ""
+  c_main += 'void non_utf_copy_in_free(SQLCHAR **tmp, SQLCHAR **src) {' + "\n"
+  c_main += '  char * trash = *src;' + "\n"
+  c_main += '  *src = *tmp;' + "\n"
+  c_main += '  if (trash) {' + "\n"
+  c_main += '    free(trash);' + "\n"
+  c_main += '    *tmp = NULL;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_copy_out():
+  c_main = ""
+  c_main += 'int non_utf_copy_out_hdbc(SQLHDBC	hdbc, SQLRETURN sqlrc, SQLCHAR *src, SQLINTEGER srclen) {' + "\n"
+  c_main += '  SQLRETURN sqlrc1 = SQL_SUCCESS;' + "\n"
+  c_main += '  int inccsid = init_CCSID400(0);' + "\n"
+  c_main += '  int outccsid = init_job_CCSID400();' + "\n"
+  c_main += '  SQLCHAR * inparm = src;' + "\n"
+  c_main += '  SQLINTEGER inlen = srclen;' + "\n"
+  c_main += '  SQLCHAR * outparm = (SQLCHAR *) NULL;' + "\n"
+  c_main += '  SQLINTEGER outlen = 0;' + "\n"
+  c_main += '  if (inparm && (inlen != SQL_NULL_DATA) && (sqlrc == SQL_SUCCESS || sqlrc == SQL_SUCCESS_WITH_INFO)) {' + "\n"
+  c_main += '    outlen = inlen + 1;' + "\n"
+  c_main += '    outparm = (SQLCHAR *) malloc(outlen);' + "\n"
+  c_main += '    memset(outparm,0,outlen);' + "\n"    
+  c_main += '    sqlrc1 = SQL400IgnoreNullAnyFromAny(hdbc, inparm, inlen,  outparm, outlen, inccsid, outccsid);' + "\n"
+  c_main += '    outlen = strlen(outparm);' + "\n"    
+  c_main += '    memcpy(inparm,outparm,inlen);' + "\n"    
+  c_main += '    free(outparm);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return outlen;' + "\n"
+  c_main += '}' + "\n"
+  c_main += 'int non_utf_copy_out_hstmt(SQLHSTMT hstmt, SQLRETURN sqlrc, SQLCHAR *src, SQLINTEGER srclen) {' + "\n"
+  c_main += '  SQLHDBC hdbc = init_table_stmt_2_conn(hstmt);' + "\n"
+  c_main += '  return non_utf_copy_out_hdbc(hdbc, sqlrc, src, srclen);' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLColAttributes(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fDescType == SQL_DESC_NAME) {' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hstmt(hstmt, sqlrc, (SQLCHAR *)rgbDesc, (SQLINTEGER)cbDescMax);' + "\n"
+  c_main += '    if (pcbDesc) *pcbDesc = outsz;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLColumnPrivileges(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp4 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)cbTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)cbTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)cbTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbColumnName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName, (SQLINTEGER)cbColumnName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLColumns(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp4 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)cbTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)cbTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)cbTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbColumnName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName, (SQLINTEGER)cbColumnName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLConnect(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbDSN = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&szDSN, (SQLINTEGER)cbDSN, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbUID = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp2, (SQLCHAR **)&szUID, (SQLINTEGER)cbUID, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbAuthStr = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp3, (SQLCHAR **)&szAuthStr, (SQLINTEGER)cbAuthStr, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szDSN);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szUID);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szAuthStr);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLDataSources(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER tmpsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  tmpsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szDSN, (SQLINTEGER)cbDSNMax);' + "\n"
+  c_main += '  tmpsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szDescription, (SQLINTEGER)cbDescriptionMax);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLDescribeCol(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szColName, (SQLINTEGER)cbColNameMax);' + "\n"
+  c_main += '  if (pcbColName) *pcbColName = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLDriverConnect(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  cbConnStrin = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&szConnStrIn, (SQLINTEGER)cbConnStrin, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szConnStrIn);' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szConnStrOut, (SQLINTEGER)cbConnStrOutMax);' + "\n"
+  c_main += '  if (pcbConnStrOut) *pcbConnStrOut = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLError(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += '  SQLINTEGER maxsz = SQL_SQLSTATE_SIZE + 1;' + "\n"
+  c_main += '  SQLINTEGER tmpsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  tmpsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szSqlState, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szErrorMsg, (SQLINTEGER)cbErrorMsgMax);' + "\n"
+  c_main += '  if (pcbErrorMsg) *pcbErrorMsg = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLExecDirect(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  cbSqlStr = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStr, (SQLINTEGER)cbSqlStr, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStr);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+ 
+def non_utf_SQLForeignKeys(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp4 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp5 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp6 = NULL;' + "\n"
+  c_main += '  cbPkTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szPkTableQualifier, (SQLINTEGER)cbPkTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbPkTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szPkTableOwner, (SQLINTEGER)cbPkTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbPkTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szPkTableName, (SQLINTEGER)cbPkTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbFkTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp4, (SQLCHAR **)&szFkTableQualifier, (SQLINTEGER)cbFkTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbFkTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp5, (SQLCHAR **)&szFkTableOwner, (SQLINTEGER)cbFkTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbFkTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp6, (SQLCHAR **)&szFkTableName, (SQLINTEGER)cbFkTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szPkTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szPkTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szPkTableName);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp4, (SQLCHAR **)&szFkTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp5, (SQLCHAR **)&szFkTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp6, (SQLCHAR **)&szFkTableName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetConnectAttr(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (attr == SQL_ATTR_DBC_DEFAULT_LIB || attr == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)oval, (SQLINTEGER)ilen);' + "\n"
+  c_main += '    if (olen) *olen = outsz;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetConnectOption(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = DFTCOLSIZE;' + "\n"
+  c_main += '  SQLINTEGER tmpsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (iopt == SQL_ATTR_DBC_DEFAULT_LIB) {' + "\n"
+  c_main += '    tmpsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)oval, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetCursorName(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)szCursor, (SQLINTEGER)cbCursorMax);' + "\n"
+  c_main += '  if (pcbCursor) *pcbCursor = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetDescField(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fieldID == SQL_DESC_NAME) {' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)fValue, (SQLINTEGER)fLength);' + "\n"
+  c_main += '  if (stLength) *stLength = outsz;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetDescRec(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)fname, (SQLINTEGER)bufLen);' + "\n"
+  c_main += '  if (sLength) *sLength = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetDiagField(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (diagID == SQL_DIAG_SQLSTATE || diagID == SQL_DIAG_MESSAGE_TEXT || diagID == SQL_DIAG_SERVER_NAME) {' + "\n"
+  c_main += '    if (hType == SQL_HANDLE_DBC) {' + "\n"
+  c_main += '      outsz = non_utf_copy_out_hdbc(hndl, sqlrc, (SQLCHAR *)dValue, (SQLINTEGER)bLength);' + "\n"
+  c_main += '    } else {' + "\n"
+  c_main += '      outsz = non_utf_copy_out_hstmt(hndl, sqlrc, (SQLCHAR *)dValue, (SQLINTEGER)bLength);' + "\n"
+  c_main += '    }' + "\n"
+  c_main += '    if (sLength) *sLength = outsz;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetDiagRec(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += '  SQLINTEGER maxsz = SQL_SQLSTATE_SIZE + 1;' + "\n"
+  c_main += '  SQLINTEGER tmpsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (hType == SQL_HANDLE_DBC) {' + "\n"
+  c_main += '    tmpsz = non_utf_copy_out_hdbc(hndl, sqlrc, (SQLCHAR *)SQLstate, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hdbc(hndl, sqlrc, (SQLCHAR *)msgText, (SQLINTEGER)bLength);' + "\n"
+  c_main += '  } else {' + "\n"
+  c_main += '    tmpsz = non_utf_copy_out_hstmt(hndl, sqlrc, (SQLCHAR *)SQLstate, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hstmt(hndl, sqlrc, (SQLCHAR *)msgText, (SQLINTEGER)bLength);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  if (SLength) *SLength = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetEnvAttr(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fAttribute == SQL_ATTR_DEFAULT_LIB || fAttribute == SQL_ATTR_ESCAPE_CHAR) {' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hdbc(0, sqlrc, (SQLCHAR *)pParam, (SQLINTEGER)cbParamMax);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  if (pcbParam) *pcbParam = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetInfo(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fInfoType == SQL_DBMS_NAME' + "\n"
+  c_main += '   || fInfoType == SQL_DBMS_VER' + "\n"
+  c_main += '   || fInfoType == SQL_PROCEDURES' + "\n"
+  c_main += '   || fInfoType == SQL_DATA_SOURCE_NAME' + "\n"
+  c_main += '   || fInfoType == SQL_COLUMN_ALIAS' + "\n"
+  c_main += '   || fInfoType == SQL_DATA_SOURCE_READ_ONLY' + "\n"
+  c_main += '   || fInfoType == SQL_MULTIPLE_ACTIVE_TXN' + "\n"
+  c_main += '   || fInfoType == SQL_DRIVER_NAME' + "\n"
+  c_main += '   || fInfoType == SQL_IDENTIFIER_QUOTE_CHAR' + "\n"
+  c_main += '   || fInfoType == SQL_PROCEDURE_TERM' + "\n"
+  c_main += '   || fInfoType == SQL_QUALIFIER_TERM' + "\n"
+  c_main += '   || fInfoType == SQL_QUALIFIER_NAME_SEPARATOR' + "\n"
+  c_main += '   || fInfoType == SQL_OWNER_TERM' + "\n"
+  c_main += '   || fInfoType == SQL_DRIVER_ODBC_VER' + "\n"
+  c_main += '   || fInfoType == SQL_ORDER_BY_COLUMNS_IN_SELECT' + "\n"
+  c_main += '   || fInfoType == SQL_SEARCH_PATTERN_ESCAPE' + "\n"
+  c_main += '   || fInfoType == SQL_OUTER_JOINS' + "\n"
+  c_main += '   || fInfoType == SQL_LIKE_ESCAPE_CLAUSE' + "\n"
+  c_main += '   || fInfoType == SQL_CATALOG_NAME' + "\n"
+  c_main += '   || fInfoType == SQL_DESCRIBE_PARAMETER' + "\n"
+  c_main += '  ) {' + "\n"
+  c_main += '    outsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)rgbInfoValue, (SQLINTEGER)cbInfoValueMax);' + "\n"
+  c_main += '    if (pcbInfoValue) *pcbInfoValue = outsz;' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLGetPosition(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  srchLiteralLen = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&srchLiteral, (SQLINTEGER)srchLiteralLen, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&srchLiteral);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLNativeSql(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER outsz = 0;' + "\n"
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  cbSqlStrIn = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStrIn, (SQLINTEGER)cbSqlStrIn, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStrIn);' + "\n"
+  c_main += '  outsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)szSqlStr, (SQLINTEGER)cbSqlStrMax);' + "\n"
+  c_main += '  if (pcbSqlStr) *pcbSqlStr = outsz;' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLParamData(call_name, normal_db400_args):
+  c_main = ""
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLPrepare(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  cbSqlStr = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStr, (SQLINTEGER)cbSqlStr, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szSqlStr);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLPrimaryKeys(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)cbTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)cbTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)cbTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLProcedureColumns(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp4 = NULL;' + "\n"
+  c_main += '  cbProcQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szProcQualifier, (SQLINTEGER)cbProcQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbProcOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szProcOwner, (SQLINTEGER)cbProcOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbProcName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szProcName, (SQLINTEGER)cbProcName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbColumnName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName, (SQLINTEGER)cbColumnName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szProcQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szProcOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szProcName);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp4, (SQLCHAR **)&szColumnName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLProcedures(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbProcQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szProcQualifier, (SQLINTEGER)cbProcQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbProcOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szProcOwner, (SQLINTEGER)cbProcOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbProcName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szProcName, (SQLINTEGER)cbProcName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szProcQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szProcOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szProcName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLSetConnectAttr(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  if (attrib == SQL_ATTR_DBC_DEFAULT_LIB || attrib == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    inlen = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&vParam, (SQLINTEGER)inlen, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (attrib == SQL_ATTR_DBC_DEFAULT_LIB || attrib == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&vParam);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLSetConnectOption(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLINTEGER tmpsz = 0;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  if (fOption == SQL_ATTR_DBC_DEFAULT_LIB || fOption == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    tmpsz = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&vParam, (SQLINTEGER)SQL_NTS, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fOption == SQL_ATTR_DBC_DEFAULT_LIB || fOption == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&vParam);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLSetCursorName(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  cbCursor = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szCursor, (SQLINTEGER)cbCursor, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szCursor);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLSetEnvAttr(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  if (fAttribute == SQL_ATTR_DBC_DEFAULT_LIB || fAttribute == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    cbParam = non_utf_copy_in_hdbc(0, (SQLCHAR **)&tmp1, (SQLCHAR **)&pParam, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  if (fAttribute == SQL_ATTR_DBC_DEFAULT_LIB || fAttribute == SQL_ATTR_SAVEPOINT_NAME) {' + "\n"
+  c_main += '    non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&pParam);' + "\n"
+  c_main += '  }' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLSpecialColumns(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbTableQual = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQual, (SQLINTEGER)cbTableQual, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)cbTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)cbTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQual);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLStatistics(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)cbTableQualifier, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)cbTableOwner, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)cbTableName, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLTablePrivileges(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+def non_utf_SQLTables(call_name, normal_db400_args):
+  c_main = ""
+  c_main += '  SQLINTEGER maxsz = SQL_MAXSMALLVAL;' + "\n"
+  c_main += '  SQLCHAR * tmp1 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp2 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp3 = NULL;' + "\n"
+  c_main += '  SQLCHAR * tmp4 = NULL;' + "\n"
+  c_main += '  cbTableQualifier = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableOwner = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableName = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += '  cbTableType = non_utf_copy_in_hstmt(hstmt, (SQLCHAR **)&tmp4, (SQLCHAR **)&szTableType, (SQLINTEGER)maxsz, (SQLINTEGER)maxsz);' + "\n"
+  c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&szTableQualifier);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp2, (SQLCHAR **)&szTableOwner);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp3, (SQLCHAR **)&szTableName);' + "\n"
+  c_main += '  non_utf_copy_in_free((SQLCHAR **)&tmp4, (SQLCHAR **)&szTableType);' + "\n"
+  c_main += '  return sqlrc;' + "\n"
+  c_main += '}' + "\n"
+  return c_main
+
+# ===============================================
+# special ILE CLI APIs
+# ===============================================
+# SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
+def ILE_SQLParamData_copy_var():
+  c_main = ""
+  c_main += '  /* returnPtr - API returns ILE SP pointer buffer (alias of PASE ptr) */ ' + "\n"
+  c_main += '  char returnBuffer[ sizeof(ILEpointer ) + 16 ];' + "\n"
+  c_main += '  ILEpointer	*returnPtr = (ILEpointer *)ROUND_QUAD(returnBuffer);' + "\n"
+  return c_main
+def ILE_SQLParamData_copy_in():
+  c_main = ""
+  c_main += '  /* returnPtr - ILE SP pointer buffer return area */ ' + "\n"
+  c_main += '  if (Value) {' + "\n"
+  c_main += '    arglist->Value.s.addr = (ulong) returnPtr;' + "\n"
+  c_main += '  }' + "\n"
+  return c_main
+def ILE_SQLParamData_copy_out():
+  c_main = ""
+  c_main += '  /* returnPtr - ILE SP to PASE pointer */ ' + "\n"
+  c_main += '  if (Value) {' + "\n"
+  c_main += '    if (arglist->base.result.s_int32.r_int32 == SQL_NEED_DATA) {' + "\n"
+  c_main += '      *Value = _CVTSPP(returnPtr);' + "\n"
+  c_main += '    }' + "\n"
+  c_main += '  }' + "\n"
+  return c_main
+# SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT  fieldID, 
+# SQLPOINTER  fValue, SQLINTEGER  fLength, SQLINTEGER * stLength )
+def ILE_SQLGetDescField_copy_var():
+  c_main = ""
+  c_main += '  /* returnPtr - API returns ILE SP pointer buffer (alias of PASE ptr)' + "\n"
+  c_main += '   * Return ILE SP likely outside PASE mapable addr space.' + "\n"
+  c_main += '   * However, _CVTSPP is safe. The result is zero (null)' + "\n"
+  c_main += '   * if the input is a 16-byte null pointer or a tagged space pointer ' + "\n"
+  c_main += '   * that does not contain the teraspace address' + "\n"
+  c_main += '   * equivalent of some valid IBM PASE for i memory address.' + "\n"
+  c_main += '   * (I suspect options never used in years of PASE.' + "\n"
+  c_main += '   * Rochester CLI team was notified).' + "\n"
+  c_main += '   */' + "\n"
+  c_main += '  char returnBuffer[ sizeof(ILEpointer ) + 16 ];' + "\n"
+  c_main += '  ILEpointer	*returnPtr = (ILEpointer *)ROUND_QUAD(returnBuffer);' + "\n"
+  return c_main
+def ILE_SQLGetDescField_copy_in():
+  c_main = ""
+  c_main += '  /* returnPtr - ILE SP pointer buffer return area */ ' + "\n"
+  c_main += '  if (fValue) {' + "\n"
+  c_main += '    if (fieldID == SQL_DESC_DATA_PTR' + "\n"
+  c_main += '     || fieldID == SQL_DESC_LENGTH_PTR' + "\n"
+  c_main += '     || fieldID == SQL_DESC_INDICATOR_PTR)' + "\n"
+  c_main += '    {' + "\n"
+  c_main += '      arglist->fValue.s.addr = (ulong) returnPtr;' + "\n"
+  c_main += '    }' + "\n"
+  c_main += '  }' + "\n"
+  return c_main
+def ILE_SQLGetDescField_copy_out():
+  c_main = ""
+  c_main += '  /* returnPtr - ILE SP to PASE pointer */ ' + "\n"
+  c_main += '  if (fValue) {' + "\n"
+  c_main += '    if (fieldID == SQL_DESC_DATA_PTR' + "\n"
+  c_main += '     || fieldID == SQL_DESC_LENGTH_PTR' + "\n"
+  c_main += '     || fieldID == SQL_DESC_INDICATOR_PTR)' + "\n"
+  c_main += '    {' + "\n"
+  c_main += '      *((void **)fValue) = _CVTSPP(returnPtr);' + "\n"
+  c_main += '    }' + "\n"
+  c_main += '  }' + "\n"
+  return c_main
+
 
 # ===============================================
 # pre-process CLI gen_cli_template.c
@@ -605,38 +1256,94 @@ for line in f:
     PaseCliAny_h_proto += " * " + call_retv + ' ' + call_name + '(' + normal_call_args + ' );' + "\n"
 
     # ===============================================
-    # libdb400 call
+    # libdb400 call (here adc tony)
     # ===============================================
-    # declare dlsym call each SQL function
-    # SQLRETURN (*libdb400_SQLAllocEnv)(SQLHENV*);
-    PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
-    PaseCliLibDB400_c_symbol += 'SQLINTEGER libdb400_' + call_name + '_flag' + ';' + "\n"
-    PaseCliLibDB400_c_symbol += "SQLRETURN (*" + "libdb400_" + call_name + '_symbol)(' + normal_call_types + ' );' + "\n"
-    # main
-    if c400_not_wide:
-      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-      PaseCliLibDB400_c_main += '  void *dlhandle = NULL;' + "\n"
-      PaseCliLibDB400_c_main += '  if (!libdb400_'+ call_name + '_flag' + ') {' +  "\n"
-      PaseCliLibDB400_c_main += '    dlhandle = init_cli_dlsym();' + "\n"
-      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_symbol = dlsym(dlhandle, "'+ call_name +'");' + "\n"
-      PaseCliLibDB400_c_main += "    libdb400_" + call_name + '_flag = 1;' +  "\n"
-      PaseCliLibDB400_c_main += '  }' + "\n"
-      PaseCliLibDB400_c_main += "  sqlrc = libdb400_" + call_name + '_symbol(' + normal_db400_args + ' );' + "\n"
-      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-      PaseCliLibDB400_c_main += '}' + "\n"
-    else:
-      PaseCliLibDB400_c_main += '/* PASE libdb400.a does not support wide interfaces, call ILE directly */' + "\n"
-      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
-      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
-      PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
-      PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
-      PaseCliLibDB400_c_main += '}' + "\n"
-
     # SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID )
     if c400_CCSID:
       PaseCliCustom_h_proto += call_retv + ' ' + "custom_" + call_name + '(' + normal_call_args + ' );' + "\n"
     else:
+      # old libdb400.a (non-utf)
+      PaseCliLibDB400_h_proto  += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' );' + "\n"
+      # main
+      PaseCliLibDB400_c_main += call_retv + ' libdb400_' + call_name + '(' + normal_call_args + ' ) {' + "\n"
+      PaseCliLibDB400_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+      if 'W' in call_name:
+        PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+        PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+        PaseCliLibDB400_c_main += '}' + "\n"
+      else:
+        if 'SQLColAttributes' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLColAttributes(call_name, normal_db400_args)
+        elif 'SQLColumnPrivileges' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLColumnPrivileges(call_name, normal_db400_args)
+        elif 'SQLColumns' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLColumns(call_name, normal_db400_args)
+        elif 'SQLConnect' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLConnect(call_name, normal_db400_args)
+        elif 'SQLDataSources' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLDataSources(call_name, normal_db400_args)
+        elif 'SQLDescribeCol' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLDescribeCol(call_name, normal_db400_args)
+        elif 'SQLDriverConnect' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLDriverConnect(call_name, normal_db400_args)
+        elif 'SQLError' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLError(call_name, normal_db400_args)
+        elif 'SQLExecDirect' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLExecDirect(call_name, normal_db400_args)
+        elif 'SQLForeignKeys' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLForeignKeys(call_name, normal_db400_args)
+        elif 'SQLGetConnectAttr' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetConnectAttr(call_name, normal_db400_args)
+        elif 'SQLGetConnectOption' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetConnectOption(call_name, normal_db400_args)
+        elif 'SQLGetCursorName' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetCursorName(call_name, normal_db400_args)
+        elif 'SQLGetDescField' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetDescField(call_name, normal_db400_args)
+        elif 'SQLGetDescRec' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetDescRec(call_name, normal_db400_args)
+        elif 'SQLGetDiagField' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetDiagField(call_name, normal_db400_args)
+        elif 'SQLGetDiagRec' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetDiagRec(call_name, normal_db400_args)
+        elif 'SQLGetEnvAttr' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetEnvAttr(call_name, normal_db400_args)
+        elif 'SQLGetInfo' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetInfo(call_name, normal_db400_args)
+        elif 'SQLGetPosition' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLGetPosition(call_name, normal_db400_args)
+        elif 'SQLNativeSql' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLNativeSql(call_name, normal_db400_args)
+        elif 'SQLParamData' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLParamData(call_name, normal_db400_args)
+        elif 'SQLPrepare' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLPrepare(call_name, normal_db400_args)
+        elif 'SQLPrimaryKeys' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLPrimaryKeys(call_name, normal_db400_args)
+        elif 'SQLProcedureColumns' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLProcedureColumns(call_name, normal_db400_args)
+        elif 'SQLProcedures' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLProcedures(call_name, normal_db400_args)
+        elif 'SQLSetConnectAttr' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLSetConnectAttr(call_name, normal_db400_args)
+        elif 'SQLSetConnectOption' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLSetConnectOption(call_name, normal_db400_args)
+        elif 'SQLSetCursorName' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLSetCursorName(call_name, normal_db400_args)
+        elif 'SQLSetEnvAttr' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLSetEnvAttr(call_name, normal_db400_args)
+        elif 'SQLSpecialColumns' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLSpecialColumns(call_name, normal_db400_args)
+        elif 'SQLStatistics' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLStatistics(call_name, normal_db400_args)
+        elif 'SQLTablePrivileges' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLTablePrivileges(call_name, normal_db400_args)
+        elif 'SQLTables' in call_name:
+          PaseCliLibDB400_c_main += non_utf_SQLTables(call_name, normal_db400_args)
+        else:
+          PaseCliLibDB400_c_main += "  sqlrc = ILE_" + call_name + '(' + normal_db400_args + ' );' + "\n"
+          PaseCliLibDB400_c_main += "  return sqlrc;" + "\n"
+          PaseCliLibDB400_c_main += '}' + "\n"
       libdb400_exp += "libdb400_" + call_name + "\n"
 
   else:
@@ -796,6 +1503,10 @@ for line in f:
     PaseCliILE_c_main += '{' + "\n"
     PaseCliILE_c_main += '  int rc = 0;' + "\n"
     PaseCliILE_c_main += '  SQLRETURN sqlrc = SQL_SUCCESS;' + "\n"
+    if 'SQLParamData' in call_name:
+      PaseCliILE_c_main += ILE_SQLParamData_copy_var()
+    if 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += ILE_SQLGetDescField_copy_var()
     PaseCliILE_c_main += '  int actMark = 0;' + "\n"
     PaseCliILE_c_main += '  char * ileSymPtr = (char *) NULL;' + "\n"
     PaseCliILE_c_main += '  ' + struct_ile_name + ' * arglist = (' + struct_ile_name + ' *) NULL;' + "\n"
@@ -813,10 +1524,18 @@ for line in f:
     PaseCliILE_c_main += '    ' + struct_ile_flag + ' = 1;' +  "\n"
     PaseCliILE_c_main += '  }' + "\n"
     PaseCliILE_c_main += ILE_copyin_args
+    if 'SQLParamData' in call_name:
+      PaseCliILE_c_main += ILE_SQLParamData_copy_in()
+    if 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += ILE_SQLGetDescField_copy_in()
     PaseCliILE_c_main += '  rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, ' + struct_ile_sig + ', RESULT_INT32);' +  "\n"
     PaseCliILE_c_main += '  if (rc != ILECALL_NOERROR) {' + "\n"
     PaseCliILE_c_main += '    return SQL_ERROR;' + "\n"
     PaseCliILE_c_main += '  }' + "\n"
+    if 'SQLParamData' in call_name:
+      PaseCliILE_c_main += ILE_SQLParamData_copy_out()
+    if 'SQLGetDescField' in call_name:
+      PaseCliILE_c_main += ILE_SQLGetDescField_copy_out()
     PaseCliILE_c_main += '  return arglist->base.result.s_int32.r_int32;' + "\n"
     PaseCliILE_c_main += '}' + "\n"
 
@@ -1025,7 +1744,14 @@ file_PaseCliLibDB400_c = ""
 file_PaseCliLibDB400_c += file_pase_incl
 file_PaseCliLibDB400_c += file_local_incl
 file_PaseCliLibDB400_c += "" + "\n"
+file_PaseCliLibDB400_c += "#define DFTCOLSIZE 18" + "\n"
+file_PaseCliLibDB400_c += "#define SQL_MAXINTVAL_REASONABLE 131072" + "\n"
+file_PaseCliLibDB400_c += "" + "\n"
 file_PaseCliLibDB400_c += PaseCliLibDB400_c_symbol
+file_PaseCliLibDB400_c += "" + "\n"
+file_PaseCliLibDB400_c += non_utf_copy_in()
+file_PaseCliLibDB400_c += non_utf_copy_in_free()
+file_PaseCliLibDB400_c += non_utf_copy_out()
 file_PaseCliLibDB400_c += "" + "\n"
 file_PaseCliLibDB400_c += PaseCliLibDB400_c_main
 file_PaseCliLibDB400_c += "" + "\n"
@@ -1286,7 +2012,7 @@ file_PaseCliAsync_h += ' * ===================================================' 
 file_PaseCliAsync_h += ' */' + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += PaseCliCustom_h_proto
-file_PaseCliAsync_h += "SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env );" + "\n"
+file_PaseCliAsync_h += "SQLRETURN custom_SQLSetEnvCCSID( SQLHANDLE env, int myccsid);" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += "" + "\n"
 file_PaseCliAsync_h += '#ifdef __cplusplus ' + "\n"

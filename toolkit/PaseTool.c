@@ -2024,6 +2024,12 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     sqlrc1 = SQLFreeHandle(SQL_HANDLE_STMT, tpgm->hstmt);
   }
   tpgm->hstmt = 0;
+
+  /* memory leak - delete used pgm template memeory (Misiewicz/Halmela) */
+  if(tpgm->layout){
+    tool_free(tpgm->layout);
+  }
+
   return sqlrc;
 }
 

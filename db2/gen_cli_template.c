@@ -961,6 +961,38 @@ SQLRETURN SQL400IgnoreNullFromUtf16(SQLHDBC hdbc,
  SQLINTEGER outlen,
  SQLINTEGER outccsid)
 
+SQLRETURN SQL400AnyToAny(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid,
+ SQLINTEGER outccsid)
+
+SQLRETURN SQL400AnyFromAny(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid,
+ SQLINTEGER outccsid)
+
+SQLRETURN SQL400IgnoreNullAnyToAny(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid,
+ SQLINTEGER outccsid)
+
+SQLRETURN SQL400IgnoreNullAnyFromAny(SQLHDBC hdbc,
+ SQLPOINTER inparm,
+ SQLINTEGER inlen, 
+ SQLPOINTER outparm,
+ SQLINTEGER outlen,
+ SQLINTEGER inccsid,
+ SQLINTEGER outccsid)
+
 # custom json 
 
 SQLRETURN SQL400Json(SQLHDBC hdbc,

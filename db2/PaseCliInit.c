@@ -45,6 +45,7 @@ int db2_cli_srvpgm_mark;
  * pase ccsid
  */
 int db2_pase_ccsid;
+int db2_job_ccsid;
 
 /*
  * pase cli trace
@@ -250,6 +251,21 @@ int init_cli_srvpgm() {
     init_unlock();
   }
   return db2_cli_srvpgm_mark;
+}
+
+int init_job_CCSID400() {
+  int i = 0;
+  int j = 0;
+  int paseMark = 0;
+  char * lastGood = NULL;
+  if (!db2_job_ccsid) {
+    init_lock();
+    if (!db2_job_ccsid) {
+      db2_job_ccsid = Qp2jobCCSID();
+    }
+    init_unlock();
+  }
+  return db2_job_ccsid;
 }
 
 int init_CCSID400( int newCCSID ) {

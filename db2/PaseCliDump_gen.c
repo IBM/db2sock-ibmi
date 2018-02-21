@@ -3465,6 +3465,106 @@ void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER 
     }
   }
 }
+void dump_SQL400AnyToAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400anytoany")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400AnyToAny");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+void dump_SQL400AnyFromAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400anyfromany")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400AnyFromAny");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+void dump_SQL400IgnoreNullAnyToAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400ignorenullanytoany")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400IgnoreNullAnyToAny");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
+void dump_SQL400IgnoreNullAnyFromAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  if (dev_go(sqlrc,"sql400ignorenullanyfromany")) {
+    char mykey[256];
+    printf_key(mykey,"SQL400IgnoreNullAnyFromAny");
+    printf_clear();
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 1);
+    printf_stack(mykey);
+    printf_sqlrc_status((char *)&mykey, sqlrc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLHDBC","hdbc",hdbc,hdbc);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","inparm",inparm,inparm);
+    printf_hexdump(mykey,inparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inlen",inlen,inlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLPOINTER","outparm",outparm,outparm);
+    printf_hexdump(mykey,outparm,80);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outlen",outlen,outlen);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","inccsid",inccsid,inccsid);
+    printf_format("%s.parm %s %s 0x%p (%d)\n",mykey,"SQLINTEGER","outccsid",outccsid,outccsid);
+    printf_sqlrc_head_foot((char *)&mykey, sqlrc, 0);
+    dev_dump();
+    if (sqlrc < SQL_SUCCESS) {
+      printf_sql_diag(SQL_HANDLE_DBC,hdbc);
+      printf_force_SIGQUIT((char *)&mykey);
+    }
+  }
+}
 void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen ) {
   if (dev_go(sqlrc,"sql400json")) {
     char mykey[256];

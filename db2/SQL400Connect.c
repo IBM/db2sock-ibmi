@@ -13,37 +13,35 @@ static int env_server_mode;
 /*
  * env 
  */
-SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env ) {
+SQLRETURN custom_SQLSetEnvCCSID( SQLHANDLE env, int myccsid) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER yes = SQL_TRUE;
-  int myccsid = 1208;
   if (!env_hndl) {
     env_hndl = env;
-    sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
-    sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL_ATTR_UTF8, (SQLPOINTER)&yes, (SQLINTEGER) 0);
+    switch(myccsid) {
+    case 1208: /* UTF-8 */
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL_ATTR_UTF8, (SQLPOINTER)&yes, (SQLINTEGER) 0);
+      break;
+    case 1200: /* UTF-16 */
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
+      break;
+    default:
+      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
+      break;
+    }
   }
   return sqlrc;
 }
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLINTEGER yes = SQL_TRUE;
+  SQLHANDLE env = 0;
   int myccsid = 0;
   if (!env_hndl) {
     myccsid = init_CCSID400(newCCSID);
-    switch(myccsid) {
-    case 1208: /* UTF-8 */
-      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
-      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL400_ATTR_PASE_CCSID, (SQLPOINTER)&myccsid, (SQLINTEGER) 0);
-      sqlrc = SQLSetEnvAttr((SQLHENV)env_hndl, (SQLINTEGER)SQL_ATTR_UTF8, (SQLPOINTER)&yes, (SQLINTEGER) 0);
-      break;
-    case 1200: /* UTF-16 */
-      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
-      break;
-    default:
-      libdb400_SQLOverrideCCSID400( newCCSID );
-      sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env_hndl);
-      break;
-    }
+    sqlrc = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env);
+    sqlrc = custom_SQLSetEnvCCSID(env, myccsid);
   }
   return sqlrc;
 }

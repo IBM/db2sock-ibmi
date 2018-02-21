@@ -82,6 +82,7 @@ void * init_cli_dlsym();
 void * init_json_dlsym();
 int init_cli_srvpgm();
 int init_CCSID400( int newCCSID );
+int init_job_CCSID400();
 
 /* hdbc/hstmt scope locking */
 void init_table_ctor(int handle, int hdbc);

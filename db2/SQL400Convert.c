@@ -68,3 +68,37 @@ SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, S
   return sqlrc;
 }
 
+SQLRETURN custom_SQL400AnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ){
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_iconv(1, inparm, outparm, inlen, outlen, inccsid, outccsid);
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400AnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ){
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  sqlrc = custom_iconv(0, inparm, outparm, inlen, outlen, inccsid, outccsid);
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400IgnoreNullAnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400AnyToAny( hdbc, inparm, inlen, outparm, outlen, inccsid, outccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+
+SQLRETURN custom_SQL400IgnoreNullAnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid ) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  if (inparm != NULL && inlen != 0 && outparm != NULL && outlen != 0) {
+    return custom_SQL400AnyFromAny( hdbc, inparm, inlen, outparm, outlen, inccsid, outccsid );
+  } else if (outparm != NULL && outlen != 0) {
+    memset(outparm,0,outlen);
+  }
+  return sqlrc;
+}
+
+
+

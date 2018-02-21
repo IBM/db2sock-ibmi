@@ -2097,6 +2097,17 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
 {
   int rc = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
+  /* returnPtr - API returns ILE SP pointer buffer (alias of PASE ptr)
+   * Return ILE SP likely outside PASE mapable addr space.
+   * However, _CVTSPP is safe. The result is zero (null)
+   * if the input is a 16-byte null pointer or a tagged space pointer 
+   * that does not contain the teraspace address
+   * equivalent of some valid IBM PASE for i memory address.
+   * (I suspect options never used in years of PASE.
+   * Rochester CLI team was notified).
+   */
+  char returnBuffer[ sizeof(ILEpointer ) + 16 ];
+  ILEpointer	*returnPtr = (ILEpointer *)ROUND_QUAD(returnBuffer);
   int actMark = 0;
   char * ileSymPtr = (char *) NULL;
   SQLGetDescFieldIleCallStruct * arglist = (SQLGetDescFieldIleCallStruct *) NULL;
@@ -2119,9 +2130,27 @@ SQLRETURN ILE_SQLGetDescField( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLINT
   arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (ulong) stLength;
+  /* returnPtr - ILE SP pointer buffer return area */ 
+  if (fValue) {
+    if (fieldID == SQL_DESC_DATA_PTR
+     || fieldID == SQL_DESC_LENGTH_PTR
+     || fieldID == SQL_DESC_INDICATOR_PTR)
+    {
+      arglist->fValue.s.addr = (ulong) returnPtr;
+    }
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* returnPtr - ILE SP to PASE pointer */ 
+  if (fValue) {
+    if (fieldID == SQL_DESC_DATA_PTR
+     || fieldID == SQL_DESC_LENGTH_PTR
+     || fieldID == SQL_DESC_INDICATOR_PTR)
+    {
+      *((void **)fValue) = _CVTSPP(returnPtr);
+    }
   }
   return arglist->base.result.s_int32.r_int32;
 }
@@ -2129,6 +2158,17 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
 {
   int rc = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
+  /* returnPtr - API returns ILE SP pointer buffer (alias of PASE ptr)
+   * Return ILE SP likely outside PASE mapable addr space.
+   * However, _CVTSPP is safe. The result is zero (null)
+   * if the input is a 16-byte null pointer or a tagged space pointer 
+   * that does not contain the teraspace address
+   * equivalent of some valid IBM PASE for i memory address.
+   * (I suspect options never used in years of PASE.
+   * Rochester CLI team was notified).
+   */
+  char returnBuffer[ sizeof(ILEpointer ) + 16 ];
+  ILEpointer	*returnPtr = (ILEpointer *)ROUND_QUAD(returnBuffer);
   int actMark = 0;
   char * ileSymPtr = (char *) NULL;
   SQLGetDescFieldWIleCallStruct * arglist = (SQLGetDescFieldWIleCallStruct *) NULL;
@@ -2151,9 +2191,27 @@ SQLRETURN ILE_SQLGetDescFieldW( SQLHDESC  hdesc, SQLSMALLINT  rcdNum, SQLSMALLIN
   arglist->fValue.s.addr = (ulong) fValue;
   arglist->fLength = (SQLINTEGER) fLength;
   arglist->stLength.s.addr = (ulong) stLength;
+  /* returnPtr - ILE SP pointer buffer return area */ 
+  if (fValue) {
+    if (fieldID == SQL_DESC_DATA_PTR
+     || fieldID == SQL_DESC_LENGTH_PTR
+     || fieldID == SQL_DESC_INDICATOR_PTR)
+    {
+      arglist->fValue.s.addr = (ulong) returnPtr;
+    }
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLGetDescFieldWIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* returnPtr - ILE SP to PASE pointer */ 
+  if (fValue) {
+    if (fieldID == SQL_DESC_DATA_PTR
+     || fieldID == SQL_DESC_LENGTH_PTR
+     || fieldID == SQL_DESC_INDICATOR_PTR)
+    {
+      *((void **)fValue) = _CVTSPP(returnPtr);
+    }
   }
   return arglist->base.result.s_int32.r_int32;
 }
@@ -3042,6 +3100,9 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
 {
   int rc = 0;
   SQLRETURN sqlrc = SQL_SUCCESS;
+  /* returnPtr - API returns ILE SP pointer buffer (alias of PASE ptr) */ 
+  char returnBuffer[ sizeof(ILEpointer ) + 16 ];
+  ILEpointer	*returnPtr = (ILEpointer *)ROUND_QUAD(returnBuffer);
   int actMark = 0;
   char * ileSymPtr = (char *) NULL;
   SQLParamDataIleCallStruct * arglist = (SQLParamDataIleCallStruct *) NULL;
@@ -3060,9 +3121,19 @@ SQLRETURN ILE_SQLParamData( SQLHSTMT  hstmt, SQLPOINTER * Value )
   }
   arglist->hstmt = (SQLHSTMT) hstmt;
   arglist->Value.s.addr = (ulong) Value;
+  /* returnPtr - ILE SP pointer buffer return area */ 
+  if (Value) {
+    arglist->Value.s.addr = (ulong) returnPtr;
+  }
   rc = _ILECALL((ILEpointer *)ileSymPtr, &arglist->base, SQLParamDataIleSigStruct, RESULT_INT32);
   if (rc != ILECALL_NOERROR) {
     return SQL_ERROR;
+  }
+  /* returnPtr - ILE SP to PASE pointer */ 
+  if (Value) {
+    if (arglist->base.result.s_int32.r_int32 == SQL_NEED_DATA) {
+      *Value = _CVTSPP(returnPtr);
+    }
   }
   return arglist->base.result.s_int32.r_int32;
 }

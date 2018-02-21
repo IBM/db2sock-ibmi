@@ -190,6 +190,10 @@ SQLRETURN SQL400IgnoreNullToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER 
 SQLRETURN SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+SQLRETURN SQL400AnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN SQL400AnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN SQL400IgnoreNullAnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN SQL400IgnoreNullAnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
 SQLRETURN SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
 
 /* ===================================================
@@ -470,6 +474,10 @@ typedef struct SQL400IgnoreNullToUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQ
 typedef struct SQL400IgnoreNullFromUtf8Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400IgnoreNullFromUtf8Struct;
 typedef struct SQL400IgnoreNullToUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; void * callback; } SQL400IgnoreNullToUtf16Struct;
 typedef struct SQL400IgnoreNullFromUtf16Struct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  outccsid; void * callback; } SQL400IgnoreNullFromUtf16Struct;
+typedef struct SQL400AnyToAnyStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; SQLINTEGER  outccsid; void * callback; } SQL400AnyToAnyStruct;
+typedef struct SQL400AnyFromAnyStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; SQLINTEGER  outccsid; void * callback; } SQL400AnyFromAnyStruct;
+typedef struct SQL400IgnoreNullAnyToAnyStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; SQLINTEGER  outccsid; void * callback; } SQL400IgnoreNullAnyToAnyStruct;
+typedef struct SQL400IgnoreNullAnyFromAnyStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLPOINTER  inparm; SQLINTEGER  inlen; SQLPOINTER  outparm; SQLINTEGER  outlen; SQLINTEGER  inccsid; SQLINTEGER  outccsid; void * callback; } SQL400IgnoreNullAnyFromAnyStruct;
 typedef struct SQL400JsonStruct { SQLRETURN sqlrc; SQLHDBC  hdbc; SQLCHAR * injson; SQLINTEGER  inlen; SQLCHAR * outjson; SQLINTEGER  outlen; void * callback; } SQL400JsonStruct;
 
 
@@ -758,6 +766,14 @@ SQL400IgnoreNullFromUtf8Struct * SQL400IgnoreNullFromUtf8Join (pthread_t tid, SQ
 SQL400IgnoreNullToUtf16Struct * SQL400IgnoreNullToUtf16Join (pthread_t tid, SQLINTEGER flag);
 /* void SQL400IgnoreNullFromUtf16Callback(SQL400IgnoreNullFromUtf16Struct* ); */
 SQL400IgnoreNullFromUtf16Struct * SQL400IgnoreNullFromUtf16Join (pthread_t tid, SQLINTEGER flag);
+/* void SQL400AnyToAnyCallback(SQL400AnyToAnyStruct* ); */
+SQL400AnyToAnyStruct * SQL400AnyToAnyJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400AnyFromAnyCallback(SQL400AnyFromAnyStruct* ); */
+SQL400AnyFromAnyStruct * SQL400AnyFromAnyJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400IgnoreNullAnyToAnyCallback(SQL400IgnoreNullAnyToAnyStruct* ); */
+SQL400IgnoreNullAnyToAnyStruct * SQL400IgnoreNullAnyToAnyJoin (pthread_t tid, SQLINTEGER flag);
+/* void SQL400IgnoreNullAnyFromAnyCallback(SQL400IgnoreNullAnyFromAnyStruct* ); */
+SQL400IgnoreNullAnyFromAnyStruct * SQL400IgnoreNullAnyFromAnyJoin (pthread_t tid, SQLINTEGER flag);
 /* void SQL400JsonCallback(SQL400JsonStruct* ); */
 SQL400JsonStruct * SQL400JsonJoin (pthread_t tid, SQLINTEGER flag);
 
@@ -905,6 +921,10 @@ pthread_t SQL400IgnoreNullToUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLIN
 pthread_t SQL400IgnoreNullFromUtf8Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
 pthread_t SQL400IgnoreNullToUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, void * callback );
 pthread_t SQL400IgnoreNullFromUtf16Async ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid, void * callback );
+pthread_t SQL400AnyToAnyAsync ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid, void * callback );
+pthread_t SQL400AnyFromAnyAsync ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid, void * callback );
+pthread_t SQL400IgnoreNullAnyToAnyAsync ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid, void * callback );
+pthread_t SQL400IgnoreNullAnyFromAnyAsync ( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid, void * callback );
 pthread_t SQL400JsonAsync ( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen, void * callback );
 
 /* ===================================================
@@ -1162,7 +1182,6 @@ SQLRETURN libdb400_SQLTablePrivilegesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQuali
 SQLRETURN libdb400_SQLTables( SQLHSTMT  hstmt, SQLCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLCHAR * szTableName, SQLSMALLINT  cbTableName, SQLCHAR * szTableType, SQLSMALLINT  cbTableType );
 SQLRETURN libdb400_SQLTablesW( SQLHSTMT  hstmt, SQLWCHAR * szTableQualifier, SQLSMALLINT  cbTableQualifier, SQLWCHAR * szTableOwner, SQLSMALLINT  cbTableOwner, SQLWCHAR * szTableName, SQLSMALLINT  cbTableName, SQLWCHAR * szTableType, SQLSMALLINT  cbTableType );
 SQLRETURN libdb400_SQLTransact( SQLHENV  henv, SQLHDBC  hdbc, SQLSMALLINT  fType );
-SQLRETURN libdb400_SQLOverrideCCSID400( SQLINTEGER  newCCSID );
 
 /* ===================================================
  * trace dump
@@ -1316,6 +1335,10 @@ void dump_SQL400IgnoreNullToUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  in
 void dump_SQL400IgnoreNullFromUtf8(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 void dump_SQL400IgnoreNullToUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 void dump_SQL400IgnoreNullFromUtf16(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+void dump_SQL400AnyToAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+void dump_SQL400AnyFromAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+void dump_SQL400IgnoreNullAnyToAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+void dump_SQL400IgnoreNullAnyFromAny(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
 void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
 
 /* ===================================================
@@ -1348,8 +1371,12 @@ SQLRETURN custom_SQL400IgnoreNullToUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLI
 SQLRETURN custom_SQL400IgnoreNullFromUtf8( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
 SQLRETURN custom_SQL400IgnoreNullToUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid );
 SQLRETURN custom_SQL400IgnoreNullFromUtf16( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  outccsid );
+SQLRETURN custom_SQL400AnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN custom_SQL400AnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN custom_SQL400IgnoreNullAnyToAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
+SQLRETURN custom_SQL400IgnoreNullAnyFromAny( SQLHDBC  hdbc, SQLPOINTER  inparm, SQLINTEGER  inlen, SQLPOINTER  outparm, SQLINTEGER  outlen, SQLINTEGER  inccsid, SQLINTEGER  outccsid );
 SQLRETURN custom_SQL400Json( SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEGER  inlen, SQLCHAR * outjson, SQLINTEGER  outlen );
-SQLRETURN custom_SQLSetEnvUTF8( SQLHANDLE env );
+SQLRETURN custom_SQLSetEnvCCSID( SQLHANDLE env, int myccsid);
 
 
 #ifdef __cplusplus 
