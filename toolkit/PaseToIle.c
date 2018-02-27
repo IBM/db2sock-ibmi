@@ -582,6 +582,8 @@ int ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale
   int firstNibble = 0;
   int secondNibble = 0;
   char * wherev = where;
+  int adot = 0;
+  int ascale = 0;
   /* fix up input */
   if (!str) {
     str = "0";
@@ -596,8 +598,17 @@ int ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale
     } else {
       if (ile_pgm_isnum_digit(c[i])) {
         chr[j++] = c[i];
+        if (adot) {
+          ascale++;
+        }
       }
     }
+    if (!adot && c[i] == '.') {
+        adot = 1;
+    }
+  }
+  for (i=ascale; i < tscale; i++) {
+    chr[j++] = '0';
   }
   /* convert string to packed */
   c = chr;
@@ -814,6 +825,8 @@ int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale)
   char dec[256];
   char * c = NULL;
   char * wherev = where;
+  int adot = 0;
+  int ascale = 0;
   /* fix up input */
   if (!str) {
     str = "0";
@@ -828,8 +841,17 @@ int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale)
     } else {
       if (ile_pgm_isnum_digit(c[i])) {
         chr[j++] = c[i];
+        if (adot) {
+          ascale++;
+        }
       }
     }
+    if (!adot && c[i] == '.') {
+        adot = 1;
+    }
+  }
+  for (i=ascale; i < tscale; i++) {
+    chr[j++] = '0';
   }
   /* convert string to zoned */
   c = chr;

@@ -71,6 +71,42 @@ int non_utf_copy_out_hstmt(SQLHSTMT hstmt, SQLRETURN sqlrc, SQLCHAR *src, SQLINT
   SQLHDBC hdbc = init_table_stmt_2_conn(hstmt);
   return non_utf_copy_out_hdbc(hdbc, sqlrc, src, srclen);
 }
+int non_utf_isconvert_ordinal(SQLINTEGER ord) {
+  int convert = 0;
+  switch(ord) {
+  case SQL_ATTR_DBC_DEFAULT_LIB: 
+  case SQL_ATTR_SAVEPOINT_NAME: 
+  case SQL_ATTR_INFO_ACCTSTR: 
+  case SQL_ATTR_INFO_APPLNAME: 
+  case SQL_ATTR_INFO_PROGRAMID: 
+  case SQL_ATTR_INFO_USERID: 
+  case SQL_ATTR_INFO_WRKSTNNAME: 
+  case SQL_ATTR_SERVERMODE_SUBSYSTEM: 
+  case SQL_DBMS_NAME: 
+  case SQL_DBMS_VER: 
+  case SQL_PROCEDURES: 
+  case SQL_DATA_SOURCE_NAME: 
+  case SQL_COLUMN_ALIAS: 
+  case SQL_DATA_SOURCE_READ_ONLY: 
+  case SQL_MULTIPLE_ACTIVE_TXN: 
+  case SQL_DRIVER_NAME: 
+  case SQL_IDENTIFIER_QUOTE_CHAR: 
+  case SQL_PROCEDURE_TERM: 
+  case SQL_QUALIFIER_TERM: 
+  case SQL_QUALIFIER_NAME_SEPARATOR: 
+  case SQL_OWNER_TERM: 
+  case SQL_DRIVER_ODBC_VER: 
+  case SQL_ORDER_BY_COLUMNS_IN_SELECT: 
+  case SQL_SEARCH_PATTERN_ESCAPE: 
+  case SQL_OUTER_JOINS: 
+  case SQL_LIKE_ESCAPE_CLAUSE: 
+  case SQL_CATALOG_NAME: 
+  case SQL_DESCRIBE_PARAMETER: 
+    convert = 1;
+    break;
+  }
+  return convert;
+}
 
 SQLRETURN libdb400_SQLAllocConnect( SQLHENV  henv, SQLHDBC * phdbc ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -392,9 +428,10 @@ SQLRETURN libdb400_SQLGetColW( SQLHSTMT  hstmt, SQLSMALLINT  icol, SQLSMALLINT  
 }
 SQLRETURN libdb400_SQLGetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINTER  oval, SQLINTEGER  ilen, SQLINTEGER * olen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int isconvert = non_utf_isconvert_ordinal(attr);
   SQLINTEGER outsz = 0;
   sqlrc = ILE_SQLGetConnectAttr( hdbc, attr, oval, ilen, olen );
-  if (attr == SQL_ATTR_DBC_DEFAULT_LIB || attr == SQL_ATTR_SAVEPOINT_NAME) {
+  if (isconvert) {
     outsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)oval, (SQLINTEGER)ilen);
     if (olen) *olen = outsz;
   }
@@ -407,10 +444,11 @@ SQLRETURN libdb400_SQLGetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attr, SQLPOINT
 }
 SQLRETURN libdb400_SQLGetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  iopt, SQLPOINTER  oval ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int isconvert = non_utf_isconvert_ordinal(iopt);
   SQLINTEGER maxsz = DFTCOLSIZE;
   SQLINTEGER tmpsz = 0;
   sqlrc = ILE_SQLGetConnectOption( hdbc, iopt, oval );
-  if (iopt == SQL_ATTR_DBC_DEFAULT_LIB) {
+  if (isconvert) {
     tmpsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)oval, (SQLINTEGER)maxsz);
   }
   return sqlrc;
@@ -523,29 +561,10 @@ SQLRETURN libdb400_SQLGetFunctions( SQLHDBC  hdbc, SQLSMALLINT  fFunction, SQLSM
 }
 SQLRETURN libdb400_SQLGetInfo( SQLHDBC  hdbc, SQLSMALLINT  fInfoType, SQLPOINTER  rgbInfoValue, SQLSMALLINT  cbInfoValueMax, SQLSMALLINT * pcbInfoValue ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int isconvert = non_utf_isconvert_ordinal(fInfoType);
   SQLINTEGER outsz = 0;
   sqlrc = ILE_SQLGetInfo( hdbc, fInfoType, rgbInfoValue, cbInfoValueMax, pcbInfoValue );
-  if (fInfoType == SQL_DBMS_NAME
-   || fInfoType == SQL_DBMS_VER
-   || fInfoType == SQL_PROCEDURES
-   || fInfoType == SQL_DATA_SOURCE_NAME
-   || fInfoType == SQL_COLUMN_ALIAS
-   || fInfoType == SQL_DATA_SOURCE_READ_ONLY
-   || fInfoType == SQL_MULTIPLE_ACTIVE_TXN
-   || fInfoType == SQL_DRIVER_NAME
-   || fInfoType == SQL_IDENTIFIER_QUOTE_CHAR
-   || fInfoType == SQL_PROCEDURE_TERM
-   || fInfoType == SQL_QUALIFIER_TERM
-   || fInfoType == SQL_QUALIFIER_NAME_SEPARATOR
-   || fInfoType == SQL_OWNER_TERM
-   || fInfoType == SQL_DRIVER_ODBC_VER
-   || fInfoType == SQL_ORDER_BY_COLUMNS_IN_SELECT
-   || fInfoType == SQL_SEARCH_PATTERN_ESCAPE
-   || fInfoType == SQL_OUTER_JOINS
-   || fInfoType == SQL_LIKE_ESCAPE_CLAUSE
-   || fInfoType == SQL_CATALOG_NAME
-   || fInfoType == SQL_DESCRIBE_PARAMETER
-  ) {
+  if (isconvert) {
     outsz = non_utf_copy_out_hdbc(hdbc, sqlrc, (SQLCHAR *)rgbInfoValue, (SQLINTEGER)cbInfoValueMax);
     if (pcbInfoValue) *pcbInfoValue = outsz;
   }
@@ -761,13 +780,14 @@ SQLRETURN libdb400_SQLRowCount( SQLHSTMT  hstmt, SQLINTEGER * pcrow ) {
 }
 SQLRETURN libdb400_SQLSetConnectAttr( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOINTER  vParam, SQLINTEGER  inlen ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int isconvert = non_utf_isconvert_ordinal(attrib);
   SQLINTEGER maxsz = SQL_MAXINTVAL_REASONABLE;
   SQLCHAR * tmp1 = NULL;
-  if (attrib == SQL_ATTR_DBC_DEFAULT_LIB || attrib == SQL_ATTR_SAVEPOINT_NAME) {
+  if (isconvert) {
     inlen = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&vParam, (SQLINTEGER)inlen, (SQLINTEGER)maxsz);
   }
   sqlrc = ILE_SQLSetConnectAttr( hdbc, attrib, vParam, inlen );
-  if (attrib == SQL_ATTR_DBC_DEFAULT_LIB || attrib == SQL_ATTR_SAVEPOINT_NAME) {
+  if (isconvert) {
     non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&vParam);
   }
   return sqlrc;
@@ -779,14 +799,15 @@ SQLRETURN libdb400_SQLSetConnectAttrW( SQLHDBC  hdbc, SQLINTEGER  attrib, SQLPOI
 }
 SQLRETURN libdb400_SQLSetConnectOption( SQLHDBC  hdbc, SQLSMALLINT  fOption, SQLPOINTER  vParam ) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  int isconvert = non_utf_isconvert_ordinal(fOption);
   SQLINTEGER maxsz = SQL_MAXSMALLVAL;
   SQLINTEGER tmpsz = 0;
   SQLCHAR * tmp1 = NULL;
-  if (fOption == SQL_ATTR_DBC_DEFAULT_LIB || fOption == SQL_ATTR_SAVEPOINT_NAME) {
+  if (isconvert) {
     tmpsz = non_utf_copy_in_hdbc(hdbc, (SQLCHAR **)&tmp1, (SQLCHAR **)&vParam, (SQLINTEGER)SQL_NTS, (SQLINTEGER)maxsz);
   }
   sqlrc = ILE_SQLSetConnectOption( hdbc, fOption, vParam );
-  if (fOption == SQL_ATTR_DBC_DEFAULT_LIB || fOption == SQL_ATTR_SAVEPOINT_NAME) {
+  if (isconvert) {
     non_utf_copy_in_free((SQLCHAR **)&tmp1, (SQLCHAR **)&vParam);
   }
   return sqlrc;

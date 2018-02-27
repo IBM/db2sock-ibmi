@@ -1345,6 +1345,9 @@ void dump_SQL400Json(SQLRETURN sqlrc,  SQLHDBC  hdbc, SQLCHAR * injson, SQLINTEG
  * INTERNAL USE
  * ===================================================
  */
+#ifndef SQL_ATTR_SERVERMODE_SUBSYSTEM
+#define SQL_ATTR_SERVERMODE_SUBSYSTEM 10204
+#endif
 
 SQLRETURN custom_SQL400Version( SQLPOINTER  outversion, SQLINTEGER  outlen );
 SQLRETURN custom_SQLOverrideCCSID400( SQLINTEGER  newCCSID );

@@ -35,6 +35,7 @@ TEST0000     = test0000_resource_array
 TEST0001     = test0001_error
 TEST0011     = test0011_resource_array_async_callback
 TEST0012     = test0012_resource_array_async_join
+TEST0020     = test0020_db2_non_utf
 TEST1000     = test1000_sql400json
 TEST1010     = test1010_jsonloop
 TEST2000     = test2000_sql400json_async
@@ -57,6 +58,7 @@ tgt32:
 go: speakpase $(TEST0000)$(BIT) \
 	$(TEST0011)$(BIT) \
 	$(TEST0012)$(BIT) \
+	$(TEST0020)$(BIT) \
 	$(TEST1000)$(BIT) \
 	$(TEST1010)$(BIT) \
 	$(TEST2000)$(BIT) \
@@ -81,6 +83,8 @@ $(TEST0011)$(BIT): $(TEST0011).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0011).o -o $(TEST0011)$(BIT)
 $(TEST0012)$(BIT): $(TEST0012).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0012).o -o $(TEST0012)$(BIT)
+$(TEST0020)$(BIT): $(TEST0020).o
+	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST0020).o -o $(TEST0020)$(BIT)
 $(TEST1000)$(BIT): $(TEST1000).o
 	$(CC) $(CCFLAGS) $(LIBDEPS) $(TEST1000).o -o $(TEST1000)$(BIT)
 $(TEST1010)$(BIT): $(TEST1010).o
