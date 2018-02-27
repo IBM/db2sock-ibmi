@@ -26,6 +26,8 @@
  */
 SQLRETURN tool_key_pgm_data_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, char * ds_dob, int * dob, tool_node_t ** curr_node);
 SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm, int * isDs, int isOut, tool_node_t ** curr_node);
+/* connect (Halmela no connect memory call, until needed) */
+SQLRETURN tool_key_conn_delayed(tool_struct_t * tool);
 
 
 /*=================================================
@@ -766,7 +768,7 @@ int tool_sql_errors(tool_struct_t * tool, SQLHANDLE handle, SQLSMALLINT hType, i
   return SQL_SUCCESS;
 }
 
-SQLRETURN tool_joblog_errors(tool_struct_t * tool, SQLHANDLE hdbc) {
+SQLRETURN tool_joblog_errors(tool_struct_t * tool) {
   /*
   *sort time descend (new entries first)
   */
@@ -800,11 +802,15 @@ SQLRETURN tool_joblog_errors(tool_struct_t * tool, SQLHANDLE hdbc) {
   SQLINTEGER size = 0;
   SQLSMALLINT scale = 0;
   SQLSMALLINT nullable = 0;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
 
   /* output */
   tool_output_joblog_beg(tool);
+
+  /* connect (Halmela no connect memory call, until needed) */
+  sqlrc = tool_key_conn_delayed(tool);
   /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) hdbc, &hstmt);
+  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &hstmt);
   /* prepare */
   sqlrc = SQLPrepare((SQLHSTMT)hstmt, (SQLPOINTER)hostSql, (SQLINTEGER)SQL_NTS);
   /* execute */
@@ -1975,10 +1981,10 @@ SQLRETURN tool_key_pgm_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   /* init pgm layout (ebcdic, etc) */
   tool_pgm(tpgm->pgm_ile_name, tpgm->pgm_ile_lib, tpgm->pgm_ile_func, tpgm->pgm_ile_debug, (ile_pgm_call_t **)&tpgm->layout);
-  /* statement */
-  sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
   /* in memory option? */
   if (tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_ILE && tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_PASE) {
+    /* statement */
+    sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, (SQLHDBC) tconn->hdbc, &tpgm->hstmt);
     /* prepare */
     if (sqlrc == SQL_SUCCESS) {
       sqlrc = SQLPrepare((SQLHSTMT)tpgm->hstmt, (SQLCHAR*)tpgm->pgm_buff, (SQLINTEGER)SQL_NTS);
@@ -2095,26 +2101,30 @@ SQLRETURN tool_key_cmd_run(tool_struct_t * tool, tool_node_t ** curr_node) {
      * select * from qtemp/out456
      */
     case TOOL400_CMD_REXX:
+      /* in memory option? (not support rexx -- not work chroot) */
+      if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
+        tconn->conn_type = TOOL400_CONN_TYPE_SET;
+        /* memory connect only when needed (Halmela) */
+        sqlrc = tool_key_conn_delayed(tool);
+      }
       sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
       isRexx = hstmt;
       sprintf(tcmd->cmd_buff,"STRREXPRC SRCMBR(CMDIO) SRCFILE(DB2JSON/QREXSRC) PARM('%d %s')",isRexx,val);
       cmd = tcmd->cmd_buff;
-      /* in memory option? (not support rexx -- not work chroot) */
-      if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
-        tconn->conn_type = TOOL400_CONN_TYPE_SET;
-      }
       break;
     /* "qsh":"STRQSH CMD('ls -1 /home/adc')"
      * select * from qtemp/out456
      */
     case TOOL400_CMD_QSH:
-      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
-      isQsh = hstmt;
-      cmd = qshVal = val;
       /* in memory option? (not support qsh -- not work chroot) */
       if (tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_ILE || tconn->conn_type == TOOL400_CONN_TYPE_MEMORY_PASE) {
         tconn->conn_type = TOOL400_CONN_TYPE_SET;
+        /* memory connect only when needed (Halmela) */
+        sqlrc = tool_key_conn_delayed(tool);
       }
+      sqlrc = SQLAllocHandle(SQL_HANDLE_STMT, tconn->hdbc, &hstmt);
+      isQsh = hstmt;
+      cmd = qshVal = val;
       break;
     default:
       break;
@@ -2555,6 +2565,9 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLSMALLINT parm_data_type = 0;
   SQLSMALLINT parm_nullable = 0;
 
+  /* memory connect only when needed (Halmela) */
+  sqlrc = tool_key_conn_delayed(tool);
+
   /* close stmt at end? */
   if (tconn->presistent) {
     tqry->stmt_close = 0;
@@ -2861,8 +2874,17 @@ SQLRETURN tool_key_close_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   return sqlrc;
 }
 
-/* connection */
+/* connect (Halmela no connect memory call, until needed) */
+SQLRETURN tool_key_conn_delayed(tool_struct_t * tool) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
+  if (!tconn->hdbc) {
+    sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib);
+  }
+  return sqlrc;
+}
 
+/* connection */
 SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   int i = 0;
@@ -2963,13 +2985,15 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     tconn->conn_pwd = NULL;
     tconn->conn_qual = NULL;
 #endif
-    /* connect */
-    if (tconn->presistent) {
-      sqlrc = SQL400pConnect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, tconn->conn_qual, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
-    } else {
-      sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
+    /* connect (Halmela no connect memory call, until needed) */
+    if (tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_ILE && tconn->conn_type != TOOL400_CONN_TYPE_MEMORY_PASE) {
+      if (tconn->presistent) {
+        sqlrc = SQL400pConnect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, tconn->conn_qual, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
+      } else {
+        sqlrc = SQL400Connect( tconn->conn_db, tconn->conn_uid, tconn->conn_pwd, &tconn->hdbc, tconn->conn_commit, tconn->conn_libl, tconn->conn_curlib );
+      }
+      sqlrc = tool_sql_errors(tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
     }
-    sqlrc = tool_sql_errors(tool, tconn->hdbc, SQL_HANDLE_DBC, sqlrc);
   }
   /* connect children (parser order next) */
   for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
@@ -3011,7 +3035,7 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
     }
     /* joblog info */
     if (sqlrc == SQL_ERROR) {
-      tool_joblog_errors(tool, tconn->hdbc);
+      tool_joblog_errors(tool);
     }
   }
   /* hdbc external (caller?) or pool (pConnect) */
