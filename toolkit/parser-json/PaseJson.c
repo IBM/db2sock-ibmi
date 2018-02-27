@@ -612,7 +612,8 @@ json_key_t * json_ctor_key() {
   k->lvl = NULL;
   return k;
 }
-void json_grow_key(json_key_t * k, int i) {
+/* never add more keys than JSON400_KEY_GROW_PAD between calls */
+void json_grow_key(json_key_t * k, int c) {
   int g = 0;
   char * old_key = (char *) k->key;
   char * old_val = (char *) k->val;
@@ -620,26 +621,29 @@ void json_grow_key(json_key_t * k, int i) {
   char * new_key = NULL;
   char * new_val = NULL;
   char * new_lvl = NULL;
-  /* already big enough (add grow amount i to count) */
-  if (k->max > k->count + i + 1) {
-    k->count += i; /* hamela found bug */
+  /* already big enough (halmela found bug) */
+  if (k->max > c + JSON400_KEY_GROW_PAD) {
+    k->count = c;
     return;
   }
+  k->count = c + JSON400_KEY_GROW_PAD;
   /* grow by blocks */
-  for (g = k->max; k->max < g + i + 1; k->max += JSON400_KEY_BLOCK);
+  for (g = k->max; k->max < k->count; k->max += JSON400_KEY_BLOCK);
   /* realloc */
   new_key = json_new(k->max * sizeof(int));
   new_val = json_new(k->max * sizeof(char *));
   new_lvl = json_new(k->max * sizeof(int));
-  memcpy(new_key,old_key,(k->count * sizeof(int)));
-  memcpy(new_val,old_val,(k->count * sizeof(char *)));
-  memcpy(new_lvl,old_lvl,(k->count * sizeof(int)));
+  if (old_key) {
+    memcpy(new_key,old_key,(k->count * sizeof(int)));
+    memcpy(new_val,old_val,(k->count * sizeof(char *)));
+    memcpy(new_lvl,old_lvl,(k->count * sizeof(int)));
+  }
   k->key = (int *) new_key;
   k->val = (char **) new_val;
   k->lvl = (int *) new_lvl;
-  json_free(old_key);
-  json_free(old_val);
-  json_free(old_lvl);
+  if (old_key) json_free(old_key);
+  if (old_val) json_free(old_val);
+  if (old_lvl) json_free(old_lvl);
 }
 void json_dtor_key(json_key_t * k) {
   char * old_key = (char *) k->key;
@@ -819,7 +823,7 @@ int json_parse(char * json, json_key_t * bigkey) {
 
   /* parse json */
   for (c=json; *c; c++) {
-    json_grow_key(bigkey, 1);
+    json_grow_key(bigkey, k);
     key = bigkey->key;
     val = bigkey->val;
     lvl = bigkey->lvl;

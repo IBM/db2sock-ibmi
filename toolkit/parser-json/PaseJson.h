@@ -35,6 +35,7 @@
  * ==========================
  */
 #define JSON400_KEY_BLOCK 4096
+#define JSON400_KEY_GROW_PAD 10
 typedef struct json_key_struct {
   int count;
   int max;
