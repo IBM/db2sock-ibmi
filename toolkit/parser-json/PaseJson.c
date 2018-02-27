@@ -149,9 +149,11 @@ int json_output_printf(int adjust, char *out_caller, int outLen, const char * fo
   int w = 0;
   int printLen = 0;
   va_list args;
+  /* Halmela asserts remove strlen will work.
   if(retLen == 0){
     retLen = strlen(out_caller);
   }
+  */
   l = retLen;
   p = out_caller + l;
   if (l) {
