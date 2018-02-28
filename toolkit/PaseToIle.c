@@ -1608,6 +1608,10 @@ int ile_pgm_str_2_hole(char * where, int tlen, int tdim) {
 int ile_pgm_hole_2_int(char * where, int tlen) {
   return 0;
 }
+int ile_pgm_hole_2_output(tool_struct_t *tool) {
+  tool_output_pgm_dcl_s_data(tool, "\"\"", 1);
+  return 0;
+}
 
 /*=================================================
  * toolkit copy in/out ILE type, by and location

@@ -1216,7 +1216,9 @@ ile_pgm_call_t **playout) {
     }
     break;
   case 'h':
-    if (!isOut) {
+    if (isOut) {
+      rc = ile_pgm_hole_2_output(tool); /* hole output "" (Halmela) */
+    } else {
       rc = ile_pgm_str_2_hole(where, tdim, tlen);
     }
     break;

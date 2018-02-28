@@ -81,6 +81,7 @@ int ile_pgm_float_2_output(tool_struct_t *tool, char * where, int tscale, int td
 int ile_pgm_str_2_double(char * where, const char *str, int tdim);
 int ile_pgm_double_2_output(tool_struct_t *tool, char * where, int tscale, int tdim);
 int ile_pgm_str_2_hole(char * where, int tlen, int tdim);
+int ile_pgm_hole_2_output(tool_struct_t *tool);
 int ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale);
 int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tscale, int tdim);
 int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale);
