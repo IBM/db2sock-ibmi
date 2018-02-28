@@ -565,6 +565,84 @@ int ile_pgm_double_2_int(char * where) {
   return (int) *wherev;
 }
 
+int ile_pgm_str_fix_decimal(char *str, int tlen, int tscale, char * buf, int len, int *sign) {
+  int i = 0;
+  int j = 0;
+  char chr[256];
+  char * a = NULL;
+  char * c = NULL;
+  int mint = 0;
+  int aint = 0;
+  int adot = 0;
+  int mscale = 0;
+  int ascale = 0;
+  int inLength = 0;
+  int trimLength = 0;
+
+  /* zero user buffer */
+  memset(buf,0,len);
+  /* character zero buffer correct length (user) */
+  memset(buf,'0',tlen);
+
+  /* parse input string */
+  c = str;
+  inLength = strlen(c);
+  if (inLength) {
+    memset(chr,0,sizeof(chr));
+    for (i=0, j=0; i < inLength; i++) {
+      if (c[i] == '-') {
+        *sign = 1;
+      } else {
+        if (ile_pgm_isnum_digit(c[i])) {
+          chr[j++] = c[i];
+          if (adot) {
+            ascale++;
+          } else {
+            aint++;
+          }
+        }
+      }
+      if (!adot && c[i] == '.') {
+          adot = 1;
+      }
+    }
+    /* max char int (front) */
+    if (tlen > tscale) {
+      mint = tlen - tscale;
+    }
+    /* max char scale (back) */
+    if (tscale) {
+      mscale = tscale;
+    }
+    /* copy out */
+    a = chr;
+    c = buf;
+    /* integer too large (trunc front) */
+    if (aint > mint) {
+      i = 0;
+      j = aint - mint;
+      aint = mint;
+    /* integer ok (front) */
+    } else {
+      i = mint - aint;
+      j = 0;
+    }
+    for (ascale=0; i < tlen; i++) {
+      if (aint) {
+        c[i] = a[j++];
+        aint--;
+      } else {
+        /* trunc scale (back) */
+        if (ascale < mscale) {
+          c[i] = a[j++];
+        }
+        ascale++;
+      }
+    }
+  }
+ 
+  return tlen;
+}
 
 int ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale) {
   int i = 0;
@@ -582,38 +660,12 @@ int ile_pgm_str_2_packed(char * where, char *str, int tdim, int tlen, int tscale
   int firstNibble = 0;
   int secondNibble = 0;
   char * wherev = where;
-  int adot = 0;
-  int ascale = 0;
+
   /* fix up input */
-  if (!str) {
-    str = "0";
-  }
-  memset(chr,0,sizeof(chr));
-  memset(dec,0,sizeof(dec));
-  c = str;
-  inLength = strlen(c);
-  for (i=0, j=0; i < inLength; i++) {
-    if (c[i] == '-') {
-      sign = i + 1;
-    } else {
-      if (ile_pgm_isnum_digit(c[i])) {
-        chr[j++] = c[i];
-        if (adot) {
-          ascale++;
-        }
-      }
-    }
-    if (!adot && c[i] == '.') {
-        adot = 1;
-    }
-  }
-  for (i=ascale; i < tscale; i++) {
-    chr[j++] = '0';
-  }
-  /* convert string to packed */
   c = chr;
-  inLength = strlen(c); 
-  j = 0;
+  inLength = ile_pgm_str_fix_decimal(str, tlen, tscale, c, sizeof(chr), &sign);
+
+  /* convert string to packed */
   if (outDigits % 2 == 0) {
    leadingZeros = outDigits - inLength + 1;
   } else {
@@ -825,38 +877,12 @@ int ile_pgm_str_2_zoned(char * where, char *str, int tdim, int tlen, int tscale)
   char dec[256];
   char * c = NULL;
   char * wherev = where;
-  int adot = 0;
-  int ascale = 0;
+
   /* fix up input */
-  if (!str) {
-    str = "0";
-  }
-  memset(chr,0,sizeof(chr));
-  memset(dec,0,sizeof(dec));
-  c = str;
-  inLength = strlen(c);
-  for (i=0, j=0; i < inLength; i++) {
-    if (c[i] == '-') {
-      sign = i + 1;
-    } else {
-      if (ile_pgm_isnum_digit(c[i])) {
-        chr[j++] = c[i];
-        if (adot) {
-          ascale++;
-        }
-      }
-    }
-    if (!adot && c[i] == '.') {
-        adot = 1;
-    }
-  }
-  for (i=ascale; i < tscale; i++) {
-    chr[j++] = '0';
-  }
-  /* convert string to zoned */
   c = chr;
-  inLength = strlen(c); 
-  j = 0;
+  inLength = ile_pgm_str_fix_decimal(str, tlen, tscale, c, sizeof(chr), &sign);
+
+  /* convert string to zoned */
   /* write correct number of leading zero's */
   for (i=0; i < outDigits-inLength; i++) {
     dec[j++] = (char)0xF0;
