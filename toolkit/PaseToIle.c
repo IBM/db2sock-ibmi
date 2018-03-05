@@ -565,6 +565,83 @@ int ile_pgm_double_2_int(char * where) {
   return (int) *wherev;
 }
 
+int ile_pgm_str_fix_round(char *str, int tlen, int tscale) {
+  int i = 0;
+  int overflow = 0;
+  char * c = str;
+
+  for (i=tlen-1;i && tscale;i--) {
+    if (overflow || i == tlen-tscale) {
+      if (overflow) {
+        overflow = 0;
+        switch(c[i-1]) {
+        case '0':
+          c[i-1] = '1';
+          break;
+        case '2':
+          c[i-1] = '2';
+          break;
+        case '3':
+          c[i-1] = '3';
+          break;
+        case '4':
+          c[i-1] = '5';
+          break;
+        case '5':
+          c[i-1] = '6';
+          break;
+        case '6':
+          c[i-1] = '7';
+          break;
+        case '7':
+          c[i-1] = '8';
+          break;
+        case '8':
+          c[i-1] = '9';
+          break;
+        case '9':
+          c[i-1] = '0';
+          overflow = 1;
+          if (tscale && i == tlen-tscale) {
+            tscale--;
+          }
+          break;
+        }
+      }
+    } else { 
+      if (i > tlen-tscale && (c[i] > '5' && c[i-1] >= '5')) {
+        c[i] = '0';
+        switch(c[i-1]) {
+        case '5':
+          c[i-1] = '6';
+          break;
+        case '6':
+          c[i-1] = '7';
+          break;
+        case '7':
+          c[i-1] = '8';
+          break;
+        case '8':
+          c[i-1] = '9';
+          break;
+        case '9':
+          c[i-1] = '0';
+          overflow = 1;
+          if (tscale && i == tlen-tscale) {
+            tscale--;
+          }
+          break;
+        }
+      }
+    }
+    if (tscale < 1 || i == tlen-tscale) {
+      break;
+    }
+  }
+  return overflow;
+}
+
+
 int ile_pgm_str_fix_decimal(char *str, int tlen, int tscale, char * buf, int len, int *sign) {
   int i = 0;
   int j = 0;
@@ -578,6 +655,7 @@ int ile_pgm_str_fix_decimal(char *str, int tlen, int tscale, char * buf, int len
   int ascale = 0;
   int inLength = 0;
   int trimLength = 0;
+  int overflow = 0;
 
   /* zero user buffer */
   memset(buf,0,len);
@@ -614,6 +692,10 @@ int ile_pgm_str_fix_decimal(char *str, int tlen, int tscale, char * buf, int len
     if (tscale) {
       mscale = tscale;
     }
+    /* round scale (back) */
+    if (ascale > mscale) {
+      overflow = ile_pgm_str_fix_round(chr, strlen(chr), mscale);
+    }
     /* copy out */
     a = chr;
     c = buf;
@@ -639,7 +721,7 @@ int ile_pgm_str_fix_decimal(char *str, int tlen, int tscale, char * buf, int len
         ascale++;
       }
     }
-  }
+  } /* inLength */
  
   return tlen;
 }
