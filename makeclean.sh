@@ -60,5 +60,12 @@ dltmod --lib $ILELIB --mod RAINSRV
 dltmod --lib $ILELIB --mod DANNY01
 dltmod --lib $ILELIB --mod DANNY02
 dltmod --lib $ILELIB --mod DANNY03
+dltmod --lib $ILELIB --mod DANNY04
 dltmod --lib $ILELIB --mod IAMSLOW
+
+echo "=== savlib ==="
+echo "CLRSAVF FILE(QGPL/$ILELIB)"
+borgi -cmd "CLRSAVF FILE(QGPL/$ILELIB)"
+echo "SAVLIB LIB($ILELIB) DEV(*SAVF) SAVF(QGPL/$ILELIB)"
+borgi -cmd "SAVLIB LIB($ILELIB) DEV(*SAVF) SAVF(QGPL/$ILELIB)"
 

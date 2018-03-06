@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "../db2/PaseCliAsync.h"
 
+#define OCCURS_CLOB_MAX 15000000
+
 static void db2fcgi_http_200(char *json)
 {
   printf("HTTP/1.1 200 Ok\r\n"
@@ -35,8 +37,8 @@ int main(int argc, char * argv[])
   char * req = (char *) NULL;
   char * get = (char *) NULL;
   char * pContent = NULL;
-  char getbuf[512000];
-  char buff[512000];
+  char getbuf[OCCURS_CLOB_MAX];
+  char buff[OCCURS_CLOB_MAX];
   int len = 0;
   SQLHDBC hdbc = 0;
 

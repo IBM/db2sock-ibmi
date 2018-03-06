@@ -1755,7 +1755,8 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         pgm_ds_dim_cnt--;
         pgm_ds_dim_cnt_up++;
         if (pgm_ds_dim_cnt > 0) {
-          if (pgm_ds_dim_dou_cnt > 0 && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
+          /* zero dou value - danny */
+          if ((pgm_ds_dim_dou_cnt > 0 || pgm_ds_dou) && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
              if (!tool->outholdord) {
                tool->outholdord = pgm_ds_idx_node->ord;
                tool->outhold = 1;
@@ -2499,7 +2500,7 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
       tqry->stmt_close = 1;
       /* fetch pagination, always include 'last record' ... (i think)??? */
       tool_output_record_no_data_found(tool, fetch_recs);
-      if (fetch_recs) {
+      if (fetch_recs || sqlrc == SQL_NO_DATA_FOUND) {
         sqlrc = SQL_SUCCESS;
       }
 /* Old, not always include 'last record'
@@ -2889,6 +2890,7 @@ SQLRETURN tool_key_conn_delayed(tool_struct_t * tool) {
 /* connection */
 SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
+  SQLRETURN sqlrc1 = SQL_SUCCESS;
   int i = 0;
   int key = 0;
   char * val = NULL;
@@ -3042,7 +3044,7 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   /* hdbc external (caller?) or pool (pConnect) */
   if (tconn->hdbc && !tconn->presistent) {
-    sqlrc = SQL400Close(tconn->hdbc);
+    sqlrc1 = SQL400Close(tconn->hdbc);
   }
   return sqlrc;
 }
