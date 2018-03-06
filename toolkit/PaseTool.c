@@ -1613,6 +1613,7 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   tool_key_ds_struct_t *node_ds = NULL;
   int pgm_ds_idx_outareaLen = 0;
   int pgm_ds_all_input = 0;
+  int pgm_ds_all_zero = 0; /* zero dou value - danny */
   int j = 0;
   int ds_spill_len = 0;
   char * where = NULL;
@@ -1662,6 +1663,10 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
     if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
+    if (pgm_ds_dou && !pgm_ds_dim_dou_cnt) {
+      pgm_ds_all_zero = 1;
+      pgm_ds_all_input = 1;
+    }
     if (pgm_ds_dim_cnt) {
       if (!tool->outhold) {
         pgm_ds_idx_outareaLen = tool->outareaLen;
@@ -1755,7 +1760,6 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
         pgm_ds_dim_cnt--;
         pgm_ds_dim_cnt_up++;
         if (pgm_ds_dim_cnt > 0) {
-          /* zero dou value - danny */
           if ((pgm_ds_dim_dou_cnt > 0 || pgm_ds_dou) && pgm_ds_dim_cnt_up >= pgm_ds_dim_dou_cnt) {
              if (!tool->outholdord) {
                tool->outholdord = pgm_ds_idx_node->ord;
@@ -1800,6 +1804,9 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
     if (sqlrc == SQL_ERROR) {
       tool_dump_end(sqlrc, "pgm_ds_error", i, lvl, key, val);
     }
+  }
+  if (pgm_ds_all_zero) {
+    tool_output_pgm_dcl_ds_end(tool, 2);
   }
   return sqlrc;
 }

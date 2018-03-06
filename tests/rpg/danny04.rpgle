@@ -48,27 +48,7 @@
                        + ' silly frog doodle 17'
                        + ' silly frog doodle 18'
                        + ' silly frog doodle 19'
-                       + ' silly frog doodle 20'
-                       + ' silly frog doodle 21'
-                       + ' silly frog doodle 22'
-                       + ' silly frog doodle 23'
-                       + ' silly frog doodle 24'
-                       + ' silly frog doodle 25'
-                       + ' silly frog doodle 26'
-                       + ' silly frog doodle 27'
-                       + ' silly frog doodle 28'
-                       + ' silly frog doodle 29'
-                       + ' silly frog doodle 30'
-                       + ' silly frog doodle 31'
-                       + ' silly frog doodle 32'
-                       + ' silly frog doodle 33'
-                       + ' silly frog doodle 34'
-                       + ' silly frog doodle 35'
-                       + ' silly frog doodle 36'
-                       + ' silly frog doodle 37'
-                       + ' silly frog doodle 38'
-                       + ' silly frog doodle 39'
-                       + ' silly frog doodle 40';
+                       + ' silly frog doodle 20';
          outputA(i).o2 = 'value';
        endfor;
        last = '"quoted" text';

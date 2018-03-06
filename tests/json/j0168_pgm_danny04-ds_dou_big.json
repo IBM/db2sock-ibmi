@@ -1,6 +1,6 @@
 {"pgm":[
     {"name":"DANNY04", "lib":"DB2JSON"},
-    {"s": {"name":"inCount", "type":"10i0", "value":5000, "by":"in"}},
+    {"s": {"name":"inCount", "type":"10i0", "value":900, "by":"in"}},
     {"ds": [{"name":"inputDS","dim":20, "by": "in"},
         {"s":[
             {"name":"in1", "type":"100a", "value":"i1"},
