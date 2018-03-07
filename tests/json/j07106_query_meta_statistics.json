@@ -1,0 +1,5 @@
+{"query":[{"stmt":"statistics"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"},{"unique":"all"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+

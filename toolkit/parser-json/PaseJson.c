@@ -39,15 +39,38 @@ int json_admin_tool [] = {TOOL400_ADMIN_INFO};
  */
 char * json_conn_attr [] = {"db","uid","pwd","qual","iso","libl","curlib", NULL};
 int json_conn_tool [] = {TOOL400_CONN_DB,TOOL400_CONN_UID,TOOL400_CONN_PWD,TOOL400_CONN_QUAL,TOOL400_CONN_ISOLATION,TOOL400_CONN_LIBL, TOOL400_CONN_CURLIB};
-/* {"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
+/* 
+{"query":[{"stmt":"select * from QIWS/QCUSTCDT where LSTNAM=? or LSTNAM=?"},
         {"parm":[{"value":"Jones"},{"value":"Vine"}]},
         {"fetch":[{"rec":"all"}]}
        ]} 
+== meta data special ==
+{"query":[{"stmt":"tables"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+{"query":[{"stmt":"tablepriv"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+{"query":[{"stmt":"columns"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"},{"colname":"LSTNAM"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+{"query":[{"stmt":"columnpriv"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"},{"colname":"LSTNAM"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+{"query":[{"stmt":"statistics"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"},{"unique":"all"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
 */
 char * json_query_attr [] = {"stmt","handle",NULL};
 int json_query_tool [] = {TOOL400_QUERY_STMT,TOOL400_QUERY_HNDL};
-char * json_parm_attr [] = {"value",NULL};
-int json_parm_tool [] = {TOOL400_PARM_VALUE};
+char * json_parm_attr [] = {"value","schema","table","type","proc","colname","scope","unique",NULL};
+int json_parm_tool [] = {TOOL400_PARM_VALUE,TOOL400_PARM_SCHEMA,TOOL400_PARM_TABLE,TOOL400_PARM_TYPE,TOOL400_PARM_PROC,
+                         TOOL400_PARM_COL,TOOL400_PARM_SCOPE,TOOL400_PARM_UNIQUE};
 char * json_fetch_attr [] = {"rec",NULL};
 int json_fetch_tool [] = {TOOL400_FETCH_REC};
 /* {"close":[{"handle":4}

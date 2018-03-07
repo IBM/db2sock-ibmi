@@ -1,0 +1,5 @@
+{"query":[{"stmt":"columns"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"},{"colname":"LSTNAM"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+

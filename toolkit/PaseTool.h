@@ -187,12 +187,29 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 #define TOOL400_KEY_QUERY       820     /*"query": */
 #define TOOL400_QUERY_STMT     1821     /*"stmt":"select * from animals where breed=?"
                                          *"stmt":"joblog" - special joblog errors
+                                         *"stmt":"tables" - tables (meta only)
+                                         *"stmt":"tablepriv" - table privileges (meta only)
+                                         *"stmt":"columns" - columns (meta only)
+                                         *"stmt":"columnpriv" - column privileges (meta only)
+                                         *"stmt":"primarykeys" - primary keys (meta only)
+                                         *"stmt":"foreignkeys" - foreign keys (meta only)
+                                         *"stmt":"procedures" - procedures (meta only)
+                                         *"stmt":"procedurecolumns" - procedure columns (meta only)
+                                         *"stmt":"specialcolumns" - special columns (meta only)
+                                         *"stmt":"statistics" - statistics (meta only)
                                          */
 #define TOOL400_QUERY_HNDL     1822     /*"handle":4 (stmt handle, fetch pagination)*/
 #define TOOL400_KEY_END_QUERY   920     /*"end"*/
 
 #define TOOL400_KEY_PARM        830     /*"parm": */
 #define TOOL400_PARM_VALUE     1831     /*"value":"fox"*/
+#define TOOL400_PARM_SCHEMA    1832     /*"schema":"db2json" (meta only)*/
+#define TOOL400_PARM_TABLE     1833     /*"table":"animals" (meta only)*/
+#define TOOL400_PARM_TYPE      1834     /*"type":"" (meta only)*/
+#define TOOL400_PARM_PROC      1835     /*"proc":"db2proc" (meta only)*/
+#define TOOL400_PARM_COL       1836     /*"colname":"LSTNAM" (meta only)*/
+#define TOOL400_PARM_SCOPE     1837     /*"scope":"row|trans|session" (meta only)*/
+#define TOOL400_PARM_UNIQUE    1838     /*"unique":"unique|all" (meta only)*/
 #define TOOL400_KEY_END_PARM    930     /*"end"*/
 
 #define TOOL400_KEY_FETCH       840     /*"fetch": */

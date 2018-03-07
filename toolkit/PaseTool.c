@@ -2564,6 +2564,39 @@ SQLRETURN tool_key_fetch_run(tool_struct_t * tool, tool_key_query_struct_t * tqr
   return sqlrc;
 }
 
+void tool_key_query_meta_helper(
+  SQLCHAR **qualifier, SQLINTEGER *qualifier_len,
+  SQLCHAR **owner, SQLINTEGER *owner_len,
+  SQLCHAR **table, SQLINTEGER *table_len,
+  SQLCHAR **column, SQLINTEGER *column_len)
+{
+    if (qualifier) {
+        *qualifier=NULL;
+        *qualifier_len=0;
+    }
+    if (owner) {
+        if (**owner=='\0') {
+            *owner=NULL;
+            *owner_len=0;
+        }
+        else *owner_len=SQL_NTS;
+    }
+    if (table) {
+        if (**table=='\0') {
+            *table=NULL;
+            *table_len=0;
+        }
+        else *table_len=SQL_NTS;
+    }
+    if (column) {
+        if (**column=='\0') {
+            *column=NULL;
+            *column_len=0;
+        }
+        else *column_len=SQL_NTS;
+    }
+}
+
 SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   SQLRETURN sqlrc1 = SQL_SUCCESS;
@@ -2575,6 +2608,18 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   int max = 0;
   int go = 1;
   int isjoblog = 0;
+  int istables = 0;
+  int istablepriv = 0;
+  int iscols = 0;
+  int iscolpriv = 0;
+  int isprimarykeys = 0;
+  int isforeignkeys = 0;
+  int isprocs = 0;
+  int isproccols = 0;
+  int iscolspecial = 0;
+  int scope = 0;
+  int isstats = 0;
+  int funique = 0;
   tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
   tool_node_t * node = *curr_node;
   tool_key_query_struct_t * tqry = (tool_key_query_struct_t *) node;
@@ -2590,7 +2635,23 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   SQLINTEGER parm_precision = 0;
   SQLSMALLINT parm_data_type = 0;
   SQLSMALLINT parm_nullable = 0;
-
+  /* tables */
+  SQLCHAR *qualifier_name = NULL;
+  SQLINTEGER qualifier_name_len = 0;
+  SQLCHAR *schema_name = NULL;
+  SQLINTEGER schema_name_len = 0;
+  SQLCHAR *table_name = NULL;
+  SQLINTEGER table_name_len = 0;
+  SQLCHAR *type_name = NULL;
+  SQLINTEGER type_name_len = 0;
+  SQLCHAR *proc_name = NULL;
+  SQLINTEGER proc_name_len = 0;
+  SQLCHAR *column_name = NULL;
+  SQLINTEGER column_name_len = 0;
+  SQLCHAR *scope_name = NULL;
+  SQLINTEGER scope_name_len = 0;
+  SQLCHAR *unique_name = NULL;
+  SQLINTEGER unique_name_len = 0;
   /* memory connect only when needed (Halmela) */
   sqlrc = tool_key_conn_delayed(tool);
 
@@ -2615,6 +2676,26 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       query = val;
       if (!strcmp(query,"joblog")) {
         isjoblog = 1;
+      } else if (!strcmp(query,"tables")) {
+        istables = 1;
+      } else if (!strcmp(query,"tablepriv")) {
+        istablepriv = 1;
+      } else if (!strcmp(query,"columns")) {
+        iscols = 1;
+      } else if (!strcmp(query,"columnpriv")) {
+        iscolpriv = 1;
+      } else if (!strcmp(query,"primarykeys")) {
+        isprimarykeys = 1;
+      } else if (!strcmp(query,"foreignkeys")) {
+        isforeignkeys = 1;
+      } else if (!strcmp(query,"procedures")) {
+        isprocs = 1;
+      } else if (!strcmp(query,"procedurecolumns")) {
+        isproccols = 1;
+      } else if (!strcmp(query,"specialcolumns")) {
+        iscolspecial = 1;
+      } else if (!strcmp(query,"statistics")) {
+        isstats = 1;
       }
       break;
     case TOOL400_QUERY_HNDL:
@@ -2643,7 +2724,211 @@ SQLRETURN tool_key_query_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   }
   /* output */
   tool_output_query_beg(tool, query, tqry->hstmt);
-  if (query) {  
+  /* tables */
+  if (istables || istablepriv || iscols || iscolpriv || isprimarykeys || isforeignkeys || isprocs || isproccols || iscolspecial || isstats) {
+    /* query parms */
+    if (!node_next) {
+      node_next = node->next;
+    }
+    if (node_next->key != TOOL400_KEY_PARM) {
+      node_next = NULL;
+    } else { 
+      for (i=0, go = 1, node = node_next, node_next = NULL; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
+        key = node->key;
+        val = node->val;
+        lvl = node->ord;
+        if (!max) {
+          max = node->ord;
+        }
+        if (lvl > max) {
+          continue;
+        }
+        *curr_node = node;
+        /* current node (output) */
+        tool->curr = node;
+        tool_dump_beg(sqlrc, "query_parm", i, lvl, key, val);
+        switch (key) {
+        case TOOL400_KEY_PARM:
+          /* query parm attributes (parser order 1st) */
+          for (j=0; j < TOOL400_ATTR_MAX && node->akey[j]; j++) {
+            key = node->akey[j];
+            val = node->aval[j];
+            lvl = node->ord;
+            tool_dump_beg(sqlrc, "query_parm(a)", j, lvl, key, val);
+            switch (key) {
+            case TOOL400_PARM_SCHEMA:
+              schema_name = val;
+              break;
+            case TOOL400_PARM_TABLE:
+              table_name = val;
+              break;
+            case TOOL400_PARM_TYPE:
+              type_name = val;
+              break;
+            case TOOL400_PARM_PROC:
+              proc_name = val;
+              break;
+            case TOOL400_PARM_COL:
+              column_name = val;
+              break;
+            case TOOL400_PARM_SCOPE:
+              scope_name = val;
+              break;
+            case TOOL400_PARM_UNIQUE:
+              unique_name = val;
+              break;
+            default:
+              break;
+            }
+            tool_dump_end(sqlrc, "query_parm2(a)", j, lvl, key, val);
+          }
+          break;
+        case TOOL400_KEY_END_PARM:
+          node_next = (tool_node_t *)node->next;
+          if (!node_next || node_next->key != TOOL400_KEY_PARM) {
+            go = 0;
+          }
+          break;
+        default:
+          break;
+        }
+        tool_dump_end(sqlrc, "query_parm_end", i, lvl, key, val);
+      }
+      /* tables */
+      if (istables) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   &type_name, &type_name_len);
+        sqlrc = SQLTables((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          type_name, type_name_len);
+      }
+      if (istablepriv) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   NULL, NULL);
+        sqlrc = SQLTablePrivileges((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len);
+      }
+      if (iscols) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   &column_name, &column_name_len);
+        sqlrc = SQLColumns((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          column_name, column_name_len);
+      }
+      if (iscolpriv) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   &column_name, &column_name_len);
+        sqlrc = SQLColumnPrivileges((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          column_name, column_name_len);
+      }
+      if (iscolspecial) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   &scope_name, &scope_name_len);
+        if (scope_name) {
+          switch (scope_name[0]) {
+          case 'r':
+            scope = SQL_SCOPE_CURROW;
+            break; 
+          case 't':
+            scope = SQL_SCOPE_TRANSACTION;
+            break; 
+          case 's':
+          default:
+            scope = SQL_SCOPE_SESSION;
+            break; 
+          }
+        }
+        sqlrc = SQLSpecialColumns((SQLHSTMT)tqry->hstmt, 0,
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          scope, SQL_NULLABLE);
+      }
+      if (isstats) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   &unique_name, &unique_name_len);
+        if (unique_name) {
+          switch (unique_name[0]) {
+          case 'u':
+            funique = SQL_INDEX_UNIQUE;
+            break; 
+          case 'a':
+          default:
+            funique = SQL_INDEX_ALL;
+            break; 
+          }
+        }
+        sqlrc = SQLStatistics((SQLHSTMT)tqry->hstmt,
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          funique, 0);
+      }
+      if (isprimarykeys) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   NULL, NULL);
+        sqlrc = SQLPrimaryKeys((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len);
+      }
+      if (isforeignkeys) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &table_name, &table_name_len,
+                                   NULL, NULL);
+        sqlrc = SQLForeignKeys((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          table_name, table_name_len,
+                          NULL, 0,
+                          NULL, SQL_NTS,
+                          NULL, SQL_NTS);
+      }
+      if (isprocs) {
+        tool_key_query_meta_helper(&qualifier_name, &qualifier_name_len,
+                                   &schema_name, &schema_name_len,
+                                   &proc_name, &proc_name_len,
+                                   NULL, NULL);
+        sqlrc = SQLProcedures((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          proc_name, proc_name_len);
+      }
+      if (isproccols) {
+        sqlrc = SQLProcedureColumns((SQLHSTMT)tqry->hstmt, 
+                          qualifier_name, qualifier_name_len,
+                          schema_name, schema_name_len,
+                          proc_name, proc_name_len,
+                          column_name, column_name_len);
+      }
+      sqlrc = tool_sql_errors(tool, tqry->hstmt, SQL_HANDLE_STMT, sqlrc);
+    }
+  /* query */
+  } else if (query) {  
     /* prepare */
     if (sqlrc == SQL_SUCCESS) {
       sqlrc = SQLPrepare((SQLHSTMT)tqry->hstmt, (SQLCHAR*)query, (SQLINTEGER)SQL_NTS);

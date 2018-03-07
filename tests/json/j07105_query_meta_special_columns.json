@@ -1,0 +1,5 @@
+{"query":[{"stmt":"specialcolumns"},
+        {"parm":[{"schema":"QIWS"},{"table":"%"},{"scope":"session"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+

@@ -1,0 +1,5 @@
+{"query":[{"stmt":"procedurecolumns"},
+        {"parm":[{"schema":"QIWS"},{"proc":"%"},{"colname":"%"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+

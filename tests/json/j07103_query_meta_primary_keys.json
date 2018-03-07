@@ -1,0 +1,5 @@
+{"query":[{"stmt":"primarykeys"},
+        {"parm":[{"schema":"QIWS"},{"table":"QCUSTCDT"}]},
+        {"fetch":[{"rec":"all"}]}
+       ]}
+
