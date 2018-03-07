@@ -79,6 +79,10 @@ key[n]                                  val[n] - "names" parser dependent (anyth
 */
 #define TOOL400_ATTR_MAX          9     /* max 9 attributes per element (TOOL400_KEY_PGM, etc.) */
 
+/* === admin === */
+#define TOOL400_KEY_ADMIN        30     /*"admin"*/
+#define TOOL400_ADMIN_INFO     1031     /*"info":"version" */
+#define TOOL400_KEY_END_ADMIN   130     /*"end"*/
 
 /* === shell === */
 
@@ -234,7 +238,6 @@ typedef struct tool_node {
   void * next;
 } tool_node_t;
 
-
 typedef int (*output_script_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_script_end_t)(tool_node_t *, char *, int);
 typedef int (*output_query_beg_t)(tool_node_t *, char *, int, char *, int);
@@ -265,6 +268,8 @@ typedef int (*output_cmd_end_t)(tool_node_t *, char *, int);
 typedef int (*output_joblog_beg_t)(tool_node_t *, char *, int);
 typedef int (*output_joblog_rec_t)(tool_node_t *, char *, int, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *, char *);
 typedef int (*output_joblog_end_t)(tool_node_t *, char *, int);
+typedef int (*output_admin_beg_t)(tool_node_t *, char *, int, char *, int);
+typedef int (*output_admin_end_t)(tool_node_t *, char *, int, int);
 
 typedef struct tool_struct {
   /* user callback data */
@@ -295,6 +300,8 @@ typedef struct tool_struct {
   output_joblog_beg_t output_joblog_beg;
   output_joblog_rec_t output_joblog_rec;
   output_joblog_end_t output_joblog_end;
+  output_admin_beg_t output_admin_beg;
+  output_admin_end_t output_admin_end;
   /* private data */
   tool_node_t * first;
   tool_node_t * curr;
@@ -347,7 +354,9 @@ tool_struct_t * tool_ctor(
   output_cmd_end_t output_cmd_end,
   output_joblog_beg_t output_joblog_beg,
   output_joblog_rec_t output_joblog_rec,
-  output_joblog_end_t output_joblog_end
+  output_joblog_end_t output_joblog_end,
+  output_admin_beg_t output_admin_beg,
+  output_admin_end_t output_admin_end
 );
 
 

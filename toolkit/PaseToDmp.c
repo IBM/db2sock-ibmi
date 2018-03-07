@@ -34,6 +34,16 @@ void tool_dump_key(char *mykey, int idx, int lvl, int key, char * val) {
   sprintf(widekey,"%s.node",mykey);
   switch (key) {
 
+    case TOOL400_KEY_ADMIN:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_ADMIN", val);
+      break;
+    case TOOL400_ADMIN_INFO:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_ADMIN_INFO", val);
+      break;
+    case TOOL400_KEY_END_ADMIN:
+      printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_END_ADMIN", val);
+      break;
+
     case TOOL400_KEY_CONN:
       printf_format("%-50s %6d %6d %6d %25s (%s)\n",widekey, idx, lvl, key, "TOOL400_KEY_CONN", val);
       break;

@@ -73,6 +73,16 @@ void json_dump_key(char *mykey, int lvl, int key, char * val) {
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "JSON400_ARY_END", val);
       break;
 
+    case TOOL400_KEY_ADMIN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_ADMIN", val);
+      break;
+    case TOOL400_ADMIN_INFO:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_ADMIN_INFO", val);
+      break;
+    case TOOL400_KEY_END_ADMIN:
+      printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_END_ADMIN", val);
+      break;
+
     case TOOL400_KEY_CONN:
       printf_format("%s.node %6d %6d %25s (%s)\n",mykey, lvl, key, "TOOL400_KEY_CONN", val);
       break;

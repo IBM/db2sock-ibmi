@@ -223,7 +223,9 @@ tool_struct_t * tool_ctor(
   output_cmd_end_t output_cmd_end,
   output_joblog_beg_t output_joblog_beg,
   output_joblog_rec_t output_joblog_rec,
-  output_joblog_end_t output_joblog_end
+  output_joblog_end_t output_joblog_end,
+  output_admin_beg_t output_admin_beg,
+  output_admin_end_t output_admin_end
 ) 
 {
   tool_struct_t *tool = tool_new(sizeof(tool_struct_t));
@@ -254,6 +256,8 @@ tool_struct_t * tool_ctor(
   tool->output_joblog_beg = output_joblog_beg;
   tool->output_joblog_rec = output_joblog_rec;
   tool->output_joblog_end = output_joblog_end;
+  tool->output_admin_beg = output_admin_beg;
+  tool->output_admin_end = output_admin_end;
   tool->first = NULL;
   tool->curr = NULL;
   tool->last = NULL;
@@ -741,6 +745,17 @@ void tool_output_joblog_rec(tool_struct_t *tool, char * msgid, char * msgtype, c
 }
 void tool_output_joblog_end(tool_struct_t *tool) {
   tool->outareaLen = tool->output_joblog_end(tool->curr, tool->outarea, tool->outareaLen);
+}
+
+void tool_output_admin_beg(tool_struct_t *tool, char * name, int tdim) {
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_admin_beg(tool->curr, tool->outarea, tool->outareaLen, name, tdim);
+  }
+}
+void tool_output_admin_end(tool_struct_t *tool, int tdim) {
+  if (!tool->outhold) {
+    tool->outareaLen = tool->output_admin_end(tool->curr, tool->outarea, tool->outareaLen, tdim);
+  }
 }
 
 /*=================================================
@@ -1662,11 +1677,12 @@ SQLRETURN tool_key_pgm_ds_run(tool_struct_t * tool, tool_key_pgm_struct_t * tpgm
                       (ile_pgm_call_t **)&tpgm->layout);
   *isDs = 1; /* now, we are in a ds structure */
   if (isOut) {
-    if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
     if (pgm_ds_dou && !pgm_ds_dim_dou_cnt) {
+      tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, 2);
       pgm_ds_all_zero = 1;
       pgm_ds_all_input = 1;
     }
+    if (!pgm_ds_all_input) tool_output_pgm_dcl_ds_beg(tool, pgm_ds_name, pgm_ds_dim_cnt);
     if (pgm_ds_dim_cnt) {
       if (!tool->outhold) {
         pgm_ds_idx_outareaLen = tool->outareaLen;
@@ -2884,6 +2900,90 @@ SQLRETURN tool_key_close_run(tool_struct_t * tool, tool_node_t ** curr_node) {
   return sqlrc;
 }
 
+/* admin */
+SQLRETURN tool_key_admin_run(tool_struct_t * tool, tool_node_t ** curr_node) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  int i = 0;
+  int j = 0;
+  int key = 0;
+  char * val = NULL;
+  int lvl = 0;
+  int max = 0;
+  int go = 1;
+  char * adm = NULL;
+  int admin_info_cnt = 0;
+  char * admin_info_val[TOOL400_ATTR_MAX];
+  tool_key_conn_struct_t * tconn = (tool_key_conn_struct_t *) tool->tconn;
+  tool_node_t * node = *curr_node;
+  char ver[128];
+
+  /* admin attributes (parser order 1st) */
+  for (i=0; i < TOOL400_ATTR_MAX; i++) {
+    admin_info_val[i] = NULL;
+  }
+  for (i=0; i < TOOL400_ATTR_MAX && node->akey[i]; i++) {
+    key = node->akey[i];
+    val = node->aval[i];
+    lvl = node->ord;
+    tool_dump_attr(sqlrc, "admin_run(a)", i, lvl, key, val);
+    switch (key) {
+    case TOOL400_ADMIN_INFO:
+      admin_info_val[admin_info_cnt++] = val;
+      break;
+    default:
+      break;
+    }
+  }
+
+  /* output */
+  tool_output_admin_beg(tool, "admin", 2);
+
+  /* admin info actions (bit odd, but save effort) */
+  for (j=0; j < admin_info_cnt; j++) {
+    adm = admin_info_val[j];
+    switch (adm[0]) {
+    case 'v':
+      memset(ver,0,sizeof(ver));
+      sqlrc = SQL400Version((SQLPOINTER) &ver, sizeof(ver));
+      /* output */
+      tool_output_pgm_dcl_s_beg(tool, "version", 1);
+      ile_pgm_char_2_output(tool, ver, strlen(ver), 0, 0, 1, 0);
+      tool_output_pgm_dcl_s_end(tool, 1);
+      break;
+    default:
+      break;
+    }
+  }
+
+  /* admin children (none so far ...) */
+  for (i=0, go = 1, node = node->next; node && sqlrc == SQL_SUCCESS && go; node = node->next, i++) {
+    key = node->key;
+    val = node->val;
+    lvl = node->ord;
+    if (!max) {
+      max = node->ord;
+    }
+    if (lvl > max) {
+      continue;
+    }
+    *curr_node = node;
+    /* current node (output) */
+    tool->curr = node;
+    switch (key) {
+    case TOOL400_KEY_END_ADMIN:
+      go = 0;
+      break;
+    default:
+      break;
+    }
+  }
+
+  /* output */
+  tool_output_admin_end(tool, 2);
+
+  return sqlrc;
+}
+
 /* connect (Halmela no connect memory call, until needed) */
 SQLRETURN tool_key_conn_delayed(tool_struct_t * tool) {
   SQLRETURN sqlrc = SQL_SUCCESS;
@@ -3034,6 +3134,9 @@ SQLRETURN tool_key_conn_run(tool_struct_t * tool, tool_node_t ** curr_node) {
       break;
     case TOOL400_KEY_PGM:
       sqlrc = tool_key_pgm_run(tool, &node);
+      break;
+    case TOOL400_KEY_ADMIN:
+      sqlrc = tool_key_admin_run(tool, &node);
       break;
     case TOOL400_KEY_END_CONN:
       go = 0;

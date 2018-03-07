@@ -5,6 +5,7 @@
 #include <stdarg.h>
 #include <sqlcli.h>
 #include "PaseType.h"
+#include "../PaseCliLic.h"
 
 /* This module is only used ILE compile.
  * Modifies a few libdb400.a extended APIs
@@ -216,6 +217,22 @@ SQLRETURN SQL400Close(SQLHDBC hdbc) {
   SQLRETURN sqlrc = SQL_SUCCESS;
   return sqlrc;
 }
+SQLRETURN SQL400Version(SQLPOINTER outversion, SQLINTEGER outlen) {
+  SQLRETURN sqlrc = SQL_SUCCESS;
+  char buf[128];
+  int len = 0;
+
+  memset(buf,0,sizeof(buf));
+  strcpy(buf,DB2_CLI_VERSION);
+  len = strlen(buf);
+  if (outlen > len) {
+    strcpy(outversion,buf);
+  } else {
+    sqlrc = SQL_ERROR;
+  }
+  return sqlrc;
+}
+
 
 
 
