@@ -1,0 +1,15 @@
+{"pgm":[{"name":"BRIAN01","lib":"DB2JSON"},
+    {"s":{"name":"inputOne","type":"8p0","by":"in","value":""}},
+    {"s":{"name":"outArray","type":"8p0","by":"out","dim":100}},
+    {"s":{"name":"bothArray","type":"8p0","by":"both","dim":100,"value":""}},
+    {"ds":[
+        {"name":"outDS","by":"out","dim":100,"dou":"outCount"},
+        {"s":[
+            {"name":"outputA","type":"7a"},
+            {"name":"outputB","type":"1a"}
+        ]}
+    ]},
+    {"s":{"name":"outCount","type":"10i0","by":"out"}},
+    {"s":{"name":"last","type":"8a","by":"out"}}
+]}
+

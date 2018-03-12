@@ -985,6 +985,8 @@ ile_pgm_call_t **playout) {
 
   ile_pgm_call_t * layout = *playout;
 
+  char * in_value_nothing = "";
+
   char typ = ' ';
   int tlen = 0;
   int tscale = 0;
@@ -1003,6 +1005,11 @@ ile_pgm_call_t **playout) {
   int dou = 0;
   char * where_dou = NULL;
   tool_key_data_struct_t * node = NULL;
+
+  /* no value at all (Brian) */
+  if (!in_value) {
+    in_value = in_value_nothing;
+  }
 
   /* parse "12p2", "5a", "5av2", ... */
   typ = ile_pgm_type(in_type, &tlen, &tscale, &tvary);

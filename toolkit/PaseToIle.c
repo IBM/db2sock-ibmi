@@ -859,6 +859,7 @@ int ile_pgm_packed_2_output(tool_struct_t *tool, char * where, int tlen, int tsc
       str[j++] = (char) hex_nbr;
     }
     tool_output_pgm_dcl_s_data(tool, str, 1);
+    j = 0; /* Brian s with dim */
   }
   return 0;
 }
@@ -1044,6 +1045,7 @@ int ile_pgm_zoned_2_output(tool_struct_t *tool, char * where, int tlen, int tsca
       str[j++] = (char) hex_nbr;
     }
     tool_output_pgm_dcl_s_data(tool, str, 1);
+    j = 0; /* Brian s with dim */
   }
   return 0;
 }
