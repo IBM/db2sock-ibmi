@@ -1,7 +1,5 @@
 #db2sock/toolkit/fastcgi
 
-==Experimental==
-
 Apache fastcgi REST json interface to new async libdb400.a driver.
 
 -- or --
