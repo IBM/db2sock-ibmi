@@ -253,7 +253,7 @@ def perms(n, what):
   p = ""
   if not n:
     return p
-  for i in xrange(2**n):
+  for i in range(2**n):
     s = bin(i)[2:]
     s = "0" * (n-len(s)) + s
     # print s
