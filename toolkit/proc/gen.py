@@ -1,6 +1,11 @@
 # description: Generate db2proc.h
 # command:     python gen.py
 
+try:
+  xrange          # Python 2
+except NameError:
+  xrange = range  # Python 3
+
 byall_header = "ibyref.h"
 
 byref_max_files = 6
