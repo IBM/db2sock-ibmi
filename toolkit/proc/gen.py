@@ -1,11 +1,6 @@
 # description: Generate db2proc.h
 # command:     python gen.py
 
-try:
-  xrange          # Python 2
-except NameError:
-  xrange = range  # Python 3
-
 byall_header = "ibyref.h"
 
 byref_max_files = 6
@@ -258,7 +253,7 @@ def perms(n, what):
   p = ""
   if not n:
     return p
-  for i in xrange(2**n):
+  for i in range(2**n):
     s = bin(i)[2:]
     s = "0" * (n-len(s)) + s
     # print s
